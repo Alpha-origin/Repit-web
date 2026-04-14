@@ -1,11 +1,11 @@
 import { createRoot } from "react-dom/client";
 import { ThemeProvider } from "styled-components";
-import App from "../pages/App.tsx";
-import "../shared/index.css";
-import { theme } from "../style/theme";
+import { theme } from "../style/theme"; 
+import { RouterProvider } from "react-router-dom";
+import router from "./router.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <ThemeProvider theme={theme}>
-    <App />
+    <RouterProvider router={router} />
   </ThemeProvider>,
 );
