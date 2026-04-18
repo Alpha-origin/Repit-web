@@ -1,6 +1,16 @@
 import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyle = createGlobalStyle`
+  @import url('https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard.css');
+
+  @font-face {
+    font-family: 'Wave';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/WavvePADO-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
   html, body, div, span, applet, object, iframe,
   h1, h2, h3, h4, h5, h6, p, blockquote, pre,
   a, abbr, acronym, address, big, cite, code,
@@ -27,6 +37,7 @@ export const GlobalStyle = createGlobalStyle`
   }
   body {
     line-height: 1;
+    font-family: ${({ theme }) => theme.fontFamily.pretendard};
   }
   ol, ul {
     list-style: none;
