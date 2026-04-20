@@ -1,8 +1,7 @@
 import * as S from "./style";
-import type { LandingPageComponent } from "./type";
 import FirstSection from "./sections/FirstSection";
 
-const LandingPage: LandingPageComponent = () => {
+const LandingPage = () => {
   return (
     <S.Page>
       <FirstSection />
