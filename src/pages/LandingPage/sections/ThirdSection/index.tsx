@@ -35,7 +35,7 @@ const ThirdSection = () => {
         <S.ReviewGrid>
           {reviews.map((review) => (
             <S.ReviewWrapper key={review.id} align={review.align}>
-              <S.Emoji>🥰</S.Emoji>
+              <S.Emoji align={review.align}>🥰</S.Emoji>
 
               <S.ChatBubble
                 align={review.align}
