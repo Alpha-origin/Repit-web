@@ -1,14 +1,26 @@
+import { useReducedMotion } from "framer-motion";
 import {
   SECOND_SECTION_SERVICE_ITEMS,
   SECOND_SECTION_SUBTITLE,
   SECOND_SECTION_TITLE,
 } from "@/shared/constants/LandingPage/landingPage";
+import {
+  listVariants,
+  mainServiceViewport,
+  revealVariants,
+} from "./animation";
 import * as S from "./style";
 
 const MainService = () => {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
-    <>
-      <S.Header>
+    <S.ContentMotion
+      initial={shouldReduceMotion ? false : "hidden"}
+      whileInView={shouldReduceMotion ? undefined : "visible"}
+      viewport={shouldReduceMotion ? undefined : mainServiceViewport}
+    >
+      <S.Header variants={revealVariants}>
         <S.SubTitle>{SECOND_SECTION_SUBTITLE}</S.SubTitle>
 
         <S.Title>
@@ -21,9 +33,13 @@ const MainService = () => {
         </S.Title>
       </S.Header>
 
-      <S.ServiceGrid>
+      <S.ServiceGrid variants={listVariants}>
         {SECOND_SECTION_SERVICE_ITEMS.map((item) => (
-          <S.ServiceRow key={item.title} $align={item.align ?? "left"}>
+          <S.ServiceRow
+            key={item.title}
+            $align={item.align ?? "left"}
+            variants={revealVariants}
+          >
             <S.ServiceCard $align={item.align ?? "left"}>
               <S.CardTitle>{item.title}</S.CardTitle>
 
@@ -45,7 +61,7 @@ const MainService = () => {
           </S.ServiceRow>
         ))}
       </S.ServiceGrid>
-    </>
+    </S.ContentMotion>
   );
 };
 

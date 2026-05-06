@@ -1,6 +1,19 @@
+import { motion } from "framer-motion";
 import styled from "styled-components";
 
-export const Header = styled.div`
+type ServiceRowProps = {
+  $align: "left" | "right";
+};
+
+type ServiceCardProps = {
+  $align: "left" | "right";
+};
+
+export const ContentMotion = styled(motion.div)`
+  width: 100%;
+`;
+
+export const Header = styled(motion.div)`
   text-align: center;
   margin-bottom: 9rem;
 `;
@@ -29,7 +42,7 @@ export const Title = styled.h2`
   }
 `;
 
-export const ServiceGrid = styled.div`
+export const ServiceGrid = styled(motion.div)`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -45,9 +58,7 @@ export const ServiceGrid = styled.div`
   }
 `;
 
-export const ServiceRow = styled.div<{
-  $align: "left" | "right";
-}>`
+export const ServiceRow = styled(motion.div)<ServiceRowProps>`
   display: flex;
   justify-content: ${({ $align }) =>
     $align === "right" ? "flex-end" : "flex-start"};
@@ -58,9 +69,7 @@ export const ServiceRow = styled.div<{
   }
 `;
 
-export const ServiceCard = styled.article<{
-  $align: "left" | "right";
-}>`
+export const ServiceCard = styled.article<ServiceCardProps>`
   display: flex;
   flex-direction: column;
   width: min(100%, 42rem);
