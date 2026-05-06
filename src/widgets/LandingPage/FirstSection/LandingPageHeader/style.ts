@@ -13,9 +13,9 @@ export const Logo = styled.div`
   display: flex;
   align-items: center;
   gap: 0;
-  font-size: ${({ theme }) => theme.fontSize.logoFont};
+  font-size: 30px;
   font-weight: 800;
-  color: ${({ theme }) => theme.colors.landingLogo};
+  color: ${({ theme }) => theme.colors.landing.logo};
 
   svg {
     width: 3.5rem;
@@ -34,19 +34,19 @@ export const SignUp = styled.button`
   background: none;
   border: none;
   color: ${({ theme }) => theme.colors.white};
-  font-size: ${({ theme }) => theme.fontSize.navFont};
+  font-size: 13px;
   cursor: pointer;
 `;
 
 export const Login = styled.button`
-  background: ${({ theme }) => theme.colors.landingLogin};
+  background: ${({ theme }) => theme.colors.landing.login};
   border: none;
   color: ${({ theme }) => theme.colors.white};
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.radius.sm};
   cursor: pointer;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.landingLoginHover};
+    background: ${({ theme }) => theme.colors.landing.loginHover};
   }
 `;

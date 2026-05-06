@@ -1,5 +1,5 @@
-import HeroContent from "@/widgets/LandingPage/HeroContent";
-import LandingPageHeader from "@/widgets/LandingPage/LandingPageHeader";
+import HeroContent from "@/widgets/LandingPage/FirstSection/HeroContent";
+import LandingPageHeader from "@/widgets/LandingPage/FirstSection/LandingPageHeader";
 import * as S from "./style";
 
 

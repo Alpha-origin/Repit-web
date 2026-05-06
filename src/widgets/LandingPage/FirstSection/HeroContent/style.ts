@@ -14,10 +14,10 @@ export const Badge = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: ${({ theme }) => theme.colors.landingBadge};
+  background: ${({ theme }) => theme.colors.landing.badge};
   padding: 8px 14px;
-  border-radius: 20px;
-  font-size: ${({ theme }) => theme.fontSize.badgeFont};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  font-size: ${({ theme }) => theme.fontSize.xs};
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   margin-bottom: 20px;
 `;
@@ -29,7 +29,7 @@ export const BadgeBrand = styled.span`
 `;
 
 export const Title = styled.h1`
-  font-size: ${({ theme }) => theme.fontSize.bigFont};
+  font-size: ${({ theme }) => theme.fontSize.xxl};
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   text-align: center;
   line-height: 1.2;
@@ -38,9 +38,9 @@ export const Title = styled.h1`
 
 export const Subtitle = styled.p`
   margin: 20px 0;
-  font-size: ${({ theme }) => theme.fontSize.subtitleFont};
+  font-size: ${({ theme }) => theme.fontSize.sm};
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
-  color: ${({ theme }) => theme.colors.landingSubtitle};
+  color: ${({ theme }) => theme.colors.landing.subtitle};
 `;
 
 export const StartButton = styled.button`
@@ -53,15 +53,15 @@ export const StartButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.landingButtonHover};
+    background: ${({ theme }) => theme.colors.landing.buttonHover};
   }
 `;
 
 export const MainTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSize.bigFont};
+  font-size: ${({ theme }) => theme.fontSize.xxl};
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   text-align: center;
   line-height: 1.2;
   margin: 0;
-  color: ${({ theme }) => theme.colors.landingMaintitle};
+  color: ${({ theme }) => theme.colors.landing.mainTitle};
 `;
