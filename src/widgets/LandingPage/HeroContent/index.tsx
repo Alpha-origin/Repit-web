@@ -14,8 +14,10 @@ const HeroContent: HeroContentComponent = () => {
       <S.Title>
         실전처럼 준비하는
         <br />
-        AI 면접 코칭
       </S.Title>
+      <S.MainTitle>
+        AI 면접 코칭 플랫폼
+      </S.MainTitle>
 
       <S.Subtitle>
         취업 준비를 위한 맞춤 기술 면접 연습과 피드백

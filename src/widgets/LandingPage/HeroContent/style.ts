@@ -56,3 +56,12 @@ export const StartButton = styled.button`
     background: ${({ theme }) => theme.colors.landingButtonHover};
   }
 `;
+
+export const MainTitle = styled.h1`
+  font-size: ${({ theme }) => theme.fontSize.bigFont};
+  font-family: ${({ theme }) => theme.fontFamily.wavvePado};
+  text-align: center;
+  line-height: 1.2;
+  margin: 0;
+  color: ${({ theme }) => theme.colors.landingMaintitle};
+`;

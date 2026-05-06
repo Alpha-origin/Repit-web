@@ -13,6 +13,7 @@ export const theme = {
     landingLogo: "#7ec0ff",
     landingLogin: "#1f6fff",
     landingLoginHover: "#175de0",
+    landingMaintitle:"#A8D8FF",
     landingBadge: "rgba(255, 255, 255, 0.15)",
     landingSubtitle: "rgba(255, 255, 255, 0.8)",
     landingButtonHover: "rgba(255, 255, 255, 0.1)",
