@@ -1,4 +1,4 @@
-import { LANDING_STYLE } from "@/shared/constants/LandingPage/landingStyle";
+import { LANDING_STYLE } from "@/shared/constants/LandingPage/FirstSection";
 import styled from "styled-components";
 
 export const Header = styled.header`

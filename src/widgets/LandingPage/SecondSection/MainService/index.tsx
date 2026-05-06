@@ -3,7 +3,7 @@ import {
   SECOND_SECTION_SERVICE_ITEMS,
   SECOND_SECTION_SUBTITLE,
   SECOND_SECTION_TITLE,
-} from "@/shared/constants/LandingPage/landingPage";
+} from "@/shared/constants/LandingPage/SecondSection";
 import {
   listVariants,
   mainServiceViewport,

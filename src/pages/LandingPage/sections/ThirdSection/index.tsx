@@ -1,73 +1,16 @@
-import { useReducedMotion } from "framer-motion";
-import {
-  listVariants,
-  revealVariants,
-  thirdSectionViewport,
-} from "./animation";
+import { THIRD_SECTION_FOOTER_TEXT } from "@/shared/constants/LandingPage/ThirdSection";
+import UserReview from "@/widgets/LandingPage/ThirdSection/UserReview";
 import * as S from "./style";
 
-const reviews = [
-  {
-    id: 1,
-    align: "left",
-    color: "primary",
-  },
-  {
-    id: 2,
-    align: "right",
-    color: "primary",
-  },
-  {
-    id: 3,
-    align: "left",
-    color: "secondary",
-  },
-  {
-    id: 4,
-    align: "right",
-    color: "light",
-  },
-] as const;
-
 const ThirdSection = () => {
-  const shouldReduceMotion = useReducedMotion();
-
   return (
     <S.Container>
-      <S.Inner
-        initial={shouldReduceMotion ? false : "hidden"}
-        whileInView={shouldReduceMotion ? undefined : "visible"}
-        viewport={shouldReduceMotion ? undefined : thirdSectionViewport}
-      >
-        <S.Header variants={revealVariants}>
-          <S.SubTitle>User Review</S.SubTitle>
-          <S.Title>사람들이 말하는 레핏</S.Title>
-        </S.Header>
-
-        <S.ReviewGrid variants={listVariants}>
-          {reviews.map((review) => (
-            <S.ReviewWrapper
-              key={review.id}
-              align={review.align}
-              variants={revealVariants}
-            >
-              <S.Emoji align={review.align}>🥰</S.Emoji>
-
-              <S.ChatBubble
-                align={review.align}
-                color={review.color}
-              >
-                혼자 집에서도 간편하게 면접을 보고
-                <br />
-                구체적인 피드백을 받을 수 있어 좋아요
-              </S.ChatBubble>
-            </S.ReviewWrapper>
-          ))}
-        </S.ReviewGrid>
-      </S.Inner>
+      <S.Content>
+        <UserReview />
+      </S.Content>
 
       <S.Footer>
-        <span>사이트 정보 여기</span>
+        <span>{THIRD_SECTION_FOOTER_TEXT}</span>
       </S.Footer>
     </S.Container>
   );
