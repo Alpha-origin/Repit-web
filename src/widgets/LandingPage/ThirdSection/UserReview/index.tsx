@@ -34,10 +34,7 @@ const UserReview = () => {
           >
             <S.Emoji align={review.align}>{review.emoji}</S.Emoji>
 
-            <S.ChatBubble
-              align={review.align}
-              color={review.color}
-            >
+            <S.ChatBubble color={review.color}>
               {review.message.split("\n").map((line) => (
                 <span key={line}>
                   {line}

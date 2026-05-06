@@ -6,7 +6,6 @@ type ReviewWrapperProps = {
 };
 
 type ChatBubbleProps = {
-  align: "left" | "right";
   color: "primary" | "secondary" | "light";
 };
 
@@ -119,35 +118,6 @@ export const ChatBubble = styled.div<ChatBubbleProps>`
     css`
       background: #a9c8f4;
     `}
-
-  ${({ align }) =>
-    align === "left"
-      ? css`
-          &::after {
-            content: "";
-            position: absolute;
-            bottom: -1.5rem;
-            left: 0;
-            width: 0;
-            height: 0;
-            border-top: 1.5rem solid currentColor;
-            border-right: 2.125rem solid transparent;
-            color: inherit;
-          }
-        `
-      : css`
-          &::after {
-            content: "";
-            position: absolute;
-            bottom: -1.5rem;
-            right: 0;
-            width: 0;
-            height: 0;
-            border-top: 1.5rem solid currentColor;
-            border-left: 2.125rem solid transparent;
-            color: inherit;
-          }
-        `}
 
   @media (max-width: 56.25rem) {
     width: 100%;
