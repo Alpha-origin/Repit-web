@@ -2,7 +2,10 @@ import { LANDING_STYLE } from "@/shared/constants/LandingPage/FirstSection";
 import styled from "styled-components";
 
 export const Header = styled.header`
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 1;
   padding: 1.25rem 1.875rem;
   display: flex;

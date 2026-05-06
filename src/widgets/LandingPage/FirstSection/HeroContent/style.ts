@@ -4,7 +4,7 @@ import styled from "styled-components";
 export const Content = styled.div`
   position: relative;
   z-index: 1;
-  height: calc(100vh - 5rem);
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -42,15 +42,26 @@ export const Subtitle = styled.p`
   font-size: ${({ theme }) => theme.fontSize.sm};
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   color: ${LANDING_STYLE.subtitle};
+  text-align: center;
 `;
 
 export const StartButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0.0625rem solid ${({ theme }) => theme.colors.white};
   background: transparent;
   color: ${({ theme }) => theme.colors.white};
-  padding: 0.75rem 1.5rem;
+  width: 13rem;
+  height: 3.875rem;
+  padding: 0;
   border-radius: 6.25rem;
-  font-family: ${({ theme }) => theme.fontFamily.wavvePado};
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  font-family: ${({ theme }) => theme.fontFamily.pretendard};
+  letter-spacing: -0.03rem;
   cursor: pointer;
 
   &:hover {
