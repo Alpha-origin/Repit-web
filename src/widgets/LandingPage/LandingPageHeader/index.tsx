@@ -13,8 +13,8 @@ const LandingPageHeader: LandingPageHeaderComponent = () => {
       </S.Logo>
 
       <S.Nav>
-        <S.SignUp>Sign Up</S.SignUp>
-        <S.Login>Login</S.Login>
+        <S.SignUp>회원가입</S.SignUp>
+        <S.Login>로그인</S.Login>
       </S.Nav>
     </S.Header>
   );
