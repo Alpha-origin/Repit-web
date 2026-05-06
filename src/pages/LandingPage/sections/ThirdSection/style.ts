@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import styled, { css } from "styled-components";
 
 type ReviewWrapperProps = {
@@ -31,7 +32,7 @@ export const Container = styled.section`
   overflow: hidden;
 `;
 
-export const Inner = styled.div`
+export const Inner = styled(motion.div)`
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
@@ -42,7 +43,7 @@ export const Inner = styled.div`
   }
 `;
 
-export const Header = styled.div`
+export const Header = styled(motion.div)`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -74,7 +75,7 @@ export const Title = styled.h2`
   }
 `;
 
-export const ReviewGrid = styled.div`
+export const ReviewGrid = styled(motion.div)`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -89,7 +90,7 @@ export const ReviewGrid = styled.div`
   }
 `;
 
-export const ReviewWrapper = styled.div<ReviewWrapperProps>`
+export const ReviewWrapper = styled(motion.div)<ReviewWrapperProps>`
   position: relative;
 
   display: flex;

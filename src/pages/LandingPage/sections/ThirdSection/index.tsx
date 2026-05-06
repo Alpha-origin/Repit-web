@@ -1,3 +1,9 @@
+import { useReducedMotion } from "framer-motion";
+import {
+  listVariants,
+  revealVariants,
+  thirdSectionViewport,
+} from "./animation";
 import * as S from "./style";
 
 const reviews = [
@@ -21,20 +27,30 @@ const reviews = [
     align: "right",
     color: "light",
   },
-];
+] as const;
 
 const ThirdSection = () => {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <S.Container>
-      <S.Inner>
-        <S.Header>
+      <S.Inner
+        initial={shouldReduceMotion ? false : "hidden"}
+        whileInView={shouldReduceMotion ? undefined : "visible"}
+        viewport={shouldReduceMotion ? undefined : thirdSectionViewport}
+      >
+        <S.Header variants={revealVariants}>
           <S.SubTitle>User Review</S.SubTitle>
           <S.Title>사람들이 말하는 레핏</S.Title>
         </S.Header>
 
-        <S.ReviewGrid>
+        <S.ReviewGrid variants={listVariants}>
           {reviews.map((review) => (
-            <S.ReviewWrapper key={review.id} align={review.align}>
+            <S.ReviewWrapper
+              key={review.id}
+              align={review.align}
+              variants={revealVariants}
+            >
               <S.Emoji align={review.align}>🥰</S.Emoji>
 
               <S.ChatBubble
