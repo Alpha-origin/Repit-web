@@ -1,7 +1,6 @@
 import * as S from "./style";
-import type { HeroContentComponent } from "./type";
 
-const HeroContent: HeroContentComponent = () => {
+const HeroContent = () => {
   return (
     <S.Content>
       <S.Badge>

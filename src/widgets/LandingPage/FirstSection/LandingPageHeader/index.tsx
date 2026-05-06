@@ -1,8 +1,7 @@
 import RepitLogo from "@/shared/img/logo/Repit.svg?react";
 import * as S from "./style";
-import type { LandingPageHeaderComponent } from "./type";
 
-const LandingPageHeader: LandingPageHeaderComponent = () => {
+const LandingPageHeader = () => {
   return (
     <S.Header>
       <S.Logo>

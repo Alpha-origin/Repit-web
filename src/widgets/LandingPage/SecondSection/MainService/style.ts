@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export const Header = styled.div`
   text-align: center;
-  margin-bottom: 92px;
+  margin-bottom: 9rem;
 `;
 
 export const SubTitle = styled.p`
@@ -10,7 +10,7 @@ export const SubTitle = styled.p`
 
   color: ${({ theme }) => theme.colors.brand.blueLight};
 
-  font-size: 15px;
+  font-size: 1.125rem;
   font-weight: 700;
 `;
 
@@ -19,22 +19,42 @@ export const Title = styled.h2`
 
   color: ${({ theme }) => theme.colors.brand.blue};
 
-  font-size: ${({ theme }) => theme.fontSize.xl};
+  font-size: 2.625rem;
   font-weight: 800;
   line-height: 1.25;
-  letter-spacing: -0.8px;
+  letter-spacing: -0.05rem;
+
+  @media (max-width: 56.25rem) {
+    font-size: 2rem;
+  }
 `;
 
 export const ServiceGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: min(100%, 80rem);
+  min-height: 58rem;
+  margin: 0 auto;
 
-  row-gap: 84px;
-  column-gap: 120px;
+  @media (max-width: 56.25rem) {
+    justify-content: flex-start;
+    width: 100%;
+    min-height: auto;
+    gap: 6rem;
+  }
+`;
 
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-    row-gap: 56px;
+export const ServiceRow = styled.div<{
+  $align: "left" | "right";
+}>`
+  display: flex;
+  justify-content: ${({ $align }) =>
+    $align === "right" ? "flex-end" : "flex-start"};
+  width: 100%;
+
+  @media (max-width: 56.25rem) {
+    justify-content: flex-start;
   }
 `;
 
@@ -43,13 +63,20 @@ export const ServiceCard = styled.article<{
 }>`
   display: flex;
   flex-direction: column;
+  width: min(100%, 42rem);
 
   align-items: ${({ $align }) =>
     $align === "right" ? "flex-end" : "flex-start"};
 
   text-align: ${({ $align }) => $align};
 
-  min-height: 140px;
+  min-height: 10rem;
+
+  @media (max-width: 56.25rem) {
+    width: 100%;
+    align-items: flex-start;
+    text-align: left;
+  }
 `;
 
 export const CardTitle = styled.h3`
@@ -57,27 +84,48 @@ export const CardTitle = styled.h3`
 
   color: ${({ theme }) => theme.colors.brand.blue};
 
-  font-size: 19px;
+  font-size: 1.5rem;
   font-weight: 800;
+
+  @media (max-width: 56.25rem) {
+    font-size: 1.25rem;
+  }
 `;
 
 export const CardHeading = styled.p`
-  margin: 0 0 12px;
+  margin: 0 0 0.75rem;
 
   color: ${({ theme }) => theme.colors.text.strong};
 
-  font-size: ${({ theme }) => theme.fontSize.lg};
+  font-size: 2rem;
   font-weight: 800;
   line-height: 1.25;
-  letter-spacing: -0.8px;
+  letter-spacing: -0.05rem;
+
+  @media (max-width: 56.25rem) {
+    font-size: 1.625rem;
+  }
 `;
 
 export const CardDescription = styled.p`
-  margin: 0;
+  margin: 2rem 0 0;
 
   color: ${({ theme }) => theme.colors.text.muted};
 
-  font-size: ${({ theme }) => theme.fontSize.sm};
+  font-size: 1.0625rem;
   font-weight: 500;
-  line-height: 1.65;
+  line-height: 1.9;
+
+  span {
+    display: block;
+  }
+
+  span + span {
+    margin-top: 0.75rem;
+  }
+
+  @media (max-width: 56.25rem) {
+    margin-top: 1.5rem;
+    font-size: 0.9375rem;
+  }
 `;

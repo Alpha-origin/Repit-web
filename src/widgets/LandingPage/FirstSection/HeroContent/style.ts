@@ -1,9 +1,10 @@
+import { LANDING_STYLE } from "@/shared/constants/LandingPage/landingStyle";
 import styled from "styled-components";
 
 export const Content = styled.div`
   position: relative;
   z-index: 1;
-  height: calc(100vh - 80px);
+  height: calc(100vh - 5rem);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -13,19 +14,19 @@ export const Content = styled.div`
 export const Badge = styled.div`
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: ${({ theme }) => theme.colors.landing.badge};
-  padding: 8px 14px;
+  gap: 0.375rem;
+  background: ${LANDING_STYLE.badge};
+  padding: 0.5rem 0.875rem;
   border-radius: ${({ theme }) => theme.radius.lg};
   font-size: ${({ theme }) => theme.fontSize.xs};
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 `;
 
 export const BadgeBrand = styled.span`
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 0.25rem;
 `;
 
 export const Title = styled.h1`
@@ -37,23 +38,23 @@ export const Title = styled.h1`
 `;
 
 export const Subtitle = styled.p`
-  margin: 20px 0;
+  margin: 1.25rem 0;
   font-size: ${({ theme }) => theme.fontSize.sm};
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
-  color: ${({ theme }) => theme.colors.landing.subtitle};
+  color: ${LANDING_STYLE.subtitle};
 `;
 
 export const StartButton = styled.button`
-  border: 1px solid ${({ theme }) => theme.colors.white};
+  border: 0.0625rem solid ${({ theme }) => theme.colors.white};
   background: transparent;
   color: ${({ theme }) => theme.colors.white};
-  padding: 12px 24px;
-  border-radius: 100px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6.25rem;
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   cursor: pointer;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.landing.buttonHover};
+    background: ${LANDING_STYLE.buttonHover};
   }
 `;
 
@@ -63,5 +64,5 @@ export const MainTitle = styled.h1`
   text-align: center;
   line-height: 1.2;
   margin: 0;
-  color: ${({ theme }) => theme.colors.landing.mainTitle};
+  color: ${LANDING_STYLE.mainTitle};
 `;

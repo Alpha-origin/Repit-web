@@ -2,11 +2,10 @@ import {
   SECOND_SECTION_SERVICE_ITEMS,
   SECOND_SECTION_SUBTITLE,
   SECOND_SECTION_TITLE,
-} from "@/shared/constants/landingPage";
+} from "@/shared/constants/LandingPage/landingPage";
 import * as S from "./style";
-import type { MainServiceComponent } from "./type";
 
-const MainService: MainServiceComponent = () => {
+const MainService = () => {
   return (
     <>
       <S.Header>
@@ -24,27 +23,26 @@ const MainService: MainServiceComponent = () => {
 
       <S.ServiceGrid>
         {SECOND_SECTION_SERVICE_ITEMS.map((item) => (
-          <S.ServiceCard key={item.title} $align={item.align ?? "left"}>
-            <S.CardTitle>{item.title}</S.CardTitle>
+          <S.ServiceRow key={item.title} $align={item.align ?? "left"}>
+            <S.ServiceCard $align={item.align ?? "left"}>
+              <S.CardTitle>{item.title}</S.CardTitle>
 
-            <S.CardHeading>
-              {item.heading.split("\n").map((line) => (
-                <span key={line}>
-                  {line}
-                  <br />
-                </span>
-              ))}
-            </S.CardHeading>
+              <S.CardHeading>
+                {item.heading.split("\n").map((line) => (
+                  <span key={line}>
+                    {line}
+                    <br />
+                  </span>
+                ))}
+              </S.CardHeading>
 
-            <S.CardDescription>
-              {item.description.split("\n").map((line) => (
-                <span key={line}>
-                  {line}
-                  <br />
-                </span>
-              ))}
-            </S.CardDescription>
-          </S.ServiceCard>
+              <S.CardDescription>
+                {item.description.split("\n").map((line) => (
+                  <span key={line}>{line}</span>
+                ))}
+              </S.CardDescription>
+            </S.ServiceCard>
+          </S.ServiceRow>
         ))}
       </S.ServiceGrid>
     </>

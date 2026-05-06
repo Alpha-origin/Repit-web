@@ -1,26 +1,32 @@
+import footerGraphic from "@/shared/img/landingpage/repitMain.svg?url";
 import styled from "styled-components";
 
 export const Container = styled.footer`
   width: 100%;
-  padding: 0 ${({ theme }) => theme.spacing.xl} 40px;
-  background: ${({ theme }) => theme.colors.surface.background};
+  padding: 0;
+  background: transparent;
 `;
 
 export const Inner = styled.div`
   position: relative;
 
   width: 100%;
-  height: 152px;
+  height: 8.25rem;
 
   overflow: hidden;
 
-  border-radius: ${({ theme }) => theme.radius.md};
+  border-radius: 0;
 
   background: linear-gradient(
     90deg,
     ${({ theme }) => theme.colors.surface.blueSoft} 0%,
     ${({ theme }) => theme.colors.surface.blueMuted} 100%
   );
+
+  @media (max-width: 56.25rem) {
+    min-height: 13.75rem;
+    height: auto;
+  }
 `;
 
 export const LeftSection = styled.div`
@@ -29,11 +35,19 @@ export const LeftSection = styled.div`
 
   display: flex;
   align-items: center;
-  gap: 36px;
+  gap: 2rem;
 
   height: 100%;
 
   padding-left: ${({ theme }) => theme.spacing.xxl};
+
+  @media (max-width: 56.25rem) {
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: column;
+    gap: ${({ theme }) => theme.spacing.md};
+    padding: 2rem 1.5rem;
+  }
 `;
 
 export const Title = styled.h2`
@@ -41,15 +55,19 @@ export const Title = styled.h2`
 
   color: ${({ theme }) => theme.colors.brand.blue};
 
-  font-size: 24px;
+  font-size: 1.375rem;
   font-weight: 800;
   line-height: 1.25;
-  letter-spacing: -0.8px;
+  letter-spacing: -0.05rem;
+
+  @media (max-width: 56.25rem) {
+    font-size: 1.25rem;
+  }
 `;
 
 export const StartButton = styled.button`
-  width: 168px;
-  height: 56px;
+  width: 10.5rem;
+  height: 3rem;
 
   border: none;
   border-radius: ${({ theme }) => theme.radius.sm};
@@ -63,82 +81,33 @@ export const StartButton = styled.button`
 
   cursor: pointer;
 
-  box-shadow: 0 4px 10px ${({ theme }) => theme.colors.shadow.blue};
+  box-shadow: 0 0.1875rem 0.5rem ${({ theme }) => theme.colors.shadow.blue};
 
   transition: 0.2s ease;
 
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-0.125rem);
+  }
+
+  @media (max-width: 56.25rem) {
+    width: 100%;
+    max-width: 10.5rem;
+    height: 3.25rem;
   }
 `;
 
-export const BackgroundCircle = styled.div`
+export const GraphicImage = styled.div`
   position: absolute;
-
-  top: -180px;
-  right: -140px;
-
-  width: 520px;
-  height: 520px;
-
-  border-radius: ${({ theme }) => theme.radius.circle};
-
-  background: rgba(255, 255, 255, 0.28);
-`;
-
-export const BackgroundCircleSmall = styled.div`
-  position: absolute;
-
-  top: -70px;
-  right: 120px;
-
-  width: 220px;
-  height: 220px;
-
-  border-radius: ${({ theme }) => theme.radius.circle};
-
-  background: rgba(255, 255, 255, 0.18);
-`;
-
-export const LogoWrapper = styled.div`
-  position: absolute;
-
-  right: 120px;
-  top: 50%;
-
-  width: 120px;
-  height: 120px;
-
-  transform: translateY(-50%) rotate(25deg);
-`;
-
-export const LogoBar = styled.div`
-  position: absolute;
-
-  left: 50%;
+  right: 0;
   top: 0;
+  z-index: 1;
 
-  width: 36px;
-  height: 120px;
+  width: 30rem;
+  height: 100%;
+  pointer-events: none;
+  background: url(${footerGraphic}) right center / auto 100% no-repeat;
 
-  border-radius: ${({ theme }) => theme.radius.lg};
-
-  background: linear-gradient(180deg, #5ea1ff 0%, #1b38ff 100%);
-
-  transform: translateX(-50%);
-`;
-
-export const LogoCircle = styled.div`
-  position: absolute;
-
-  right: -10px;
-  top: 18px;
-
-  width: 84px;
-  height: 84px;
-
-  border: 18px solid #5c96e8;
-  border-left-color: transparent;
-
-  border-radius: ${({ theme }) => theme.radius.circle};
+  @media (max-width: 56.25rem) {
+    width: 18rem;
+  }
 `;

@@ -1,6 +1,6 @@
 import * as S from "./style";
-import FirstSection from "./sections/FirstSection";
-import SecondSection from "./sections/SecondSection";
+import FirstSection from "./Sections/FirstSection";
+import SecondSection from "./Sections/SecondSection";
 
 const LandingPage = () => {
   return (

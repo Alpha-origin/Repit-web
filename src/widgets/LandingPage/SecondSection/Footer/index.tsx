@@ -1,7 +1,6 @@
 import * as S from "./style";
-import type { FooterProps } from "./type";
 
-const Footer = ({}: FooterProps) => {
+const Footer = () => {
   return (
     <S.Container>
       <S.Inner>
@@ -15,13 +14,7 @@ const Footer = ({}: FooterProps) => {
           <S.StartButton>면접 시작하기</S.StartButton>
         </S.LeftSection>
 
-        <S.BackgroundCircle />
-        <S.BackgroundCircleSmall />
-
-        <S.LogoWrapper>
-          <S.LogoBar />
-          <S.LogoCircle />
-        </S.LogoWrapper>
+        <S.GraphicImage aria-hidden="true" />
       </S.Inner>
     </S.Container>
   );

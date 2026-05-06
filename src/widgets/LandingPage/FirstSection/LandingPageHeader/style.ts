@@ -1,9 +1,10 @@
+import { LANDING_STYLE } from "@/shared/constants/LandingPage/landingStyle";
 import styled from "styled-components";
 
 export const Header = styled.header`
   position: relative;
   z-index: 1;
-  padding: 20px 30px;
+  padding: 1.25rem 1.875rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -13,9 +14,9 @@ export const Logo = styled.div`
   display: flex;
   align-items: center;
   gap: 0;
-  font-size: 30px;
+  font-size: 1.875rem;
   font-weight: 800;
-  color: ${({ theme }) => theme.colors.landing.logo};
+  color: ${LANDING_STYLE.logo};
 
   svg {
     width: 3.5rem;
@@ -27,26 +28,26 @@ export const Logo = styled.div`
 
 export const Nav = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
 `;
 
 export const SignUp = styled.button`
   background: none;
   border: none;
   color: ${({ theme }) => theme.colors.white};
-  font-size: 13px;
+  font-size: 0.8125rem;
   cursor: pointer;
 `;
 
 export const Login = styled.button`
-  background: ${({ theme }) => theme.colors.landing.login};
+  background: ${LANDING_STYLE.login};
   border: none;
   color: ${({ theme }) => theme.colors.white};
-  padding: 8px 16px;
+  padding: 0.5rem 1rem;
   border-radius: ${({ theme }) => theme.radius.sm};
   cursor: pointer;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.landing.loginHover};
+    background: ${LANDING_STYLE.loginHover};
   }
 `;

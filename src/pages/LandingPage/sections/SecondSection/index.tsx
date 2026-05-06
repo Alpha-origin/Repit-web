@@ -1,11 +1,14 @@
+import Footer from "@/widgets/LandingPage/SecondSection/Footer";
 import MainService from "@/widgets/LandingPage/SecondSection/MainService";
 import * as S from "./style";
-import type { SecondSectionProps } from "./type";
 
-const SecondSection = ({}: SecondSectionProps) => {
+const SecondSection = () => {
   return (
     <S.Container>
-      <MainService />
+      <S.Content>
+        <MainService />
+      </S.Content>
+      <Footer />
     </S.Container>
   );
 };
