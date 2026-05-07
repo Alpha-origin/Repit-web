@@ -1,5 +1,5 @@
-import Footer from "@/widgets/LandingPage/SecondSection/Footer";
-import MainService from "@/widgets/LandingPage/SecondSection/MainService";
+import Footer from "@/widgets/landing-page/second-section/footer";
+import MainService from "@/widgets/landing-page/second-section/main-service";
 import * as S from "./style";
 
 const SecondSection = () => {

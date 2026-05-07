@@ -1,14 +1,10 @@
-import { useReducedMotion } from "framer-motion";
 import {
   THIRD_SECTION_REVIEW_ITEMS,
   THIRD_SECTION_SUBTITLE,
   THIRD_SECTION_TITLE,
-} from "@/shared/constants/LandingPage/ThirdSection";
-import {
-  listVariants,
-  revealVariants,
-  userReviewViewport,
-} from "./animation";
+} from "@/shared/constants/landing-page/third-section";
+import { useReducedMotion } from "framer-motion";
+import { listVariants, revealVariants, userReviewViewport } from "./animation";
 import * as S from "./style";
 
 const UserReview = () => {

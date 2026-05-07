@@ -1,5 +1,5 @@
-import { THIRD_SECTION_FOOTER_TEXT } from "@/shared/constants/LandingPage/ThirdSection";
-import UserReview from "@/widgets/LandingPage/ThirdSection/UserReview";
+import { THIRD_SECTION_FOOTER_TEXT } from "@/shared/constants/landing-page/third-section";
+import UserReview from "@/widgets/landing-page/third-section/user-review";
 import * as S from "./style";
 
 const ThirdSection = () => {

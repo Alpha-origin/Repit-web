@@ -1,14 +1,10 @@
-import { useReducedMotion } from "framer-motion";
 import {
   SECOND_SECTION_SERVICE_ITEMS,
   SECOND_SECTION_SUBTITLE,
   SECOND_SECTION_TITLE,
-} from "@/shared/constants/LandingPage/SecondSection";
-import {
-  listVariants,
-  mainServiceViewport,
-  revealVariants,
-} from "./animation";
+} from "@/shared/constants/landing-page/second-section";
+import { useReducedMotion } from "framer-motion";
+import { listVariants, mainServiceViewport, revealVariants } from "./animation";
 import * as S from "./style";
 
 const MainService = () => {
