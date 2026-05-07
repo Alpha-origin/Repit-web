@@ -1,7 +1,7 @@
 import * as S from "./style";
-import FirstSection from "./sections/FirstSection";
-import SecondSection from "./sections/SecondSection";
-import ThirdSection from "./sections/ThirdSection";
+import FirstSection from "./sections/first-section";
+import SecondSection from "./sections/second-section";
+import ThirdSection from "./sections/third-section";
 
 const LandingPage = () => {
   return (
