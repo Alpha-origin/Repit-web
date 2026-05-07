@@ -1,17 +1,10 @@
 import { motion } from "framer-motion";
 import styled, { css } from "styled-components";
-
-type ReviewWrapperProps = {
-  align: "left" | "right";
-};
-
-type ChatBubbleProps = {
-  color: "primary" | "secondary" | "light";
-};
-
-type EmojiProps = {
-  align: "left" | "right";
-};
+import type {
+  ChatBubbleProps,
+  EmojiProps,
+  ReviewWrapperProps,
+} from "./types";
 
 export const ContentMotion = styled(motion.div)`
   width: 100%;

@@ -1,13 +1,6 @@
 import { motion } from "framer-motion";
 import styled from "styled-components";
-
-type ServiceRowProps = {
-  $align: "left" | "right";
-};
-
-type ServiceCardProps = {
-  $align: "left" | "right";
-};
+import type { ServiceCardProps, ServiceRowProps } from "./types";
 
 export const ContentMotion = styled(motion.div)`
   width: 100%;
