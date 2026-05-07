@@ -1,10 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
-import App from "@/pages/App.tsx";
-
+import LandingPage from "../pages/LandingPage";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <LandingPage />,
   },
   {
     path: "*",
