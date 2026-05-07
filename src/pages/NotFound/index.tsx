@@ -1,8 +1,7 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import * as S from "./style";
 
 const NotFound = () => {
-  const { pathname } = useLocation();
   const navigate = useNavigate();
 
   return (
