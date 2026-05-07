@@ -1,5 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import LandingPage from "../pages/LandingPage";
+import NotFound from "../pages/NotFound";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -7,8 +9,8 @@ const router = createBrowserRouter([
   },
   {
     path: "*",
-    element: <div>페이지를 찾을 수 없어요!</div>, // 404 page
-  }
+    element: <NotFound />,
+  },
 ]);
 
 export default router;
