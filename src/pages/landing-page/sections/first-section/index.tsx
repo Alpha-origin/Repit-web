@@ -1,7 +1,6 @@
-import HeroContent from "@/widgets/LandingPage/FirstSection/HeroContent";
-import LandingPageHeader from "@/widgets/LandingPage/FirstSection/LandingPageHeader";
+import HeroContent from "@/widgets/landing-page/first-section/hero-content";
+import LandingPageHeader from "@/widgets/landing-page/first-section/landing-page-header";
 import * as S from "./style";
-
 
 const FirstSection = () => {
   return (

@@ -1,4 +1,4 @@
-import footerGraphic from "@/shared/img/landingpage/repitMain.svg?url";
+import footerGraphic from "@/shared/img/landing-page/repitMain.svg?url";
 import styled from "styled-components";
 
 export const Container = styled.footer`
