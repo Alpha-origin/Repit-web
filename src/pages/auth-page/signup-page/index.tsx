@@ -11,9 +11,12 @@ import * as S from '../login-page/style';
 const SignUpPage = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const isLogin = pathname.includes('login');
-  const switchAuthLabel = isLogin ? '회원가입' : '로그인';
-  const switchAuthPath = isLogin ? '/signup' : '/login';
+  const isLoginPage = pathname.includes('login');
+  const switchAuthLabel = isLoginPage ? '회원가입' : '로그인';
+  const switchAuthPath = isLoginPage ? '/signup' : '/login';
+  const welcomeDescription = isLoginPage
+    ? '로그인을 하고 레핏을 이용해보세요'
+    : '회원가입을 하고 레핏을 시작해보세요';
   const [submitError, setSubmitError] = useState('');
   const {
     register,
@@ -43,16 +46,24 @@ const SignUpPage = () => {
   };
 
   return (
-    <S.Container $isLogin={isLogin}>
+    <S.Container $isLogin={isLoginPage}>
       <S.LeftSection>
         <S.LeftImage src={loginSideImage} alt="리핏 회원가입 안내 이미지" />
-        <S.SwitchAuthButton
-          type="button"
-          aria-label={switchAuthLabel}
-          onClick={() => navigate(switchAuthPath)}
-        >
-          {switchAuthLabel}
-        </S.SwitchAuthButton>
+        <S.LeftContent>
+          <S.WelcomeTitle>
+            Hello
+            <br />
+            WELCOME!
+          </S.WelcomeTitle>
+          <S.WelcomeDescription>{welcomeDescription}</S.WelcomeDescription>
+          <S.SwitchAuthButton
+            type="button"
+            aria-label={switchAuthLabel}
+            onClick={() => navigate(switchAuthPath)}
+          >
+            {switchAuthLabel}
+          </S.SwitchAuthButton>
+        </S.LeftContent>
       </S.LeftSection>
 
       <S.RightSection>

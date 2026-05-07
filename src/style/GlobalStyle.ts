@@ -1,6 +1,7 @@
 import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyle = createGlobalStyle`
+  @import url('https://cdn.jsdelivr.net/fontsource/fonts/cal-sans@latest/latin-400-normal.css');
   @import url('https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard.css');
 
   @font-face {

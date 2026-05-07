@@ -10,6 +10,11 @@ const LoginPage = () => {
   const location = useLocation();
 
   const isLoginPage = location.pathname.includes("login");
+  const switchAuthLabel = isLoginPage ? "회원가입" : "로그인";
+  const switchAuthPath = isLoginPage ? "/signup" : "/login";
+  const welcomeDescription = isLoginPage
+    ? "로그인을 하고 레핏을 이용해보세요"
+    : "회원가입을 하고 레핏을 시작해보세요";
   const {
     register,
     handleSubmit,
@@ -23,17 +28,24 @@ const LoginPage = () => {
   };
 
   return (
-    <S.Container>
+    <S.Container $isLogin={isLoginPage}>
       <S.LeftSection>
         <S.LeftImage src={loginSideImage} alt="리핏 로그인 안내 이미지" />
-        <S.SwitchAuthButton
-          type="button"
-          aria-label="회원가입"
-          onClick={() => navigate("/signup")}
-          disabled={!isLoginPage}
-        >
-          회원가입
-        </S.SwitchAuthButton>
+        <S.LeftContent>
+          <S.WelcomeTitle>
+            Hello
+            <br />
+            WELCOME!
+          </S.WelcomeTitle>
+          <S.WelcomeDescription>{welcomeDescription}</S.WelcomeDescription>
+          <S.SwitchAuthButton
+            type="button"
+            aria-label={switchAuthLabel}
+            onClick={() => navigate(switchAuthPath)}
+          >
+            {switchAuthLabel}
+          </S.SwitchAuthButton>
+        </S.LeftContent>
       </S.LeftSection>
 
       <S.RightSection>
