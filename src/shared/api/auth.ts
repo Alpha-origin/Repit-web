@@ -9,6 +9,7 @@ interface ApiErrorResponse {
 }
 
 export interface SignUpRequest {
+  nickname: string;
   name: string;
   email: string;
   password: string;
