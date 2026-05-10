@@ -116,8 +116,8 @@ const SignUpPanel = ({
         </S.Form>
 
         <S.LinkWrapper>
-          <S.LinkText type="button" onClick={onNavigateToLogin}>
-            이미 계정이 있나요? 로그인
+          <S.LinkText>
+            이미 계정이 있나요? <S.GoLooginButton type="button" onClick={onNavigateToLogin}>로그인</S.GoLooginButton>
           </S.LinkText>
         </S.LinkWrapper>
       </S.Panel>

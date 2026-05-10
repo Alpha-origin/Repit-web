@@ -138,3 +138,15 @@ export const LinkText = styled.button`
   cursor: pointer;
   padding: 0;
 `;
+export const GoLooginButton = styled.button`
+  border: none;
+  background: transparent;
+  color: #2478e8;
+  font-size: 17px;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+`
