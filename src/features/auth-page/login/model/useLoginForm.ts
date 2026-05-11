@@ -5,7 +5,7 @@ import { login } from '@/features/auth-page/login/api/login';
 
 import type { LoginFormData } from './types';
 
-export function useLoginForm() {
+export function useLoginForm(onSuccess?: () => void) {
   const [submitError, setSubmitError] = useState('');
   const {
     register,
@@ -15,20 +15,23 @@ export function useLoginForm() {
     mode: 'onSubmit',
   });
 
-  const onSubmit = handleSubmit(async (formData) => {
+  async function submitLogin(formData: LoginFormData) {
     setSubmitError('');
 
     const errorMessage = await login(formData);
 
     if (errorMessage) {
       setSubmitError(errorMessage);
+      return;
     }
-  });
+
+    onSuccess?.();
+  }
 
   return {
     errors,
     isSubmitting,
-    onSubmit,
+    onSubmit: handleSubmit(submitLogin),
     register,
     submitError,
   };

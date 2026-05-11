@@ -6,15 +6,6 @@ import type {
   InternalAxiosRequestConfig,
 } from "axios";
 
-import type { RetryableRequestConfig } from "@/shared/api/type";
-
-import {
-  clearTokens,
-  getAccessToken,
-  getRefreshToken,
-  saveAccessToken,
-} from "./token";
-
 const resolveServerUrl = (url?: string) => {
   if (!url) return "";
 
@@ -51,43 +42,24 @@ export const chatInstance = axios.create({
   },
 });
 
-const refreshAccessToken = async (): Promise<string | null> => {
+interface RetryableRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
+
+const goToLoginPage = () => {
+  window.location.href = "/login";
+};
+
+const tryRefreshSession = async () => {
   try {
-    const refreshToken = getRefreshToken();
-
-    if (!refreshToken) return null;
-
-    const response = await authInstance.post("/auth/refresh", {
-      refreshToken,
-    });
-
-    const newAccessToken = response.data.accessToken;
-
-    if (!newAccessToken) return null;
-
-    saveAccessToken(newAccessToken);
-
-    return newAccessToken;
+    await authInstance.post("/auth/refresh");
+    return true;
   } catch {
-    clearTokens();
-    return null;
+    return false;
   }
 };
 
-const applyAuthInterceptor = (instance: AxiosInstance) => {
-  instance.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
-      const accessToken = getAccessToken();
-
-      if (accessToken) {
-        config.headers.Authorization = `Bearer ${accessToken}`;
-      }
-
-      return config;
-    },
-    (error) => Promise.reject(error),
-  );
-
+const addRefreshInterceptor = (instance: AxiosInstance) => {
   instance.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
@@ -100,18 +72,15 @@ const applyAuthInterceptor = (instance: AxiosInstance) => {
       ) {
         originalRequest._retry = true;
 
-        const newAccessToken = await refreshAccessToken();
+        const refreshed = await tryRefreshSession();
 
-        if (!newAccessToken) {
-          clearTokens();
-          window.location.href = "/login";
-
-          return Promise.reject(error);
+        if (refreshed) {
+          return instance(originalRequest);
         }
+      }
 
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-        return instance(originalRequest);
+      if (error.response?.status === 401) {
+        goToLoginPage();
       }
 
       return Promise.reject(error);
@@ -119,6 +88,5 @@ const applyAuthInterceptor = (instance: AxiosInstance) => {
   );
 };
 
-applyAuthInterceptor(authInstance);
-applyAuthInterceptor(apiInstance);
-applyAuthInterceptor(chatInstance);
+addRefreshInterceptor(apiInstance);
+addRefreshInterceptor(chatInstance);

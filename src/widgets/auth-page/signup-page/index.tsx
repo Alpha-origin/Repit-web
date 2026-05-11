@@ -1,16 +1,18 @@
 import RepitLogo from '@/shared/img/logo/Repit.svg?react';
+import { useNavigate } from 'react-router-dom';
 
 import * as S from './style';
 import type { SignUpPanelProps } from './type';
 
-const SignUp = ({
+const SignUpPanel = ({
   errors,
   isSubmitting,
-  onNavigateToLogin,
   onSubmit,
   register,
   submitError,
 }: SignUpPanelProps) => {
+  const navigate = useNavigate();
+
   return (
     <S.Section>
       <S.Logo aria-label="Repit">
@@ -118,7 +120,7 @@ const SignUp = ({
         <S.LinkWrapper>
           <S.LinkText>
             이미 계정이 있나요?{' '}
-            <S.GoLoginButton type="button" onClick={onNavigateToLogin}>
+            <S.GoLoginButton type="button" onClick={() => navigate('/login')}>
               로그인
             </S.GoLoginButton>
           </S.LinkText>
@@ -128,4 +130,4 @@ const SignUp = ({
   );
 };
 
-export default SignUp;
+export default SignUpPanel;

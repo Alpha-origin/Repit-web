@@ -1,15 +1,35 @@
-import type { LoginFormData } from '@/features/auth-page/login/model/types';
+import axios from 'axios';
 
-const NOT_READY_MESSAGE =
-  '아직 안함 ㅋㅋ';
+import type { LoginFormData } from '@/features/auth-page/login/model/types';
+import { authInstance } from '@/shared/api/axiosInstance';
+
+const LOGIN_URL = '/auth/login';
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: string; error?: string } | undefined;
+
+    if (data?.message) return data.message;
+    if (data?.error) return data.error;
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallback;
+};
 
 export async function login(formData: LoginFormData): Promise<string | null> {
-  const email = formData.email.trim();
-  const password = formData.password;
+  const loginData = {
+    email: formData.email.trim(),
+    password: formData.password,
+  };
 
-  // login api
-  void email;
-  void password;
-
-  return NOT_READY_MESSAGE;
+  try {
+    await authInstance.post(LOGIN_URL, loginData);
+    return null;
+  } catch (error) {
+    return getErrorMessage(error, '로그인에 실패했습니다.');
+  }
 }

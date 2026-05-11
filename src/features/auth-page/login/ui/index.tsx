@@ -1,11 +1,13 @@
-import Login from '@/widgets/auth-page/login-page';
+import LoginPanel from '@/widgets/auth-page/login-page';
+import { useNavigate } from 'react-router-dom';
 
 import { useLoginForm } from '@/features/auth-page/login/model/useLoginForm';
 
 const LoginForm = () => {
-  const form = useLoginForm();
+  const navigate = useNavigate();
+  const form = useLoginForm(() => navigate('/'));
 
-  return <Login {...form} />;
+  return <LoginPanel {...form} />;
 };
 
 export default LoginForm;
