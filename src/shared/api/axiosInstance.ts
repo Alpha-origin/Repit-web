@@ -6,6 +6,8 @@ import type {
   InternalAxiosRequestConfig,
 } from "axios";
 
+import type { RetryableRequestConfig } from "@/shared/api/type";
+
 import {
   clearTokens,
   getAccessToken,
@@ -48,10 +50,6 @@ export const chatInstance = axios.create({
     "Content-Type": "application/json",
   },
 });
-
-interface RetryableRequestConfig extends InternalAxiosRequestConfig {
-  _retry?: boolean;
-}
 
 const refreshAccessToken = async (): Promise<string | null> => {
   try {

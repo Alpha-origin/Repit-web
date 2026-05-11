@@ -1,5 +1,7 @@
 import Cookie from 'js-cookie';
 
+import type { TokenPayload } from '@/shared/util/type';
+
 export const getCookie = (name: string): string | null => {
   return Cookie.get(name) ?? null;
 };
@@ -37,14 +39,6 @@ export const setUsername = (username: string) => {
     path: '/',
   });
 };
-
-interface TokenPayload {
-  sub?: string;
-  username?: string;
-  role?: string;
-  iat?: number;
-  exp?: number;
-}
 
 export const getAccessTokenPayload = (): TokenPayload | null => {
   const token = getCookie('accessToken');

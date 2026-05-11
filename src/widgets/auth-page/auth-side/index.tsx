@@ -1,13 +1,7 @@
 import authSideImage from '@/shared/img/auth-page/repit-auth.svg?url';
 
 import * as S from './style';
-
-interface AuthSidePanelProps {
-  description: string;
-  imageAlt: string;
-  switchAuthLabel: string;
-  onSwitchAuth: () => void;
-}
+import type { AuthSidePanelProps } from './type';
 
 const AuthSidePanel = ({
   description,

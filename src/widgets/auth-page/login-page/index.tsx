@@ -1,18 +1,7 @@
-import type { FormEventHandler } from 'react';
-import type { FieldErrors, UseFormRegister } from 'react-hook-form';
-
-import type { LoginFormData } from '@/features/auth-page/login/model/types';
 import RepitLogo from '@/shared/img/logo/Repit.svg?react';
 
 import * as S from './style';
-
-interface LoginPanelProps {
-  errors: FieldErrors<LoginFormData>;
-  isSubmitting: boolean;
-  onSubmit: FormEventHandler<HTMLFormElement>;
-  register: UseFormRegister<LoginFormData>;
-  submitError: string;
-}
+import type { LoginPanelProps } from './type';
 
 const Login = ({
   errors,

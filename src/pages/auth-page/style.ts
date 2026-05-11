@@ -1,8 +1,6 @@
 import styled from 'styled-components';
 
-interface AuthPageStyleProps {
-  $isLogin: boolean;
-}
+import type { AuthPageStyleProps } from '@/pages/auth-page/type';
 
 export const Container = styled.main.attrs<AuthPageStyleProps>(({ $isLogin }) => ({
   'data-is-login': String($isLogin),
