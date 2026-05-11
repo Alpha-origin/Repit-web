@@ -1,13 +1,25 @@
-import type { LoginPanelProps } from '@/pages/auth-page/type';
+import type { FormEventHandler } from 'react';
+import type { FieldErrors, UseFormRegister } from 'react-hook-form';
+
+import type { LoginFormData } from '@/features/auth-page/login/model/types';
 import RepitLogo from '@/shared/img/logo/Repit.svg?react';
 
 import * as S from './style';
 
-const LoginPanel = ({
+interface LoginPanelProps {
+  errors: FieldErrors<LoginFormData>;
+  isSubmitting: boolean;
+  onSubmit: FormEventHandler<HTMLFormElement>;
+  register: UseFormRegister<LoginFormData>;
+  submitError: string;
+}
+
+const Login = ({
   errors,
-  isSubmitDisabled,
+  isSubmitting,
   onSubmit,
   register,
+  submitError,
 }: LoginPanelProps) => {
   return (
     <S.Section>
@@ -23,6 +35,7 @@ const LoginPanel = ({
             <S.Input
               type="email"
               placeholder="이메일"
+              disabled={isSubmitting}
               {...register('email', {
                 required: '이메일을 입력해주세요.',
                 pattern: {
@@ -39,6 +52,7 @@ const LoginPanel = ({
             <S.Input
               type="password"
               placeholder="비밀번호"
+              disabled={isSubmitting}
               {...register('password', {
                 required: '비밀번호를 입력해주세요.',
                 minLength: {
@@ -51,8 +65,10 @@ const LoginPanel = ({
             {errors.password && <S.ErrorMessage>{errors.password.message}</S.ErrorMessage>}
           </S.InputWrapper>
 
-          <S.SubmitButton type="submit" disabled={isSubmitDisabled}>
-            로그인
+          {submitError && <S.StatusMessage role="alert">{submitError}</S.StatusMessage>}
+
+          <S.SubmitButton type="submit" disabled={isSubmitting}>
+            {isSubmitting ? '확인 중...' : '로그인'}
           </S.SubmitButton>
         </S.Form>
 
@@ -66,4 +82,4 @@ const LoginPanel = ({
   );
 };
 
-export default LoginPanel;
+export default Login;

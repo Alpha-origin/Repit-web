@@ -79,10 +79,22 @@ export const Input = styled.input`
   &:focus {
     box-shadow: 0 0 0 3px rgba(36, 120, 232, 0.15);
   }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
 `;
 
 export const ErrorMessage = styled.p`
   margin: 8px 0 0 16px;
+  color: #ff4d4f;
+  font-size: 16px;
+  font-weight: 500;
+`;
+
+export const StatusMessage = styled.p`
+  margin: 4px 0 0 16px;
   color: #ff4d4f;
   font-size: 16px;
   font-weight: 500;

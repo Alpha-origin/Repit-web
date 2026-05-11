@@ -54,7 +54,7 @@ export const Login = styled.button`
   background: ${LANDING_STYLE.login};
   border: none;
   color: ${({ theme }) => theme.colors.white};
-  min-height: 2.75rem;
+  min-height: 2.5rem;
   padding: 0.625rem 1.25rem;
   border-radius: ${({ theme }) => theme.radius.sm};
   font-size: 1.25rem;

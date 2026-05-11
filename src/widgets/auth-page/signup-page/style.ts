@@ -138,7 +138,8 @@ export const LinkText = styled.button`
   cursor: pointer;
   padding: 0;
 `;
-export const GoLooginButton = styled.button`
+
+export const GoLoginButton = styled.button`
   border: none;
   background: transparent;
   color: #2478e8;
@@ -146,7 +147,8 @@ export const GoLooginButton = styled.button`
   font-weight: 600;
   padding: 0;
   cursor: pointer;
+
   &:hover {
     text-decoration: underline;
   }
-`
+`;
