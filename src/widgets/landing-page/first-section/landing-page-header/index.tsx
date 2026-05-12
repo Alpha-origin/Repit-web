@@ -1,7 +1,10 @@
 import RepitLogo from "@/shared/img/logo/Repit.svg?react";
+import { useNavigate } from "react-router-dom";
 import * as S from "./style";
 
 const LandingPageHeader = () => {
+  const navigate = useNavigate();
+
   return (
     <S.Header>
       <S.Logo>
@@ -12,8 +15,12 @@ const LandingPageHeader = () => {
       </S.Logo>
 
       <S.Nav>
-        <S.SignUp>회원가입</S.SignUp>
-        <S.Login>로그인</S.Login>
+        <S.SignUp type="button" onClick={() => navigate("/signup")}>
+          회원가입
+        </S.SignUp>
+        <S.Login type="button" onClick={() => navigate("/login")}>
+          로그인
+        </S.Login>
       </S.Nav>
     </S.Header>
   );

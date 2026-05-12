@@ -1,6 +1,8 @@
 import * as S from "./style";
+import { useNavigate } from "react-router-dom";
 
 const HeroContent = () => {
+    const navigate = useNavigate();
   return (
     <S.Content>
       <S.Badge>
@@ -22,7 +24,9 @@ const HeroContent = () => {
         취업 준비를 위한 맞춤 기술 면접 연습과 피드백
       </S.Subtitle>
 
-      <S.StartButton>면접 시작하기</S.StartButton>
+      <S.StartButton onClick={() => navigate('/login')}>
+        면접 시작하기
+      </S.StartButton>
     </S.Content>
   );
 };

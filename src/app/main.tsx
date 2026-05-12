@@ -1,9 +1,10 @@
 import { createRoot } from "react-dom/client";
 import { ThemeProvider } from "styled-components";
-import { theme } from "../style/theme"; 
 import { RouterProvider } from "react-router-dom";
+import { GlobalStyle } from "@/app/styles/GlobalStyle";
+import { theme } from "@/app/styles/theme";
+
 import router from "./router.tsx";
-import { GlobalStyle } from "../style/GlobalStyle";
 
 createRoot(document.getElementById("root")!).render(
   <ThemeProvider theme={theme}>

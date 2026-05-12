@@ -41,6 +41,7 @@ export const theme = {
     xxl: "3.75rem",
   },
   fontFamily: {
+    calSans: "'Cal Sans', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     pretendard: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     wavvePado: "'Wave', sans-serif",
   },
