@@ -129,14 +129,11 @@ export const LinkWrapper = styled.div`
   gap: 10px;
 `;
 
-export const LinkText = styled.button`
-  border: none;
-  background: transparent;
+export const LinkText = styled.p`
+  margin: 0;
   color: #2478e8;
   font-size: 17px;
   font-weight: 600;
-  cursor: pointer;
-  padding: 0;
 `;
 
 export const GoLoginButton = styled.button`
