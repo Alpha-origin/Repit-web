@@ -1,4 +1,4 @@
-import RepitLogo from '@/shared/img/logo/Repit.svg?react';
+import RepitLogo from '@/shared/img/logo/Repit-logo.svg?url';
 import { useNavigate } from 'react-router-dom';
 
 import * as S from './style';
@@ -16,7 +16,7 @@ const SignUpPanel = ({
   return (
     <S.Section>
       <S.Logo aria-label="Repit">
-        <RepitLogo />
+        <img src={RepitLogo} alt="Repit" />
       </S.Logo>
 
       <S.Panel>

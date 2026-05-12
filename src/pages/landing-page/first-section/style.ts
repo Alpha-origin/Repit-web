@@ -3,7 +3,8 @@ import styled from "styled-components";
 
 export const Section = styled.section`
   position: relative;
-  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
   overflow: hidden;
   background: linear-gradient(
     180deg,

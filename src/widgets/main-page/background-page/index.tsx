@@ -1,10 +1,11 @@
+import MainBackground from "@/shared/img/main-page/Main-background.svg?url";
 import * as S from "./style";
 
 const BackGroundPage = () => {
   return (
-    <S.backgroundPageStyle>
-      <div>배경 페이지 입니당</div>
-    </S.backgroundPageStyle>
+    <S.BackgroundPage>
+      <S.BackgroundImage src={MainBackground} alt="" aria-hidden="true" />
+    </S.BackgroundPage>
   );
 };
 export default BackGroundPage;

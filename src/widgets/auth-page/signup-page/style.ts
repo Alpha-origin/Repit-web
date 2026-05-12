@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const Section = styled.section`
   position: relative;
@@ -26,7 +26,7 @@ export const Logo = styled.div`
   display: flex;
   align-items: center;
 
-  svg {
+  img {
     display: block;
     width: 80px;
     height: 80px;

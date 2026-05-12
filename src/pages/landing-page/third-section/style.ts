@@ -3,11 +3,9 @@ import styled from "styled-components";
 export const Container = styled.section`
   position: relative;
   left: 50%;
-
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
   width: 100vw;
   min-height: 100vh;
   margin-left: -50vw;
@@ -29,19 +27,15 @@ export const Content = styled.div`
 export const Footer = styled.footer`
   width: 100%;
   height: 7.5rem;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   background: linear-gradient(
     180deg,
     #d8e8ff 0%,
     #c5dcff 100%
   );
-
   font-size: 2.5rem;
   font-weight: 700;
-
   color: black;
 `;

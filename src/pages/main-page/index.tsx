@@ -1,10 +1,13 @@
-import BackGroundPage from "../../widgets/main-page/background-page";
+import BackGroundPage from "@/widgets/main-page/background-page";
+import Header from "@/widgets/main-page/header";
+import * as S from "./style";
 
 const MainPage = () => {
   return (
-    <div>
+    <S.Page>
       <BackGroundPage />
-    </div>
+      <Header />
+    </S.Page>
   );
 };
 export default MainPage;

@@ -13,18 +13,14 @@ export const Header = styled(motion.div)`
 
 export const SubTitle = styled.p`
   margin: 0 0 ${({ theme }) => theme.spacing.sm};
-
   color: ${({ theme }) => theme.colors.brand.blueLight};
-
   font-size: 1.125rem;
   font-weight: 700;
 `;
 
 export const Title = styled.h2`
   margin: 0;
-
   color: ${({ theme }) => theme.colors.brand.blue};
-
   font-size: 2.625rem;
   font-weight: 800;
   line-height: 1.25;
@@ -66,12 +62,9 @@ export const ServiceCard = styled.article<ServiceCardProps>`
   display: flex;
   flex-direction: column;
   width: min(100%, 42rem);
-
   align-items: ${({ $align }) =>
     $align === "right" ? "flex-end" : "flex-start"};
-
   text-align: ${({ $align }) => $align};
-
   min-height: 10rem;
 
   @media (max-width: 56.25rem) {
@@ -83,9 +76,7 @@ export const ServiceCard = styled.article<ServiceCardProps>`
 
 export const CardTitle = styled.h3`
   margin: 0 0 ${({ theme }) => theme.spacing.xs};
-
   color: ${({ theme }) => theme.colors.brand.blue};
-
   font-size: 1.5rem;
   font-weight: 800;
 
@@ -96,9 +87,7 @@ export const CardTitle = styled.h3`
 
 export const CardHeading = styled.p`
   margin: 0 0 0.75rem;
-
   color: ${({ theme }) => theme.colors.text.strong};
-
   font-size: 2rem;
   font-weight: 800;
   line-height: 1.25;
@@ -111,9 +100,7 @@ export const CardHeading = styled.p`
 
 export const CardDescription = styled.p`
   margin: 2rem 0 0;
-
   color: ${({ theme }) => theme.colors.text.muted};
-
   font-size: 1.0625rem;
   font-weight: 500;
   line-height: 1.9;

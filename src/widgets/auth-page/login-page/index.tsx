@@ -1,4 +1,4 @@
-import RepitLogo from "@/shared/img/logo/Repit.svg?react";
+import RepitLogo from "@/shared/img/logo/Repit-logo.svg?url";
 
 import * as S from "./style";
 import type { LoginPanelProps } from "./type";
@@ -11,10 +11,10 @@ const LoginPanel = ({
   submitError,
 }: LoginPanelProps) => {
   return (
-    <S.Section>
-      <S.Logo aria-label="Repit">
-        <RepitLogo />
-      </S.Logo>
+      <S.Section>
+        <S.Logo aria-label="Repit">
+          <img src={RepitLogo} alt="Repit" />
+        </S.Logo>
 
       <S.Panel>
         <S.Title>로그인</S.Title>

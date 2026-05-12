@@ -3,12 +3,10 @@ import styled from "styled-components";
 export const Container = styled.section`
   position: relative;
   left: 50%;
-
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 7.5rem;
-
   width: 100vw;
   min-height: 100vh;
   margin-left: -50vw;
