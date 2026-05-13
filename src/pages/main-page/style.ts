@@ -6,5 +6,8 @@ export const Page = styled.main`
   height: 100vh;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
+  row-gap: 1rem;
+  padding-bottom: 1rem;
+  box-sizing: border-box;
   overflow: hidden;
 `;

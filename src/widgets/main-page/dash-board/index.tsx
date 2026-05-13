@@ -59,12 +59,14 @@ const DashboardMain = () => {
       </S.TopCard>
 
       <S.BottomCard>
-        <S.CardImage src={DashboardBottomImage} alt="" aria-hidden="true" />
+        <S.BottomCardInner>
+          <S.CardImage src={DashboardBottomImage} alt="" aria-hidden="true" />
 
-        <S.BottomOverlay>
-          <S.ReadyBadge>준비중...</S.ReadyBadge>
-          <S.BottomTitle>아직 공개되지 않은 서비스입니다.</S.BottomTitle>
-        </S.BottomOverlay>
+          <S.BottomOverlay>
+            <S.ReadyBadge>준비중...</S.ReadyBadge>
+            <S.BottomTitle>아직 공개되지 않은 서비스입니다.</S.BottomTitle>
+          </S.BottomOverlay>
+        </S.BottomCardInner>
       </S.BottomCard>
     </S.Section>
   );

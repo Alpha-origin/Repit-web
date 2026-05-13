@@ -4,17 +4,17 @@ export const Header = styled.header`
   position: relative;
   z-index: 1;
   width: 100%;
-  height: 4.5rem;
+  height: 4.25rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 2.5rem;
-  margin-top: 0.75rem;
+  margin-top: 0.6rem;
 `;
 
 export const LogoImage = styled.img`
   width: auto;
-  height: 4rem;
+  height: 3.75rem;
   display: block;
   flex-shrink: 0;
 `;

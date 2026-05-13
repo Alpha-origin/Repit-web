@@ -6,22 +6,22 @@ export const Section = styled.section`
   width: 100%;
   height: 100%;
   min-height: 0;
-  max-width: 103rem;
+  max-width: 108rem;
   margin: 0 auto;
-  padding: 1rem 2.5rem 0.75rem;
+  padding: 0.45rem 1.35rem 0;
   display: grid;
   grid-template-rows: minmax(0, 1fr) minmax(0, 0.88fr);
-  gap: 0.9rem;
+  gap: 1.35rem;
 
   @media (max-width: 64rem) {
-    padding: 0.9rem 1.5rem 0.75rem;
+    padding: 0.35rem 1rem 0;
   }
 `;
 
 const cardBase = `
   position: relative;
   width: 100%;
-  border-radius: 1.5rem;
+  border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 0.625rem 2rem rgba(0, 0, 0, 0.08);
 `;
@@ -29,12 +29,13 @@ const cardBase = `
 export const TopCard = styled.article`
   ${cardBase}
   min-height: 0;
-  padding: 0.75rem;
+  padding: 0.7rem;
 `;
 
 export const BottomCard = styled.article`
   ${cardBase}
   min-height: 0;
+  padding: 0.7rem;
 `;
 
 export const CardImage = styled.img`
@@ -57,6 +58,15 @@ export const TopCardInner = styled.div`
     grid-template-columns: 1fr;
     gap: 1.25rem;
   }
+`;
+
+export const BottomCardInner = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border-radius: 1rem;
+  overflow: hidden;
 `;
 
 export const TopBanner = styled.div`

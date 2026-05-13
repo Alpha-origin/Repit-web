@@ -4,19 +4,19 @@ export const Section = styled.section`
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 103rem;
+  max-width: 108rem;
   margin: 0 auto;
-  padding: 0 2.5rem 1rem;
+  padding: 0 1.35rem 0;
 
   @media (max-width: 64rem) {
-    padding: 0 1.5rem 0.75rem;
+    padding: 0 1rem 0;
   }
 `;
 
 export const BannerCard = styled.div`
   width: 100%;
-  min-height: 4.9rem;
-  padding: 0.9rem 2rem;
+  min-height: 4.7rem;
+  padding: 0.85rem 1.8rem;
   border-radius: 1rem;
   background-color: rgba(255, 255, 255, 0.94);
   box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.08);
