@@ -1,4 +1,4 @@
-import RepitLogo from "@/shared/img/logo/Repit.svg?react";
+import RepitLogo from "@/shared/img/logo/Repit-logo.svg?url";
 import { useNavigate } from "react-router-dom";
 import * as S from "./style";
 
@@ -7,11 +7,8 @@ const LandingPageHeader = () => {
 
   return (
     <S.Header>
-      <S.Logo>
-        <span aria-hidden="true">
-          <RepitLogo />
-        </span>
-        <span>e:pit</span>
+      <S.Logo aria-label="Repit">
+        <S.LogoImage src={RepitLogo} alt="Repit" />
       </S.Logo>
 
       <S.Nav>

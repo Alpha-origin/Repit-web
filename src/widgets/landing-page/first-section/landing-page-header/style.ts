@@ -16,17 +16,13 @@ export const Header = styled.header`
 export const Logo = styled.div`
   display: flex;
   align-items: center;
-  gap: 0;
-  font-size: 1.875rem;
-  font-weight: 800;
-  color: ${LANDING_STYLE.logo};
+`;
 
-  svg {
-    width: 3.5rem;
-    height: 3.5rem;
-    flex-shrink: 0;
-    display: block;
-  }
+export const LogoImage = styled.img`
+  width: auto;
+  height: clamp(4rem, 7vw, 4.5rem);
+  flex-shrink: 0;
+  display: block;
 `;
 
 export const Nav = styled.div`

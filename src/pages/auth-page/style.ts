@@ -1,9 +1,9 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
-import type { AuthPageStyleProps } from '@/pages/auth-page/type';
+import type { AuthPageStyleProps } from "@/pages/auth-page/type";
 
 export const Container = styled.main.attrs<AuthPageStyleProps>(({ $isLogin }) => ({
-  'data-is-login': String($isLogin),
+  "data-is-login": String($isLogin),
 }))<AuthPageStyleProps>`
   width: 100vw;
   min-height: 100vh;
