@@ -1,30 +1,11 @@
 import * as S from './style';
 import { useNavigate } from 'react-router-dom';
-const INTERVIEW_STYLES = ['편함', '일반', '압박'];
-const INTERVIEW_LEVELS = ['쉬움', '보통', '어려움'];
-
-const INTERVIEWERS = [
-  {
-    id: 1,
-    name: '면접관1',
-    tags: ['성격', '말투', '전문분야'],
-  },
-  {
-    id: 2,
-    name: '면접관2',
-    tags: ['성격', '말투', '전문분야'],
-  },
-  {
-    id: 3,
-    name: '면접관3',
-    tags: ['성격', '말투', '전문분야'],
-  },
-  {
-    id: 4,
-    name: '면접관4',
-    tags: ['성격', '말투', '전문분야'],
-  },
-];
+import {
+  INTERVIEW_SETTING_ACTION_LABELS,
+  INTERVIEW_SETTING_INTERVIEWERS,
+  INTERVIEW_SETTING_INTERVIEWER_SECTION_TITLE,
+  INTERVIEW_SETTING_OPTION_SECTIONS,
+} from '@/shared/constants/interview-page/setting-interview';
 
 const SettingInterview = () => {
   const navigate = useNavigate();
@@ -32,31 +13,23 @@ const SettingInterview = () => {
   return (
     <S.Container>
       <S.Card>
-        <S.Section>
-          <S.Title>면접 스타일</S.Title>
+        {INTERVIEW_SETTING_OPTION_SECTIONS.map((section) => (
+          <S.Section key={section.title}>
+            <S.Title>{section.title}</S.Title>
 
-          <S.OptionGrid>
-            {INTERVIEW_STYLES.map((style) => (
-              <S.OptionButton key={style}>{style}</S.OptionButton>
-            ))}
-          </S.OptionGrid>
-        </S.Section>
-
-        <S.Section>
-          <S.Title>면접 난이도</S.Title>
-
-          <S.OptionGrid>
-            {INTERVIEW_LEVELS.map((level) => (
-              <S.OptionButton key={level}>{level}</S.OptionButton>
-            ))}
-          </S.OptionGrid>
-        </S.Section>
+            <S.OptionGrid>
+              {section.options.map((option) => (
+                <S.OptionButton key={option}>{option}</S.OptionButton>
+              ))}
+            </S.OptionGrid>
+          </S.Section>
+        ))}
 
         <S.Section>
-          <S.Title>면접관</S.Title>
+          <S.Title>{INTERVIEW_SETTING_INTERVIEWER_SECTION_TITLE}</S.Title>
 
           <S.InterviewerList>
-            {INTERVIEWERS.map((interviewer) => (
+            {INTERVIEW_SETTING_INTERVIEWERS.map((interviewer) => (
               <S.InterviewerCard key={interviewer.id}>
                 <S.InterviewerName>{interviewer.name}</S.InterviewerName>
 
@@ -69,8 +42,12 @@ const SettingInterview = () => {
         </S.Section>
 
         <S.ButtonWrapper>
-          <S.BackButton onClick={() => navigate(-1)}>돌아가기</S.BackButton>
-          <S.SaveButton onClick={() => navigate('/main/interview')}>다음</S.SaveButton>
+          <S.BackButton onClick={() => navigate(-1)}>
+            {INTERVIEW_SETTING_ACTION_LABELS.back}
+          </S.BackButton>
+          <S.SaveButton onClick={() => navigate('/main/interview')}>
+            {INTERVIEW_SETTING_ACTION_LABELS.next}
+          </S.SaveButton>
         </S.ButtonWrapper>
       </S.Card>
     </S.Container>
