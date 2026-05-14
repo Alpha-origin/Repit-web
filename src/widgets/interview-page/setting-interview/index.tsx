@@ -1,5 +1,5 @@
 import * as S from './style';
-
+import { useNavigate } from 'react-router-dom';
 const INTERVIEW_STYLES = ['편함', '일반', '압박'];
 const INTERVIEW_LEVELS = ['쉬움', '보통', '어려움'];
 
@@ -27,6 +27,8 @@ const INTERVIEWERS = [
 ];
 
 const SettingInterview = () => {
+  const navigate = useNavigate();
+
   return (
     <S.Container>
       <S.Card>
@@ -67,8 +69,8 @@ const SettingInterview = () => {
         </S.Section>
 
         <S.ButtonWrapper>
-          <S.BackButton>돌아가기</S.BackButton>
-          <S.SaveButton>저장</S.SaveButton>
+          <S.BackButton onClick={() => navigate(-1)}>돌아가기</S.BackButton>
+          <S.SaveButton onClick={() => navigate('/main/interview')}>다음</S.SaveButton>
         </S.ButtonWrapper>
       </S.Card>
     </S.Container>
