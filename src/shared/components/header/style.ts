@@ -18,8 +18,8 @@ export const Header = styled.header`
   z-index: 1;
   width: 100%;
   height: 4.25rem;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   padding: 0 2.5rem;
   margin-top: 0.6rem;
@@ -30,6 +30,7 @@ export const LogoImage = styled.img`
   height: 3.75rem;
   display: block;
   flex-shrink: 0;
+  justify-self: start;
 `;
 
 export const TopButtons = styled.div`
@@ -37,6 +38,7 @@ export const TopButtons = styled.div`
   gap: 2rem;
   justify-content: center;
   align-items: center;
+  justify-self: center;
 `;
 
 export const TopButton = styled.button<TopButtonProps>`
@@ -62,6 +64,7 @@ export const StatusButtons = styled.div`
   gap: 1rem;
   justify-content: center;
   align-items: center;
+  justify-self: end;
 `;
 
 export const StatusButton = styled.button`

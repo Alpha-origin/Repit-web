@@ -1,9 +1,11 @@
-const SettingInterview = () => {
+import SettingInterview from "@/widgets/interview-page/setting-interview";
+
+const SettingInterviewPage = () => {
   return (
     <div>
-      면접 설정 페이지
+      <SettingInterview />
     </div>
   );
 };
 
-export default SettingInterview;
+export default SettingInterviewPage;
