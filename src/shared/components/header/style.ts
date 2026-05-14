@@ -1,4 +1,17 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
+
+interface TopButtonProps {
+  $active: boolean;
+}
+
+const topButtonGlow = css`
+  color: #0061e0;
+
+  text-shadow:
+    0 0 30px rgba(0, 97, 224, 0.95),
+    0 0 80px rgba(0, 97, 224, 0.85),
+    0 0 140px rgba(0, 97, 224, 0.7);
+`;
 
 export const Header = styled.header`
   position: relative;
@@ -26,26 +39,21 @@ export const TopButtons = styled.div`
   align-items: center;
 `;
 
-export const TopButton = styled.button`
+export const TopButton = styled.button<TopButtonProps>`
   border: none;
   background: none;
   font-size: 1.3rem;
   font-weight: 600;
-
   cursor: pointer;
-
   color: #004196;
-
   padding: 1rem 2rem;
   border-radius: 999px;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+
+  ${({ $active }) => $active && topButtonGlow}
 
   &:hover {
-    color: #0061e0;
-
-    text-shadow:
-      0 0 30px rgba(0, 97, 224, 0.95),
-      0 0 80px rgba(0, 97, 224, 0.85),
-      0 0 140px rgba(0, 97, 224, 0.7);
+    ${topButtonGlow}
   }
 `;
 
