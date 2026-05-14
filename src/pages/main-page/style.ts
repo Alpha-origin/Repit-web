@@ -1,13 +1,9 @@
 import styled from "styled-components";
 
 export const Page = styled.main`
-  position: relative;
-  width: 100vw;
-  height: 100vh;
+  height: 100%;
+  min-height: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   row-gap: 1rem;
-  padding-bottom: 1rem;
-  box-sizing: border-box;
-  overflow: hidden;
 `;

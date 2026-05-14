@@ -4,23 +4,24 @@ import * as S from "./style";
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const pathname = location.pathname.toLowerCase();
 
-  const isInterviewPage = location.pathname.includes('/main/Interview');
-  const isFeedbackPage = location.pathname.includes('/main/Feedback');
-  const isMypage = location.pathname.includes('/main/Mypage');
-  
+  const isFeedbackPage = pathname.startsWith("/main/feedback");
+  const isMypage = pathname.startsWith("/main/mypage");
+  const isInterviewPage = pathname.startsWith("/main/interview");
+
   return (
     <S.Header>
       <S.LogoImage src={Repit} alt="Repit" />
 
       <S.TopButtons>
-        <S.TopButton onClick={() => navigate("/main/Interview")} $active={isInterviewPage}>
+        <S.TopButton onClick={() => navigate("/main")} $active={isInterviewPage}>
           면접
         </S.TopButton>
-        <S.TopButton onClick={() => navigate("/main/Feedback")} $active={isFeedbackPage}>
+        <S.TopButton onClick={() => navigate("/main/feedback")} $active={isFeedbackPage}>
           피드백
         </S.TopButton>
-        <S.TopButton onClick={() => navigate("/main/Mypage")} $active={isMypage}>
+        <S.TopButton onClick={() => navigate("/main/mypage")} $active={isMypage}>
           마이페이지
         </S.TopButton>
       </S.TopButtons>
