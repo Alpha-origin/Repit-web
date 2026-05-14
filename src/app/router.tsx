@@ -19,7 +19,7 @@ const router = createBrowserRouter([
     element: <SignUpPage />,
   },
   {
-    path:"/main",
+    path:"/main/Interview",
     element: <MainPage />,
   },
   {
