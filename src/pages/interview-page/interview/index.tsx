@@ -1,4 +1,7 @@
-const Interview = () => {
-  return <div>인터뷰 페이지</div>;
+import Interview from "@/widgets/interview-page/interview";
+
+const InterviewPage = () => {
+  return <Interview />;
 };
-export default Interview;
+
+export default InterviewPage;

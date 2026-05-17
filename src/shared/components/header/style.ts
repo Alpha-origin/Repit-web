@@ -17,12 +17,23 @@ export const Header = styled.header`
   position: relative;
   z-index: 1;
   width: 100%;
-  height: 4.25rem;
+  min-height: 4.25rem;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   padding: 0 2.5rem;
   margin-top: 0.6rem;
+
+  @media (max-width: 72rem) {
+    padding: 0 1.5rem;
+  }
+
+  @media (max-width: 56rem) {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem 0;
+  }
 `;
 
 export const LogoImage = styled.img`
@@ -31,20 +42,31 @@ export const LogoImage = styled.img`
   display: block;
   flex-shrink: 0;
   justify-self: start;
+
+  @media (max-width: 56rem) {
+    height: 3.1rem;
+    justify-self: center;
+  }
 `;
 
 export const TopButtons = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 2rem;
   justify-content: center;
   align-items: center;
   justify-self: center;
+
+  @media (max-width: 56rem) {
+    gap: 0.75rem;
+    width: 100%;
+  }
 `;
 
 export const TopButton = styled.button<TopButtonProps>`
   border: none;
   background: none;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 600;
   cursor: pointer;
   color: #004196;
@@ -57,14 +79,31 @@ export const TopButton = styled.button<TopButtonProps>`
   &:hover {
     ${topButtonGlow}
   }
+
+  @media (max-width: 56rem) {
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+  }
+
+  @media (max-width: 36rem) {
+    flex: 1 1 calc(33.333% - 0.5rem);
+    min-width: 5rem;
+    padding: 0.8rem 0.5rem;
+  }
 `;
 
 export const StatusButtons = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   justify-content: center;
   align-items: center;
   justify-self: end;
+
+  @media (max-width: 56rem) {
+    justify-self: center;
+    gap: 0.75rem;
+  }
 `;
 
 export const StatusButton = styled.button`
@@ -79,6 +118,12 @@ export const StatusButton = styled.button`
   display: flex;
   justify-content: center;
   align-items: center;
+
+  @media (max-width: 56rem) {
+    width: 6rem;
+    height: 2.8rem;
+    font-size: 1rem;
+  }
 `;
 
 export const LogoutButton = styled.button`
@@ -90,4 +135,10 @@ export const LogoutButton = styled.button`
   cursor: pointer;
   background-color: transparent;
   color: #1A73E8;
+
+  @media (max-width: 56rem) {
+    width: 6rem;
+    height: 2.8rem;
+    font-size: 1rem;
+  }
 `;

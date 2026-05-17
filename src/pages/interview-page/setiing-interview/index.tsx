@@ -1,11 +1,7 @@
 import SettingInterview from "@/widgets/interview-page/setting-interview";
 
 const SettingInterviewPage = () => {
-  return (
-    <div>
-      <SettingInterview />
-    </div>
-  );
+  return <SettingInterview />;
 };
 
 export default SettingInterviewPage;

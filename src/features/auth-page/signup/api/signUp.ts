@@ -5,13 +5,21 @@ import { authInstance } from '@/shared/api/axiosInstance';
 
 const SIGN_UP_URL = '/api/v1/auth/signup';
 
+type ErrorResponse = {
+  code?: string;
+  message?: string;
+  error?: string;
+  errors?: unknown[];
+  timestamp?: string;
+};
+
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (axios.isAxiosError(error)) {
     if (!error.response) {
       return '서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.';
     }
 
-    const data = error.response?.data as { message?: string; error?: string } | undefined;
+    const data = error.response.data as ErrorResponse | undefined;
 
     if (data?.message) return data.message;
     if (data?.error) return data.error;
@@ -27,15 +35,27 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 export async function signUp(formData: SignUpFormData): Promise<string | null> {
   const signUpData = {
     nickname: formData.nickname.trim(),
-    name: formData.name.trim(),
+    username: formData.name.trim(),
     email: formData.email.trim(),
     password: formData.password,
   };
 
   try {
+    console.log('signUpData:', signUpData);
+
     await authInstance.post(SIGN_UP_URL, signUpData);
+
     return null;
   } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const data = error.response?.data as ErrorResponse | undefined;
+
+      console.log('status:', error.response?.status);
+      console.log('data:', data);
+      console.log('errors:', data?.errors);
+      console.table(data?.errors);
+    }
+
     return getErrorMessage(error, '회원가입에 실패했습니다.');
   }
 }
