@@ -3,7 +3,7 @@ import {
   INTERVIEW_SETTING_INTERVIEWER_SECTION_TITLE,
   INTERVIEW_SETTING_OPTION_SECTIONS,
 } from '@/shared/constants/interview-page/setting-interview';
-import * as S from './style';
+import * as S from '../style';
 
 const SettingContent = () => {
   return (

@@ -225,9 +225,6 @@ const baseButton = styled.button`
     box-shadow 0.2s ease,
     background-color 0.2s ease;
 
-  &:hover {
-    transform: translateY(-1px);
-  }
 
   @media (max-width: 40rem) {
     width: 100%;

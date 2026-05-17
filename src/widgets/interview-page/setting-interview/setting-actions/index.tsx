@@ -1,5 +1,5 @@
 import { INTERVIEW_SETTING_ACTION_LABELS } from '@/shared/constants/interview-page/setting-interview';
-import * as S from './style';
+import * as S from '../style';
 
 const SettingActions = () => {
   return (
