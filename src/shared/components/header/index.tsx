@@ -7,7 +7,10 @@ const Header = () => {
   const location = useLocation();
   const pathname = location.pathname.toLowerCase().replace(/\/+$/, "") || "/";
 
-  const isInterviewPage = pathname === "/main";
+  const isInterviewPage =
+    pathname === "/main" ||
+    pathname.startsWith("/main/interview") ||
+    pathname.startsWith("/main/before/interview");
   const isFeedbackPage = pathname === "/main/feedback";
   const isMypage = pathname === "/main/mypage";
 

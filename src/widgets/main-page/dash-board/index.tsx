@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import * as S from "./style";
 
 const DashboardMain = () => {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   return (
     <S.Section>
       <S.TopCard>
