@@ -8,7 +8,7 @@ import MainPage from "@/pages/main-page";
 import InterviewPage from "@/pages/interview-page/interview";
 import FeedbackPage from "@/pages/feedback";
 import MyPage from "@/pages/mypage";
-import SettingInterview from "@/pages/interview-page/setiing-interview";
+import SettingInterview from "@/pages/interview-page/setting-interview";
 const router = createBrowserRouter([
   {
     path: "/",
