@@ -1,10 +1,12 @@
-import MainPageWidget from "@/widgets/main-page";
+import DashBoardMain from "@/widgets/main-page/dash-board";
+import MainPageFooter from "@/widgets/main-page/footer";
 import * as S from "./style";
 
 const MainPage = () => {
   return (
     <S.Page>
-      <MainPageWidget />
+      <DashBoardMain />
+      <MainPageFooter />
     </S.Page>
   );
 };

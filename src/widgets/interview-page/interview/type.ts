@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import type { ChangeEvent } from "react";
 
 export type InterviewMode = "text" | "voice";
 
@@ -16,7 +17,10 @@ export interface InterviewCameraViewProps {
 
 export interface InterviewContentViewProps {
   answerStatus: string;
+  answerText: string;
   mode: InterviewMode;
+  onAnswerTextChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  onClearAnswer: () => void;
   onModeChange: (mode: InterviewMode) => void;
   onReset: () => void;
   question: InterviewQuestion;

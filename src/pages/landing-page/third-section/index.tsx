@@ -1,12 +1,12 @@
 import { THIRD_SECTION_FOOTER_TEXT } from "@/shared/constants/landing-page/third-section";
-import ThirdSectionWidget from "@/widgets/landing-page/third-section";
+import UserReview from "@/widgets/landing-page/third-section/user-review";
 import * as S from "./style";
 
 const ThirdSection = () => {
   return (
     <S.Container>
       <S.Content>
-        <ThirdSectionWidget />
+        <UserReview />
       </S.Content>
 
       <S.Footer>

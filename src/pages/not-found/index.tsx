@@ -1,10 +1,12 @@
-import NotFoundWidget from "@/widgets/not-found";
+import NotFoundBackground from "@/widgets/not-found/not-found-background";
+import NotFoundContent from "@/widgets/not-found/not-found-content";
 import * as S from "./style";
 
 const NotFound = () => {
   return (
     <S.Page>
-      <NotFoundWidget />
+      <NotFoundBackground />
+      <NotFoundContent />
     </S.Page>
   );
 };

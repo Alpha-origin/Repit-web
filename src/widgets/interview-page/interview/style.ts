@@ -29,7 +29,7 @@ export const Content = styled.div`
 `;
 
 export const InterviewBody = styled.div`
-  width: 100%;
+  width: min(100%, 86rem);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -101,7 +101,7 @@ export const CameraFallbackText = styled.p`
 `;
 
 export const QuestionCard = styled.article`
-  width: min(100%, 86rem);
+  width: 100%;
   min-height: clamp(20.5rem, 31vh, 23rem);
   padding: clamp(1.8rem, 2.4vw, 2.25rem) clamp(2.1rem, 2.8vw, 2.7rem)
     clamp(1.45rem, 1.9vw, 1.8rem);
@@ -212,7 +212,7 @@ export const ActionRow = styled.div`
 `;
 
 const actionButtonBase = styled.button`
-  width: clamp(10.6rem, 11.6vw, 11.6rem);
+  width: clamp(10.8rem, 12vw, 11.9rem);
   min-height: clamp(3.7rem, 5.4vh, 4.1rem);
   border: 1px solid transparent;
   border-radius: 1.1rem;
@@ -243,7 +243,6 @@ export const SecondaryAction = styled(actionButtonBase)`
 `;
 
 export const PrimaryAction = styled(actionButtonBase)`
-  width: clamp(11.5rem, 12.5vw, 12.6rem);
   background: #3388f7;
   color: #ffffff;
 
@@ -270,4 +269,43 @@ export const VisualizerIcon = styled.img`
   height: auto;
   display: block;
   filter: none;
+`;
+
+export const TextAnswerCard = styled.div`
+  width: 100%;
+  min-height: clamp(10.5rem, 18vh, 11.5rem);
+  padding: 1.25rem 1.5rem;
+  border-radius: 1.15rem;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid #dce3ee;
+  box-shadow: 0 0.4rem 1.2rem rgba(15, 23, 42, 0.06);
+`;
+
+export const TextAnswerField = styled.textarea`
+  width: 100%;
+  min-height: clamp(8rem, 13vh, 9rem);
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: #111111;
+  font-size: clamp(1.15rem, 1.45vw, 1.32rem);
+  line-height: 1.7;
+
+  &::placeholder {
+    color: #98a2b3;
+  }
+`;
+
+export const TextActionRow = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+
+  @media (max-width: 40rem) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
