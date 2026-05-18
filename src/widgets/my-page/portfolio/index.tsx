@@ -1,3 +1,4 @@
+import MyPageFileImage from "@/shared/img/my-page/Repit-mypage.svg?url";
 import * as S from "./style";
 
 const Portfolio = () => {
@@ -7,11 +8,11 @@ const Portfolio = () => {
 
       <S.UploadBox>
         <S.GuideBadge>
-          내용이 정밀할수록 가이드 정밀도 UP
+          내용이 정밀할수록 가이드 정밀도 <span>UP</span>
         </S.GuideBadge>
 
         <S.UploadContent>
-          <S.FileIcon>📄</S.FileIcon>
+          <S.FileIcon src={MyPageFileImage} alt="" aria-hidden="true" />
 
           <S.UploadText>
             자신의 포트폴리오를 첨부해주세요

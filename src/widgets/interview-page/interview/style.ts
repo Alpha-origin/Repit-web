@@ -10,26 +10,22 @@ interface CameraVideoProps {
 
 export const Container = styled.section`
   width: 100%;
-  height: 100%;
-  min-height: 0;
-  overflow-y: auto;
+  min-height: 100%;
+  overflow: visible;
   padding: clamp(0.35rem, 0.8vw, 0.85rem) clamp(1rem, 2.2vw, 1.75rem)
     clamp(1.5rem, 3vw, 2.5rem);
 `;
 
 export const Content = styled.div`
-  width: min(100%, 92rem);
+  width: min(100%, 90rem);
   min-height: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: clamp(3.2rem, 4.8vh, 3.9rem);
-
-  @media (max-width: 56rem) {
-    justify-content: flex-start;
-  }
+  justify-content: flex-start;
+  padding-top: clamp(0.75rem, 1.4vh, 1.2rem);
+  gap: clamp(3.9rem, 5.6vh, 4.5rem);
 `;
 
 export const InterviewBody = styled.div`
@@ -37,7 +33,7 @@ export const InterviewBody = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(2rem, 2.8vh, 2.35rem);
+  gap: clamp(1.9rem, 2.5vh, 2.15rem);
 `;
 
 export const PreviewSection = styled.div`
@@ -48,7 +44,7 @@ export const PreviewSection = styled.div`
 
 export const PreviewFrame = styled.div`
   position: relative;
-  width: min(100%, clamp(28.5rem, 34vw, 36.5rem));
+  width: min(100%, clamp(28rem, 33vw, 36rem));
   aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: 0.95rem;
@@ -105,8 +101,8 @@ export const CameraFallbackText = styled.p`
 `;
 
 export const QuestionCard = styled.article`
-  width: min(100%, 85rem);
-  min-height: clamp(21rem, 32vh, 23.25rem);
+  width: min(100%, 86rem);
+  min-height: clamp(20.5rem, 31vh, 23rem);
   padding: clamp(1.8rem, 2.4vw, 2.25rem) clamp(2.1rem, 2.8vw, 2.7rem)
     clamp(1.45rem, 1.9vw, 1.8rem);
   border-radius: 1.45rem;
