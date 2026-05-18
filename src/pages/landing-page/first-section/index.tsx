@@ -1,13 +1,11 @@
-import HeroContent from "@/widgets/landing-page/first-section/hero-content";
-import LandingPageHeader from "@/widgets/landing-page/first-section/landing-page-header";
+import FirstSectionWidget from "@/widgets/landing-page/first-section";
 import * as S from "./style";
 
 const FirstSection = () => {
   return (
     <S.Section>
       <S.BackgroundGlow />
-      <LandingPageHeader />
-      <HeroContent />
+      <FirstSectionWidget />
     </S.Section>
   );
 };

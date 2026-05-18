@@ -1,23 +1,14 @@
+import {
+  MAIN_PAGE_DASHBOARD_CONTENT,
+  MAIN_PAGE_DASHBOARD_FEATURE_ITEMS,
+} from "@/shared/constants/main-page/dash-board";
 import DashboardBottomImage from "@/shared/img/main-page/Main-DahBoard-Bottom.svg?url";
 import DashboardTopImage from "@/shared/img/main-page/Main-DashBoard-Top.svg?url";
+import { useNavigate } from "react-router-dom";
 import * as S from "./style";
 
-const featureItems = [
-  {
-    description: "다양한",
-    title: "꼬리질문",
-  },
-  {
-    description: "분석 Ai를 통한",
-    title: "피드백",
-  },
-  {
-    description: "면접데이터를 이용한",
-    title: "성장 추적",
-  },
-];
-
 const DashboardMain = () => {
+  const navigate = useNavigate();
   return (
     <S.Section>
       <S.TopCard>
@@ -30,8 +21,10 @@ const DashboardMain = () => {
             />
 
             <S.LeftCopy>
-              <S.ChallengeBadge>도전하기</S.ChallengeBadge>
-              <S.TopTitle>실전 체험하기</S.TopTitle>
+              <S.ChallengeBadge onClick={() => navigate("/main/setting/interview")}>
+                {MAIN_PAGE_DASHBOARD_CONTENT.topChallengeBadge}
+              </S.ChallengeBadge>
+              <S.TopTitle>{MAIN_PAGE_DASHBOARD_CONTENT.topTitle}</S.TopTitle>
             </S.LeftCopy>
           </S.TopBanner>
 
@@ -39,21 +32,25 @@ const DashboardMain = () => {
             <S.TopRow>
               <S.CheckIcon>✓</S.CheckIcon>
               <S.Description>
-                돌발 상황에도 유연하게 대응하고 싶은 취업 준비생
+                {MAIN_PAGE_DASHBOARD_CONTENT.description}
               </S.Description>
-              <S.AiBadge>Ai</S.AiBadge>
+              <S.AiBadge>{MAIN_PAGE_DASHBOARD_CONTENT.aiBadge}</S.AiBadge>
             </S.TopRow>
 
             <S.FeatureGrid>
-              {featureItems.map((item) => (
+              {MAIN_PAGE_DASHBOARD_FEATURE_ITEMS.map((item) => (
                 <S.FeatureItem key={item.title}>
-                  <S.FeatureDescription>{item.description}</S.FeatureDescription>
+                  <S.FeatureDescription>
+                    {item.description}
+                  </S.FeatureDescription>
                   <S.FeatureTitle>{item.title}</S.FeatureTitle>
                 </S.FeatureItem>
               ))}
             </S.FeatureGrid>
 
-            <S.StartButton type="button">면접 시작하기</S.StartButton>
+            <S.StartButton type="button" onClick={() => navigate("/main/before/interview")}>
+              {MAIN_PAGE_DASHBOARD_CONTENT.startButton}
+            </S.StartButton>
           </S.RightCopy>
         </S.TopCardInner>
       </S.TopCard>
@@ -63,8 +60,12 @@ const DashboardMain = () => {
           <S.CardImage src={DashboardBottomImage} alt="" aria-hidden="true" />
 
           <S.BottomOverlay>
-            <S.ReadyBadge>준비중...</S.ReadyBadge>
-            <S.BottomTitle>아직 공개되지 않은 서비스입니다.</S.BottomTitle>
+            <S.ReadyBadge>
+              {MAIN_PAGE_DASHBOARD_CONTENT.readyBadge}
+            </S.ReadyBadge>
+            <S.BottomTitle>
+              {MAIN_PAGE_DASHBOARD_CONTENT.bottomTitle}
+            </S.BottomTitle>
           </S.BottomOverlay>
         </S.BottomCardInner>
       </S.BottomCard>

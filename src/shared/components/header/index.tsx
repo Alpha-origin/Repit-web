@@ -1,14 +1,18 @@
 import Repit from "@/shared/img/logo/Repit-logo.svg?url";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as S from "./style";
+
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const pathname = location.pathname.toLowerCase();
+  const pathname = location.pathname.toLowerCase().replace(/\/+$/, "") || "/";
 
-  const isFeedbackPage = pathname.startsWith("/main/feedback");
-  const isMypage = pathname.startsWith("/main/mypage");
-  const isInterviewPage = pathname.startsWith("/main/interview");
+  const isInterviewPage =
+    pathname === "/main" ||
+    pathname.startsWith("/main/interview") ||
+    pathname.startsWith("/main/before/interview");
+  const isFeedbackPage = pathname === "/main/feedback";
+  const isMypage = pathname === "/main/mypage";
 
   return (
     <S.Header>
