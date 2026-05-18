@@ -41,19 +41,12 @@ export async function signUp(formData: SignUpFormData): Promise<string | null> {
   };
 
   try {
-    console.log('signUpData:', signUpData);
-
     await authInstance.post(SIGN_UP_URL, signUpData);
 
     return null;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const data = error.response?.data as ErrorResponse | undefined;
-
-      console.log('status:', error.response?.status);
-      console.log('data:', data);
-      console.log('errors:', data?.errors);
-      console.table(data?.errors);
     }
 
     return getErrorMessage(error, '회원가입에 실패했습니다.');
