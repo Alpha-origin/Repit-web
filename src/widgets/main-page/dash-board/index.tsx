@@ -21,7 +21,7 @@ const DashboardMain = () => {
             />
 
             <S.LeftCopy>
-              <S.ChallengeBadge onClick={() => navigate("/main/before/interview")}>
+              <S.ChallengeBadge onClick={() => navigate("/main/setting/interview")}>
                 {MAIN_PAGE_DASHBOARD_CONTENT.topChallengeBadge}
               </S.ChallengeBadge>
               <S.TopTitle>{MAIN_PAGE_DASHBOARD_CONTENT.topTitle}</S.TopTitle>

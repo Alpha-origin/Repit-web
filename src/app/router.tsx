@@ -43,7 +43,7 @@ const router = createBrowserRouter([
         element: <MyPage />,
       },
       {
-        path: "before/interview",
+        path: "setting/interview",
         element: <SettingInterview />,
       },
     ],
