@@ -48,7 +48,7 @@ const DashboardMain = () => {
               ))}
             </S.FeatureGrid>
 
-            <S.StartButton type="button" onClick={() => navigate("/main/before/interview")}>
+            <S.StartButton type="button" onClick={() => navigate("/main/setting/interview")}>
               {MAIN_PAGE_DASHBOARD_CONTENT.startButton}
             </S.StartButton>
           </S.RightCopy>

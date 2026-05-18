@@ -1,13 +1,13 @@
 import PersonalInfo from "@/widgets/my-page/personal-info";
 import Portfolio from "@/widgets/my-page/portfolio";
+import * as S from "./style";
 
 const MyPage = () => {
   return (
-    <div>
-      <h1>마이 페이지</h1>
+    <S.Page>
       <PersonalInfo />  
       <Portfolio />
-    </div>
+    </S.Page>
   );
 };
 export default MyPage;
