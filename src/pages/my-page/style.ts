@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const Page = styled.main`
-  width: min(100%, 64rem);
+  width: min(100%, 66rem);
   min-height: 100%;
   margin: 0 auto;
   display: flex;

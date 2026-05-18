@@ -76,6 +76,10 @@ export const UploadText = styled.p`
   }
 `;
 
+export const HiddenFileInput = styled.input`
+  display: none;
+`;
+
 export const UploadButton = styled.button`
   border: none;
   border-radius: 0.7rem;
@@ -93,6 +97,24 @@ export const UploadButton = styled.button`
     opacity: 0.92;
     transform: translateY(-1px);
   }
+`;
+
+export const SelectedFileName = styled.p`
+  max-width: min(100%, 26rem);
+  color: #6b748a;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+export const FileErrorText = styled.p`
+  color: #e14d4d;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.4;
 `;
 
 export const InputSection = styled.div`

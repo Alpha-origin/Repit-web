@@ -1,7 +1,41 @@
+import { useRef, useState } from "react";
+import type { ChangeEvent } from "react";
 import MyPageFileImage from "@/shared/img/my-page/Repit-mypage.svg?url";
 import * as S from "./style";
 
 const Portfolio = () => {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [selectedFileName, setSelectedFileName] = useState("");
+  const [fileError, setFileError] = useState("");
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      setSelectedFileName("");
+      setFileError("");
+      return;
+    }
+
+    const isPdfFile =
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf");
+
+    if (!isPdfFile) {
+      setSelectedFileName("");
+      setFileError("PDF 파일만 업로드할 수 있습니다.");
+      event.target.value = "";
+      return;
+    }
+
+    setSelectedFileName(file.name);
+    setFileError("");
+  };
+
   return (
     <S.PortfolioWrapper>
       <S.Title>포트폴리오</S.Title>
@@ -19,9 +53,22 @@ const Portfolio = () => {
             <span> pdf형식</span>
           </S.UploadText>
 
-          <S.UploadButton type="button">
+          <S.UploadButton type="button" onClick={handleUploadClick}>
             + 파일첨부
           </S.UploadButton>
+
+          <S.HiddenFileInput
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,application/pdf"
+            onChange={handleFileChange}
+          />
+
+          {selectedFileName && (
+            <S.SelectedFileName>{selectedFileName}</S.SelectedFileName>
+          )}
+
+          {fileError && <S.FileErrorText>{fileError}</S.FileErrorText>}
         </S.UploadContent>
       </S.UploadBox>
 
