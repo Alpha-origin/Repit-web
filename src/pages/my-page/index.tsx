@@ -1,7 +1,7 @@
-import { useRef, useState } from "react";
-import type { ChangeEvent } from "react";
 import PersonalInfo from "@/widgets/my-page/personal-info";
 import Portfolio from "@/widgets/my-page/portfolio";
+import type { ChangeEvent } from "react";
+import { useRef, useState } from "react";
 import * as S from "./style";
 
 const MyPage = () => {
@@ -12,11 +12,10 @@ const MyPage = () => {
   const [jobRole, setJobRole] = useState("");
 
   const handlePortfolioUploadClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-
-    fileInputRef.current?.click();
+    const input = fileInputRef.current;
+    if (!input) return;
+    input.value = "";
+    input.click();
   };
 
   const handlePortfolioFileChange = (event: ChangeEvent<HTMLInputElement>) => {
