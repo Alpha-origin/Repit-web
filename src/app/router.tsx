@@ -6,9 +6,10 @@ import SignUpPage from "@/pages/auth-page/signup-page";
 import MainLayout from "@/app/layout/main-layout";
 import MainPage from "@/pages/main-page";
 import InterviewPage from "@/pages/interview-page/interview";
-import FeedbackPage from "@/pages/feedback";
+import FeedbackPage from "@/pages/feedback-page";
 import MyPage from "@/pages/my-page";
 import SettingInterview from "@/pages/interview-page/setting-interview";
+
 const router = createBrowserRouter([
   {
     path: "/",
