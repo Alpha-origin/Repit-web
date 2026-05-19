@@ -1,5 +1,8 @@
 import type { ChangeEvent, RefObject } from "react";
+
+import { MY_PAGE_PORTFOLIO_JOB_ROLE_OPTIONS } from "@/shared/constants/my-page";
 import MyPageFileImage from "@/shared/img/my-page/Repit-mypage.svg?url";
+
 import * as S from "./style";
 
 interface PortfolioProps {
@@ -81,10 +84,11 @@ const Portfolio = ({
               본인의 직무를 선택해주세요.
             </option>
 
-            <option value="frontend">Frontend</option>
-            <option value="backend">Backend</option>
-            <option value="android">Android</option>
-            <option value="ai">AI</option>
+            {MY_PAGE_PORTFOLIO_JOB_ROLE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </S.Select>
 
           <S.Arrow>▼</S.Arrow>
