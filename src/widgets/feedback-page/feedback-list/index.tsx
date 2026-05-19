@@ -1,21 +1,8 @@
 import * as S from "./style";
-
-interface FeedbackListItem {
-  id: number;
-  date: string;
-  title: string;
-  styleLabel: string;
-  levelLabel: string;
-  interviewerName: string;
-  statusLabel: string;
-}
-
-interface FeedbackListProps {
-  items: readonly FeedbackListItem[];
-  title: string;
-}
-
+import type { FeedbackListProps } from "./type";
+import { useNavigate } from "react-router-dom";
 const FeedbackList = ({ items, title }: FeedbackListProps) => {
+  const navigate = useNavigate();
   return (
     <S.Page>
       <S.Panel>
@@ -23,7 +10,10 @@ const FeedbackList = ({ items, title }: FeedbackListProps) => {
 
         <S.List>
           {items.map((item) => (
-            <S.FeedbackCard key={item.id}>
+            <S.FeedbackCard
+              key={item.id}
+              onClick={() => navigate(`/main/feedback/detail/${item.id}`)}
+            >
               <S.CardDate>{item.date}</S.CardDate>
 
               <S.CardBody>
