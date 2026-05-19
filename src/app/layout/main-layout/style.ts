@@ -31,5 +31,6 @@ export const OutletArea = styled.div`
   align-items: stretch;
   justify-items: stretch;
   min-height: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 `;

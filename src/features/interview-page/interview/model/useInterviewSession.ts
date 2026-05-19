@@ -1,23 +1,27 @@
 import { useEffect, useRef, useState } from "react";
-import InterviewCameraView from "./camera-view";
-import InterviewContentView from "./interview-content";
-import * as S from "./style";
-import type { CameraState, InterviewMode, InterviewQuestion } from "./type";
+import type { ChangeEvent } from "react";
 
-const QUESTION: InterviewQuestion = {
-  id: "Q1-1",
-  text: "React TypeScript 함께 사용할때 주의해야 할 점은 무엇이라고 생각하나요?",
-};
+import { INTERVIEW_STATUS_MESSAGES } from "@/shared/constants/interview-page/interview";
 
-const Interview = () => {
+import type { CameraState, InterviewMode } from "@/widgets/interview-page/interview/type";
+
+export const useInterviewSession = () => {
   const [mode, setMode] = useState<InterviewMode>("voice");
   const [cameraState, setCameraState] = useState<CameraState>("loading");
+  const [answerText, setAnswerText] = useState("");
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     let currentStream: MediaStream | null = null;
     const videoElement = videoRef.current;
+
+    if (mode !== "voice") {
+      if (videoElement) {
+        videoElement.srcObject = null;
+      }
+      return;
+    }
 
     const attachCamera = async () => {
       if (!navigator.mediaDevices?.getUserMedia) {
@@ -70,29 +74,48 @@ const Interview = () => {
 
       currentStream?.getTracks().forEach((track) => track.stop());
     };
-  }, []);
+  }, [mode]);
 
   const handleReset = () => {
+    if (mode !== "voice") {
+      setCameraState("loading");
+    }
+
     setMode("voice");
+    setAnswerText("");
+  };
+
+  const handleModeChange = (nextMode: InterviewMode) => {
+    if (nextMode === mode) {
+      return;
+    }
+
+    setCameraState("loading");
+    setMode(nextMode);
+  };
+
+  const handleAnswerTextChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    setAnswerText(event.target.value);
+  };
+
+  const handleClearAnswer = () => {
+    setAnswerText("");
   };
 
   const answerStatus =
-    mode === "voice" ? "내 답변 보내는 중..." : "텍스트 답변을 입력할 수 있어요.";
+    mode === "voice"
+      ? INTERVIEW_STATUS_MESSAGES.voice
+      : INTERVIEW_STATUS_MESSAGES.text;
 
-  return (
-    <S.Container>
-      <S.Content>
-        <InterviewCameraView cameraState={cameraState} videoRef={videoRef} />
-        <InterviewContentView
-          answerStatus={answerStatus}
-          mode={mode}
-          onModeChange={setMode}
-          onReset={handleReset}
-          question={QUESTION}
-        />
-      </S.Content>
-    </S.Container>
-  );
+  return {
+    answerStatus,
+    answerText,
+    cameraState,
+    mode,
+    onAnswerTextChange: handleAnswerTextChange,
+    onClearAnswer: handleClearAnswer,
+    onModeChange: handleModeChange,
+    onReset: handleReset,
+    videoRef,
+  };
 };
-
-export default Interview;

@@ -4,7 +4,10 @@ import * as S from "../style";
 
 const InterviewContentView = ({
   answerStatus,
+  answerText,
   mode,
+  onAnswerTextChange,
+  onClearAnswer,
   onModeChange,
   onReset,
   question,
@@ -43,21 +46,41 @@ const InterviewContentView = ({
         </S.ModeControl>
       </S.QuestionCard>
 
-      <S.ActionRow>
-        <S.SecondaryAction type="button" onClick={onReset}>
-          다시하기
-        </S.SecondaryAction>
+      {mode === "text" ? (
+        <>
+          <S.TextAnswerCard>
+            <S.TextAnswerField
+              value={answerText}
+              placeholder="답변을 텍스트로 입력해주세요."
+              onChange={onAnswerTextChange}
+            />
+          </S.TextAnswerCard>
 
-        <S.VisualizerButton
-          type="button"
-          aria-label="음성 인터뷰 상태"
-          onClick={() => onModeChange("voice")}
-        >
-          <S.VisualizerIcon src={InterviewVisualizerIcon} alt="" aria-hidden="true" />
-        </S.VisualizerButton>
+          <S.TextActionRow>
+            <S.SecondaryAction type="button" onClick={onClearAnswer}>
+              모두삭제
+            </S.SecondaryAction>
 
-        <S.PrimaryAction type="button">완료</S.PrimaryAction>
-      </S.ActionRow>
+            <S.PrimaryAction type="button">완료</S.PrimaryAction>
+          </S.TextActionRow>
+        </>
+      ) : (
+        <S.ActionRow>
+          <S.SecondaryAction type="button" onClick={onReset}>
+            다시하기
+          </S.SecondaryAction>
+
+          <S.VisualizerButton
+            type="button"
+            aria-label="음성 인터뷰 상태"
+            onClick={() => onModeChange("voice")}
+          >
+            <S.VisualizerIcon src={InterviewVisualizerIcon} alt="" aria-hidden="true" />
+          </S.VisualizerButton>
+
+          <S.PrimaryAction type="button">완료</S.PrimaryAction>
+        </S.ActionRow>
+      )}
     </S.InterviewBody>
   );
 };

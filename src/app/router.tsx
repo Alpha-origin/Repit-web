@@ -7,7 +7,7 @@ import MainLayout from "@/app/layout/main-layout";
 import MainPage from "@/pages/main-page";
 import InterviewPage from "@/pages/interview-page/interview";
 import FeedbackPage from "@/pages/feedback";
-import MyPage from "@/pages/mypage";
+import MyPage from "@/pages/my-page";
 import SettingInterview from "@/pages/interview-page/setting-interview";
 const router = createBrowserRouter([
   {

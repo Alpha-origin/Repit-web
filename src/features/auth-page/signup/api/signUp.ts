@@ -45,10 +45,6 @@ export async function signUp(formData: SignUpFormData): Promise<string | null> {
 
     return null;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      const data = error.response?.data as ErrorResponse | undefined;
-    }
-
     return getErrorMessage(error, '회원가입에 실패했습니다.');
   }
 }
