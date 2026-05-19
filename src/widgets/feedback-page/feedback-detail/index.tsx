@@ -1,9 +1,9 @@
-const FeedbackWidget = () => {
+const FeedbackDetail = () => {
     return (
         <div>
-            피드백 페이지
+            피드백 
         </div>
     );
 }
 
-export default FeedbackWidget;
+export default FeedbackDetail;

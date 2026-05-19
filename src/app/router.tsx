@@ -1,14 +1,16 @@
-import { createBrowserRouter } from "react-router-dom";
-import LandingPage from "@/pages/landing-page";
-import NotFound from "@/pages/not-found";
+import MainLayout from "@/app/layout/main-layout";
 import LoginPage from "@/pages/auth-page/login-page";
 import SignUpPage from "@/pages/auth-page/signup-page";
-import MainLayout from "@/app/layout/main-layout";
-import MainPage from "@/pages/main-page";
+import FeedbackDetailPage from "@/pages/feedback-page/feddback-detail";
+import FeedbackListPage from "@/pages/feedback-page/feedback-list";
+import FeedbackOverallPage from "@/pages/feedback-page/feedback-overall";
 import InterviewPage from "@/pages/interview-page/interview";
-import FeedbackList from "../widgets/feedback-page/feedback-list";
-import MyPage from "@/pages/my-page";
 import SettingInterview from "@/pages/interview-page/setting-interview";
+import LandingPage from "@/pages/landing-page";
+import MainPage from "@/pages/main-page";
+import MyPage from "@/pages/my-page";
+import NotFound from "@/pages/not-found";
+import { createBrowserRouter } from "react-router-dom";
 
 const router = createBrowserRouter([
   {
@@ -36,8 +38,21 @@ const router = createBrowserRouter([
         element: <InterviewPage />,
       },
       {
-        path: "feedback/list",
-        element: <FeedbackList />,
+        path: "feedback",
+        children: [
+          {
+            path: "list",
+            element: <FeedbackListPage />,
+          },
+          {
+            path: "overall",
+            element: <FeedbackOverallPage />,
+          },
+          {
+            path: "detail",
+            element: <FeedbackDetailPage />,
+          },
+        ],
       },
       {
         path: "mypage",

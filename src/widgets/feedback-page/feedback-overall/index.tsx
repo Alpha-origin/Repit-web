@@ -1,4 +1,4 @@
-const FeedbackWidget = () => {
+const FeedbackOverall = () => {
     return (
         <div>
             피드백 페이지
@@ -6,4 +6,4 @@ const FeedbackWidget = () => {
     );
 }
 
-export default FeedbackWidget;
+export default FeedbackOverall;

@@ -22,12 +22,4 @@ export const MY_PAGE_PORTFOLIO_JOB_ROLE_OPTIONS = [
     value: 'backend',
     label: 'Backend',
   },
-  {
-    value: 'android',
-    label: 'Android',
-  },
-  {
-    value: 'ai',
-    label: 'AI',
-  },
 ] as const;
