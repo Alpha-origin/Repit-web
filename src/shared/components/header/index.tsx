@@ -22,7 +22,7 @@ const Header = () => {
         <S.TopButton onClick={() => navigate("/main")} $active={isInterviewPage}>
           면접
         </S.TopButton>
-        <S.TopButton onClick={() => navigate("/main/feedback")} $active={isFeedbackPage}>
+        <S.TopButton onClick={() => navigate("/main/feedback/list")} $active={isFeedbackPage}>
           피드백
         </S.TopButton>
         <S.TopButton onClick={() => navigate("/main/mypage")} $active={isMypage}>
