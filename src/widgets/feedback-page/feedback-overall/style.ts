@@ -152,8 +152,8 @@ export const SectionLabel = styled.p`
 export const MainScore = styled.h2`
   margin: 0.45rem 0 0.6rem;
   color: #2b74e3;
-  font-size: clamp(2.9rem, 4.4vw, 3.9rem);
-  font-weight: 800;
+  font-size: clamp(1.3rem, 2.8vw, 2.85rem);
+  font-weight: 550;
   letter-spacing: -0.08rem;
   line-height: 1;
 `;
