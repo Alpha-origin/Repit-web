@@ -10,9 +10,11 @@ const Header = () => {
   const isInterviewPage =
     pathname === "/main" ||
     pathname.startsWith("/main/interview") ||
-    pathname.startsWith("/main/before/interview");
+    pathname.startsWith("/main/setting/interview");
   const isFeedbackPage =
-    pathname === "/main/feedback" || pathname.startsWith("/main/feedback/detail/") || pathname.startsWith("/main/feedback/overall/");
+    pathname === "/main/feedback/list" ||
+    pathname.startsWith("/main/feedback/detail/") ||
+    pathname.startsWith("/main/feedback/overall/");
   const isMypage = pathname === "/main/mypage";
 
   return (

@@ -12,7 +12,7 @@ const FeedbackList = ({ items, title }: FeedbackListProps) => {
           {items.map((item) => (
             <S.FeedbackCard
               key={item.id}
-              onClick={() => navigate(`/main/feedback/detail/${item.id}`)}
+              onClick={() => navigate(`/main/feedback/overall/${item.id}`)}
             >
               <S.CardDate>{item.date}</S.CardDate>
 

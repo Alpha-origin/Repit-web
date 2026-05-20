@@ -1,7 +1,7 @@
 const FeedbackDetail = () => {
     return (
         <div>
-            피드백 
+            상세 피드백 페이지 
         </div>
     );
 }
