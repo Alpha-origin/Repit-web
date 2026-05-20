@@ -22,7 +22,7 @@ export const Section = styled.section`
 export const Logo = styled.div`
   position: absolute;
   top: 24px;
-  left: 32px;
+  right: 32px;
   display: flex;
   align-items: center;
 
@@ -30,6 +30,10 @@ export const Logo = styled.div`
     display: block;
     width: 80px;
     height: 80px;
+  }
+
+  @media (max-width: 960px) {
+    right: 24px;
   }
 `;
 
