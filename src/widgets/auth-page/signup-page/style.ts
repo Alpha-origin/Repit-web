@@ -1,5 +1,9 @@
 import styled from "styled-components";
 
+interface StepDotInnerProps {
+  $active: boolean;
+}
+
 export const Section = styled.section`
   position: relative;
   width: 50%;
@@ -58,6 +62,33 @@ export const Form = styled.form`
   gap: 24px;
 `;
 
+export const FirstStepLayout = styled.div`
+  position: relative;
+  width: 100%;
+  display: block;
+
+  @media (max-width: 960px) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+`;
+
+export const SecondStepLayout = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+`;
+
+export const StepFields = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
 export const InputWrapper = styled.div`
   width: 100%;
 `;
@@ -104,10 +135,43 @@ export const StatusMessage = styled.p`
   font-weight: 500;
 `;
 
+export const NextStepButton = styled.button`
+  position: absolute;
+  top: 50%;
+  right: -4.4rem;
+  width: 3.1rem;
+  height: 5.6rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: translateY(-50%);
+
+  @media (max-width: 960px) {
+    position: static;
+    width: 3.4rem;
+    height: 3.4rem;
+    transform: none;
+  }
+`;
+
+export const ArrowIcon = styled.img`
+  width: 2.85rem;
+  height: auto;
+  display: block;
+
+  @media (max-width: 960px) {
+    width: 3rem;
+    transform: rotate(90deg);
+  }
+`;
+
 export const SubmitButton = styled.button`
   width: 100%;
   height: 66px;
-  margin-top: 8px;
   border: none;
   border-radius: 999px;
   background-color: #2478e8;
@@ -124,6 +188,38 @@ export const SubmitButton = styled.button`
     background-color: #8cb5ef;
     cursor: not-allowed;
   }
+`;
+
+export const StepIndicator = styled.div`
+  width: 2.35rem;
+  align-self: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+export const StepDot = styled.span`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.78rem;
+  height: 0.78rem;
+  border-radius: 50%;
+  border: 1.5px solid #2478e8;
+  background: #ffffff;
+`;
+
+export const StepDotInner = styled.span<StepDotInnerProps>`
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: #2478e8;
+  opacity: ${({ $active }) => ($active ? 1 : 0)};
+  transform: scale(${({ $active }) => ($active ? 1 : 0.45)});
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
 `;
 
 export const LinkWrapper = styled.div`
