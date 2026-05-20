@@ -337,10 +337,13 @@ export const TextCard = styled.article`
   ${cardSurface}
   min-height: 13.6rem;
   padding: 1.2rem 1.3rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 `;
 
 export const TextCardTitle = styled.h3`
-  margin: 0 0 0.75rem;
+  margin: 0;
   color: #2b74e3;
   font-size: 2.02rem;
   font-weight: 800;
@@ -418,6 +421,9 @@ export const ReliabilityBadge = styled.div`
 export const QuestionCard = styled.article`
   ${cardSurface}
   min-height: 11.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
   padding: 1.2rem 1.25rem 1.25rem;
 `;
 

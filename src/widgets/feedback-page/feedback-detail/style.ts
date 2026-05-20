@@ -294,7 +294,6 @@ export const CoachCard = styled.article`
   gap: 1.4rem;
   padding: 1.3rem 1.55rem;
   border-radius: 1.55rem;
-  height: 20vh;
   background: linear-gradient(
     180deg,
     rgba(207, 224, 252, 0.98),
@@ -326,38 +325,32 @@ export const RobotImage = styled.img`
 export const CoachBubble = styled.div`
   position: relative;
   flex: 1;
-  min-height: 5.4rem;
-  padding: 1.5rem 1.7rem;
-  border-radius: 1.5rem;
-  background: #ffffff;
-  box-shadow: 0 1rem 2.2rem rgba(68, 101, 157, 0.06);
-
-  &::before {
-    content: "";
-    position: absolute;
-    left: -1rem;
-    bottom: 1.2rem;
-    width: 1.5rem;
-    height: 1.5rem;
-    background: #ffffff;
-    clip-path: polygon(0 100%, 100% 50%, 100% 100%);
-  }
+  min-height: 6.2rem;
+  display: flex;
+  align-items: center;
+  padding: 1.15rem 1.9rem 1.15rem 2.3rem;
 
   @media (max-width: 48rem) {
     width: 100%;
-
-    &::before {
-      left: 1.2rem;
-      top: -0.72rem;
-      bottom: auto;
-      width: 1.3rem;
-      height: 1rem;
-      clip-path: polygon(50% 0, 0 100%, 100% 100%);
-    }
+    min-height: 7rem;
+    padding: 1rem 1.2rem 1rem 1.6rem;
   }
 `;
 
+export const CoachBubbleImage = styled.img`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: fill;
+  pointer-events: none;
+  user-select: none;
+`;
+
 export const CoachText = styled.p`
+  position: relative;
+  z-index: 1;
   margin: 0;
   color: #171717;
   font-size: 1.18rem;
