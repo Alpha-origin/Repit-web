@@ -1,23 +1,23 @@
-export type FeedbackOverallBarItem = {
+export interface FeedbackOverallBarItem {
   label: string;
   score: number;
   tone: "primary" | "muted";
-};
+}
 
-export type FeedbackOverallComparisonCard = {
+export interface FeedbackOverallComparisonCard {
   title: string;
   highlightText?: string;
   bars: readonly FeedbackOverallBarItem[];
-};
+}
 
-export type FeedbackOverallKeywordItem = {
+export interface FeedbackOverallKeywordItem {
   text: string;
   size: "xs" | "sm" | "md" | "xl";
   top: string;
   left: string;
-};
+}
 
-export type FeedbackOverallTopSectionData = {
+export interface FeedbackOverallTopSectionData {
   tabs: {
     overallLabel: string;
     detailLabel: string;
@@ -33,16 +33,16 @@ export type FeedbackOverallTopSectionData = {
     bars: readonly FeedbackOverallBarItem[];
   };
   comparisonCards: readonly FeedbackOverallComparisonCard[];
-};
+}
 
-export type FeedbackOverallMiddleSectionData = {
+export interface FeedbackOverallMiddleSectionData {
   cards: readonly {
     title: string;
     content: string;
   }[];
-};
+}
 
-export type FeedbackOverallBottomSectionData = {
+export interface FeedbackOverallBottomSectionData {
   reliability: {
     title: string;
     scoreLabel: string;
@@ -55,17 +55,16 @@ export type FeedbackOverallBottomSectionData = {
   keywords: {
     items: readonly FeedbackOverallKeywordItem[];
   };
-};
+}
 
-type SectionProps<T> = {
-  content: T;
-};
+export interface FeedbackOverallTopSectionProps {
+  content: FeedbackOverallTopSectionData;
+}
 
-export type FeedbackOverallTopSectionProps =
-  SectionProps<FeedbackOverallTopSectionData>;
+export interface FeedbackOverallMiddleSectionProps {
+  content: FeedbackOverallMiddleSectionData;
+}
 
-export type FeedbackOverallMiddleSectionProps =
-  SectionProps<FeedbackOverallMiddleSectionData>;
-
-export type FeedbackOverallBottomSectionProps =
-  SectionProps<FeedbackOverallBottomSectionData>;
+export interface FeedbackOverallBottomSectionProps {
+  content: FeedbackOverallBottomSectionData;
+}

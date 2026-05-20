@@ -1,9 +1,9 @@
+import { useParams } from "react-router-dom";
+
 const FeedbackDetail = () => {
-    return (
-        <div>
-            상세 피드백 페이지 
-        </div>
-    );
-}
+  const { id } = useParams();
+
+  return <div>상세 피드백 페이지 {id}</div>;
+};
 
 export default FeedbackDetail;

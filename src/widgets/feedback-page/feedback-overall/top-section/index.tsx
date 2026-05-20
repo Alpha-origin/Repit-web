@@ -4,17 +4,17 @@ import type {
   FeedbackOverallComparisonCard,
   FeedbackOverallTopSectionProps,
 } from "../type";
+import { useNavigate, useParams } from "react-router-dom";
 
-interface ScoreChartProps {
+interface ChartProps {
   bars: readonly FeedbackOverallBarItem[];
-  size?: "default" | "large";
 }
 
-const ScoreChart = ({ bars, size = "default" }: ScoreChartProps) => {
+const AverageScoreChart = ({ bars }: ChartProps) => {
   return (
-    <S.BarChart $size={size}>
+    <S.BarChart>
       {bars.map((bar) => (
-        <S.BarColumn $size={size} key={bar.label}>
+        <S.BarColumn key={bar.label}>
           <S.BarTrack>
             <S.BarFill $score={bar.score} $tone={bar.tone}>
               <S.BarValue $tone={bar.tone}>{bar.score}점</S.BarValue>
@@ -24,6 +24,23 @@ const ScoreChart = ({ bars, size = "default" }: ScoreChartProps) => {
         </S.BarColumn>
       ))}
     </S.BarChart>
+  );
+};
+
+const ComparisonScoreChart = ({ bars }: ChartProps) => {
+  return (
+    <S.ComparisonBarChart>
+      {bars.map((bar) => (
+        <S.ComparisonBarColumn key={bar.label}>
+          <S.BarTrack>
+            <S.BarFill $score={bar.score} $tone={bar.tone}>
+              <S.BarValue $tone={bar.tone}>{bar.score}점</S.BarValue>
+            </S.BarFill>
+          </S.BarTrack>
+          <S.BarLabel>{bar.label}</S.BarLabel>
+        </S.ComparisonBarColumn>
+      ))}
+    </S.ComparisonBarChart>
   );
 };
 
@@ -40,7 +57,7 @@ const ComparisonCard = ({ card }: ComparisonCardProps) => {
           <S.HighlightText>{card.highlightText}</S.HighlightText>
         )}
       </S.ComparisonHeader>
-      <ScoreChart bars={card.bars} size="large" />
+      <ComparisonScoreChart bars={card.bars} />
     </S.ComparisonCard>
   );
 };
@@ -50,14 +67,25 @@ const FeedbackOverallTopSection = ({
 }: FeedbackOverallTopSectionProps) => {
   const { averageComparison, comparisonCards, summary, tabs } = content;
   const { activeTab, detailLabel, overallLabel } = tabs;
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const feedbackId = id ?? "1";
 
   return (
     <S.SectionBlock>
       <S.TabGroup>
-        <S.TabButton $active={activeTab === "overall"} type="button">
+        <S.TabButton
+          $active={activeTab === "overall"}
+          type="button"
+          onClick={() => navigate(`/main/feedback/overall/${feedbackId}`)}
+        >
           {overallLabel}
         </S.TabButton>
-        <S.TabButton $active={activeTab === "detail"} type="button">
+        <S.TabButton
+          $active={activeTab === "detail"}
+          type="button"
+          onClick={() => navigate(`/main/feedback/detail/${feedbackId}`)}
+        >
           {detailLabel}
         </S.TabButton>
       </S.TabGroup>
@@ -77,7 +105,7 @@ const FeedbackOverallTopSection = ({
 
             <S.ChartCard>
               <S.CardHeading>{averageComparison.title}</S.CardHeading>
-              <ScoreChart bars={averageComparison.bars} />
+              <AverageScoreChart bars={averageComparison.bars} />
             </S.ChartCard>
           </S.LeftColumn>
 

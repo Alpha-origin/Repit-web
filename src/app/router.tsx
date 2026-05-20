@@ -45,11 +45,11 @@ const router = createBrowserRouter([
             element: <FeedbackListPage />,
           },
           {
-            path: "overall/:overviewId",
+            path: "overall/:id",
             element: <FeedbackOverallPage />,
           },
           {
-            path: "detail/:feedbackId",
+            path: "detail/:id",
             element: <FeedbackDetailPage />,
           },
         ],

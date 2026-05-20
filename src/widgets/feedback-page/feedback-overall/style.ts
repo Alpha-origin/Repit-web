@@ -9,14 +9,6 @@ interface BarFillProps {
   $tone: "primary" | "muted";
 }
 
-interface BarChartProps {
-  $size?: "default" | "large";
-}
-
-interface BarColumnProps {
-  $size?: "default" | "large";
-}
-
 interface BarValueProps {
   $tone: "primary" | "muted";
 }
@@ -238,36 +230,54 @@ export const HighlightText = styled.p`
   text-align: right;
 `;
 
-export const BarChart = styled.div<BarChartProps>`
+export const BarChart = styled.div`
   position: relative;
   width: 100%;
-  flex: ${({ $size = "default" }) => ($size === "large" ? "1" : "initial")};
-  min-height: ${({ $size = "default" }) =>
-    $size === "large" ? "15.2rem" : "11.9rem"};
-  height: ${({ $size = "default" }) =>
-    $size === "large" ? "auto" : "11.9rem"};
-  margin-top: ${({ $size = "default" }) =>
-    $size === "large" ? "0.35rem" : "auto"};
+  height: 11.9rem;
+  margin-top: auto;
   display: flex;
   align-items: end;
   justify-content: center;
-  gap: ${({ $size = "default" }) => ($size === "large" ? "1.35rem" : "1.2rem")};
-  padding: 0 0.45rem ${({ $size = "default" }) =>
-    $size === "large" ? "0.18rem" : "0.1rem"};
+  gap: 1.2rem;
+  padding: 0 0.45rem 0.1rem;
   box-sizing: border-box;
   overflow: visible;
 `;
 
-export const BarColumn = styled.div<BarColumnProps>`
+export const ComparisonBarChart = styled.div`
   position: relative;
-  width: ${({ $size = "default" }) =>
-    $size === "large" ? "min(100%, 7.2rem)" : "min(100%, 6.7rem)"};
+  width: 100%;
+  flex: 1;
+  min-height: 15.2rem;
+  margin-top: 0.35rem;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 1.35rem;
+  padding: 0 0.45rem 0.18rem;
+  box-sizing: border-box;
+  overflow: visible;
+`;
+
+export const BarColumn = styled.div`
+  position: relative;
+  width: min(100%, 6.7rem);
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding-bottom: ${({ $size = "default" }) =>
-    $size === "large" ? "1.55rem" : "1.35rem"};
+  padding-bottom: 1.35rem;
+  box-sizing: border-box;
+`;
+
+export const ComparisonBarColumn = styled.div`
+  position: relative;
+  width: min(100%, 7.2rem);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 1.55rem;
   box-sizing: border-box;
 `;
 
