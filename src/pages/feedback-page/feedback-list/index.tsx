@@ -1,7 +1,7 @@
 import {
   FEEDBACK_LIST_ITEMS,
   FEEDBACK_LIST_TITLE,
-} from "@/shared/constants/feedback-page/feedback-list";
+} from "@/shared/fixtures/feedback-page/feedback-list";
 import FeedbackList from "@/widgets/feedback-page/feedback-list";
 
 const FeedbackListPage = () => {

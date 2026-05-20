@@ -1,4 +1,4 @@
-import { FEEDBACK_OVERALL_CONTENT } from "@/shared/constants/feedback-page/feedback-overall";
+import { FEEDBACK_OVERALL_CONTENT } from "@/shared/fixtures/feedback-page/feedback-overall";
 import FeedbackOverallBottomSection from "@/widgets/feedback-page/feedback-overall/bottom-section";
 import FeedbackOverallMiddleSection from "@/widgets/feedback-page/feedback-overall/middle-section";
 import FeedbackOverallTopSection from "@/widgets/feedback-page/feedback-overall/top-section";

@@ -1,10 +1,10 @@
-import { FEEDBACK_DETAIL_CONTENT } from "@/shared/constants/feedback-page/feedback-detail";
+import { FEEDBACK_DETAIL_CONTENT } from "@/shared/fixtures/feedback-page/feedback-detail";
 import { exportElementToPdf } from "@/shared/utils/exportElementToPdf";
-import { useRef, useState } from "react";
-import { useParams } from "react-router-dom";
 import FeedbackDetailBottomSection from "@/widgets/feedback-page/feedback-detail/bottom-section";
 import FeedbackDetailMiddleSection from "@/widgets/feedback-page/feedback-detail/middle-section";
 import FeedbackDetailTopSection from "@/widgets/feedback-page/feedback-detail/top-section";
+import { useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import * as S from "./style";
 
 const FeedbackDetailPage = () => {
