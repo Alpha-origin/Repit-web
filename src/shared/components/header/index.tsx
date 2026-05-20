@@ -10,8 +10,11 @@ const Header = () => {
   const isInterviewPage =
     pathname === "/main" ||
     pathname.startsWith("/main/interview") ||
-    pathname.startsWith("/main/before/interview");
-  const isFeedbackPage = pathname === "/main/feedback";
+    pathname.startsWith("/main/setting/interview");
+  const isFeedbackPage =
+    pathname === "/main/feedback/list" ||
+    pathname.startsWith("/main/feedback/detail/") ||
+    pathname.startsWith("/main/feedback/overall/");
   const isMypage = pathname === "/main/mypage";
 
   return (
@@ -19,13 +22,22 @@ const Header = () => {
       <S.LogoImage src={Repit} alt="Repit" />
 
       <S.TopButtons>
-        <S.TopButton onClick={() => navigate("/main")} $active={isInterviewPage}>
+        <S.TopButton
+          onClick={() => navigate("/main")}
+          $active={isInterviewPage}
+        >
           면접
         </S.TopButton>
-        <S.TopButton onClick={() => navigate("/main/feedback")} $active={isFeedbackPage}>
+        <S.TopButton
+          onClick={() => navigate("/main/feedback/list")}
+          $active={isFeedbackPage}
+        >
           피드백
         </S.TopButton>
-        <S.TopButton onClick={() => navigate("/main/mypage")} $active={isMypage}>
+        <S.TopButton
+          onClick={() => navigate("/main/mypage")}
+          $active={isMypage}
+        >
           마이페이지
         </S.TopButton>
       </S.TopButtons>

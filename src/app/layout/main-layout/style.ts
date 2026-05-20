@@ -28,9 +28,21 @@ export const Content = styled.div`
 export const OutletArea = styled.div`
   display: grid;
   grid-template-rows: minmax(0, 1fr);
-  align-items: stretch;
+  align-items: start;
   justify-items: stretch;
   min-height: 0;
+  padding-bottom: 1.5rem;
+  box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  @media (max-width: 56rem) {
+    padding-bottom: 1rem;
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
