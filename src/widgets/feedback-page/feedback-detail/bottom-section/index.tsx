@@ -5,6 +5,8 @@ import type { FeedbackDetailBottomSectionProps } from "../type";
 
 const FeedbackDetailBottomSection = ({
   content,
+  isDownloadingPdf,
+  onDownloadPdf,
 }: FeedbackDetailBottomSectionProps) => {
   const navigate = useNavigate();
 
@@ -21,8 +23,12 @@ const FeedbackDetailBottomSection = ({
       </S.CoachCard>
 
       <S.ActionRow>
-        <S.SecondaryActionButton type="button" onClick={() => window.print()}>
-          {content.secondaryActionLabel}
+        <S.SecondaryActionButton
+          type="button"
+          disabled={isDownloadingPdf}
+          onClick={onDownloadPdf}
+        >
+          {isDownloadingPdf ? "PDF 저장 중..." : content.secondaryActionLabel}
         </S.SecondaryActionButton>
         <S.PrimaryActionButton
           type="button"

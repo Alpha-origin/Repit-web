@@ -396,6 +396,11 @@ export const SecondaryActionButton = styled.button`
   border: 1px solid rgba(214, 224, 240, 0.96);
   background: #ffffff;
   color: #2b74e3;
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.72;
+  }
 `;
 
 export const PrimaryActionButton = styled.button`

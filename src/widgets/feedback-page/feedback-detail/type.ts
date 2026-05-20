@@ -49,4 +49,6 @@ export interface FeedbackDetailMiddleSectionProps {
 
 export interface FeedbackDetailBottomSectionProps {
   content: FeedbackDetailBottomSectionData;
+  isDownloadingPdf: boolean;
+  onDownloadPdf: () => Promise<void> | void;
 }
