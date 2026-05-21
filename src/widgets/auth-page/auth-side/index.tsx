@@ -10,22 +10,23 @@ const AuthSidePanel = ({
   onSwitchAuth,
 }: AuthSidePanelProps) => {
   return (
-    <S.Section>
-      <S.BackgroundImage src={authSideImage} alt={imageAlt} />
+    <S.Section $backgroundImage={authSideImage} aria-label={imageAlt}>
       <S.Content>
-        <S.Title>
-          Hello
-          <br />
-          WELCOME!
-        </S.Title>
-        <S.Description>{description}</S.Description>
-        <S.SwitchButton
-          type="button"
-          aria-label={switchAuthLabel}
-          onClick={onSwitchAuth}
-        >
-          {switchAuthLabel}
-        </S.SwitchButton>
+        <S.ContentStack>
+          <S.Title>
+            Hello
+            <br />
+            WELCOME!
+          </S.Title>
+          <S.Description>{description}</S.Description>
+          <S.SwitchButton
+            type="button"
+            aria-label={switchAuthLabel}
+            onClick={onSwitchAuth}
+          >
+            {switchAuthLabel}
+          </S.SwitchButton>
+        </S.ContentStack>
       </S.Content>
     </S.Section>
   );

@@ -1,45 +1,49 @@
 import styled from "styled-components";
 
-export const Section = styled.section`
+interface SectionProps {
+  $backgroundImage: string;
+}
+
+export const Section = styled.section<SectionProps>`
   position: relative;
   width: 50%;
   min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 2.5rem 0 clamp(4rem, 8vw, 9rem);
+  box-sizing: border-box;
   background-color: #1a73e8;
+  background-image: url(${({ $backgroundImage }) => $backgroundImage});
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   overflow: hidden;
 
   @media (max-width: 960px) {
     width: 100%;
     min-height: 42vh;
+    align-items: flex-end;
+    padding: 2.5rem;
   }
-`;
-
-export const BackgroundImage = styled.img`
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
 `;
 
 export const Content = styled.div`
   position: relative;
   z-index: 1;
-  width: min(27rem, calc(100% - 6rem));
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  padding: clamp(22rem, 34vh, 28rem) 0 0 clamp(4rem, 8vw, 9rem);
+  width: min(27rem, 100%);
   color: #ffffff;
 
   @media (max-width: 960px) {
-    width: calc(100% - 5rem);
-    justify-content: flex-end;
-    padding: 2.5rem;
+    width: 100%;
   }
+`;
+
+export const ContentStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.9rem;
 `;
 
 export const Title = styled.h2`
@@ -52,7 +56,7 @@ export const Title = styled.h2`
 `;
 
 export const Description = styled.p`
-  margin: 1.9rem 0 0;
+  margin: 0;
   font-size: clamp(1.15rem, 1.3vw, 1.45rem);
   font-weight: 700;
   line-height: 1.45;
@@ -62,7 +66,6 @@ export const Description = styled.p`
 export const SwitchButton = styled.button`
   min-width: 15rem;
   height: 3.85rem;
-  margin-top: 2.95rem;
   padding: 0 2.5rem;
   display: inline-flex;
   align-items: center;

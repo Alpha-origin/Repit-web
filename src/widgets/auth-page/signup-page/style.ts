@@ -12,14 +12,14 @@ export const Section = styled.section`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 7rem 0 3rem;
+  padding: 0 1.5rem;
   box-sizing: border-box;
   overflow-y: auto;
 
   @media (max-width: 960px) {
     width: 100%;
     min-height: auto;
-    padding: 6rem 0 3rem;
+    padding: 2.5rem 1.5rem 3rem;
   }
 `;
 
