@@ -56,7 +56,8 @@ export const Title = styled.h2`
 `;
 
 export const Form = styled.form`
-  width: 100%;
+  width: min(440px, 100%);
+  align-self: center;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -150,7 +151,7 @@ export const StatusMessage = styled.p`
 export const NextStepButton = styled.button`
   position: absolute;
   top: 50%;
-  right: -4.4rem;
+  right: -6rem;
   width: 3.1rem;
   height: 5.6rem;
   border: none;
@@ -184,7 +185,7 @@ export const ArrowIcon = styled.img`
 export const BackStepButton = styled.button`
   position: absolute;
   top: 50%;
-  left: -4.4rem;
+  left: -6rem;
   width: 3.1rem;
   height: 5.6rem;
   border: none;
@@ -194,7 +195,7 @@ export const BackStepButton = styled.button`
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transform: translateY(-82%);
+  transform: translateY(-50%);
 
   @media (max-width: 960px) {
     position: static;
