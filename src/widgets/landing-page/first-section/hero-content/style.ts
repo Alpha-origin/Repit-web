@@ -16,11 +16,12 @@ export const Badge = styled.div`
   align-items: center;
   gap: 0.375rem;
   background: ${LANDING_STYLE.badge};
-  padding: 0.5rem 0.875rem;
+  padding: 0.625rem 1rem;
   border-radius: ${({ theme }) => theme.radius.lg};
-  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-size: clamp(0.95rem, 0.85rem + 0.4vw, 1.25rem);
+  line-height: 1.25;
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.375rem;
 `;
 
 export const BadgeBrand = styled.span`
@@ -38,11 +39,15 @@ export const Title = styled.h1`
 `;
 
 export const Subtitle = styled.p`
-  margin: 1.25rem 0;
-  font-size: ${({ theme }) => theme.fontSize.sm};
+  margin: 0.5rem 0 2rem;
+
+  max-width: 38rem;
+  font-size: clamp(0.95rem, 0.88rem + 0.35vw, 1.2rem);
+  line-height: 1.5;
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   color: ${LANDING_STYLE.subtitle};
   text-align: center;
+  font-weight: 200;
 `;
 
 export const StartButton = styled.button`
