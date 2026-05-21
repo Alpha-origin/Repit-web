@@ -1,15 +1,15 @@
 <svg width="3270" height="3164" viewBox="0 0 3270 3164" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect width="2436" height="3164" fill="#1A73E8"/>
-<foreignObject x="-630.281" y="2476.78" width="1539.54" height="1319.72"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(2px);clip-path:url(#bgblur_0_638_117_clip_path);height:100%;width:100%"></div></foreignObject><g filter="url(#filter0_f_638_117)" data-figma-bg-blur-radius="4">
+<foreignObject x="-630.281" y="2476.78" width="1539.54" height="1319.72"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(0.125rem);clip-path:url(#bgblur_0_638_117_clip_path);height:100%;width:100%"></div></foreignObject><g filter="url(#filter0_f_638_117)" data-figma-bg-blur-radius="4">
 <ellipse cx="139.488" cy="3136.64" rx="784.356" ry="633.115" transform="rotate(-158.372 139.488 3136.64)" fill="url(#paint0_radial_638_117)" fill-opacity="0.2"/>
 </g>
-<foreignObject x="1235.86" y="2154.13" width="1919.08" height="1690.9"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(2px);clip-path:url(#bgblur_1_638_117_clip_path);height:100%;width:100%"></div></foreignObject><g filter="url(#filter1_f_638_117)" data-figma-bg-blur-radius="4">
+<foreignObject x="1235.86" y="2154.13" width="1919.08" height="1690.9"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(0.125rem);clip-path:url(#bgblur_1_638_117_clip_path);height:100%;width:100%"></div></foreignObject><g filter="url(#filter1_f_638_117)" data-figma-bg-blur-radius="4">
 <ellipse cx="2195.41" cy="2999.58" rx="832.622" ry="962.849" transform="rotate(75.6262 2195.41 2999.58)" fill="url(#paint1_radial_638_117)" fill-opacity="0.2"/>
 </g>
-<foreignObject x="1221.15" y="-902.402" width="2048.34" height="1978.8"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(2px);clip-path:url(#bgblur_2_638_117_clip_path);height:100%;width:100%"></div></foreignObject><g filter="url(#filter2_f_638_117)" data-figma-bg-blur-radius="4">
+<foreignObject x="1221.15" y="-902.402" width="2048.34" height="1978.8"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(0.125rem);clip-path:url(#bgblur_2_638_117_clip_path);height:100%;width:100%"></div></foreignObject><g filter="url(#filter2_f_638_117)" data-figma-bg-blur-radius="4">
 <ellipse cx="2245.32" cy="86.9993" rx="1024.56" ry="980.278" transform="rotate(160.862 2245.32 86.9993)" fill="url(#paint2_radial_638_117)" fill-opacity="0.2"/>
 </g>
-<foreignObject x="-607.879" y="-748.781" width="2258.8" height="2248.56"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(2px);clip-path:url(#bgblur_3_638_117_clip_path);height:100%;width:100%"></div></foreignObject><g filter="url(#filter3_f_638_117)" data-figma-bg-blur-radius="4">
+<foreignObject x="-607.879" y="-748.781" width="2258.8" height="2248.56"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(0.125rem);clip-path:url(#bgblur_3_638_117_clip_path);height:100%;width:100%"></div></foreignObject><g filter="url(#filter3_f_638_117)" data-figma-bg-blur-radius="4">
 <ellipse cx="521.521" cy="375.499" rx="1125.79" ry="1119.27" transform="rotate(160.862 521.521 375.499)" fill="url(#paint3_radial_638_117)" fill-opacity="0.2"/>
 </g>
 <defs>

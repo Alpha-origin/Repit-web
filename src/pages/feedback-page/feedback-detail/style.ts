@@ -24,7 +24,7 @@ export const Panel = styled.section`
     rgba(255, 255, 255, 0.84),
     rgba(247, 250, 255, 0.95)
   );
-  border: 1px solid rgba(217, 227, 245, 0.88);
+  border: 0.0625rem solid rgba(217, 227, 245, 0.88);
   border-radius: 2rem;
   box-shadow: 0 1.6rem 3.5rem rgba(62, 104, 171, 0.08);
   box-sizing: border-box;

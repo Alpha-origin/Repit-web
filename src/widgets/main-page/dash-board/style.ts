@@ -21,7 +21,7 @@ export const Section = styled.section`
 const cardBase = `
   position: relative;
   width: 100%;
-  border-radius: 20px;
+  border-radius: 1.25rem;
   overflow: hidden;
   box-shadow: 0 0.625rem 2rem rgba(0, 0, 0, 0.08);
 `;
@@ -161,7 +161,7 @@ export const CheckIcon = styled.span`
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
-  border-radius: 999px;
+  border-radius: 999rem;
   background-color: #2f8ff3;
   color: #ffffff;
   font-size: 1.2rem;
@@ -186,7 +186,7 @@ export const AiBadge = styled.span`
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  border-radius: 999px;
+  border-radius: 999rem;
   background-color: rgba(255, 255, 255, 0.95);
   color: #486fe6;
   font-size: 1.95rem;

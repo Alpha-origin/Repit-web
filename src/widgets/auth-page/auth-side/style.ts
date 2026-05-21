@@ -20,7 +20,7 @@ export const Section = styled.section<SectionProps>`
   background-repeat: no-repeat;
   overflow: hidden;
 
-  @media (max-width: 960px) {
+  @media (max-width: 60rem) {
     width: 100%;
     min-height: 42vh;
     align-items: flex-end;
@@ -34,7 +34,7 @@ export const Content = styled.div`
   width: min(27rem, 100%);
   color: #ffffff;
 
-  @media (max-width: 960px) {
+  @media (max-width: 60rem) {
     width: 100%;
   }
 `;
@@ -70,8 +70,8 @@ export const SwitchButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid rgba(255, 255, 255, 0.58);
-  border-radius: 999px;
+  border: 0.125rem solid rgba(255, 255, 255, 0.58);
+  border-radius: 999rem;
   background-color: rgba(255, 255, 255, 0.03);
   color: #ffffff;
   font-size: 1.55rem;
@@ -85,15 +85,15 @@ export const SwitchButton = styled.button`
   &:hover {
     background-color: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.88);
-    transform: translateY(-1px);
+    transform: translateY(-0.0625rem);
   }
 
   &:focus-visible {
-    outline: 3px solid rgba(255, 255, 255, 0.35);
-    outline-offset: 4px;
+    outline: 0.1875rem solid rgba(255, 255, 255, 0.35);
+    outline-offset: 0.25rem;
   }
 
-  @media (max-width: 960px) {
+  @media (max-width: 60rem) {
     min-width: 12rem;
     height: 3.25rem;
     font-size: 1.2rem;

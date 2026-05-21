@@ -24,7 +24,7 @@ export const UploadBox = styled.div`
   position: relative;
   width: 100%;
   min-height: 15.7rem;
-  border: 1.5px solid #dbe1ea;
+  border: 0.0938rem solid #dbe1ea;
   border-radius: 0.95rem;
   background-color: #fdfdfe;
 `;
@@ -95,7 +95,7 @@ export const UploadButton = styled.button`
 
   &:hover {
     opacity: 0.92;
-    transform: translateY(-1px);
+    transform: translateY(-0.0625rem);
   }
 `;
 
@@ -133,7 +133,7 @@ export const Input = styled.input`
   width: 100%;
   height: 3.45rem;
   padding: 0 1.15rem;
-  border: 1px solid #d9dde5;
+  border: 0.0625rem solid #d9dde5;
   border-radius: 0.7rem;
   outline: none;
   color: #47516a;
@@ -158,7 +158,7 @@ export const Select = styled.select`
   width: 100%;
   height: 3.45rem;
   padding: 0 3.4rem 0 1.15rem;
-  border: 1px solid #d9dde5;
+  border: 0.0625rem solid #d9dde5;
   border-radius: 0.7rem;
   outline: none;
   background-color: #f7f9fd;
@@ -205,7 +205,7 @@ export const BackButton = styled.button`
 
   &:hover {
     background-color: #e8ebf2;
-    transform: translateY(-1px);
+    transform: translateY(-0.0625rem);
   }
 `;
 
@@ -224,6 +224,6 @@ export const SaveButton = styled.button`
 
   &:hover {
     background-color: #0f67d6;
-    transform: translateY(-1px);
+    transform: translateY(-0.0625rem);
   }
 `;

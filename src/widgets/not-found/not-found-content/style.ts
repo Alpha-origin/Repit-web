@@ -119,7 +119,7 @@ export const HomeButton = styled(Link)`
 
 export const SecondaryButton = styled.button`
   ${actionBase}
-  border: 1px solid rgba(24, 119, 242, 0.18);
+  border: 0.0625rem solid rgba(24, 119, 242, 0.18);
   background: rgba(255, 255, 255, 0.82);
   color: ${({ theme }) => theme.colors.brand.blue};
   cursor: pointer;

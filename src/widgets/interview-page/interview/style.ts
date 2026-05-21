@@ -107,7 +107,7 @@ export const QuestionCard = styled.article`
     clamp(1.45rem, 1.9vw, 1.8rem);
   border-radius: 1.45rem;
   background: rgba(255, 255, 255, 0.97);
-  border: 1px solid #dce8fb;
+  border: 0.0625rem solid #dce8fb;
   display: flex;
   flex-direction: column;
   gap: 1.15rem;
@@ -170,7 +170,7 @@ export const ModeControl = styled.div`
   gap: 0.35rem;
   padding: 0.25rem;
   border-radius: 0.8rem;
-  border: 1px solid #d8e6fb;
+  border: 0.0625rem solid #d8e6fb;
   background: #f8fbff;
 
   @media (max-width: 40rem) {
@@ -214,7 +214,7 @@ export const ActionRow = styled.div`
 const actionButtonBase = styled.button`
   width: clamp(10.8rem, 12vw, 11.9rem);
   min-height: clamp(3.7rem, 5.4vh, 4.1rem);
-  border: 1px solid transparent;
+  border: 0.0625rem solid transparent;
   border-radius: 1.1rem;
   font-size: clamp(1.22rem, 1.5vw, 1.45rem);
   font-weight: 800;
@@ -277,7 +277,7 @@ export const TextAnswerCard = styled.div`
   padding: 1.25rem 1.5rem;
   border-radius: 1.15rem;
   background: rgba(255, 255, 255, 0.97);
-  border: 1px solid #dce3ee;
+  border: 0.0625rem solid #dce3ee;
   box-shadow: 0 0.4rem 1.2rem rgba(15, 23, 42, 0.06);
 `;
 
