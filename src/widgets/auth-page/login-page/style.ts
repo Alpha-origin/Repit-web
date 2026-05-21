@@ -88,6 +88,17 @@ export const Input = styled.input`
     opacity: 0.65;
     cursor: not-allowed;
   }
+
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-text-fill-color: #2478e8;
+    caret-color: #2478e8;
+    -webkit-box-shadow: 0 0 0 1000px #f7fbff inset;
+    box-shadow: 0 0 0 1000px #f7fbff inset;
+    transition: background-color 9999s ease-out;
+  }
 `;
 
 export const ErrorMessage = styled.p`
