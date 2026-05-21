@@ -8,7 +8,7 @@ export const ContentMotion = styled(motion.div)`
 
 export const Header = styled(motion.div)`
   text-align: center;
-  margin-bottom: 9rem;
+  margin-bottom: 6rem;
 `;
 
 export const SubTitle = styled.p`
@@ -23,7 +23,7 @@ export const Title = styled.h2`
   color: ${({ theme }) => theme.colors.brand.blue};
   font-size: 2.625rem;
   font-weight: 800;
-  line-height: 1.25;
+  line-height: 1.15;
   letter-spacing: -0.05rem;
 
   @media (max-width: 56.25rem) {
@@ -36,14 +36,14 @@ export const ServiceGrid = styled(motion.div)`
   flex-direction: column;
   justify-content: space-between;
   width: min(100%, 80rem);
-  min-height: 58rem;
+  min-height: 50rem;
   margin: 0 auto;
 
   @media (max-width: 56.25rem) {
     justify-content: flex-start;
     width: 100%;
     min-height: auto;
-    gap: 6rem;
+    gap: 4rem;
   }
 `;
 
@@ -65,7 +65,7 @@ export const ServiceCard = styled.article<ServiceCardProps>`
   align-items: ${({ $align }) =>
     $align === "right" ? "flex-end" : "flex-start"};
   text-align: ${({ $align }) => $align};
-  min-height: 10rem;
+  min-height: 8.5rem;
 
   @media (max-width: 56.25rem) {
     width: 100%;
@@ -75,7 +75,7 @@ export const ServiceCard = styled.article<ServiceCardProps>`
 `;
 
 export const CardTitle = styled.h3`
-  margin: 0 0 ${({ theme }) => theme.spacing.xs};
+  margin: 0 0 0.125rem;
   color: ${({ theme }) => theme.colors.brand.blue};
   font-size: 1.5rem;
   font-weight: 800;
@@ -86,11 +86,11 @@ export const CardTitle = styled.h3`
 `;
 
 export const CardHeading = styled.p`
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.5rem;
   color: ${({ theme }) => theme.colors.text.strong};
   font-size: 2rem;
   font-weight: 800;
-  line-height: 1.25;
+  line-height: 1.15;
   letter-spacing: -0.05rem;
 
   @media (max-width: 56.25rem) {
@@ -99,22 +99,23 @@ export const CardHeading = styled.p`
 `;
 
 export const CardDescription = styled.p`
-  margin: 2rem 0 0;
+  margin: 0.5rem 0 0;
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 1.0625rem;
   font-weight: 500;
-  line-height: 1.9;
+  line-height: 1.65;
 
   span {
     display: block;
   }
 
   span + span {
-    margin-top: 0.75rem;
+    margin-top: 0;
   }
 
   @media (max-width: 56.25rem) {
-    margin-top: 1.5rem;
+    margin-top: 0.4rem;
     font-size: 0.9375rem;
+    line-height: 1.6;
   }
 `;
