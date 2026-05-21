@@ -25,7 +25,7 @@ export const Logo = styled.div`
   right: 32px;
   display: flex;
   align-items: center;
-
+  cursor: pointer;
   img {
     display: block;
     width: 80px;
