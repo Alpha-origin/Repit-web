@@ -56,7 +56,7 @@ export const Title = styled.h2`
 `;
 
 export const Form = styled.form`
-  width: min(440px, 100%);
+  width: min(468px, 100%);
   align-self: center;
   display: flex;
   flex-direction: column;

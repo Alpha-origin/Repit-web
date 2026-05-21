@@ -52,7 +52,7 @@ export const Title = styled.h2`
 `;
 
 export const Form = styled.form`
-  width: min(440px, 100%);
+  width: min(468px, 100%);
   align-self: center;
   display: flex;
   flex-direction: column;
@@ -119,7 +119,7 @@ export const StatusMessage = styled.p`
 export const SubmitButton = styled.button`
   width: 100%;
   height: 66px;
-  margin-top: 8px;
+  margin: 8px 0 0;
   border: none;
   border-radius: 999px;
   background-color: #2478e8;

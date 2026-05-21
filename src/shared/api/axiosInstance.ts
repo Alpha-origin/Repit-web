@@ -52,7 +52,7 @@ const goToLoginPage = () => {
 
 const tryRefreshSession = async () => {
   try {
-    await authInstance.post("/auth/refresh");
+    await authInstance.post("/api/v1/auth/refresh");
     return true;
   } catch {
     return false;
@@ -63,7 +63,9 @@ const addRefreshInterceptor = (instance: AxiosInstance) => {
   instance.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
-      const originalRequest = error.config as RetryableRequestConfig | undefined;
+      const originalRequest = error.config as
+        | RetryableRequestConfig
+        | undefined;
 
       if (
         error.response?.status === 401 &&
