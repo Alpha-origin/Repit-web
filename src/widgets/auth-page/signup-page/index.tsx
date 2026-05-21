@@ -110,6 +110,14 @@ const SignUpPanel = ({
             </S.FirstStepLayout>
           ) : (
             <S.SecondStepLayout>
+              <S.BackStepButton
+                type="button"
+                aria-label="이전 단계로 이동"
+                onClick={() => setStep(1)}
+              >
+                <S.BackArrowIcon src={ArrowImage} alt="" aria-hidden="true" />
+              </S.BackStepButton>
+
               <S.StepFields>
                 <S.InputWrapper>
                   <S.Input

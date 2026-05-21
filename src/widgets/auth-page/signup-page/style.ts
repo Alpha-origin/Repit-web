@@ -76,6 +76,7 @@ export const FirstStepLayout = styled.div`
 `;
 
 export const SecondStepLayout = styled.div`
+  position: relative;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -166,6 +167,42 @@ export const ArrowIcon = styled.img`
   @media (max-width: 960px) {
     width: 3rem;
     transform: rotate(90deg);
+  }
+`;
+
+export const BackStepButton = styled.button`
+  position: absolute;
+  top: 50%;
+  left: -4.4rem;
+  width: 3.1rem;
+  height: 5.6rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: translateY(-82%);
+
+  @media (max-width: 960px) {
+    position: static;
+    align-self: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    transform: none;
+  }
+`;
+
+export const BackArrowIcon = styled.img`
+  width: 2.85rem;
+  height: auto;
+  display: block;
+  transform: rotate(180deg);
+
+  @media (max-width: 960px) {
+    width: 3rem;
+    transform: rotate(-90deg);
   }
 `;
 
