@@ -1,28 +1,28 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-  --panel-width: clamp(840px, 58vw, 1120px);
-  --panel-height: clamp(700px, 81vh, 860px);
-  --content-width: min(100%, 1000px);
-  --panel-padding: clamp(38px, 4.4vh, 50px) clamp(28px, 2.3vw, 36px);
-  --section-gap: clamp(44px, 5.7vh, 58px);
-  --section-inner-gap: clamp(16px, 2.1vh, 22px);
+  --panel-width: clamp(52.5rem, 58vw, 70rem);
+  --panel-height: clamp(43.75rem, 81vh, 53.75rem);
+  --content-width: min(100%, 62.5rem);
+  --panel-padding: clamp(2.375rem, 4.4vh, 3.125rem) clamp(1.75rem, 2.3vw, 2.25rem);
+  --section-gap: clamp(2.75rem, 5.7vh, 3.625rem);
+  --section-inner-gap: clamp(1rem, 2.1vh, 1.375rem);
   --title-size: clamp(1.65rem, 1.26rem + 0.52vw, 2.05rem);
-  --control-gap: clamp(22px, 2.2vw, 34px);
-  --control-height: clamp(42px, 4.8vh, 48px);
+  --control-gap: clamp(1.375rem, 2.2vw, 2.125rem);
+  --control-height: clamp(2.625rem, 4.8vh, 3rem);
   --control-font-size: clamp(1.04rem, 0.96rem + 0.1vw, 1.12rem);
-  --control-padding-x: clamp(16px, 1vw, 20px);
-  --interviewer-gap: clamp(22px, 2vw, 34px);
-  --interviewer-height: clamp(184px, 21.5vh, 206px);
-  --interviewer-padding-y: clamp(16px, 1.6vh, 20px);
-  --interviewer-padding-x: clamp(14px, 0.9vw, 18px);
+  --control-padding-x: clamp(1rem, 1vw, 1.25rem);
+  --interviewer-gap: clamp(1.375rem, 2vw, 2.125rem);
+  --interviewer-height: clamp(11.5rem, 21.5vh, 12.875rem);
+  --interviewer-padding-y: clamp(1rem, 1.6vh, 1.25rem);
+  --interviewer-padding-x: clamp(0.875rem, 0.9vw, 1.125rem);
   --interviewer-title-size: clamp(1.36rem, 1.12rem + 0.3vw, 1.56rem);
   --interviewer-text-size: clamp(1.05rem, 0.94rem + 0.14vw, 1.16rem);
-  --action-button-width: clamp(260px, 18.8vw, 340px);
-  --action-button-height: clamp(48px, 5.4vh, 58px);
-  --action-gap: clamp(28px, 2.1vw, 42px);
+  --action-button-width: clamp(16.25rem, 18.8vw, 21.25rem);
+  --action-button-height: clamp(3rem, 5.4vh, 3.625rem);
+  --action-gap: clamp(1.75rem, 2.1vw, 2.625rem);
   --action-font-size: clamp(1.13rem, 1.02rem + 0.14vw, 1.24rem);
-  --action-top-gap: clamp(48px, 6vh, 60px);
+  --action-top-gap: clamp(3rem, 6vh, 3.75rem);
 
   width: 100%;
   height: 100%;
@@ -32,19 +32,19 @@ export const Container = styled.div`
   justify-items: center;
   align-items: center;
   overflow: hidden;
-  padding: clamp(16px, 2.4vh, 28px) clamp(16px, 2.4vw, 32px) clamp(24px, 4vh, 48px);
+  padding: clamp(1rem, 2.4vh, 1.75rem) clamp(1rem, 2.4vw, 2rem) clamp(1.5rem, 4vh, 3rem);
 
   @media (max-width: 64rem) {
     --content-width: 100%;
-    --panel-width: min(90vw, 920px);
-    --panel-height: min(100%, 760px);
+    --panel-width: min(90vw, 57.5rem);
+    --panel-height: min(100%, 47.5rem);
   }
 
   @media (max-width: 48rem) {
-    --panel-width: calc(100vw - 32px);
+    --panel-width: calc(100vw - 2rem);
     --panel-height: auto;
-    --panel-padding: 24px;
-    --section-gap: 28px;
+    --panel-padding: 1.5rem;
+    --section-gap: 1.75rem;
     --title-size: 1.75rem;
   }
 `;
@@ -113,7 +113,7 @@ export const ButtonGroup = styled.div`
 export const SelectButton = styled.button`
   min-height: var(--control-height);
   padding: 0.875rem var(--control-padding-x);
-  border: 1px solid #d9dce3;
+  border: 0.0625rem solid #d9dce3;
   border-radius: 0.95rem;
   background: #ffffff;
   color: #555;
@@ -128,7 +128,7 @@ export const SelectButton = styled.button`
     transform 0.2s ease;
 
   &:hover {
-    transform: translateY(-1px);
+    transform: translateY(-0.0625rem);
     border-color: #2f80ed;
     color: #2f80ed;
     box-shadow: 0 0 1.5rem rgba(47, 128, 237, 0.12);
@@ -152,7 +152,7 @@ export const InterviewerGrid = styled.div`
 export const InterviewerCard = styled.div`
   min-height: var(--interviewer-height);
   padding: var(--interviewer-padding-y) var(--interviewer-padding-x);
-  border: 1px solid #edf0f5;
+  border: 0.0625rem solid #edf0f5;
   border-radius: 1.5rem;
   background: #ffffff;
   box-shadow: 0 0.5rem 1.5rem rgba(15, 23, 42, 0.05);
@@ -194,7 +194,7 @@ export const BottomButtonWrapper = styled.div`
   width: var(--content-width);
   position: absolute;
   left: 50%;
-  bottom: clamp(28px, 4.2vh, 42px);
+  bottom: clamp(1.75rem, 4.2vh, 2.625rem);
   transform: translateX(-50%);
   display: flex;
   justify-content: center;

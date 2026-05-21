@@ -11,7 +11,7 @@ export const Container = styled.main.attrs<AuthPageStyleProps>(({ $isLogin }) =>
   overflow: hidden;
   background-color: #f4f8ff;
 
-  @media (max-width: 960px) {
+  @media (max-width: 60rem) {
     flex-direction: column;
   }
 `;

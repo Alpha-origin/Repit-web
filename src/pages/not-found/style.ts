@@ -17,7 +17,7 @@ export const Page = styled.main`
     top: 6%;
     left: 50%;
     width: min(90vw, 68rem);
-    height: 1px;
+    height: 0.0625rem;
     background: rgba(24, 119, 242, 0.16);
     transform: translateX(-50%);
   }

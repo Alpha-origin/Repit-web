@@ -27,5 +27,5 @@ export const listVariants: Variants = {
 export const userReviewViewport = {
   once: true,
   amount: 0.18,
-  margin: "0px 0px -12% 0px",
+  margin: "0rem 0rem -12% 0rem",
 } as const;

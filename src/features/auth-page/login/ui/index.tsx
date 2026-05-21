@@ -5,7 +5,7 @@ import { useLoginForm } from '@/features/auth-page/login/model/useLoginForm';
 
 const LoginForm = () => {
   const navigate = useNavigate();
-  const form = useLoginForm(() => navigate('/'));
+  const form = useLoginForm(() => navigate('/main'));
 
   return <LoginPanel {...form} />;
 };

@@ -10,7 +10,7 @@ interface QuestionItemButtonProps {
 
 const cardSurface = css`
   background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(220, 230, 246, 0.96);
+  border: 0.0625rem solid rgba(220, 230, 246, 0.96);
   border-radius: 1.45rem;
   box-shadow: 0 1rem 2.2rem rgba(60, 101, 168, 0.07);
 `;
@@ -29,8 +29,8 @@ export const SectionShell = styled.div`
     rgba(234, 242, 255, 0.72),
     rgba(243, 247, 255, 0.82)
   );
-  border: 1px solid rgba(217, 228, 247, 0.92);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  border: 0.0625rem solid rgba(217, 228, 247, 0.92);
+  box-shadow: inset 0 0.0625rem 0 rgba(255, 255, 255, 0.55);
 
   @media (max-width: 48rem) {
     padding: 0.8rem;
@@ -107,8 +107,8 @@ export const QuestionItemButton = styled.button<QuestionItemButtonProps>`
   border-radius: 1rem;
   border: ${({ $active }) =>
     $active
-      ? "2px solid rgba(47, 117, 231, 0.92)"
-      : "1px solid rgba(194, 214, 241, 0.95)"};
+      ? "0.125rem solid rgba(47, 117, 231, 0.92)"
+      : "0.0625rem solid rgba(194, 214, 241, 0.95)"};
   background: #ffffff;
   box-shadow: ${({ $active }) =>
     $active ? "0 0.7rem 1.4rem rgba(47, 117, 231, 0.08)" : "none"};
@@ -228,7 +228,7 @@ export const AnswerToggleButton = styled.button`
   padding: 0 1rem;
   flex-shrink: 0;
   border-radius: 0.7rem;
-  border: 1px solid rgba(213, 223, 239, 0.96);
+  border: 0.0625rem solid rgba(213, 223, 239, 0.96);
   background: #ffffff;
   color: #5b5b5b;
   font-size: 1rem;
@@ -386,7 +386,7 @@ const actionButton = css`
 
 export const SecondaryActionButton = styled.button`
   ${actionButton}
-  border: 1px solid rgba(214, 224, 240, 0.96);
+  border: 0.0625rem solid rgba(214, 224, 240, 0.96);
   background: #ffffff;
   color: #2b74e3;
 

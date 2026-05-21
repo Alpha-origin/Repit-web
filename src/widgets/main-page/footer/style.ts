@@ -49,7 +49,7 @@ export const ActionButton = styled.button`
   min-width: 15.75rem;
   height: 3.5rem;
   padding: 0 1.75rem;
-  border: 1px solid rgba(0, 65, 150, 0.12);
+  border: 0.0625rem solid rgba(0, 65, 150, 0.12);
   border-radius: 0.875rem;
   background-color: #ffffff;
   color: #555555;

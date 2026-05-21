@@ -8,9 +8,9 @@ const topButtonGlow = css`
   color: #0061e0;
 
   text-shadow:
-    0 0 30px rgba(0, 97, 224, 0.95),
-    0 0 80px rgba(0, 97, 224, 0.85),
-    0 0 140px rgba(0, 97, 224, 0.7);
+    0 0 1.875rem rgba(0, 97, 224, 0.95),
+    0 0 5rem rgba(0, 97, 224, 0.85),
+    0 0 8.75rem rgba(0, 97, 224, 0.7);
 `;
 
 export const Header = styled.header`
@@ -71,7 +71,7 @@ export const TopButton = styled.button<TopButtonProps>`
   cursor: pointer;
   color: #004196;
   padding: 1rem 2rem;
-  border-radius: 999px;
+  border-radius: 999rem;
   transition: color 0.2s ease, text-shadow 0.2s ease;
 
   ${({ $active }) => $active && topButtonGlow}

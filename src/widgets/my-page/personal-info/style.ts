@@ -87,7 +87,7 @@ export const EditButton = styled.button`
 
   &:hover {
     background-color: #0f67d6;
-    transform: translateY(-1px);
+    transform: translateY(-0.0625rem);
   }
 
   @media (max-width: 48rem) {

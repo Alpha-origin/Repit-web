@@ -23,7 +23,7 @@ export const Panel = styled.section`
   justify-content: flex-start;
   gap: 2rem;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(248, 250, 255, 0.94));
-  border: 1px solid rgba(217, 227, 245, 0.85);
+  border: 0.0625rem solid rgba(217, 227, 245, 0.85);
   border-radius: 2rem;
   box-shadow: 0 1.6rem 3.5rem rgba(62, 104, 171, 0.08);
   padding: 2rem 1.85rem 2.35rem;
@@ -59,7 +59,7 @@ export const FeedbackCard = styled.article`
   align-items: center;
   column-gap: 1.75rem;
   padding: 1.85rem 2.2rem;
-  border: 2px solid rgba(214, 223, 237, 0.92);
+  border: 0.125rem solid rgba(214, 223, 237, 0.92);
   border-radius: 1.35rem;
   background: rgba(255, 255, 255, 0.74);
   box-shadow: 0 0.45rem 1.2rem rgba(15, 23, 42, 0.04);

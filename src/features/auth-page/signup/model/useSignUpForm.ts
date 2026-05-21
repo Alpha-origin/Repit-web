@@ -10,6 +10,7 @@ export function useSignUpForm(onSuccess?: () => void) {
   const {
     register,
     handleSubmit,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm<SignUpFormData>({
     mode: 'onSubmit',
@@ -34,5 +35,6 @@ export function useSignUpForm(onSuccess?: () => void) {
     onSubmit: handleSubmit(submitSignUp),
     register,
     submitError,
+    trigger,
   };
 }

@@ -21,7 +21,7 @@ interface KeywordWordProps {
 
 const cardSurface = css`
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(223, 232, 247, 0.96);
+  border: 0.0625rem solid rgba(223, 232, 247, 0.96);
   border-radius: 1.55rem;
   box-shadow: 0 1.1rem 2.6rem rgba(61, 102, 171, 0.08);
 `;
@@ -73,8 +73,8 @@ export const SectionShell = styled.div`
     rgba(234, 242, 255, 0.72),
     rgba(243, 247, 255, 0.82)
   );
-  border: 1px solid rgba(217, 228, 247, 0.92);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  border: 0.0625rem solid rgba(217, 228, 247, 0.92);
+  box-shadow: inset 0 0.0625rem 0 rgba(255, 255, 255, 0.55);
 
   @media (max-width: 48rem) {
     padding: 0.8rem;
@@ -407,7 +407,7 @@ export const ReliabilityBadge = styled.div`
   min-width: 5.6rem;
   height: 2.9rem;
   padding: 0 1rem;
-  border: 1px solid rgba(189, 201, 224, 0.95);
+  border: 0.0625rem solid rgba(189, 201, 224, 0.95);
   border-radius: 0.55rem;
   background: rgba(255, 255, 255, 0.9);
   color: #111111;
