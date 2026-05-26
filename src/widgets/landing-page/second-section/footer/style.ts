@@ -10,7 +10,7 @@ export const Container = styled.footer`
 export const Inner = styled.div`
   position: relative;
   width: 100%;
-  height: 12rem;
+  height: 10rem;
   overflow: hidden;
   border-radius: 0; 
   padding: 0 4rem;
@@ -21,7 +21,7 @@ export const Inner = styled.div`
   );
 
   @media (max-width: 56.25rem) {
-    min-height: 15rem;
+    min-height: 12.5rem;
     height: auto;
   }
 `;
@@ -47,13 +47,13 @@ export const LeftSection = styled.div`
 export const Title = styled.h2`
   margin: 0;
   color: ${({ theme }) => theme.colors.brand.blue};
-  font-size: 1.8rem;
+  font-size: 1.55rem;
   font-weight: 800;
   line-height: 1.25;
   letter-spacing: -0.05rem;
 
   @media (max-width: 56.25rem) {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
   }
 `;
 
@@ -64,7 +64,7 @@ export const StartButton = styled.button`
   border-radius: ${({ theme }) => theme.radius.sm};
   background: ${({ theme }) => theme.colors.brand.blueAction};
   color: ${({ theme }) => theme.colors.white};
-  font-size: ${({ theme }) => theme.fontSize.lg};
+  font-size: 1.25rem;
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 0.1875rem 0.5rem ${({ theme }) => theme.colors.shadow.blue};

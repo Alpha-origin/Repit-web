@@ -19,21 +19,21 @@ export const Header = styled(motion.div)`
 
 export const SubTitle = styled.span`
   margin-bottom: 0.5rem;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #9dc1ff;
 `;
 
 export const Title = styled.h2`
   margin: 0;
-  font-size: 2.25rem;
+  font-size: 2rem;
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: -0.05rem;
   color: #2f80ed;
 
   @media (max-width: 56.25rem) {
-    font-size: 1.875rem;
+    font-size: 1.7rem;
   }
 `;
 
@@ -75,7 +75,7 @@ export const Emoji = styled.div<EmojiProps>`
       : css`
           left: -0.5rem;
         `}
-  font-size: 3.5rem;
+  font-size: 3rem;
   z-index: 10;
 `;
 
@@ -84,7 +84,7 @@ export const ChatBubble = styled.div<ChatBubbleProps>`
   width: min(100%, 28rem);
   padding: 1.75rem 2.25rem;
   border-radius: 1.75rem;
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 700;
   line-height: 1.5;
   letter-spacing: -0.04rem;
@@ -115,6 +115,6 @@ export const ChatBubble = styled.div<ChatBubbleProps>`
   @media (max-width: 56.25rem) {
     width: 100%;
     padding: 1.5rem 1.75rem;
-    font-size: 1rem;
+    font-size: 0.9375rem;
   }
 `;

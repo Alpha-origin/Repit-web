@@ -35,7 +35,7 @@ export const Footer = styled.footer`
     #d8e8ff 0%,
     #c5dcff 100%
   );
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: black;
 `;

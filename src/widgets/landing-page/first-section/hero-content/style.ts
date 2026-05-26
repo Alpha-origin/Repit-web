@@ -18,7 +18,7 @@ export const Badge = styled.div`
   background: ${LANDING_STYLE.badge};
   padding: 0.625rem 1rem;
   border-radius: ${({ theme }) => theme.radius.lg};
-  font-size: clamp(0.95rem, 0.85rem + 0.4vw, 1.25rem);
+  font-size: clamp(0.75rem, 0.71rem + 0.18vw, 0.9rem);
   line-height: 1.25;
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   margin-bottom: 1.375rem;
@@ -31,7 +31,7 @@ export const BadgeBrand = styled.span`
 `;
 
 export const Title = styled.h1`
-  font-size: ${({ theme }) => theme.fontSize.xxl};
+  font-size: clamp(2.25rem, 2rem + 0.8vw, 3rem);
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   text-align: center;
   line-height: 1.2;
@@ -42,7 +42,7 @@ export const Subtitle = styled.p`
   margin: 0.5rem 0 2rem;
 
   max-width: 38rem;
-  font-size: clamp(0.95rem, 0.88rem + 0.35vw, 1.2rem);
+  font-size: clamp(0.75rem, 0.73rem + 0.12vw, 0.85rem);
   line-height: 1.5;
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   color: ${LANDING_STYLE.subtitle};
@@ -57,11 +57,11 @@ export const StartButton = styled.button`
   border: 0.0625rem solid ${({ theme }) => theme.colors.white};
   background: transparent;
   color: ${({ theme }) => theme.colors.white};
-  width: 13rem;
-  height: 3.875rem;
+  width: 10.25rem;
+  height: 3rem;
   padding: 0;
   border-radius: 6.25rem;
-  font-size: 1.5rem;
+  font-size: 0.95rem;
   font-weight: 700;
   line-height: 1.1;
   text-align: center;
@@ -75,7 +75,7 @@ export const StartButton = styled.button`
 `;
 
 export const MainTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSize.xxl};
+  font-size: clamp(2.45rem, 2.15rem + 0.95vw, 3.25rem);
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   text-align: center;
   line-height: 1.2;
