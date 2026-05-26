@@ -10,7 +10,7 @@ export const Container = styled.footer`
 export const Inner = styled.div`
   position: relative;
   width: 100%;
-  height: 10rem;
+  height: 10.5rem;
   overflow: hidden;
   border-radius: 0; 
   padding: 0 4rem;
@@ -21,7 +21,7 @@ export const Inner = styled.div`
   );
 
   @media (max-width: 56.25rem) {
-    min-height: 12.5rem;
+    min-height: 13rem;
     height: auto;
   }
 `;

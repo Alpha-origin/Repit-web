@@ -39,7 +39,7 @@ export const Title = styled.h1`
 `;
 
 export const Subtitle = styled.p`
-  margin: 0.5rem 0 2rem;
+  margin: 0.5rem 0 1.2rem;
 
   max-width: 38rem;
   font-size: clamp(0.75rem, 0.73rem + 0.12vw, 0.85rem);
@@ -57,12 +57,12 @@ export const StartButton = styled.button`
   border: 0.0625rem solid ${({ theme }) => theme.colors.white};
   background: transparent;
   color: ${({ theme }) => theme.colors.white};
-  width: 10.25rem;
-  height: 3rem;
+  width: 10rem;
+  height: 2.7rem;
   padding: 0;
   border-radius: 6.25rem;
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 1.1rem;
+  font-weight: 600;
   line-height: 1.1;
   text-align: center;
   font-family: ${({ theme }) => theme.fontFamily.pretendard};
