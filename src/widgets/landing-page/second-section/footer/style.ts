@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 export const Container = styled.footer`
   width: 100%;
-  padding: 0%;
+  padding: 0;
   background: transparent;
 `;
 
