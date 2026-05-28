@@ -2,12 +2,15 @@ import styled from "styled-components";
 
 export const PersonalInfoWrapper = styled.section`
   position: relative;
-  width: 100%;
-  min-height: 20.75rem;
+  width: 80%;
+  min-height: 18.5em;
   padding: 1.9rem 2.3rem 2rem;
   background-color: #ffffff;
   border-radius: 1.25rem;
   box-shadow: 0 1.1rem 2.8rem rgba(169, 181, 205, 0.14);
+  margin: 0 auto;
+  margin-top: -1.65rem;
+
 
   @media (max-width: 48rem) {
     min-height: auto;
@@ -18,8 +21,8 @@ export const PersonalInfoWrapper = styled.section`
 export const Title = styled.h2`
   margin: 0 0 2.6rem;
   color: #46506a;
-  font-size: clamp(1.8rem, 3vw, 2.2rem);
-  font-weight: 800;
+  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+  font-weight: 600;
   line-height: 1.2;
 `;
 
@@ -27,7 +30,8 @@ export const InfoList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  margin-left: 3.25rem;
+  margin-left: 2.25rem;
+  margin-top: -0.5rem;
 
   @media (max-width: 48rem) {
     margin-left: 0;
@@ -48,14 +52,14 @@ export const InfoRow = styled.div`
 
 export const Label = styled.span`
   color: #4c91f3;
-  font-size: clamp(1.15rem, 2vw, 1.55rem);
-  font-weight: 800;
-  line-height: 1.35;
+font-size: clamp(1.05rem, 1.9vw, 1.4rem);
+  font-weight: 600;
+  line-height: 1;
 `;
 
 export const Value = styled.span`
   color: #55607b;
-  font-size: clamp(1.1rem, 1.8vw, 1.45rem);
+  font-size: clamp(0.95rem, 1.6vw, 1.25rem);
   font-weight: 700;
   line-height: 1.35;
   word-break: break-all;
