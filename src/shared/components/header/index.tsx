@@ -19,7 +19,7 @@ const Header = () => {
 
   return (
     <S.Header>
-      <S.LogoImage src={Repit} alt="Repit" />
+      <S.LogoImage src={Repit} alt="Repit" onClick={() => navigate("/main")} />
 
       <S.TopButtons>
         <S.TopButton

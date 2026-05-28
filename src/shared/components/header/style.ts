@@ -42,6 +42,8 @@ export const LogoImage = styled.img`
   display: block;
   flex-shrink: 0;
   justify-self: start;
+  margin-left: -1rem;
+  cursor: pointer;
 
   @media (max-width: 56rem) {
     height: 3.1rem;

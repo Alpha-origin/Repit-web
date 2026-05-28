@@ -19,11 +19,14 @@ export const Logo = styled.div`
 `;
 
 export const LogoImage = styled.img`
+  margin-left: -1rem;
+  cursor: pointer;
   width: auto;
   height: clamp(3.4rem, 6vw, 3.9rem);
   flex-shrink: 0;
   display: block;
 `;
+
 
 export const Nav = styled.div`
   display: flex;
