@@ -35,8 +35,8 @@ export const BannerCard = styled.div`
 export const Title = styled.h2`
   margin: 0;
   color: #2d73de;
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.04rem;
 

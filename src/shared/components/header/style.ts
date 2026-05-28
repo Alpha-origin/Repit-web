@@ -66,7 +66,7 @@ export const TopButtons = styled.div`
 export const TopButton = styled.button<TopButtonProps>`
   border: none;
   background: none;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 600;
   cursor: pointer;
   color: #004196;
@@ -82,7 +82,7 @@ export const TopButton = styled.button<TopButtonProps>`
 
   @media (max-width: 56rem) {
     padding: 0.8rem 1rem;
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
   @media (max-width: 36rem) {
@@ -108,7 +108,7 @@ export const StatusButtons = styled.div`
 
 export const StatusButton = styled.button`
   border: none;
-  font-size: 1.1rem;
+  font-size: 1rem;
   width: 6.5rem;
   height: 3rem;
   border-radius: 1rem;
@@ -122,13 +122,13 @@ export const StatusButton = styled.button`
   @media (max-width: 56rem) {
     width: 6rem;
     height: 2.8rem;
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 `;
 
 export const LogoutButton = styled.button`
   border: none;
-  font-size: 1.1rem;
+  font-size: 1rem;
   width: 6.5rem;
   height: 3rem;
   border-radius: 1rem;
@@ -139,6 +139,6 @@ export const LogoutButton = styled.button`
   @media (max-width: 56rem) {
     width: 6rem;
     height: 2.8rem;
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 `;

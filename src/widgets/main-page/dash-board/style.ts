@@ -174,14 +174,14 @@ export const Description = styled.p`
   flex: 1;
   color: #4b4b4b;
   font-size: clamp(1rem, 1.4vw, 1.25rem);
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.35;
   letter-spacing: -0.03rem;
 `;
 
 export const AiBadge = styled.span`
-  min-width: 7rem;
-  height: 3.5rem;
+  min-width: 5rem;
+  height: 3rem;
   padding: 0 1.6rem;
   display: inline-flex;
   justify-content: center;
@@ -189,8 +189,8 @@ export const AiBadge = styled.span`
   border-radius: 999rem;
   background-color: rgba(255, 255, 255, 0.95);
   color: #486fe6;
-  font-size: 1.95rem;
-  font-weight: 900;
+  font-size: 1.5rem;
+  font-weight: 700;
   line-height: 1;
 
   @media (max-width: 72rem) {
@@ -303,7 +303,7 @@ export const BottomTitle = styled.h2`
   margin: 1rem 0 0;
   color: rgba(255, 255, 255, 0.92);
   font-size: clamp(2rem, 3vw, 3.9rem);
-  font-weight: 800;
+  font-weight: 650;
   line-height: 1.18;
   letter-spacing: -0.06rem;
 `;
