@@ -15,3 +15,8 @@ export interface SignUpPanelProps {
   submitError: string;
   trigger: UseFormTrigger<SignUpFormData>;
 }
+
+export interface StepDotInnerProps {
+  $active: boolean;
+}
+

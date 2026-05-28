@@ -1,8 +1,5 @@
 import styled from "styled-components";
-
-interface StepDotInnerProps {
-  $active: boolean;
-}
+import type { StepDotInnerProps } from "./type";
 
 export const Section = styled.section`
   position: relative;
@@ -33,8 +30,8 @@ export const Logo = styled.div`
 
   img {
     display: block;
-    width: 5rem;
-    height: 5rem;
+    width: 4rem;
+    height: 4rem;
   }
 
   @media (max-width: 60rem) {
@@ -43,25 +40,25 @@ export const Logo = styled.div`
 `;
 
 export const Panel = styled.div`
-  width: min(31.25rem, calc(100% - 3rem));
+  width: min(27rem, calc(100% - 2rem));
   display: flex;
   flex-direction: column;
   align-items: center;
 `;
 
 export const Title = styled.h2`
-  margin: 0 0 1.625rem;
+  margin: 0 0 3rem;
   color: #2478e8;
-  font-size: 3.25rem;
+  font-size: 2.6rem;
   font-weight: 800;
 `;
 
 export const Form = styled.form`
-  width: min(29.25rem, 100%);
+  width: min(25.5rem, 100%);
   align-self: center;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.2rem;
 `;
 
 export const FirstStepLayout = styled.div`
@@ -82,14 +79,14 @@ export const SecondStepLayout = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 1rem;
 `;
 
 export const StepFields = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
 `;
 
 export const InputWrapper = styled.div`
@@ -98,13 +95,13 @@ export const InputWrapper = styled.div`
 
 export const Input = styled.input`
   width: 100%;
-  height: 4.125rem;
-  padding: 0 3.25rem;
+  height: 3.55rem;
+  padding: 0 2.8rem;
   border: 0.0938rem solid #2478e8;
   border-radius: 999rem;
   background-color: transparent;
   color: #2478e8;
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   font-weight: 700;
   outline: none;
   box-sizing: border-box;
@@ -138,23 +135,23 @@ export const Input = styled.input`
 export const ErrorMessage = styled.p`
   margin: 0.5rem 0 0 1rem;
   color: #ff4d4f;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 500;
 `;
 
 export const StatusMessage = styled.p`
   margin: 0.25rem 0 0 1rem;
   color: #ff4d4f;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 500;
 `;
 
 export const NextStepButton = styled.button`
   position: absolute;
   top: 50%;
-  right: -6rem;
-  width: 3.1rem;
-  height: 5.6rem;
+  right: -4.8rem;
+  width: 2.5rem;
+  height: 4.5rem;
   border: none;
   background: transparent;
   padding: 0;
@@ -166,19 +163,16 @@ export const NextStepButton = styled.button`
 
   @media (max-width: 60rem) {
     position: static;
-    width: 3.4rem;
-    height: 3.4rem;
     transform: none;
   }
 `;
 
 export const ArrowIcon = styled.img`
-  width: 2.85rem;
+  width: 2.3rem;
   height: auto;
   display: block;
 
   @media (max-width: 60rem) {
-    width: 3rem;
     transform: rotate(90deg);
   }
 `;
@@ -186,9 +180,9 @@ export const ArrowIcon = styled.img`
 export const BackStepButton = styled.button`
   position: absolute;
   top: 50%;
-  left: -6rem;
-  width: 3.1rem;
-  height: 5.6rem;
+  left: -4.8rem;
+  width: 2.5rem;
+  height: 4.5rem;
   border: none;
   background: transparent;
   padding: 0;
@@ -201,32 +195,29 @@ export const BackStepButton = styled.button`
   @media (max-width: 60rem) {
     position: static;
     align-self: center;
-    width: 3.4rem;
-    height: 3.4rem;
     transform: none;
   }
 `;
 
 export const BackArrowIcon = styled.img`
-  width: 2.85rem;
+  width: 2.3rem;
   height: auto;
   display: block;
   transform: rotate(180deg);
 
   @media (max-width: 60rem) {
-    width: 3rem;
     transform: rotate(-90deg);
   }
 `;
 
 export const SubmitButton = styled.button`
   width: 100%;
-  height: 4.125rem;
+  height: 3.3rem;
   border: none;
   border-radius: 999rem;
   background-color: #2478e8;
   color: #ffffff;
-  font-size: 1.4375rem;
+  font-size: 1.15rem;
   font-weight: 800;
   cursor: pointer;
 
@@ -241,7 +232,7 @@ export const SubmitButton = styled.button`
 `;
 
 export const StepIndicator = styled.div`
-  width: 2.35rem;
+  width: 1.9rem;
   align-self: center;
   display: flex;
   justify-content: space-between;
@@ -253,16 +244,16 @@ export const StepDot = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 0.78rem;
-  height: 0.78rem;
+  width: 0.625rem;
+  height: 0.625rem;
   border-radius: 50%;
   border: 0.0938rem solid #2478e8;
   background: #ffffff;
 `;
 
 export const StepDotInner = styled.span<StepDotInnerProps>`
-  width: 0.4rem;
-  height: 0.4rem;
+  width: 0.32rem;
+  height: 0.32rem;
   border-radius: 50%;
   background: #2478e8;
   opacity: ${({ $active }) => ($active ? 1 : 0)};
@@ -273,7 +264,7 @@ export const StepDotInner = styled.span<StepDotInnerProps>`
 `;
 
 export const LinkWrapper = styled.div`
-  margin-top: 1.75rem;
+  margin-top: 1.45rem;
   display: flex;
   align-items: center;
   gap: 0.625rem;
@@ -282,7 +273,7 @@ export const LinkWrapper = styled.div`
 export const LinkText = styled.p`
   margin: 0;
   color: #2478e8;
-  font-size: 1.0625rem;
+  font-size: 0.85rem;
   font-weight: 600;
 `;
 
@@ -290,7 +281,7 @@ export const GoLoginButton = styled.button`
   border: none;
   background: transparent;
   color: #2478e8;
-  font-size: 1.0625rem;
+  font-size: 0.85rem;
   font-weight: 600;
   padding: 0;
   cursor: pointer;

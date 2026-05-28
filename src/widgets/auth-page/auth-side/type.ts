@@ -4,3 +4,7 @@ export interface AuthSidePanelProps {
   switchAuthLabel: string;
   onSwitchAuth: () => void;
 }
+
+export interface SectionProps {
+  $backgroundImage: string;
+}
