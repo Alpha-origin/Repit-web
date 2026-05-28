@@ -84,7 +84,6 @@ export const SectionShell = styled.div`
 
 export const BottomSectionShell = styled(SectionShell)`
   padding-bottom: 1.4rem;
-  font-family: ${({ theme }) => theme.fontFamily.wavvePado};
 
   @media (max-width: 48rem) {
     padding-bottom: 1rem;
@@ -412,6 +411,7 @@ export const ReliabilityBadge = styled.div`
   border: 0.0625rem solid rgba(189, 201, 224, 0.95);
   border-radius: 0.55rem;
   background: rgba(255, 255, 255, 0.9);
+  font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   color: #111111;
   font-size: 1.12rem;
   font-weight: 800;
@@ -446,6 +446,7 @@ export const KeywordWord = styled.span<KeywordWordProps>`
   position: absolute;
   top: ${({ $top }) => $top};
   left: ${({ $left }) => $left};
+  font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   color: #2b74e3;
   letter-spacing: -0.05rem;
   transform: translate(-50%, -50%);
