@@ -116,7 +116,7 @@ export const ChallengeBadge = styled.span`
   background-color: #0c66de;
   color: #ffffff;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1;
   box-shadow: 0 0.25rem 0.75rem rgba(12, 102, 222, 0.24);
 
@@ -131,7 +131,7 @@ export const TopTitle = styled.h2`
   margin: 1rem 0 0;
   color: #2774df;
   font-size: clamp(2.15rem, 3.2vw, 3.8rem);
-  font-weight: 900;
+  font-weight: 200;
   line-height: 1.1;
   letter-spacing: -0.08rem;
 `;
@@ -154,19 +154,12 @@ export const TopRow = styled.div`
   gap: 0.8rem;
 `;
 
-export const CheckIcon = styled.span`
-  width: 2.1rem;
-  height: 2.1rem;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
+export const CheckIcon = styled.img`
+  width: 1.95rem;
+  height: 1.95rem;
+  display: block;
   flex-shrink: 0;
-  border-radius: 999rem;
-  background-color: #2f8ff3;
-  color: #ffffff;
-  font-size: 1.2rem;
-  font-weight: 900;
-  line-height: 1;
+  object-fit: contain;
 `;
 
 export const Description = styled.p`
@@ -174,7 +167,7 @@ export const Description = styled.p`
   flex: 1;
   color: #4b4b4b;
   font-size: clamp(1rem, 1.4vw, 1.25rem);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.35;
   letter-spacing: -0.03rem;
 `;
@@ -190,7 +183,7 @@ export const AiBadge = styled.span`
   background-color: rgba(255, 255, 255, 0.95);
   color: #486fe6;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
 
   @media (max-width: 72rem) {
@@ -220,7 +213,7 @@ export const FeatureDescription = styled.p`
   margin: 0;
   color: #4b4b4b;
   font-size: clamp(0.95rem, 1.25vw, 1.2rem);
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.35;
   letter-spacing: -0.02rem;
 `;
@@ -230,7 +223,7 @@ export const FeatureTitle = styled.strong`
   margin-top: 0.55rem;
   color: #2874df;
   font-size: clamp(1.55rem, 2vw, 2.35rem);
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.05rem;
 `;
@@ -243,7 +236,7 @@ export const StartButton = styled.button`
   background-color: #2371dc;
   color: #ffffff;
   font-size: clamp(1rem, 1.4vw, 1.35rem);
-  font-weight: 800;
+  font-weight: 650;
   line-height: 1;
   cursor: pointer;
   box-shadow: 0 0.2rem 0.45rem rgba(0, 65, 150, 0.22);
@@ -288,7 +281,7 @@ export const ReadyBadge = styled.span`
   background-color: #0c66de;
   color: #ffffff;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1;
   box-shadow: 0 0.25rem 0.75rem rgba(12, 102, 222, 0.24);
 
@@ -303,7 +296,7 @@ export const BottomTitle = styled.h2`
   margin: 1rem 0 0;
   color: rgba(255, 255, 255, 0.92);
   font-size: clamp(2rem, 3vw, 3.9rem);
-  font-weight: 650;
+  font-weight: 200;
   line-height: 1.18;
   letter-spacing: -0.06rem;
 `;

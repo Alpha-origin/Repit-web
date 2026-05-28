@@ -36,7 +36,7 @@ export const Title = styled.h2`
   margin: 0;
   color: #2d73de;
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.04rem;
 
@@ -53,8 +53,8 @@ export const ActionButton = styled.button`
   border-radius: 0.875rem;
   background-color: #ffffff;
   color: #555555;
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 600;
   cursor: pointer;
   box-shadow: 0 0.125rem 0.75rem rgba(0, 0, 0, 0.04);
   transition:

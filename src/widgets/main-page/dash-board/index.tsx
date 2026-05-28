@@ -3,6 +3,7 @@ import {
   MAIN_PAGE_DASHBOARD_FEATURE_ITEMS,
 } from "@/shared/constants/main-page/dash-board";
 import DashboardBottomImage from "@/shared/img/main-page/Main-DahBoard-Bottom.svg?url";
+import DashboardCheckImage from "@/shared/img/main-page/Repit-check.svg?url";
 import DashboardTopImage from "@/shared/img/main-page/Main-DashBoard-Top.svg?url";
 import { useNavigate } from "react-router-dom";
 import * as S from "./style";
@@ -30,7 +31,7 @@ const DashboardMain = () => {
 
           <S.RightCopy>
             <S.TopRow>
-              <S.CheckIcon>✓</S.CheckIcon>
+              <S.CheckIcon src={DashboardCheckImage} alt="" aria-hidden="true" />
               <S.Description>
                 {MAIN_PAGE_DASHBOARD_CONTENT.description}
               </S.Description>
