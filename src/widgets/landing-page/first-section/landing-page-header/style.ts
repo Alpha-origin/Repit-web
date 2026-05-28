@@ -7,7 +7,7 @@ export const Header = styled.header`
   left: 0;
   right: 0;
   z-index: 10;
-  padding: 1.25rem 1.875rem;
+  padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -20,14 +20,14 @@ export const Logo = styled.div`
 
 export const LogoImage = styled.img`
   width: auto;
-  height: clamp(4rem, 7vw, 4.5rem);
+  height: clamp(3.4rem, 6vw, 3.9rem);
   flex-shrink: 0;
   display: block;
 `;
 
 export const Nav = styled.div`
   display: flex;
-  gap: 1.125rem;
+  gap: 0.875rem;
 `;
 
 export const SignUp = styled.button`
@@ -35,7 +35,7 @@ export const SignUp = styled.button`
   border: none;
   color: ${({ theme }) => theme.colors.white};
   padding: 0.5rem 0.375rem;
-  font-size: 1.125rem;
+  font-size: 0.9rem;
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
@@ -50,10 +50,10 @@ export const Login = styled.button`
   background: ${LANDING_STYLE.login};
   border: none;
   color: ${({ theme }) => theme.colors.white};
-  min-height: 2.5rem;
-  padding: 0.625rem 1.25rem;
+  min-height: 2.25rem;
+  padding: 0.55rem 1rem;
   border-radius: ${({ theme }) => theme.radius.sm};
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
   line-height: 1;
   cursor: pointer;

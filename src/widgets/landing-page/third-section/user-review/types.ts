@@ -1,15 +1,11 @@
 export type ReviewAlign = "left" | "right";
 
-export type ChatBubbleColor = "primary" | "secondary" | "light";
+export type BubbleAssetKey = 1 | 2 | 3 | 4;
 
 export type ReviewWrapperProps = {
-  align: ReviewAlign;
-};
-
-export type ChatBubbleProps = {
-  color: ChatBubbleColor;
+  $align: ReviewAlign;
 };
 
 export type EmojiProps = {
-  align: ReviewAlign;
+  $align: ReviewAlign;
 };

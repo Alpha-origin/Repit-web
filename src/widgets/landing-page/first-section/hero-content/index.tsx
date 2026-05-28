@@ -14,7 +14,6 @@ const HeroContent = () => {
 
       <S.Title>
         실전처럼 준비하는
-        <br />
       </S.Title>
       <S.MainTitle>
         AI 면접 코칭 플랫폼
