@@ -19,10 +19,13 @@ export const Section = styled.section`
   }
 `;
 
-export const Logo = styled.div`
+export const Logo = styled.button`
   position: absolute;
   top: 1.5rem;
   right: 2rem;
+  border: none;
+  background: transparent;
+  padding: 0;
   display: flex;
   align-items: center;
   cursor: pointer;
