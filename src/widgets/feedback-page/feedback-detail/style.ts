@@ -294,7 +294,7 @@ export const CoachCard = styled.article`
   align-items: center;
   gap: 1.4rem;
   padding: 1.3rem 1.55rem;
-  border-radius: 1.55rem;
+  border-radius: 0rem;
   background: linear-gradient(
     180deg,
     rgba(207, 224, 252, 0.98),
