@@ -95,7 +95,7 @@ export const TabGroup = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.35rem;
+  padding: 0.2rem;
   background: rgba(255, 255, 255, 0.96);
   border-radius: 1.05rem;
   box-shadow: 0 0.85rem 2rem rgba(60, 102, 173, 0.08);
@@ -103,20 +103,21 @@ export const TabGroup = styled.div`
 
 export const TabButton = styled.button<TabButtonProps>`
   min-width: 13.2rem;
-  height: 2.8rem;
-  padding: 0 1.1rem;
+  height: 2.1rem;
+  padding: 0 0.9rem;
   border: none;
   border-radius: 0.85rem;
   background: ${({ $active }) =>
     $active ? "linear-gradient(180deg, #2f75e7, #2667da)" : "transparent"};
   color: ${({ $active }) => ($active ? "#ffffff" : "#2f75e7")};
-  font-size: 1.12rem;
+  font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
 
   @media (max-width: 40rem) {
     min-width: 9rem;
-    font-size: 1.02rem;
+    height: 2rem;
+    font-size: 0.94rem;
   }
 `;
 
