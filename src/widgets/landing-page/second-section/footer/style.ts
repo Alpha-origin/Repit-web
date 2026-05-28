@@ -10,10 +10,10 @@ export const Container = styled.footer`
 export const Inner = styled.div`
   position: relative;
   width: 100%;
-  height: 10.5rem;
+  height: 11rem;
   overflow: hidden;
   border-radius: 0; 
-  padding: 0 4rem;
+  padding: 0 6.5rem;
   background: linear-gradient(
     90deg,
     ${({ theme }) => theme.colors.surface.blueSoft} 0%,
@@ -47,10 +47,12 @@ export const LeftSection = styled.div`
 export const Title = styled.h2`
   margin: 0;
   color: ${({ theme }) => theme.colors.brand.blue};
-  font-size: 1.55rem;
-  font-weight: 800;
+  font-size: 1.8rem;
+  font-weight: 300;
   line-height: 1.25;
   letter-spacing: -0.05rem;
+  font-family: 'Wave', sans-serif;
+  margin-right: 1.5rem;
 
   @media (max-width: 56.25rem) {
     font-size: 1.125rem;
@@ -65,7 +67,8 @@ export const StartButton = styled.button`
   background: ${({ theme }) => theme.colors.brand.blueAction};
   color: ${({ theme }) => theme.colors.white};
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 300;
+  font-family: 'Wave', sans-serif;
   cursor: pointer;
   box-shadow: 0 0.1875rem 0.5rem ${({ theme }) => theme.colors.shadow.blue};
   transition: 0.2s ease;
@@ -84,10 +87,10 @@ export const StartButton = styled.button`
 export const GraphicImage = styled.div`
   position: absolute;
   right: 0;
-  top: 0;
+  top: 0rem;
   z-index: 1;
-  width: 40rem;
-  height: 125%;
+  width: 35rem;
+  height: 105%;
   pointer-events: none;
   background: url(${footerGraphic}) right center / auto 100% no-repeat;
 

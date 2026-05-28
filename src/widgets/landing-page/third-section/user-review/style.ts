@@ -15,7 +15,7 @@ export const Header = styled(motion.div)`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 4.75rem;
+  margin-bottom: 8rem;
   text-align: center;
 
   @media (max-width: 56.25rem) {
@@ -24,19 +24,22 @@ export const Header = styled(motion.div)`
 `;
 
 export const SubTitle = styled.span`
-  margin-bottom: 0.7rem;
+  margin-bottom: 1.15rem;
   color: #9dc1ff;
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 300;
+  font-family: 'Wave', sans-serif;
+
 `;
 
 export const Title = styled.h2`
   margin: 0;
   color: #2f80ed;
   font-size: 2.85rem;
-  font-weight: 800;
+  font-weight: 200;
   line-height: 1.18;
   letter-spacing: -0.05rem;
+  font-family: 'Wave', sans-serif;
 
   @media (max-width: 56.25rem) {
     font-size: 2rem;
@@ -46,7 +49,7 @@ export const Title = styled.h2`
 export const ReviewGrid = styled(motion.div)`
   display: flex;
   flex-direction: column;
-  gap: 2.85rem;
+  gap: 5rem;
   width: min(100%, 74rem);
   margin: 0 auto;
 
@@ -69,7 +72,7 @@ export const ReviewWrapper = styled(motion.div)<ReviewWrapperProps>`
 
 export const BubbleCluster = styled.div<ReviewWrapperProps>`
   position: relative;
-  width: min(100%, 26.75rem);
+  width: min(100%, 35rem);
   padding-top: 0.4rem;
   overflow: visible;
 
@@ -77,7 +80,7 @@ export const BubbleCluster = styled.div<ReviewWrapperProps>`
     ${({ $align }) =>
       $align === "right" &&
       css`
-        width: min(100%, 27.25rem);
+        width: min(100%, 35rem);
       `}
   }
 
@@ -185,12 +188,14 @@ export const MessageLayer = styled.div<ReviewWrapperProps>`
 export const Message = styled.p`
   margin: 0;
   width: 100%;
-  font-size: 1.18rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 100;
   line-height: 1.38;
-  letter-spacing: -0.04rem;
+  letter-spacing: 1.5rem;
   text-align: center;
   white-space: pre-line;
+  font-family: 'Wave', sans-serif;
+  letter-spacing: 0.02rem;
 
   @media (max-width: 56.25rem) {
     font-size: 1.02rem;

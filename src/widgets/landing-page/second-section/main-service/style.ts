@@ -9,20 +9,24 @@ export const ContentMotion = styled(motion.div)`
 export const Header = styled(motion.div)`
   text-align: center;
   margin-bottom: 6rem;
+  font-weight: 300;
+  font-family: 'Wave', sans-serif;
 `;
 
 export const SubTitle = styled.p`
   margin: 0 0 ${({ theme }) => theme.spacing.sm};
   color: ${({ theme }) => theme.colors.brand.blueLight};
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  margin-bottom: 1.35rem;
+  font-family: 'Wave', sans-serif;
+  font-weight: 300;
 `;
 
 export const Title = styled.h2`
   margin: 0;
   color: ${({ theme }) => theme.colors.brand.blue};
-  font-size: 2.3rem;
-  font-weight: 800;
+  font-size: 2.4rem;
+  font-weight: 300;
   line-height: 1.15;
   letter-spacing: -0.05rem;
 
@@ -35,8 +39,8 @@ export const ServiceGrid = styled(motion.div)`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: min(100%, 80rem);
-  min-height: 50rem;
+  width: min(100%, 78rem);
+  min-height: 52rem;
   margin: 0 auto;
 
   @media (max-width: 56.25rem) {
@@ -63,7 +67,7 @@ export const ServiceCard = styled.article<ServiceCardProps>`
   flex-direction: column;
   width: min(100%, 42rem);
   align-items: ${({ $align }) =>
-    $align === "right" ? "flex-end" : "flex-start"};
+  $align === "right" ? "flex-end" : "flex-start"};
   text-align: ${({ $align }) => $align};
   min-height: 8.5rem;
 
@@ -77,8 +81,8 @@ export const ServiceCard = styled.article<ServiceCardProps>`
 export const CardTitle = styled.h3`
   margin: 0 0 0.125rem;
   color: ${({ theme }) => theme.colors.brand.blue};
-  font-size: 1.35rem;
-  font-weight: 800;
+  font-size: 1.6rem;
+  font-weight: 550;
 
   @media (max-width: 56.25rem) {
     font-size: 1.15rem;
@@ -89,21 +93,24 @@ export const CardHeading = styled.p`
   margin: 0 0 0.5rem;
   color: ${({ theme }) => theme.colors.text.strong};
   font-size: 1.8rem;
-  font-weight: 800;
+  font-weight: 200;
   line-height: 1.15;
   letter-spacing: -0.05rem;
+  padding-top: 0.7rem;
+  font-family: 'Wave', sans-serif;
 
   @media (max-width: 56.25rem) {
     font-size: 1.45rem;
   }
 `;
 
+
 export const CardDescription = styled.p`
   margin: 0.5rem 0 0;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.975rem;
-  font-weight: 500;
-  line-height: 1.65;
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1.5;
 
   span {
     display: block;
