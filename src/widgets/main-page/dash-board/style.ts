@@ -180,7 +180,7 @@ export const Description = styled.p`
 `;
 
 export const AiBadge = styled.span`
-  min-width: 5rem;
+  min-width: 5rem;//5rem fix
   height: 3rem;
   padding: 0 1.6rem;
   display: inline-flex;
