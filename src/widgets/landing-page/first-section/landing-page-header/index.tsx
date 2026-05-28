@@ -7,9 +7,10 @@ const LandingPageHeader = () => {
 
   return (
     <S.Header>
-      <S.Logo aria-label="Repit">
+      <S.Logo aria-label="Repit" onClick={() => navigate("/")}>
         <S.LogoImage src={RepitLogo} alt="Repit" />
       </S.Logo>
+      
 
       <S.Nav>
         <S.SignUp type="button" onClick={() => navigate("/signup")}>
