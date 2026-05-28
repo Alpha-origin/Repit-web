@@ -39,7 +39,7 @@ const SignUpPanel = ({
 
   return (
     <S.Section>
-      <S.Logo aria-label="Repit" onClick={() => navigate('/')}>
+      <S.Logo type="button" aria-label="Repit 홈으로 이동" onClick={() => navigate('/')}>
         <img src={RepitLogo} alt="Repit" />
       </S.Logo>
 

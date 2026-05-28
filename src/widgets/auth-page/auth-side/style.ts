@@ -1,8 +1,5 @@
 import styled from "styled-components";
-
-interface SectionProps {
-  $backgroundImage: string;
-}
+import type { SectionProps } from "./type";
 
 export const Section = styled.section<SectionProps>`
   position: relative;
@@ -64,9 +61,9 @@ export const Description = styled.p`
 `;
 
 export const SwitchButton = styled.button`
-  min-width: 15rem;
-  height: 3.85rem;
-  padding: 0 2.5rem;
+  min-width: 12rem;
+  height: 3rem;
+  padding: 0 1.7rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -74,7 +71,7 @@ export const SwitchButton = styled.button`
   border-radius: 999rem;
   background-color: rgba(255, 255, 255, 0.03);
   color: #ffffff;
-  font-size: 1.55rem;
+  font-size: 1.16rem;
   font-weight: 700;
   cursor: pointer;
   transition:

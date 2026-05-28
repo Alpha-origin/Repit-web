@@ -1,7 +1,8 @@
-import RepitLogo from "@/shared/img/logo/Repit-R.svg?url";
-import { useNavigate } from "react-router-dom";
-import * as S from "./style";
-import type { LoginPanelProps } from "./type";
+import RepitLogo from '@/shared/img/logo/Repit-R.svg?url';
+import { useNavigate } from 'react-router-dom';
+
+import * as S from './style';
+import type { LoginPanelProps } from './type';
 
 const LoginPanel = ({
   errors,
@@ -13,10 +14,10 @@ const LoginPanel = ({
   const navigate = useNavigate();
 
   return (
-      <S.Section>
-        <S.Logo aria-label="Repit" onClick={() => navigate("/")}>
-          <img src={RepitLogo} alt="Repit" />
-        </S.Logo>
+    <S.Section>
+      <S.Logo type="button" aria-label="Repit 홈으로 이동" onClick={() => navigate('/')}>
+        <img src={RepitLogo} alt="Repit" />
+      </S.Logo>
 
       <S.Panel>
         <S.Title>로그인</S.Title>
@@ -27,11 +28,11 @@ const LoginPanel = ({
               type="email"
               placeholder="이메일"
               disabled={isSubmitting}
-              {...register("email", {
-                required: "이메일을 입력해주세요.",
+              {...register('email', {
+                required: '이메일을 입력해주세요.',
                 pattern: {
                   value: /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i,
-                  message: "올바른 이메일 형식이 아닙니다.",
+                  message: '올바른 이메일 형식이 아닙니다.',
                 },
               })}
             />
@@ -46,11 +47,11 @@ const LoginPanel = ({
               type="password"
               placeholder="비밀번호"
               disabled={isSubmitting}
-              {...register("password", {
-                required: "비밀번호를 입력해주세요.",
+              {...register('password', {
+                required: '비밀번호를 입력해주세요.',
                 minLength: {
                   value: 8,
-                  message: "비밀번호는 8자 이상이어야 합니다.",
+                  message: '비밀번호는 8자 이상이어야 합니다.',
                 },
               })}
             />
@@ -65,7 +66,7 @@ const LoginPanel = ({
           )}
 
           <S.SubmitButton type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "확인 중..." : "로그인"}
+            {isSubmitting ? '확인 중...' : '로그인'}
           </S.SubmitButton>
         </S.Form>
 
