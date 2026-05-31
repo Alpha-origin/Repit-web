@@ -197,7 +197,7 @@ export const ComparisonPanel = styled.section`
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
-  padding: 1.3rem 2rem;
+  padding: 1.3rem 1.3rem;
   background: linear-gradient(180deg, rgba(219, 228, 249, 0.88), rgba(228, 235, 251, 0.94));
 
   @media (max-width: 48rem) {
