@@ -72,7 +72,7 @@ export const TabButton = styled.button<TabButtonProps>`
 
 export const TopGrid = styled.div`
   display: grid;
-  grid-template-columns: minmax(17rem, 19rem) minmax(0, 1fr);
+  grid-template-columns: minmax(20rem, 23rem) minmax(0, 1fr);
   gap: 1rem;
 
   @media (max-width: 72rem) {
