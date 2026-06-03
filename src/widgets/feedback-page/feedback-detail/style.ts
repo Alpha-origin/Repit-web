@@ -291,30 +291,29 @@ export const BottomBlock = styled.section`
 
 export const CoachCard = styled.article`
   display: flex;
-  align-items: center;
-  gap: 1.4rem;
-  padding: 1.3rem 1.55rem;
-  border-radius: 0rem;
-  background: linear-gradient(
-    180deg,
-    rgba(207, 224, 252, 0.98),
-    rgba(218, 231, 251, 0.98)
-  );
+  align-items: flex-end;
+  gap: 1.55rem;
+  min-height: 11.6rem;
+  padding: 1.75rem 1.8rem 1.35rem;
+  border-radius: 1rem;
+  background: #dcebfe;
 
   @media (max-width: 48rem) {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.8rem;
-    padding: 1rem;
+    min-height: auto;
+    padding: 1rem 1rem 1.15rem;
   }
 `;
 
 export const CoachIllustration = styled.div`
-  width: clamp(4.8rem, 9vw, 6.25rem);
+  width: clamp(3.4rem, 6vw, 4.5rem);
   display: flex;
   align-items: flex-end;
   justify-content: center;
   flex-shrink: 0;
+  margin-bottom: 0.15rem;
 `;
 
 export const RobotImage = styled.img`
@@ -326,15 +325,18 @@ export const RobotImage = styled.img`
 export const CoachBubble = styled.div`
   position: relative;
   flex: 1;
-  min-height: 6.2rem;
+  min-height: 9.3rem;
   display: flex;
   align-items: center;
-  padding: 1.15rem 1.9rem 1.15rem 2.3rem;
+  justify-content: center;
+  padding: 1.5rem 1.8rem 1.5rem 1.55rem;
+  background: transparent;
+  overflow: hidden;
 
   @media (max-width: 48rem) {
     width: 100%;
-    min-height: 7rem;
-    padding: 1rem 1.2rem 1rem 1.6rem;
+    min-height: 7.8rem;
+    padding: 0.7rem 0.8rem 0.85rem;
   }
 `;
 
@@ -345,19 +347,32 @@ export const CoachBubbleImage = styled.img`
   height: 100%;
   display: block;
   object-fit: fill;
+  z-index: 0;
   pointer-events: none;
   user-select: none;
 `;
 
-export const CoachText = styled.p`
+export const CoachTextBox = styled.div`
   position: relative;
   z-index: 1;
+  width: min(100%, 85%);
+  margin: 0 auto;
+  text-align: left;
+
+  @media (max-width: 48rem) {
+    width: min(100%, 92%);
+  }
+`;
+
+export const CoachText = styled.p`
   margin: 0;
   color: #171717;
-  font-size: 1.18rem;
-  font-weight: 600;
-  line-height: 1.72;
+  max-width: 100%;
+  font-size: 1.06rem;
+  font-weight: 500;
+  line-height: 1.58;
   word-break: keep-all;
+  overflow-wrap: anywhere;
 `;
 
 export const ActionRow = styled.div`
