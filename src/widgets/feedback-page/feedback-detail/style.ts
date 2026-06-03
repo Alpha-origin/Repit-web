@@ -386,11 +386,11 @@ export const ActionRow = styled.div`
 `;
 
 const actionButton = css`
-  min-width: 13rem;
-  height: 3.35rem;
-  padding: 0 1.5rem;
+  min-width: 12.2rem;
+  height: 3.1rem;
+  padding: 0 1.35rem;
   border-radius: 0.8rem;
-  font-size: 1.08rem;
+  font-size: 1rem;
   font-weight: 800;
   cursor: pointer;
 
