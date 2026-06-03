@@ -14,7 +14,7 @@ export const Page = styled.section`
 `;
 
 export const Panel = styled.section`
-  width: min(100%, 104rem);
+  width: min(100%, 84rem);
   display: flex;
   flex-direction: column;
   gap: 1.2rem;

@@ -88,8 +88,8 @@ export const QuestionListCard = styled.article`
 export const SideTitle = styled.h3`
   margin: 0 0 0.9rem;
   color: #2b74e3;
-  font-size: 1.42rem;
-  font-weight: 800;
+  font-size: 1.28rem;
+  font-weight: 700;
 `;
 
 export const QuestionList = styled.div`
@@ -185,8 +185,8 @@ export const AnswerCard = styled(DetailCard)`
 export const DetailCardTitle = styled.h3`
   margin: 0;
   color: #2b74e3;
-  font-size: 1.55rem;
-  font-weight: 800;
+  font-size: 1.34rem;
+  font-weight: 700;
 `;
 
 export const DetailCardText = styled.p`
@@ -266,8 +266,8 @@ export const SummaryCard = styled.article`
 export const SummaryTitle = styled.h3`
   margin: 0 0 0.9rem;
   color: #2b74e3;
-  font-size: 1.5rem;
-  font-weight: 800;
+  font-size: 1.32rem;
+  font-weight: 700;
 `;
 
 export const SummaryText = styled.p`
