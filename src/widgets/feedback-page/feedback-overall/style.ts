@@ -340,7 +340,10 @@ export const TextCard = styled.article`
   padding: 1.2rem 1.95rem 1.3rem;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 0.8rem;
+  text-align: center;
 `;
 
 export const TextCardTitle = styled.h3`

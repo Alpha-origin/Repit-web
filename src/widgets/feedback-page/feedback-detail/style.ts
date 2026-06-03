@@ -165,7 +165,7 @@ export const IntentSection = styled.div`
   flex-direction: column;
   align-items: flex-start;
   gap: 0.7rem;
-  margin-top: 0.8rem;
+  margin-top: 2.2rem;
 `;
 
 export const DetailCard = styled.article`
@@ -367,8 +367,8 @@ export const CoachText = styled.p`
   margin: 0;
   color: #171717;
   max-width: 100%;
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 1.2rem;
+  font-weight: 550;
   line-height: 1.58;
   word-break: keep-all;
   overflow-wrap: anywhere;
