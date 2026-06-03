@@ -11,7 +11,7 @@ interface QuestionItemButtonProps {
 const cardSurface = css`
   background: rgba(255, 255, 255, 0.92);
   border: 0.0625rem solid rgba(220, 230, 246, 0.96);
-  border-radius: 1.45rem;
+  border-radius: 0.8rem;
   box-shadow: 0 1rem 2.2rem rgba(60, 101, 168, 0.07);
 `;
 
@@ -23,7 +23,7 @@ export const SectionBlock = styled.section`
 
 export const SectionShell = styled.div`
   padding: 1rem;
-  border-radius: 1.7rem;
+  border-radius: 1.25rem;
   background: linear-gradient(
     180deg,
     rgba(234, 242, 255, 0.72),
@@ -34,7 +34,7 @@ export const SectionShell = styled.div`
 
   @media (max-width: 48rem) {
     padding: 0.8rem;
-    border-radius: 1.25rem;
+    border-radius: 0.95rem;
   }
 `;
 
@@ -46,7 +46,7 @@ export const TabGroup = styled.div`
   gap: 0.4rem;
   padding: 0.2rem;
   background: rgba(255, 255, 255, 0.96);
-  border-radius: 1.05rem;
+  border-radius: 0.8rem;
   box-shadow: 0 0.85rem 2rem rgba(60, 102, 173, 0.08);
 `;
 
@@ -55,7 +55,7 @@ export const TabButton = styled.button<TabButtonProps>`
   height: 2.1rem;
   padding: 0 0.9rem;
   border: none;
-  border-radius: 0.85rem;
+  border-radius: 0.62rem;
   background: ${({ $active }) =>
     $active ? "linear-gradient(180deg, #2f75e7, #2667da)" : "transparent"};
   color: ${({ $active }) => ($active ? "#ffffff" : "#2f75e7")};
@@ -82,6 +82,7 @@ export const TopGrid = styled.div`
 
 export const QuestionListCard = styled.article`
   ${cardSurface}
+  border-radius: 0.95rem;
   padding: 1rem;
 `;
 
@@ -105,7 +106,7 @@ export const QuestionItemButton = styled.button<QuestionItemButtonProps>`
   align-items: flex-start;
   gap: 0.8rem;
   padding: 1rem 0.95rem;
-  border-radius: 1rem;
+  border-radius: 0.72rem;
   border: ${({ $active }) =>
     $active
       ? "0.125rem solid rgba(47, 117, 231, 0.92)"
@@ -129,7 +130,7 @@ export const QuestionPreview = styled.span`
   display: -webkit-box;
   color: #1c1c1c;
   font-size: 1.08rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.55;
   word-break: keep-all;
   overflow: hidden;
@@ -193,7 +194,7 @@ export const DetailCardText = styled.p`
   margin: 0;
   color: #191919;
   font-size: 1.14rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.7;
   word-break: keep-all;
 `;
@@ -204,7 +205,7 @@ export const IntentBadge = styled.span`
   justify-content: center;
   width: fit-content;
   padding: 0.5rem 1rem;
-  border-radius: 0.45rem;
+  border-radius: 0.32rem;
   background: linear-gradient(180deg, #2f75e7, #2667da);
   color: #ffffff;
   font-size: 1rem;
@@ -228,7 +229,7 @@ export const AnswerToggleButton = styled.button`
   height: 2.5rem;
   padding: 0 1rem;
   flex-shrink: 0;
-  border-radius: 0.7rem;
+  border-radius: 0.42rem;
   border: 0.0625rem solid rgba(213, 223, 239, 0.96);
   background: #ffffff;
   color: #5b5b5b;
@@ -240,7 +241,7 @@ export const AnswerToggleButton = styled.button`
 
 export const SummaryShell = styled.section`
   padding: 1rem;
-  border-radius: 1.55rem;
+  border-radius: 1.15rem;
   background: linear-gradient(
     180deg,
     rgba(209, 222, 247, 0.92),
@@ -274,7 +275,7 @@ export const SummaryText = styled.p`
   margin: 0;
   color: #1d1d1d;
   font-size: 1.12rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.7;
   word-break: keep-all;
 
@@ -295,7 +296,7 @@ export const CoachCard = styled.article`
   gap: 1.55rem;
   min-height: 11.6rem;
   padding: 1.75rem 1.8rem 1.35rem;
-  border-radius: 1rem;
+  border-radius: 0.75rem;
   background: #dcebfe;
 
   @media (max-width: 48rem) {
@@ -389,7 +390,7 @@ const actionButton = css`
   min-width: 12.2rem;
   height: 3.1rem;
   padding: 0 1.35rem;
-  border-radius: 0.8rem;
+  border-radius: 0.62rem;
   font-size: 1rem;
   font-weight: 800;
   cursor: pointer;
