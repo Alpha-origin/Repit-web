@@ -358,7 +358,6 @@ export const CoachTextBox = styled.div`
   width: min(100%, 85%);
   margin: 0 auto;
   text-align: left;
-
   @media (max-width: 48rem) {
     width: min(100%, 92%);
   }
@@ -368,7 +367,7 @@ export const CoachText = styled.p`
   margin: 0;
   color: #171717;
   max-width: 100%;
-  font-size: 1.06rem;
+  font-size: 1.1rem;
   font-weight: 500;
   line-height: 1.58;
   word-break: keep-all;
