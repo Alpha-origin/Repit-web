@@ -157,15 +157,17 @@ export const DetailColumn = styled.div`
 export const QuestionContent = styled.div`
   display: flex;
   flex-direction: column;
+  width: 100%;
   align-items: flex-start;
   gap: 0.7rem;
+  margin-top: 0.58rem;
 `;
 
 export const IntentSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.7rem;
+  gap: 0.78rem;
   margin-top: 2.2rem;
 `;
 
@@ -177,7 +179,7 @@ export const DetailCard = styled.article`
 export const AnswerCard = styled(DetailCard)`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.62rem;
   min-height: 0;
   padding-top: 0.85rem;
   padding-bottom: 0.85rem;
@@ -329,15 +331,15 @@ export const CoachBubble = styled.div`
   min-height: 9.3rem;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 1.5rem 1.8rem 1.5rem 1.55rem;
-  background: transparent;
-  overflow: hidden;
+  justify-content: flex-start;
+  padding: 2rem 4rem;
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.98);
 
   @media (max-width: 48rem) {
     width: 100%;
     min-height: 7.8rem;
-    padding: 0.7rem 0.8rem 0.85rem;
+    padding: 0.7rem 0.95rem 0.85rem;
   }
 `;
 

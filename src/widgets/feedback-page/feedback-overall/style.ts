@@ -29,22 +29,22 @@ const cardSurface = css`
 const keywordSizeMap = {
   xs: css`
     font-size: 1.16rem;
-    font-weight: 500;
+    font-weight: 300;
     opacity: 0.82;
   `,
   sm: css`
     font-size: 1.58rem;
-    font-weight: 600;
+    font-weight: 400;
     opacity: 0.88;
   `,
   md: css`
     font-size: 2.3rem;
-    font-weight: 700;
+    font-weight: 500;
     opacity: 0.94;
   `,
   xl: css`
     font-size: 3.75rem;
-    font-weight: 700;
+    font-weight: 500;
     opacity: 1;
   `,
 };
@@ -154,7 +154,7 @@ export const MainScore = styled.h2`
   margin: 0.45rem 0 0.6rem;
   color: #2b74e3;
   font-size: clamp(1.3rem, 2.8vw, 2.85rem);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: -0.08rem;
   line-height: 1;
 `;
