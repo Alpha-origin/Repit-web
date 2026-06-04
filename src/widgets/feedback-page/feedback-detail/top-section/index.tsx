@@ -117,14 +117,18 @@ const FeedbackDetailTopSection = ({
 
             <S.DetailCard>
               <S.DetailCardTitle>{content.modelAnswerTitle}</S.DetailCardTitle>
-              <S.DetailCardText>{selectedQuestion.modelAnswer}</S.DetailCardText>
+              <S.QuestionContent>
+                <S.DetailCardText>{selectedQuestion.modelAnswer}</S.DetailCardText>
+              </S.QuestionContent>
             </S.DetailCard>
 
             <S.DetailCard>
               <S.DetailCardTitle>{content.followUpTitle}</S.DetailCardTitle>
-              <S.DetailCardText>
-                {selectedQuestion.followUpQuestion}
-              </S.DetailCardText>
+              <S.QuestionContent>
+                <S.DetailCardText>
+                  {selectedQuestion.followUpQuestion}
+                </S.DetailCardText>
+              </S.QuestionContent>
             </S.DetailCard>
           </S.DetailColumn>
         </S.TopGrid>
