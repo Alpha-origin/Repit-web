@@ -11,11 +11,15 @@ import MainPage from "@/pages/main-page";
 import MyPage from "@/pages/my-page";
 import NotFound from "@/pages/not-found";
 import { createBrowserRouter } from "react-router-dom";
-
+import Loading from "@/shared/components/loading";
 const router = createBrowserRouter([
   {
     path: "/",
     element: <LandingPage />,
+  },
+  {
+    path: "/loading",
+    element: <Loading />,
   },
   {
     path: "/login",
