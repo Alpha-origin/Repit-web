@@ -415,9 +415,9 @@ export const ReliabilityBadge = styled.div`
   border-radius: 0.55rem;
   background: rgba(255, 255, 255, 0.9);
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
-  color: #111111;
+  color: #000000;
   font-size: 1.12rem;
-  font-weight: 700;
+  font-weight: 400;
   display: flex;
   align-items: center;
   justify-content: center;

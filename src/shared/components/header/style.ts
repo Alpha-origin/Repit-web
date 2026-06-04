@@ -111,11 +111,11 @@ export const StatusButtons = styled.div`
 export const StatusButton = styled.button`
   border: none;
   font-size: 1rem;
-  width: 6.5rem;
-  height: 3rem;
-  border-radius: 1rem;
+  width: 5.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
   cursor: pointer;
-  background-color: #3388f7;
+  background-color: #3388F7;
   color: #ffffff;
   display: flex;
   justify-content: center;
