@@ -92,19 +92,19 @@ export const FEEDBACK_OVERALL_CONTENT = {
         {
           text: "네",
           size: "xl",
-          top: "18%",
+          top: "24%",
           left: "58%",
         },
         {
           text: "아",
           size: "xl",
-          top: "48%",
+          top: "51%",
           left: "48%",
         },
         {
           text: "프로젝트",
           size: "md",
-          top: "44%",
+          top: "46%",
           left: "22%",
         },
         {
@@ -116,25 +116,25 @@ export const FEEDBACK_OVERALL_CONTENT = {
         {
           text: "협업",
           size: "sm",
-          top: "72%",
+          top: "70%",
           left: "16%",
         },
         {
           text: "백엔드",
           size: "sm",
-          top: "82%",
+          top: "77%",
           left: "40%",
         },
         {
           text: "개발",
           size: "md",
-          top: "77%",
+          top: "73%",
           left: "68%",
         },
         {
           text: "디자인",
           size: "xs",
-          top: "12%",
+          top: "20%",
           left: "46%",
         },
       ],

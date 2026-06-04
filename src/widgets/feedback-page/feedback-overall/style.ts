@@ -140,7 +140,7 @@ export const ScoreCard = styled.article`
   ${cardSurface}
   min-height: 10.5rem;
   border: none;
-  padding: 1.25rem 2.1rem 1.3rem;
+  padding: 1rem 1.15rem 1.15rem;
 `;
 
 export const SectionLabel = styled.p`
@@ -181,7 +181,7 @@ export const ChartCard = styled.article`
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  padding: 1.05rem 1.95rem 1rem;
+  padding: 1rem 1.15rem 0.95rem;
 `;
 
 export const CardHeading = styled.h3`
@@ -197,7 +197,7 @@ export const ComparisonPanel = styled.section`
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
-  padding: 1.3rem 1.3rem;
+  padding: 1rem;
   background: linear-gradient(180deg, rgba(219, 228, 249, 0.88), rgba(228, 235, 251, 0.94));
 
   @media (max-width: 48rem) {
@@ -213,7 +213,7 @@ export const ComparisonCard = styled.article`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 1.1rem 1.55rem 1rem;
+  padding: 1rem 1.15rem 0.95rem;
 `;
 
 export const ComparisonHeader = styled.div`
@@ -336,30 +336,30 @@ export const MiddleGrid = styled.div`
 
 export const TextCard = styled.article`
   ${cardSurface}
-  min-height: 13.6rem;
-  padding: 1.2rem 1.95rem 1.3rem;
+  min-height: 12.6rem;
+  padding: 1rem 1.15rem 1.2rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
-  text-align: center;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.7rem;
+  text-align: left;
 `;
 
 export const TextCardTitle = styled.h3`
   margin: 0;
   color: #2b74e3;
-  font-size: 1.58rem;
-  font-weight: 600;
-  letter-spacing: -0.04rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.03rem;
 `;
 
 export const TextCardBody = styled.p`
   margin: 0;
   color: #1b1b1b;
-  font-size: 1.15rem;
-  font-weight: 600;
-  line-height: 1.7;
+  font-size: 1.04rem;
+  font-weight: 500;
+  line-height: 1.6;
   word-break: keep-all;
 `;
 
@@ -393,7 +393,7 @@ export const ReliabilityCard = styled.article`
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.95rem 1.8rem;
+  padding: 0.95rem 1.15rem;
 
   @media (max-width: 40rem) {
     flex-direction: column;
@@ -429,14 +429,14 @@ export const QuestionCard = styled.article`
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  padding: 1.2rem 1.9rem 1.25rem;
+  padding: 1rem 1.15rem 1.15rem;
 `;
 
 export const KeywordCard = styled.article`
   ${cardSurface}
   min-height: 17rem;
   align-self: start;
-  padding: 1.1rem 1.9rem;
+  padding: 1rem 1.15rem;
 `;
 
 export const KeywordCanvas = styled.div`

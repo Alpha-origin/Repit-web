@@ -53,7 +53,7 @@ export const List = styled.div`
 
 export const FeedbackCard = styled.article`
   width: 100%;
-  min-height: 6.8rem;
+  min-height: 6.2rem;
   display: grid;
   grid-template-columns: minmax(9rem, 13rem) minmax(0, 1fr) auto;
   align-items: center;
