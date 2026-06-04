@@ -11,7 +11,7 @@ interface QuestionItemButtonProps {
 const cardSurface = css`
   background: rgba(255, 255, 255, 0.92);
   border: 0.0625rem solid rgba(220, 230, 246, 0.96);
-  border-radius: 1.45rem;
+  border-radius: 0.8rem;
   box-shadow: 0 1rem 2.2rem rgba(60, 101, 168, 0.07);
 `;
 
@@ -23,7 +23,7 @@ export const SectionBlock = styled.section`
 
 export const SectionShell = styled.div`
   padding: 1rem;
-  border-radius: 1.7rem;
+  border-radius: 1.25rem;
   background: linear-gradient(
     180deg,
     rgba(234, 242, 255, 0.72),
@@ -34,7 +34,7 @@ export const SectionShell = styled.div`
 
   @media (max-width: 48rem) {
     padding: 0.8rem;
-    border-radius: 1.25rem;
+    border-radius: 0.95rem;
   }
 `;
 
@@ -44,34 +44,35 @@ export const TabGroup = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.35rem;
+  padding: 0.2rem;
   background: rgba(255, 255, 255, 0.96);
-  border-radius: 1.05rem;
+  border-radius: 0.8rem;
   box-shadow: 0 0.85rem 2rem rgba(60, 102, 173, 0.08);
 `;
 
 export const TabButton = styled.button<TabButtonProps>`
   min-width: 13.2rem;
-  height: 2.8rem;
-  padding: 0 1.1rem;
+  height: 2.1rem;
+  padding: 0 0.9rem;
   border: none;
-  border-radius: 0.85rem;
+  border-radius: 0.62rem;
   background: ${({ $active }) =>
     $active ? "linear-gradient(180deg, #2f75e7, #2667da)" : "transparent"};
   color: ${({ $active }) => ($active ? "#ffffff" : "#2f75e7")};
-  font-size: 1.12rem;
+  font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
 
   @media (max-width: 40rem) {
     min-width: 9rem;
-    font-size: 1.02rem;
+    height: 2rem;
+    font-size: 0.94rem;
   }
 `;
 
 export const TopGrid = styled.div`
   display: grid;
-  grid-template-columns: minmax(17rem, 19rem) minmax(0, 1fr);
+  grid-template-columns: minmax(20rem, 23rem) minmax(0, 1fr);
   gap: 1rem;
 
   @media (max-width: 72rem) {
@@ -81,14 +82,15 @@ export const TopGrid = styled.div`
 
 export const QuestionListCard = styled.article`
   ${cardSurface}
+  border-radius: 0.95rem;
   padding: 1rem;
 `;
 
 export const SideTitle = styled.h3`
   margin: 0 0 0.9rem;
   color: #2b74e3;
-  font-size: 1.42rem;
-  font-weight: 800;
+  font-size: 1.28rem;
+  font-weight: 700;
 `;
 
 export const QuestionList = styled.div`
@@ -104,7 +106,7 @@ export const QuestionItemButton = styled.button<QuestionItemButtonProps>`
   align-items: flex-start;
   gap: 0.8rem;
   padding: 1rem 0.95rem;
-  border-radius: 1rem;
+  border-radius: 0.72rem;
   border: ${({ $active }) =>
     $active
       ? "0.125rem solid rgba(47, 117, 231, 0.92)"
@@ -128,7 +130,7 @@ export const QuestionPreview = styled.span`
   display: -webkit-box;
   color: #1c1c1c;
   font-size: 1.08rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.55;
   word-break: keep-all;
   overflow: hidden;
@@ -164,7 +166,7 @@ export const IntentSection = styled.div`
   flex-direction: column;
   align-items: flex-start;
   gap: 0.7rem;
-  margin-top: 0.8rem;
+  margin-top: 2.2rem;
 `;
 
 export const DetailCard = styled.article`
@@ -184,15 +186,15 @@ export const AnswerCard = styled(DetailCard)`
 export const DetailCardTitle = styled.h3`
   margin: 0;
   color: #2b74e3;
-  font-size: 1.55rem;
-  font-weight: 800;
+  font-size: 1.34rem;
+  font-weight: 700;
 `;
 
 export const DetailCardText = styled.p`
   margin: 0;
   color: #191919;
   font-size: 1.14rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.7;
   word-break: keep-all;
 `;
@@ -203,7 +205,7 @@ export const IntentBadge = styled.span`
   justify-content: center;
   width: fit-content;
   padding: 0.5rem 1rem;
-  border-radius: 0.45rem;
+  border-radius: 0.32rem;
   background: linear-gradient(180deg, #2f75e7, #2667da);
   color: #ffffff;
   font-size: 1rem;
@@ -227,7 +229,7 @@ export const AnswerToggleButton = styled.button`
   height: 2.5rem;
   padding: 0 1rem;
   flex-shrink: 0;
-  border-radius: 0.7rem;
+  border-radius: 0.42rem;
   border: 0.0625rem solid rgba(213, 223, 239, 0.96);
   background: #ffffff;
   color: #5b5b5b;
@@ -239,7 +241,7 @@ export const AnswerToggleButton = styled.button`
 
 export const SummaryShell = styled.section`
   padding: 1rem;
-  border-radius: 1.55rem;
+  border-radius: 1.15rem;
   background: linear-gradient(
     180deg,
     rgba(209, 222, 247, 0.92),
@@ -265,15 +267,15 @@ export const SummaryCard = styled.article`
 export const SummaryTitle = styled.h3`
   margin: 0 0 0.9rem;
   color: #2b74e3;
-  font-size: 1.5rem;
-  font-weight: 800;
+  font-size: 1.32rem;
+  font-weight: 700;
 `;
 
 export const SummaryText = styled.p`
   margin: 0;
   color: #1d1d1d;
   font-size: 1.12rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.7;
   word-break: keep-all;
 
@@ -290,30 +292,29 @@ export const BottomBlock = styled.section`
 
 export const CoachCard = styled.article`
   display: flex;
-  align-items: center;
-  gap: 1.4rem;
-  padding: 1.3rem 1.55rem;
-  border-radius: 1.55rem;
-  background: linear-gradient(
-    180deg,
-    rgba(207, 224, 252, 0.98),
-    rgba(218, 231, 251, 0.98)
-  );
+  align-items: flex-end;
+  gap: 1.55rem;
+  min-height: 11.6rem;
+  padding: 1.75rem 1.8rem 1.35rem;
+  border-radius: 0.75rem;
+  background: #dcebfe;
 
   @media (max-width: 48rem) {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.8rem;
-    padding: 1rem;
+    min-height: auto;
+    padding: 1rem 1rem 1.15rem;
   }
 `;
 
 export const CoachIllustration = styled.div`
-  width: clamp(4.8rem, 9vw, 6.25rem);
+  width: clamp(3.4rem, 6vw, 4.5rem);
   display: flex;
   align-items: flex-end;
   justify-content: center;
   flex-shrink: 0;
+  margin-bottom: 0.15rem;
 `;
 
 export const RobotImage = styled.img`
@@ -325,15 +326,18 @@ export const RobotImage = styled.img`
 export const CoachBubble = styled.div`
   position: relative;
   flex: 1;
-  min-height: 6.2rem;
+  min-height: 9.3rem;
   display: flex;
   align-items: center;
-  padding: 1.15rem 1.9rem 1.15rem 2.3rem;
+  justify-content: center;
+  padding: 1.5rem 1.8rem 1.5rem 1.55rem;
+  background: transparent;
+  overflow: hidden;
 
   @media (max-width: 48rem) {
     width: 100%;
-    min-height: 7rem;
-    padding: 1rem 1.2rem 1rem 1.6rem;
+    min-height: 7.8rem;
+    padding: 0.7rem 0.8rem 0.85rem;
   }
 `;
 
@@ -344,19 +348,31 @@ export const CoachBubbleImage = styled.img`
   height: 100%;
   display: block;
   object-fit: fill;
+  z-index: 0;
   pointer-events: none;
   user-select: none;
 `;
 
-export const CoachText = styled.p`
+export const CoachTextBox = styled.div`
   position: relative;
   z-index: 1;
+  width: min(100%, 85%);
+  margin: 0 auto;
+  text-align: left;
+  @media (max-width: 48rem) {
+    width: min(100%, 92%);
+  }
+`;
+
+export const CoachText = styled.p`
   margin: 0;
   color: #171717;
-  font-size: 1.18rem;
-  font-weight: 600;
-  line-height: 1.72;
+  max-width: 100%;
+  font-size: 1.2rem;
+  font-weight: 550;
+  line-height: 1.58;
   word-break: keep-all;
+  overflow-wrap: anywhere;
 `;
 
 export const ActionRow = styled.div`
@@ -371,11 +387,11 @@ export const ActionRow = styled.div`
 `;
 
 const actionButton = css`
-  min-width: 13rem;
-  height: 3.35rem;
-  padding: 0 1.5rem;
-  border-radius: 0.8rem;
-  font-size: 1.08rem;
+  min-width: 12.2rem;
+  height: 3.1rem;
+  padding: 0 1.35rem;
+  border-radius: 0.62rem;
+  font-size: 1rem;
   font-weight: 800;
   cursor: pointer;
 

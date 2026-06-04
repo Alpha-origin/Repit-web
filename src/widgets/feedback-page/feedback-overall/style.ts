@@ -95,7 +95,7 @@ export const TabGroup = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.35rem;
+  padding: 0.2rem;
   background: rgba(255, 255, 255, 0.96);
   border-radius: 1.05rem;
   box-shadow: 0 0.85rem 2rem rgba(60, 102, 173, 0.08);
@@ -103,20 +103,21 @@ export const TabGroup = styled.div`
 
 export const TabButton = styled.button<TabButtonProps>`
   min-width: 13.2rem;
-  height: 2.8rem;
-  padding: 0 1.1rem;
+  height: 2.1rem;
+  padding: 0 0.9rem;
   border: none;
   border-radius: 0.85rem;
   background: ${({ $active }) =>
     $active ? "linear-gradient(180deg, #2f75e7, #2667da)" : "transparent"};
   color: ${({ $active }) => ($active ? "#ffffff" : "#2f75e7")};
-  font-size: 1.12rem;
+  font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
 
   @media (max-width: 40rem) {
     min-width: 9rem;
-    font-size: 1.02rem;
+    height: 2rem;
+    font-size: 0.94rem;
   }
 `;
 
@@ -138,8 +139,8 @@ export const LeftColumn = styled.div`
 export const ScoreCard = styled.article`
   ${cardSurface}
   min-height: 10.5rem;
-  border: 0.22rem solid rgba(132, 182, 245, 0.95);
-  padding: 1.25rem 1.35rem 1.3rem;
+  border: none;
+  padding: 1.25rem 2.1rem 1.3rem;
 `;
 
 export const SectionLabel = styled.p`
@@ -180,7 +181,7 @@ export const ChartCard = styled.article`
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  padding: 1.05rem 1.15rem 1rem;
+  padding: 1.05rem 1.95rem 1rem;
 `;
 
 export const CardHeading = styled.h3`
@@ -196,7 +197,7 @@ export const ComparisonPanel = styled.section`
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
-  padding: 1.3rem 1.2rem;
+  padding: 1.3rem 1.3rem;
   background: linear-gradient(180deg, rgba(219, 228, 249, 0.88), rgba(228, 235, 251, 0.94));
 
   @media (max-width: 48rem) {
@@ -212,7 +213,7 @@ export const ComparisonCard = styled.article`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 1.1rem 1rem 1rem;
+  padding: 1.1rem 1.55rem 1rem;
 `;
 
 export const ComparisonHeader = styled.div`
@@ -336,17 +337,20 @@ export const MiddleGrid = styled.div`
 export const TextCard = styled.article`
   ${cardSurface}
   min-height: 13.6rem;
-  padding: 1.2rem 1.3rem 1.3rem;
+  padding: 1.2rem 1.95rem 1.3rem;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 0.8rem;
+  text-align: center;
 `;
 
 export const TextCardTitle = styled.h3`
   margin: 0;
   color: #2b74e3;
-  font-size: 2.02rem;
-  font-weight: 800;
+  font-size: 1.58rem;
+  font-weight: 600;
   letter-spacing: -0.04rem;
 `;
 
@@ -389,7 +393,7 @@ export const ReliabilityCard = styled.article`
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.95rem 1.15rem;
+  padding: 0.95rem 1.8rem;
 
   @media (max-width: 40rem) {
     flex-direction: column;
@@ -410,6 +414,7 @@ export const ReliabilityBadge = styled.div`
   border: 0.0625rem solid rgba(189, 201, 224, 0.95);
   border-radius: 0.55rem;
   background: rgba(255, 255, 255, 0.9);
+  font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   color: #111111;
   font-size: 1.12rem;
   font-weight: 800;
@@ -424,14 +429,14 @@ export const QuestionCard = styled.article`
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  padding: 1.2rem 1.25rem 1.25rem;
+  padding: 1.2rem 1.9rem 1.25rem;
 `;
 
 export const KeywordCard = styled.article`
   ${cardSurface}
   min-height: 17rem;
   align-self: start;
-  padding: 1.1rem 1.25rem;
+  padding: 1.1rem 1.9rem;
 `;
 
 export const KeywordCanvas = styled.div`
@@ -444,6 +449,7 @@ export const KeywordWord = styled.span<KeywordWordProps>`
   position: absolute;
   top: ${({ $top }) => $top};
   left: ${({ $left }) => $left};
+  font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   color: #2b74e3;
   letter-spacing: -0.05rem;
   transform: translate(-50%, -50%);

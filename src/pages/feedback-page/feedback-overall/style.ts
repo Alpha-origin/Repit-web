@@ -14,7 +14,7 @@ export const Page = styled.section`
 `;
 
 export const Panel = styled.section`
-  width: min(100%, 104rem);
+  width: min(100%, 84rem);
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
@@ -25,7 +25,7 @@ export const Panel = styled.section`
     rgba(247, 250, 255, 0.95)
   );
   border: 0.0625rem solid rgba(217, 227, 245, 0.88);
-  border-radius: 2rem;
+  border-radius: 1rem;
   box-shadow: 0 1.6rem 3.5rem rgba(62, 104, 171, 0.08);
   box-sizing: border-box;
 

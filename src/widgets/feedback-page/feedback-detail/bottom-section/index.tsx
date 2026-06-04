@@ -24,7 +24,9 @@ const FeedbackDetailBottomSection = ({
             alt=""
             aria-hidden="true"
           />
-          <S.CoachText>{content.coachComment}</S.CoachText>
+          <S.CoachTextBox>
+            <S.CoachText>{content.coachComment}</S.CoachText>
+          </S.CoachTextBox>
         </S.CoachBubble>
       </S.CoachCard>
 
