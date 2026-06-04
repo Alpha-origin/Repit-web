@@ -21,17 +21,17 @@ export const Panel = styled.section`
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
-  gap: 2rem;
+  gap: 1.45rem;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(248, 250, 255, 0.94));
   border: 0.0625rem solid rgba(217, 227, 245, 0.85);
   border-radius: 2rem;
   box-shadow: 0 1.6rem 3.5rem rgba(62, 104, 171, 0.08);
-  padding: 2rem 1.85rem 2.35rem;
+  padding: 1.6rem 1.85rem 1.8rem;
 
   @media (max-width: 48rem) {
     border-radius: 1.45rem;
-    gap: 1.1rem;
-    padding: 1.35rem 1rem 1.45rem;
+    gap: 0.95rem;
+    padding: 1.15rem 1rem 1.2rem;
   }
 `;
 
@@ -48,17 +48,17 @@ export const List = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.3rem;
+  gap: 1rem;
 `;
 
 export const FeedbackCard = styled.article`
   width: 100%;
-  min-height: 7.9rem;
+  min-height: 6.8rem;
   display: grid;
   grid-template-columns: minmax(9rem, 13rem) minmax(0, 1fr) auto;
   align-items: center;
   column-gap: 1.75rem;
-  padding: 1.85rem 2.2rem;
+  padding: 1.4rem 2rem;
   border: 0.125rem solid rgba(214, 223, 237, 0.92);
   border-radius: 1.35rem;
   background: rgba(255, 255, 255, 0.74);
@@ -77,14 +77,14 @@ export const FeedbackCard = styled.article`
 
   @media (max-width: 64rem) {
     grid-template-columns: 1fr auto;
-    row-gap: 1rem;
-    padding: 1.5rem 1.4rem;
+    row-gap: 0.8rem;
+    padding: 1.2rem 1.35rem;
   }
 
   @media (max-width: 40rem) {
     grid-template-columns: 1fr;
     justify-items: start;
-    padding: 1.35rem 1.15rem;
+    padding: 1.1rem 1.05rem;
   }
 `;
 
