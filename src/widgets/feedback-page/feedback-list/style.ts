@@ -24,12 +24,12 @@ export const Panel = styled.section`
   gap: 1.45rem;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(248, 250, 255, 0.94));
   border: 0.0625rem solid rgba(217, 227, 245, 0.85);
-  border-radius: 2rem;
+  border-radius: 1.25rem;
   box-shadow: 0 1.6rem 3.5rem rgba(62, 104, 171, 0.08);
   padding: 1.6rem 1.85rem 1.8rem;
 
   @media (max-width: 48rem) {
-    border-radius: 1.45rem;
+    border-radius: 1rem;
     gap: 0.95rem;
     padding: 1.15rem 1rem 1.2rem;
   }

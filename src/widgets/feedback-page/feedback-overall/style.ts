@@ -22,7 +22,7 @@ interface KeywordWordProps {
 const cardSurface = css`
   background: rgba(255, 255, 255, 0.9);
   border: 0.0625rem solid rgba(223, 232, 247, 0.96);
-  border-radius: 1.55rem;
+  border-radius: 1.05rem;
   box-shadow: 0 1.1rem 2.6rem rgba(61, 102, 171, 0.08);
 `;
 
