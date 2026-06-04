@@ -89,9 +89,9 @@ const FeedbackDetailTopSection = ({
           <S.DetailColumn>
             <S.DetailCard>
               <S.DetailCardTitle>{content.questionTitle}</S.DetailCardTitle>
-              <S.QuestionContent>
+              <S.DetailContent>
                 <S.DetailCardText>{selectedQuestion.question}</S.DetailCardText>
-              </S.QuestionContent>
+              </S.DetailContent>
               <S.IntentSection>
                 <S.IntentBadge>{content.intentionTitle}</S.IntentBadge>
                 <S.DetailCardText>{selectedQuestion.intention}</S.DetailCardText>
@@ -117,14 +117,18 @@ const FeedbackDetailTopSection = ({
 
             <S.DetailCard>
               <S.DetailCardTitle>{content.modelAnswerTitle}</S.DetailCardTitle>
-              <S.DetailCardText>{selectedQuestion.modelAnswer}</S.DetailCardText>
+              <S.DetailContent>
+                <S.DetailCardText>{selectedQuestion.modelAnswer}</S.DetailCardText>
+              </S.DetailContent>
             </S.DetailCard>
 
             <S.DetailCard>
               <S.DetailCardTitle>{content.followUpTitle}</S.DetailCardTitle>
-              <S.DetailCardText>
-                {selectedQuestion.followUpQuestion}
-              </S.DetailCardText>
+              <S.DetailContent>
+                <S.DetailCardText>
+                  {selectedQuestion.followUpQuestion}
+                </S.DetailCardText>
+              </S.DetailContent>
             </S.DetailCard>
           </S.DetailColumn>
         </S.TopGrid>

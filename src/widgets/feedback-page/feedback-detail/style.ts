@@ -154,18 +154,20 @@ export const DetailColumn = styled.div`
   }
 `;
 
-export const QuestionContent = styled.div`
+export const DetailContent = styled.div`
   display: flex;
   flex-direction: column;
+  width: 100%;
   align-items: flex-start;
   gap: 0.7rem;
+  margin-top: 0.95rem;
 `;
 
 export const IntentSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.7rem;
+  gap: 0.95rem;
   margin-top: 2.2rem;
 `;
 
@@ -177,7 +179,7 @@ export const DetailCard = styled.article`
 export const AnswerCard = styled(DetailCard)`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.85rem;
   min-height: 0;
   padding-top: 0.85rem;
   padding-bottom: 0.85rem;
@@ -354,10 +356,11 @@ export const CoachBubbleImage = styled.img`
 `;
 
 export const CoachTextBox = styled.div`
+  flex: 1;
   position: relative;
   z-index: 1;
   width: min(100%, 85%);
-  margin: 0 auto;
+  margin: 0 a;
   text-align: left;
   @media (max-width: 48rem) {
     width: min(100%, 92%);
