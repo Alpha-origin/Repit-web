@@ -4,15 +4,13 @@ export const PersonalInfoWrapper = styled.section`
   position: relative;
   width: 100%;
   max-width: 850px;
-  min-height: 15.5em;
+  min-height: 15.7em;
   padding: 1.9rem 2.3rem 2rem;
   background-color: #ffffff;
   border-radius: 1.25rem;
   box-shadow: 0 1.1rem 2.8rem rgba(169, 181, 205, 0.14);
   margin: 0 auto;
   margin-top: -1.65rem;
-
-
   @media (max-width: 48rem) {
     min-height: auto;
     padding: 1.5rem 1.4rem 1.75rem;

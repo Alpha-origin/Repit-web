@@ -214,8 +214,8 @@ export const BackButton = styled.button`
   font-weight: 800;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease;
-  margin-top: -1.55rem;
-  margin-bottom: 1.5rem;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
 
   &:hover {
     background-color: #e8ebf2;
@@ -225,7 +225,7 @@ export const BackButton = styled.button`
 
 export const SaveButton = styled.button`
   width: min(100%, 18rem);
-  margin-top: -1.55rem;
+  margin-top: -1rem;
   min-width: 13rem;
   height: 3.25rem;
   border: none;
