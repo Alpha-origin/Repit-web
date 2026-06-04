@@ -1,5 +1,4 @@
 import RobotImageAsset from "@/shared/img/feedback-page/Repit-feedback.svg?url";
-import TalkImageAsset from "@/shared/img/feedback-page/Repit-talk.svg?url";
 import { useNavigate } from "react-router-dom";
 import * as S from "../style";
 import type { FeedbackDetailBottomSectionProps } from "../type";
@@ -19,11 +18,6 @@ const FeedbackDetailBottomSection = ({
         </S.CoachIllustration>
 
         <S.CoachBubble>
-          <S.CoachBubbleImage
-            src={TalkImageAsset}
-            alt=""
-            aria-hidden="true"
-          />
           <S.CoachTextBox>
             <S.CoachText>{content.coachComment}</S.CoachText>
           </S.CoachTextBox>

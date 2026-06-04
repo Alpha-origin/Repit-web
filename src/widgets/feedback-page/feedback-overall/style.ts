@@ -408,8 +408,8 @@ export const ReliabilityBadges = styled.div`
 `;
 
 export const ReliabilityBadge = styled.div`
-  min-width: 5.6rem;
-  height: 2.9rem;
+  min-width: 5.2rem;
+  height: 2.7rem;
   padding: 0 1rem;
   border: 0.0625rem solid rgba(189, 201, 224, 0.95);
   border-radius: 0.55rem;
@@ -419,7 +419,7 @@ export const ReliabilityBadge = styled.div`
   font-size: 0.96rem;
   font-weight: 100;
   letter-spacing: 0.03rem;
-  transform: scale(0.96);
+  transform: scale(1);
   transform-origin: center;
   display: flex;
   align-items: center;

@@ -326,45 +326,28 @@ export const RobotImage = styled.img`
 `;
 
 export const CoachBubble = styled.div`
-  position: relative;
   flex: 1;
-  min-height: 9.3rem;
+  min-height: 8.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem 1.8rem 1.5rem 1.55rem;
-  background: transparent;
-  overflow: hidden;
+  padding: 1.45rem 1.9rem;
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.98);
 
   @media (max-width: 48rem) {
     width: 100%;
-    min-height: 7.8rem;
-    padding: 0.7rem 0.8rem 0.85rem;
+    min-height: 7.4rem;
+    padding: 1rem 1.1rem;
   }
-`;
-
-export const CoachBubbleImage = styled.img`
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: fill;
-  z-index: 0;
-  pointer-events: none;
-  user-select: none;
 `;
 
 export const CoachTextBox = styled.div`
-  flex: 1;
-  position: relative;
-  z-index: 1;
-  width: min(100%, 85%);
-  margin: 0 a;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
   text-align: left;
-  @media (max-width: 48rem) {
-    width: min(100%, 92%);
-  }
 `;
 
 export const CoachText = styled.p`
