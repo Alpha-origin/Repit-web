@@ -337,7 +337,7 @@ export const MiddleGrid = styled.div`
 export const TextCard = styled.article`
   ${cardSurface}
   min-height: 12.6rem;
-  padding: 1rem 1.15rem 1.2rem;
+  padding: 1.45rem 1.45rem 1.2rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -393,7 +393,7 @@ export const ReliabilityCard = styled.article`
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.95rem 1.15rem;
+  padding: 0.95rem 1.45rem;
 
   @media (max-width: 40rem) {
     flex-direction: column;
@@ -417,7 +417,7 @@ export const ReliabilityBadge = styled.div`
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   color: #111111;
   font-size: 1.12rem;
-  font-weight: 800;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -429,7 +429,7 @@ export const QuestionCard = styled.article`
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  padding: 1rem 1.15rem 1.15rem;
+  padding: 1.45rem 1.45rem 1.15rem;
 `;
 
 export const KeywordCard = styled.article`
