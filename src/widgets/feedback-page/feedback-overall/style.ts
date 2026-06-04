@@ -29,22 +29,22 @@ const cardSurface = css`
 const keywordSizeMap = {
   xs: css`
     font-size: 1.16rem;
-    font-weight: 600;
+    font-weight: 500;
     opacity: 0.82;
   `,
   sm: css`
     font-size: 1.58rem;
-    font-weight: 700;
+    font-weight: 600;
     opacity: 0.88;
   `,
   md: css`
     font-size: 2.3rem;
-    font-weight: 800;
+    font-weight: 700;
     opacity: 0.94;
   `,
   xl: css`
     font-size: 3.75rem;
-    font-weight: 800;
+    font-weight: 700;
     opacity: 1;
   `,
 };
@@ -227,7 +227,7 @@ export const HighlightText = styled.p`
   margin: 0;
   color: #2b74e3;
   font-size: 1.14rem;
-  font-weight: 700;
+  font-weight: 550;
   text-align: right;
 `;
 
@@ -416,7 +416,7 @@ export const ReliabilityBadge = styled.div`
   background: rgba(255, 255, 255, 0.9);
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   color: rgba(0, 0, 0, 0.72);
-  font-size: 0.96rem;
+  font-size: 1.05rem;
   font-weight: 100;
   letter-spacing: 0.03rem;
   transform: scale(1);
