@@ -154,7 +154,7 @@ export const MainScore = styled.h2`
   margin: 0.45rem 0 0.6rem;
   color: #2b74e3;
   font-size: clamp(1.3rem, 2.8vw, 2.85rem);
-  font-weight: 550;
+  font-weight: 500;
   letter-spacing: -0.08rem;
   line-height: 1;
 `;
@@ -169,7 +169,7 @@ export const DescriptionLine = styled.p`
   margin: 0;
   color: #222222;
   font-size: 1.14rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.45;
 `;
 
@@ -227,7 +227,7 @@ export const HighlightText = styled.p`
   margin: 0;
   color: #2b74e3;
   font-size: 1.14rem;
-  font-weight: 800;
+  font-weight: 700;
   text-align: right;
 `;
 
@@ -306,7 +306,7 @@ export const BarFill = styled.div<BarFillProps>`
 export const BarValue = styled.span<BarValueProps>`
   color: ${({ $tone }) => ($tone === "primary" ? "#ffffff" : "#2f75e7")};
   font-size: 1.08rem;
-  font-weight: 800;
+  font-weight: 700;
 `;
 
 export const BarLabel = styled.p`
@@ -318,7 +318,7 @@ export const BarLabel = styled.p`
   transform: translateX(-50%);
   color: #2f75e7;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 600;
   text-align: center;
   line-height: 1.25;
   word-break: keep-all;
@@ -415,9 +415,12 @@ export const ReliabilityBadge = styled.div`
   border-radius: 0.55rem;
   background: rgba(255, 255, 255, 0.9);
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
-  color: #000000;
-  font-size: 1.12rem;
-  font-weight: 400;
+  color: rgba(0, 0, 0, 0.72);
+  font-size: 0.96rem;
+  font-weight: 100;
+  letter-spacing: 0.03rem;
+  transform: scale(0.96);
+  transform-origin: center;
   display: flex;
   align-items: center;
   justify-content: center;
