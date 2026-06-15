@@ -31,10 +31,10 @@ export const Container = styled.div`
   --interviewer-padding-x: clamp(0.9rem, 1vw, 1.1rem);
   --interviewer-title-size: clamp(1.3rem, 1.14rem + 0.16vw, 1.46rem);
   --interviewer-text-size: clamp(0.94rem, 0.91rem + 0.04vw, 0.99rem);
-  --action-button-width: clamp(14rem, 18vw, 18.5rem);
-  --action-button-height: clamp(3.15rem, 4.8vh, 3.65rem);
+  --action-button-width: clamp(12rem, 15vw, 15.5rem);
+  --action-button-height: clamp(2.85rem, 4.2vh, 3.2rem);
   --action-gap: clamp(1rem, 1.7vw, 1.8rem);
-  --action-font-size: clamp(1rem, 0.95rem + 0.1vw, 1.08rem);
+  --action-font-size: clamp(0.94rem, 0.9rem + 0.08vw, 1rem);
   --content-stack-gap: clamp(1.7rem, 2.9vh, 2.2rem);
 
   width: 100%;

@@ -1,15 +1,18 @@
 import BackGroundPage from "@/widgets/main-page/background-page";
 import Header from "@/shared/components/header/index";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import * as S from "./style";
 
 const MainLayout = () => {
+  const { pathname } = useLocation();
+  const isInterviewRoute = pathname === "/main/interview";
+
   return (
     <S.Page>
       <BackGroundPage />
-      <S.Content>
+      <S.Content $isInterviewRoute={isInterviewRoute}>
         <Header />
-        <S.OutletArea>
+        <S.OutletArea $isInterviewRoute={isInterviewRoute}>
           <Outlet />
         </S.OutletArea>
       </S.Content>

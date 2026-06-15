@@ -6,11 +6,13 @@ import * as S from "@/widgets/interview-page/interview/style";
 
 const InterviewPage = () => {
   const interviewSession = useInterviewSession();
+  const isVoiceMode = interviewSession.mode === "voice";
+  const isTextMode = interviewSession.mode === "text";
 
   return (
     <S.Container>
-      <S.Content>
-        {interviewSession.mode === "voice" && (
+      <S.Content $textMode={isTextMode} $voiceMode={isVoiceMode}>
+        {isVoiceMode && (
           <InterviewCameraView
             cameraState={interviewSession.cameraState}
             videoRef={interviewSession.videoRef}

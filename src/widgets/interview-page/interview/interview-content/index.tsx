@@ -12,9 +12,12 @@ const InterviewContentView = ({
   onReset,
   question,
 }: InterviewContentViewProps) => {
+  const isVoiceMode = mode === "voice";
+  const isTextMode = mode === "text";
+
   return (
-    <S.InterviewBody>
-      <S.QuestionCard>
+    <S.InterviewBody $textMode={isTextMode} $voiceMode={isVoiceMode}>
+      <S.QuestionCard $voiceMode={isVoiceMode}>
         <S.QuestionMeta>
           <S.QuestionLabel>{question.id}</S.QuestionLabel>
           <S.Timer>00:00</S.Timer>
@@ -24,26 +27,29 @@ const InterviewContentView = ({
           <S.QuestionText>{question.text}</S.QuestionText>
         </S.QuestionBody>
 
-        <S.AnswerStatus>{answerStatus}</S.AnswerStatus>
+        <S.QuestionFooter>
+          <S.FooterSpacer />
+          <S.AnswerStatus>{answerStatus}</S.AnswerStatus>
 
-        <S.ModeControl>
-          <S.ModeButton
-            type="button"
-            $active={mode === "text"}
-            aria-pressed={mode === "text"}
-            onClick={() => onModeChange("text")}
-          >
-            텍스트
-          </S.ModeButton>
-          <S.ModeButton
-            type="button"
-            $active={mode === "voice"}
-            aria-pressed={mode === "voice"}
-            onClick={() => onModeChange("voice")}
-          >
-            음성
-          </S.ModeButton>
-        </S.ModeControl>
+          <S.ModeControl>
+            <S.ModeButton
+              type="button"
+              $active={mode === "text"}
+              aria-pressed={mode === "text"}
+              onClick={() => onModeChange("text")}
+            >
+              텍스트
+            </S.ModeButton>
+            <S.ModeButton
+              type="button"
+              $active={mode === "voice"}
+              aria-pressed={mode === "voice"}
+              onClick={() => onModeChange("voice")}
+            >
+              음성
+            </S.ModeButton>
+          </S.ModeControl>
+        </S.QuestionFooter>
       </S.QuestionCard>
 
       {mode === "text" ? (
