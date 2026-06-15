@@ -36,6 +36,13 @@ export const GlobalStyle = createGlobalStyle`
   footer, header, hgroup, menu, nav, section {
     display: block;
   }
+  html, body, #root {
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    background-color: #f2f3f5;
+    overflow: hidden;
+  }
   body {
     line-height: 1;
     font-family: ${({ theme }) => theme.fontFamily.pretendard};

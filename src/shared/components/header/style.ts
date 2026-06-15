@@ -18,6 +18,7 @@ export const Header = styled.header`
   z-index: 1;
   width: 100%;
   min-height: 4.25rem;
+  background-color: transparent;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
