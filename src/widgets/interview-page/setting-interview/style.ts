@@ -1,5 +1,17 @@
 import styled from 'styled-components';
 
+interface SelectButtonProps {
+  $selected: boolean;
+}
+
+interface InterviewerCardProps {
+  $selected: boolean;
+}
+
+interface ActionButtonProps {
+  $disabled?: boolean;
+}
+
 export const Container = styled.div`
   --page-inline-padding: clamp(0.75rem, 4.4vw, 4.5rem);
   --panel-max-width: 52rem;
@@ -85,7 +97,7 @@ export const ContentWrapper = styled.div`
   scrollbar-width: none;
   -ms-overflow-style: none;
   background: #ffffff;
-  border-radius: 1.75rem;
+  border-radius: 1.25rem;
   padding: var(--panel-padding);
   box-shadow: none;
   display: flex;
@@ -100,7 +112,7 @@ export const ContentWrapper = styled.div`
   @media (max-width: 48rem) {
     height: auto;
     min-height: auto;
-    border-radius: 1.25rem;
+    border-radius: 1rem;
   }
 `;
 
@@ -143,15 +155,17 @@ export const ButtonGroup = styled.div`
   }
 `;
 
-export const SelectButton = styled.button`
+export const SelectButton = styled.button<SelectButtonProps>`
   min-height: var(--control-height);
   padding: 0.7rem var(--control-padding-x);
-  border: 0.0625rem solid #d8deea;
-  border-radius: 0.9rem;
-  background: #ffffff;
-  color: #5b5b5b;
+  border: 0.0625rem solid
+    ${({ $selected }) => ($selected ? '#2f80ed' : '#d8deea')};
+  border-radius: 0.65rem;
+  background: ${({ $selected }) =>
+    $selected ? 'rgba(47, 128, 237, 0.1)' : '#ffffff'};
+  color: ${({ $selected }) => ($selected ? '#2f80ed' : '#5b5b5b')};
   font-size: var(--control-font-size);
-  font-weight: 600;
+  font-weight: ${({ $selected }) => ($selected ? 700 : 600)};
   line-height: 1.2;
   cursor: pointer;
   transition:
@@ -165,6 +179,11 @@ export const SelectButton = styled.button`
     border-color: #2f80ed;
     color: #2f80ed;
     box-shadow: 0 0 1.5rem rgba(47, 128, 237, 0.12);
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid rgba(47, 128, 237, 0.28);
+    outline-offset: 0.125rem;
   }
 `;
 
@@ -182,13 +201,18 @@ export const InterviewerGrid = styled.div`
   }
 `;
 
-export const InterviewerCard = styled.div`
+export const InterviewerCard = styled.div<InterviewerCardProps>`
   min-height: var(--interviewer-height);
   padding: var(--interviewer-padding-y) var(--interviewer-padding-x);
-  border: 0.0625rem solid #edf2fb;
-  border-radius: 1.8rem;
-  background: #ffffff;
-  box-shadow: 0 0.75rem 1.75rem rgba(47, 128, 237, 0.09);
+  border: 0.0625rem solid
+    ${({ $selected }) => ($selected ? '#2f80ed' : '#edf2fb')};
+  border-radius: 1.2rem;
+  background: ${({ $selected }) =>
+    $selected ? 'rgba(47, 128, 237, 0.08)' : '#ffffff'};
+  box-shadow: ${({ $selected }) =>
+    $selected
+      ? '0 0.95rem 2rem rgba(47, 128, 237, 0.18)'
+      : '0 0.75rem 1.75rem rgba(47, 128, 237, 0.09)'};
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -198,13 +222,20 @@ export const InterviewerCard = styled.div`
   transition:
     transform 0.2s ease,
     border-color 0.2s ease,
+    background-color 0.2s ease,
     box-shadow 0.2s ease;
   cursor: pointer;
+  user-select: none;
 
   &:hover {
     transform: translateY(-0.2rem);
     border-color: #2f80ed;
     box-shadow: 0 0.75rem 2rem rgba(47, 128, 237, 0.12);
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid rgba(47, 128, 237, 0.28);
+    outline-offset: 0.125rem;
   }
 `;
 
@@ -241,19 +272,23 @@ export const BottomButtonWrapper = styled.div`
   }
 `;
 
-const baseButton = styled.button`
+const baseButton = styled.button<ActionButtonProps>`
   width: min(100%, var(--action-button-width));
   min-height: var(--action-button-height);
   border: none;
-  border-radius: 0.85rem;
+  border-radius: 0.65rem;
   font-size: var(--action-font-size);
   font-weight: 700;
-  cursor: pointer;
+  cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
     background-color 0.2s ease;
 
+  &:disabled {
+    transform: none;
+    box-shadow: none;
+  }
 
   @media (max-width: 40rem) {
     width: 100%;
@@ -271,12 +306,14 @@ export const BackButton = styled(baseButton)`
 `;
 
 export const NextButton = styled(baseButton)`
-  background: #2f80ed;
+  background: ${({ $disabled }) => ($disabled ? '#cfd8e7' : '#2f80ed')};
   color: #ffffff;
-  box-shadow: 0 0.75rem 1.75rem rgba(47, 128, 237, 0.24);
+  box-shadow: ${({ $disabled }) =>
+    $disabled ? 'none' : '0 0.75rem 1.75rem rgba(47, 128, 237, 0.24)'};
 
   &:hover {
-    background: #1f72df;
-    box-shadow: 0 1rem 2rem rgba(47, 128, 237, 0.28);
+    background: ${({ $disabled }) => ($disabled ? '#cfd8e7' : '#1f72df')};
+    box-shadow: ${({ $disabled }) =>
+      $disabled ? 'none' : '0 1rem 2rem rgba(47, 128, 237, 0.28)'};
   }
 `;
