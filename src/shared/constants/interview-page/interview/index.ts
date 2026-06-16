@@ -1,6 +1,6 @@
 export const INTERVIEW_DEFAULT_QUESTION = {
   id: 'Q1-1',
-  text: 'React TypeScript 함께 사용할때 주의해야 할 점은 무엇이라고 생각하나요?',
+  text: '리액트 타입스크립트를 함께 사용할때 주의해야 할 점은 무엇이라고 생각하나요?',
 } as const;
 
 export const INTERVIEW_STATUS_MESSAGES = {

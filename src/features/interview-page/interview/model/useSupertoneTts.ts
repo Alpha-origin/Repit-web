@@ -5,6 +5,7 @@ const SUPERTONE_TTS_API_URL = "/api/supertone/tts";
 const SUPERTONE_ANDREW_VOICE_ID = "4653d63d07d5340656b6bc";
 const SUPERTONE_DEFAULT_MODEL = "sona_speech_1";
 const SUPERTONE_DEFAULT_LANGUAGE = "ko";
+const SUPERTONE_DEFAULT_SPEED = 1.15;
 
 const createSpeechRequest = (text: string) =>
   JSON.stringify({
@@ -12,6 +13,9 @@ const createSpeechRequest = (text: string) =>
     language: SUPERTONE_DEFAULT_LANGUAGE,
     model: SUPERTONE_DEFAULT_MODEL,
     output_format: "wav",
+    voice_settings: {
+      speed: SUPERTONE_DEFAULT_SPEED,
+    },
   });
 
 export const useSupertoneTts = (text: string) => {
