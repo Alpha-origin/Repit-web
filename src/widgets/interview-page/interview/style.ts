@@ -16,6 +16,10 @@ interface TextLayoutProps {
   $textMode?: boolean;
 }
 
+interface VoiceLevelProps {
+  $voiceLevel?: number;
+}
+
 export const Container = styled.section<VoiceLayoutProps & TextLayoutProps>`
   width: 100vw;
   max-width: 100vw;
@@ -360,6 +364,47 @@ export const FooterSpacer = styled.div`
   }
 `;
 
+export const QuestionAudioButton = styled.button`
+  justify-self: start;
+  min-width: 6.8rem;
+  min-height: 2.8rem;
+  padding: 0.55rem 1rem;
+  border: 0.0625rem solid #d8e6fb;
+  border-radius: 999rem;
+  background: rgba(255, 255, 255, 0.96);
+  color: #256fdb;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: #f4f9ff;
+    border-color: #b8d5ff;
+    transform: translateY(-0.04rem);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  @media (max-width: 40rem) {
+    justify-self: center;
+  }
+
+  @media (max-height: 56rem) {
+    min-height: 2.5rem;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.88rem;
+  }
+`;
+
 export const AnswerStatus = styled.p`
   margin: 0;
   text-align: center;
@@ -483,18 +528,50 @@ export const PrimaryAction = styled(actionButtonBase)`
   }
 `;
 
-export const InlineVisualizerWrap = styled.div`
+export const InlineVisualizerWrap = styled.div<VoiceLevelProps>`
   width: 100%;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  filter: ${({ $voiceLevel = 0 }) =>
+    `drop-shadow(0 0 ${0.55 + $voiceLevel * 0.95}rem rgba(51, 136, 247, ${0.14 + $voiceLevel * 0.18}))`};
+  transition: filter 90ms linear;
+
+  &::before {
+    content: "";
+    position: absolute;
+    width: clamp(5.2rem, 6.4vw, 6.2rem);
+    aspect-ratio: 1;
+    border-radius: 999rem;
+    background: radial-gradient(
+      circle,
+      rgba(51, 136, 247, 0.2) 0%,
+      rgba(51, 136, 247, 0.08) 45%,
+      rgba(51, 136, 247, 0) 72%
+    );
+    opacity: ${({ $voiceLevel = 0 }) => 0.12 + $voiceLevel * 0.32};
+    transform: ${({ $voiceLevel = 0 }) => `scale(${0.92 + $voiceLevel * 0.48})`};
+    transition:
+      opacity 90ms linear,
+      transform 90ms linear;
+  }
 `;
 
-export const InlineVisualizerIcon = styled.img`
+export const InlineVisualizerIcon = styled.img<VoiceLevelProps>`
   width: clamp(4.6rem, 5.6vw, 5.4rem);
+  position: relative;
+  z-index: 1;
   height: auto;
   display: block;
   filter: none;
+  transform-origin: center;
+  transform: ${({ $voiceLevel = 0 }) =>
+    `scale(${0.94 + $voiceLevel * 0.42}) translateY(${-0.2 * $voiceLevel}rem)`};
+  opacity: ${({ $voiceLevel = 0 }) => 0.88 + $voiceLevel * 0.12};
+  transition:
+    transform 90ms linear,
+    opacity 90ms linear;
 
   @media (max-height: 56rem) {
     width: 4.2rem;

@@ -8,11 +8,15 @@ const InterviewContentView = ({
   answerText,
   isVoiceStarted,
   mode,
+  questionAudioStatus,
   onAnswerTextChange,
   onClearAnswer,
+  onCompleteVoice,
   onModeChange,
   onStartVoice,
+  onToggleQuestionAudio,
   question,
+  voiceLevel,
 }: InterviewContentViewProps) => {
   const isVoiceMode = mode === "voice";
   const isTextMode = mode === "text";
@@ -57,6 +61,12 @@ const InterviewContentView = ({
     };
   }, [isVoiceMode]);
 
+  const questionAudioButtonLabel = questionAudioStatus === "loading"
+    ? "질문 생성중"
+    : questionAudioStatus === "playing"
+      ? "질문 멈추기"
+      : "질문 듣기";
+
   return (
     <S.InterviewBody $textMode={isTextMode} $voiceMode={isVoiceMode}>
       <S.QuestionCard
@@ -82,11 +92,12 @@ const InterviewContentView = ({
             <S.QuestionText>{question.text}</S.QuestionText>
 
             {isVoiceMode && isVoiceStarted ? (
-              <S.InlineVisualizerWrap aria-hidden="true">
+              <S.InlineVisualizerWrap aria-hidden="true" $voiceLevel={voiceLevel}>
                 <S.InlineVisualizerIcon
                   src={InterviewVisualizerIcon}
                   alt=""
                   aria-hidden="true"
+                  $voiceLevel={voiceLevel}
                 />
               </S.InlineVisualizerWrap>
             ) : null}
@@ -94,8 +105,18 @@ const InterviewContentView = ({
         </S.QuestionBody>
 
         <S.QuestionFooter>
-          <S.FooterSpacer />
-          {isTextMode ? <S.AnswerStatus>{answerStatus}</S.AnswerStatus> : <S.FooterSpacer />}
+          {isVoiceMode && !isVoiceStarted ? (
+            <S.QuestionAudioButton
+              type="button"
+              onClick={onToggleQuestionAudio}
+              disabled={questionAudioStatus === "loading"}
+            >
+              {questionAudioButtonLabel}
+            </S.QuestionAudioButton>
+          ) : (
+            <S.FooterSpacer />
+          )}
+          <S.AnswerStatus>{answerStatus}</S.AnswerStatus>
 
           <S.ModeControl>
             <S.ModeButton
@@ -139,7 +160,9 @@ const InterviewContentView = ({
       ) : (
         <S.ActionRow>
           {isVoiceStarted ? (
-            <S.PrimaryAction type="button">완료하기</S.PrimaryAction>
+            <S.PrimaryAction type="button" onClick={onCompleteVoice}>
+              완료하기
+            </S.PrimaryAction>
           ) : (
             <S.PrimaryAction type="button" onClick={onStartVoice}>
               시작하기

@@ -1,121 +1,52 @@
-import { useEffect, useRef, useState } from "react";
-import type { ChangeEvent } from "react";
+import { useState } from "react";
 
 import { INTERVIEW_STATUS_MESSAGES } from "@/shared/constants/interview-page/interview";
 
-import type { CameraState, InterviewMode } from "@/widgets/interview-page/interview/type";
+import type { InterviewMode } from "@/widgets/interview-page/interview/type";
+import { useSupertoneTts } from "./useSupertoneTts";
+import { useInterviewCamera } from "./useInterviewCamera";
+import { useVoiceAnswer } from "./useVoiceAnswer";
 
-export const useInterviewSession = () => {
+export const useInterviewSession = (questionText: string) => {
   const [mode, setMode] = useState<InterviewMode>("voice");
-  const [cameraState, setCameraState] = useState<CameraState>("loading");
-  const [answerText, setAnswerText] = useState("");
-  const [isVoiceStarted, setIsVoiceStarted] = useState(false);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    let currentStream: MediaStream | null = null;
-    const videoElement = videoRef.current;
-
-    if (mode !== "voice") {
-      if (videoElement) {
-        videoElement.srcObject = null;
-      }
-      return;
-    }
-
-    const attachCamera = async () => {
-      if (!navigator.mediaDevices?.getUserMedia) {
-        if (!cancelled) {
-          setCameraState("blocked");
-        }
-        return;
-      }
-
-      setCameraState("loading");
-
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: "user",
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-          audio: false,
-        });
-
-        if (cancelled) {
-          stream.getTracks().forEach((track) => track.stop());
-          return;
-        }
-
-        currentStream = stream;
-
-        if (videoElement) {
-          videoElement.srcObject = stream;
-          void videoElement.play().catch(() => {});
-        }
-
-        setCameraState("ready");
-      } catch {
-        if (!cancelled) {
-          setCameraState("blocked");
-        }
-      }
-    };
-
-    void attachCamera();
-
-    return () => {
-      cancelled = true;
-
-      if (videoElement) {
-        videoElement.srcObject = null;
-      }
-
-      currentStream?.getTracks().forEach((track) => track.stop());
-    };
-  }, [mode]);
+  const isVoiceMode = mode === "voice";
+  const { cameraState, videoRef } = useInterviewCamera(isVoiceMode);
+  const voiceAnswer = useVoiceAnswer();
+  const questionTts = useSupertoneTts(questionText);
 
   const handleModeChange = (nextMode: InterviewMode) => {
     if (nextMode === mode) {
       return;
     }
 
-    setCameraState("loading");
-    setIsVoiceStarted(false);
+    questionTts.onStop();
+
+    if (isVoiceMode) {
+      voiceAnswer.onExitVoiceMode();
+    }
+
     setMode(nextMode);
   };
 
   const handleStartVoice = () => {
-    setIsVoiceStarted(true);
+    questionTts.onStop();
+    void voiceAnswer.onStartVoice();
   };
-
-  const handleAnswerTextChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    setAnswerText(event.target.value);
-  };
-
-  const handleClearAnswer = () => {
-    setAnswerText("");
-  };
-
-  const answerStatus =
-    mode === "voice"
-      ? isVoiceStarted
-        ? INTERVIEW_STATUS_MESSAGES.voiceActive
-        : INTERVIEW_STATUS_MESSAGES.voiceIdle
-      : INTERVIEW_STATUS_MESSAGES.text;
 
   return {
-    answerStatus,
-    answerText,
+    answerStatus: isVoiceMode ? voiceAnswer.voiceStatus : INTERVIEW_STATUS_MESSAGES.text,
+    answerText: voiceAnswer.answerText,
     cameraState,
-    isVoiceStarted,
+    isVoiceStarted: voiceAnswer.isVoiceStarted,
     mode,
-    onAnswerTextChange: handleAnswerTextChange,
-    onClearAnswer: handleClearAnswer,
+    questionAudioStatus: questionTts.status,
+    onAnswerTextChange: voiceAnswer.onAnswerTextChange,
+    onClearAnswer: voiceAnswer.onClearAnswer,
+    onCompleteVoice: voiceAnswer.onCompleteVoice,
     onModeChange: handleModeChange,
     onStartVoice: handleStartVoice,
+    onToggleQuestionAudio: questionTts.onToggle,
     videoRef,
+    voiceLevel: voiceAnswer.voiceLevel,
   };
 };
