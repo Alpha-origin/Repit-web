@@ -42,8 +42,9 @@ const getVoiceStatus = ({
 export const useVoiceAnswer = () => {
   const [answerText, setAnswerText] = useState("");
   const [isVoiceStarted, setIsVoiceStarted] = useState(false);
+  const [microphoneStream, setMicrophoneStream] = useState<MediaStream | null>(null);
   const latestTranscriptRef = useRef("");
-  const voiceLevel = useVoiceLevel(isVoiceStarted);
+  const voiceLevel = useVoiceLevel(isVoiceStarted ? microphoneStream : null);
   const {
     transcript,
     listening,
@@ -61,8 +62,16 @@ export const useVoiceAnswer = () => {
   useEffect(() => {
     return () => {
       void SpeechRecognition.abortListening();
+      microphoneStream?.getTracks().forEach((track) => track.stop());
     };
-  }, []);
+  }, [microphoneStream]);
+
+  const clearMicrophoneStream = () => {
+    setMicrophoneStream((currentStream) => {
+      currentStream?.getTracks().forEach((track) => track.stop());
+      return null;
+    });
+  };
 
   const saveTranscriptToAnswer = () => {
     setAnswerText(latestTranscriptRef.current);
@@ -74,13 +83,31 @@ export const useVoiceAnswer = () => {
       return;
     }
 
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setIsVoiceStarted(false);
+      return;
+    }
+
     resetTranscript();
     setAnswerText("");
-    setIsVoiceStarted(true);
 
     try {
+      clearMicrophoneStream();
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+        video: false,
+      });
+
+      setMicrophoneStream(stream);
+      setIsVoiceStarted(true);
       await SpeechRecognition.startListening(VOICE_RECOGNITION_OPTIONS);
     } catch {
+      clearMicrophoneStream();
       setIsVoiceStarted(false);
     }
   };
@@ -88,12 +115,14 @@ export const useVoiceAnswer = () => {
   const handleCompleteVoice = async () => {
     await SpeechRecognition.stopListening();
     saveTranscriptToAnswer();
+    clearMicrophoneStream();
     setIsVoiceStarted(false);
   };
 
   const handleExitVoiceMode = () => {
     void SpeechRecognition.stopListening();
     saveTranscriptToAnswer();
+    clearMicrophoneStream();
     setIsVoiceStarted(false);
   };
 

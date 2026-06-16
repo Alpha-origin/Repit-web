@@ -14,13 +14,13 @@ const normalizeDecibelLevel = (rms: number) => {
   return clamp((decibel - MIN_DECIBEL) / (MAX_DECIBEL - MIN_DECIBEL), 0, 1);
 };
 
-export const useVoiceLevel = (enabled: boolean) => {
+export const useVoiceLevel = (stream: MediaStream | null) => {
   const [voiceLevel, setVoiceLevel] = useState(0);
 
   useEffect(() => {
     const AudioContextConstructor = window.AudioContext;
 
-    if (!enabled || !navigator.mediaDevices?.getUserMedia || !AudioContextConstructor) {
+    if (!stream || !AudioContextConstructor) {
       return;
     }
 
@@ -28,32 +28,17 @@ export const useVoiceLevel = (enabled: boolean) => {
     let animationFrameId = 0;
     let currentLevel = 0;
     let audioContext: AudioContext | null = null;
-    let mediaStream: MediaStream | null = null;
     let sourceNode: MediaStreamAudioSourceNode | null = null;
     let analyserNode: AnalyserNode | null = null;
 
     const startAnalyser = async () => {
       try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
-          },
-          video: false,
-        });
-
-        if (isCancelled) {
-          mediaStream.getTracks().forEach((track) => track.stop());
-          return;
-        }
-
         audioContext = new AudioContextConstructor();
         analyserNode = audioContext.createAnalyser();
         analyserNode.fftSize = 2048;
         analyserNode.smoothingTimeConstant = 0.4;
 
-        sourceNode = audioContext.createMediaStreamSource(mediaStream);
+        sourceNode = audioContext.createMediaStreamSource(stream);
         sourceNode.connect(analyserNode);
 
         const dataArray = new Uint8Array(analyserNode.fftSize);
@@ -93,10 +78,9 @@ export const useVoiceLevel = (enabled: boolean) => {
       window.cancelAnimationFrame(animationFrameId);
       sourceNode?.disconnect();
       analyserNode?.disconnect();
-      mediaStream?.getTracks().forEach((track) => track.stop());
       void audioContext?.close();
     };
-  }, [enabled]);
+  }, [stream]);
 
-  return enabled ? voiceLevel : 0;
+  return stream ? voiceLevel : 0;
 };
