@@ -5,8 +5,8 @@ export const Page = styled.main`
   min-height: 0;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
-  row-gap: 1rem;
-  padding-bottom: 1rem;
+  row-gap: 0.9rem;
+  padding-bottom: 0;
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
 
   button {

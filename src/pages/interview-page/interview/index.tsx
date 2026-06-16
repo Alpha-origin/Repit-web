@@ -5,12 +5,14 @@ import InterviewContentView from "@/widgets/interview-page/interview/interview-c
 import * as S from "@/widgets/interview-page/interview/style";
 
 const InterviewPage = () => {
-  const interviewSession = useInterviewSession();
+  const interviewSession = useInterviewSession(INTERVIEW_DEFAULT_QUESTION.text);
+  const isVoiceMode = interviewSession.mode === "voice";
+  const isTextMode = interviewSession.mode === "text";
 
   return (
-    <S.Container>
-      <S.Content>
-        {interviewSession.mode === "voice" && (
+    <S.Container $textMode={isTextMode} $voiceMode={isVoiceMode}>
+      <S.Content $textMode={isTextMode} $voiceMode={isVoiceMode}>
+        {isVoiceMode && (
           <InterviewCameraView
             cameraState={interviewSession.cameraState}
             videoRef={interviewSession.videoRef}
@@ -20,12 +22,17 @@ const InterviewPage = () => {
         <InterviewContentView
           answerStatus={interviewSession.answerStatus}
           answerText={interviewSession.answerText}
+          isVoiceStarted={interviewSession.isVoiceStarted}
           mode={interviewSession.mode}
+          questionAudioStatus={interviewSession.questionAudioStatus}
           onAnswerTextChange={interviewSession.onAnswerTextChange}
           onClearAnswer={interviewSession.onClearAnswer}
+          onCompleteVoice={interviewSession.onCompleteVoice}
           onModeChange={interviewSession.onModeChange}
-          onReset={interviewSession.onReset}
+          onStartVoice={interviewSession.onStartVoice}
+          onToggleQuestionAudio={interviewSession.onToggleQuestionAudio}
           question={INTERVIEW_DEFAULT_QUESTION}
+          voiceLevel={interviewSession.voiceLevel}
         />
       </S.Content>
     </S.Container>
