@@ -32,7 +32,7 @@ export const Content = styled.div<RouteLayoutProps>`
 export const OutletArea = styled.div<RouteLayoutProps>`
   display: grid;
   grid-template-rows: minmax(0, 1fr);
-  align-items: start;
+  align-items: ${({ $isInterviewRoute }) => ($isInterviewRoute ? "stretch" : "start")};
   justify-items: stretch;
   min-height: 0;
   padding-bottom: ${({ $isInterviewRoute }) => ($isInterviewRoute ? 0 : "1.5rem")};

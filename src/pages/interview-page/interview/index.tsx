@@ -10,7 +10,7 @@ const InterviewPage = () => {
   const isTextMode = interviewSession.mode === "text";
 
   return (
-    <S.Container>
+    <S.Container $textMode={isTextMode} $voiceMode={isVoiceMode}>
       <S.Content $textMode={isTextMode} $voiceMode={isVoiceMode}>
         {isVoiceMode && (
           <InterviewCameraView
@@ -22,11 +22,12 @@ const InterviewPage = () => {
         <InterviewContentView
           answerStatus={interviewSession.answerStatus}
           answerText={interviewSession.answerText}
+          isVoiceStarted={interviewSession.isVoiceStarted}
           mode={interviewSession.mode}
           onAnswerTextChange={interviewSession.onAnswerTextChange}
           onClearAnswer={interviewSession.onClearAnswer}
           onModeChange={interviewSession.onModeChange}
-          onReset={interviewSession.onReset}
+          onStartVoice={interviewSession.onStartVoice}
           question={INTERVIEW_DEFAULT_QUESTION}
         />
       </S.Content>

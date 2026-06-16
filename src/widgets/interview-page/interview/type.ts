@@ -18,10 +18,11 @@ export interface InterviewCameraViewProps {
 export interface InterviewContentViewProps {
   answerStatus: string;
   answerText: string;
+  isVoiceStarted: boolean;
   mode: InterviewMode;
   onAnswerTextChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   onClearAnswer: () => void;
   onModeChange: (mode: InterviewMode) => void;
-  onReset: () => void;
+  onStartVoice: () => void;
   question: InterviewQuestion;
 }

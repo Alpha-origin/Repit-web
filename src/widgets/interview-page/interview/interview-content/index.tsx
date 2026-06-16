@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import InterviewVisualizerIcon from "@/shared/img/interview-page/Repit-Interview.svg?url";
 import type { InterviewContentViewProps } from "../type";
 import * as S from "../style";
@@ -5,31 +6,96 @@ import * as S from "../style";
 const InterviewContentView = ({
   answerStatus,
   answerText,
+  isVoiceStarted,
   mode,
   onAnswerTextChange,
   onClearAnswer,
   onModeChange,
-  onReset,
+  onStartVoice,
   question,
 }: InterviewContentViewProps) => {
   const isVoiceMode = mode === "voice";
   const isTextMode = mode === "text";
+  const questionCardRef = useRef<HTMLElement | null>(null);
+  const [voiceQuestionCardHeight, setVoiceQuestionCardHeight] = useState<number | null>(
+    null,
+  );
+
+  useLayoutEffect(() => {
+    if (!isVoiceMode) {
+      return;
+    }
+
+    const element = questionCardRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    const updateHeight = () => {
+      const nextHeight = Math.round(element.getBoundingClientRect().height);
+
+      if (nextHeight > 0) {
+        setVoiceQuestionCardHeight(nextHeight);
+      }
+    };
+
+    updateHeight();
+
+    if (typeof ResizeObserver === "undefined") {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      updateHeight();
+    });
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isVoiceMode]);
 
   return (
     <S.InterviewBody $textMode={isTextMode} $voiceMode={isVoiceMode}>
-      <S.QuestionCard $voiceMode={isVoiceMode}>
+      <S.QuestionCard
+        ref={questionCardRef}
+        $textMode={isTextMode}
+        $voiceMode={isVoiceMode}
+        style={
+          isTextMode && voiceQuestionCardHeight
+            ? {
+                height: `${voiceQuestionCardHeight}px`,
+                minHeight: `${voiceQuestionCardHeight}px`,
+              }
+            : undefined
+        }
+      >
         <S.QuestionMeta>
           <S.QuestionLabel>{question.id}</S.QuestionLabel>
           <S.Timer>00:00</S.Timer>
         </S.QuestionMeta>
 
         <S.QuestionBody>
-          <S.QuestionText>{question.text}</S.QuestionText>
+          <S.QuestionContentStack>
+            <S.QuestionText>{question.text}</S.QuestionText>
+
+            {isVoiceMode && isVoiceStarted ? (
+              <S.InlineVisualizerWrap aria-hidden="true">
+                <S.InlineVisualizerIcon
+                  src={InterviewVisualizerIcon}
+                  alt=""
+                  aria-hidden="true"
+                />
+              </S.InlineVisualizerWrap>
+            ) : null}
+          </S.QuestionContentStack>
         </S.QuestionBody>
 
         <S.QuestionFooter>
           <S.FooterSpacer />
-          <S.AnswerStatus>{answerStatus}</S.AnswerStatus>
+          {isTextMode ? <S.AnswerStatus>{answerStatus}</S.AnswerStatus> : <S.FooterSpacer />}
 
           <S.ModeControl>
             <S.ModeButton
@@ -72,19 +138,13 @@ const InterviewContentView = ({
         </>
       ) : (
         <S.ActionRow>
-          <S.SecondaryAction type="button" onClick={onReset}>
-            다시하기
-          </S.SecondaryAction>
-
-          <S.VisualizerButton
-            type="button"
-            aria-label="음성 인터뷰 상태"
-            onClick={() => onModeChange("voice")}
-          >
-            <S.VisualizerIcon src={InterviewVisualizerIcon} alt="" aria-hidden="true" />
-          </S.VisualizerButton>
-
-          <S.PrimaryAction type="button">완료</S.PrimaryAction>
+          {isVoiceStarted ? (
+            <S.PrimaryAction type="button">완료하기</S.PrimaryAction>
+          ) : (
+            <S.PrimaryAction type="button" onClick={onStartVoice}>
+              시작하기
+            </S.PrimaryAction>
+          )}
         </S.ActionRow>
       )}
     </S.InterviewBody>

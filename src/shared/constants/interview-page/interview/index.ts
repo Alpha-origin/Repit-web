@@ -4,6 +4,7 @@ export const INTERVIEW_DEFAULT_QUESTION = {
 } as const;
 
 export const INTERVIEW_STATUS_MESSAGES = {
-  voice: '내 답변 보내는 중...',
+  voiceIdle: '시작하기를 눌러 음성 답변을 시작해주세요.',
+  voiceActive: '내 답변 보내는 중...',
   text: '텍스트로 답변을 작성해주세요.',
 } as const;

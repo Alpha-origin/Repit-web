@@ -9,6 +9,7 @@ export const useInterviewSession = () => {
   const [mode, setMode] = useState<InterviewMode>("voice");
   const [cameraState, setCameraState] = useState<CameraState>("loading");
   const [answerText, setAnswerText] = useState("");
+  const [isVoiceStarted, setIsVoiceStarted] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
@@ -76,22 +77,18 @@ export const useInterviewSession = () => {
     };
   }, [mode]);
 
-  const handleReset = () => {
-    if (mode !== "voice") {
-      setCameraState("loading");
-    }
-
-    setMode("voice");
-    setAnswerText("");
-  };
-
   const handleModeChange = (nextMode: InterviewMode) => {
     if (nextMode === mode) {
       return;
     }
 
     setCameraState("loading");
+    setIsVoiceStarted(false);
     setMode(nextMode);
+  };
+
+  const handleStartVoice = () => {
+    setIsVoiceStarted(true);
   };
 
   const handleAnswerTextChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -104,18 +101,21 @@ export const useInterviewSession = () => {
 
   const answerStatus =
     mode === "voice"
-      ? INTERVIEW_STATUS_MESSAGES.voice
+      ? isVoiceStarted
+        ? INTERVIEW_STATUS_MESSAGES.voiceActive
+        : INTERVIEW_STATUS_MESSAGES.voiceIdle
       : INTERVIEW_STATUS_MESSAGES.text;
 
   return {
     answerStatus,
     answerText,
     cameraState,
+    isVoiceStarted,
     mode,
     onAnswerTextChange: handleAnswerTextChange,
     onClearAnswer: handleClearAnswer,
     onModeChange: handleModeChange,
-    onReset: handleReset,
+    onStartVoice: handleStartVoice,
     videoRef,
   };
 };

@@ -16,16 +16,25 @@ interface TextLayoutProps {
   $textMode?: boolean;
 }
 
-export const Container = styled.section`
+export const Container = styled.section<VoiceLayoutProps & TextLayoutProps>`
   width: 100vw;
   max-width: 100vw;
   height: 100%;
   min-height: 100%;
+  align-self: stretch;
   margin-left: calc(50% - 50vw);
   overflow: hidden;
   padding: clamp(0.4rem, 1vh, 0.9rem) clamp(1rem, 2.4vw, 1.9rem)
     clamp(1.4rem, 2.8vh, 2.15rem);
   box-sizing: border-box;
+
+  ${({ $voiceMode, $textMode }) =>
+    ($voiceMode || $textMode) &&
+    css`
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `}
 
   @media (max-width: 48rem) {
     width: 100%;
@@ -44,8 +53,9 @@ export const Container = styled.section`
 export const Content = styled.div<VoiceLayoutProps & TextLayoutProps>`
   width: ${({ $voiceMode, $textMode }) =>
     $voiceMode ? "min(100%, 88rem)" : $textMode ? "min(100%, 80rem)" : "100%"};
-  height: 100%;
-  min-height: 100%;
+  height: ${({ $voiceMode, $textMode }) => ($voiceMode || $textMode ? "auto" : "100%")};
+  min-height: ${({ $voiceMode, $textMode }) =>
+    $voiceMode || $textMode ? "0" : "100%"};
   margin: 0 auto;
   padding-top: clamp(0.65rem, 1.4vh, 1rem);
   gap: clamp(2.2rem, 4.2vh, 3rem);
@@ -54,17 +64,21 @@ export const Content = styled.div<VoiceLayoutProps & TextLayoutProps>`
   ${({ $voiceMode, $textMode }) =>
     $voiceMode
       ? css`
-          display: grid;
-          grid-template-rows: auto minmax(0, 1fr);
-          justify-items: center;
-          align-content: stretch;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          flex: 0 0 auto;
         `
       : $textMode
         ? css`
-            display: grid;
-            grid-template-rows: minmax(0, 1fr);
-            justify-items: center;
-            align-content: stretch;
+            height: auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            flex: 0 0 auto;
           `
       : css`
           display: flex;
@@ -76,6 +90,17 @@ export const Content = styled.div<VoiceLayoutProps & TextLayoutProps>`
   @media (max-height: 56rem) {
     padding-top: 0.25rem;
     gap: 1.25rem;
+
+    ${({ $voiceMode, $textMode }) =>
+      $voiceMode
+        ? css`
+            align-items: center;
+            justify-content: center;
+          `
+        : $textMode &&
+          css`
+            align-items: stretch;
+          `}
   }
 `;
 
@@ -87,17 +112,18 @@ export const InterviewBody = styled.div<VoiceLayoutProps & TextLayoutProps>`
   ${({ $voiceMode, $textMode }) =>
     $voiceMode
       ? css`
-          height: 100%;
+          height: auto;
           display: grid;
-          grid-template-rows: minmax(0, 1fr) auto;
-          align-content: stretch;
+          grid-template-rows: auto auto;
+          align-content: center;
+          align-items: center;
           justify-items: center;
         `
       : $textMode
         ? css`
-            height: 100%;
+            height: clamp(29rem, 56vh, 34rem);
             display: grid;
-            grid-template-rows: auto minmax(0, 1fr) auto;
+            grid-template-rows: minmax(0, 1fr) auto auto;
             align-content: stretch;
             justify-items: center;
           `
@@ -109,6 +135,14 @@ export const InterviewBody = styled.div<VoiceLayoutProps & TextLayoutProps>`
 
   @media (max-height: 56rem) {
     gap: 0.9rem;
+
+    ${({ $textMode }) =>
+      $textMode &&
+      css`
+        height: auto;
+        grid-template-rows: auto auto auto;
+        align-content: start;
+      `}
   }
 `;
 
@@ -185,7 +219,7 @@ export const CameraFallbackText = styled.p`
   line-height: 1.45;
 `;
 
-export const QuestionCard = styled.article<VoiceLayoutProps>`
+export const QuestionCard = styled.article<VoiceLayoutProps & TextLayoutProps>`
   width: 100%;
   min-height: clamp(18.5rem, 29vh, 20.75rem);
   padding: clamp(1.55rem, 2vw, 1.95rem) clamp(2rem, 2.6vw, 2.45rem)
@@ -199,12 +233,19 @@ export const QuestionCard = styled.article<VoiceLayoutProps>`
   gap: 0.95rem;
   min-width: 0;
 
-  ${({ $voiceMode }) =>
-    $voiceMode &&
-    css`
-      height: 100%;
-      min-height: 0;
-    `}
+  ${({ $voiceMode, $textMode }) =>
+    $voiceMode
+      ? css`
+          min-height: clamp(16.5rem, 25vh, 18.5rem);
+          padding: clamp(1.4rem, 1.85vw, 1.7rem) clamp(1.85rem, 2.4vw, 2.25rem)
+            clamp(1.2rem, 1.55vw, 1.4rem);
+          align-self: start;
+        `
+      : $textMode &&
+        css`
+          height: 100%;
+          min-height: 0;
+        `}
 
   @media (max-width: 40rem) {
     border-radius: 0.9rem;
@@ -254,8 +295,9 @@ export const Timer = styled.time`
 export const QuestionBody = styled.div`
   flex: 1;
   min-height: 0;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: clamp(0.45rem, 0.9vw, 0.85rem) 0 clamp(0.2rem, 0.5vw, 0.45rem);
 
   @media (max-height: 56rem) {
@@ -263,8 +305,22 @@ export const QuestionBody = styled.div`
   }
 `;
 
-export const QuestionText = styled.p`
+export const QuestionContentStack = styled.div`
   width: min(100%, 58rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.2rem, 2vh, 1.8rem);
+
+  @media (max-height: 56rem) {
+    width: min(100%, 52rem);
+    gap: 1rem;
+  }
+`;
+
+export const QuestionText = styled.p`
+  width: 100%;
   margin: 0;
   text-align: center;
   color: #111111;
@@ -274,7 +330,6 @@ export const QuestionText = styled.p`
   letter-spacing: -0.05rem;
 
   @media (max-height: 56rem) {
-    width: min(100%, 52rem);
     font-size: 1.5rem;
     line-height: 1.38;
   }
@@ -428,39 +483,29 @@ export const PrimaryAction = styled(actionButtonBase)`
   }
 `;
 
-export const VisualizerButton = styled.button`
-  width: clamp(5.8rem, 6.8vw, 6.5rem);
-  min-width: 0;
-  padding: 0.25rem 0.2rem;
-  border: none;
-  background: transparent;
-  display: inline-flex;
-  flex: 0 0 auto;
+export const InlineVisualizerWrap = styled.div`
+  width: 100%;
+  display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-
-  @media (max-height: 56rem) {
-    width: 4.9rem;
-  }
 `;
 
-export const VisualizerIcon = styled.img`
-  width: clamp(5.1rem, 6.2vw, 5.8rem);
+export const InlineVisualizerIcon = styled.img`
+  width: clamp(4.6rem, 5.6vw, 5.4rem);
   height: auto;
   display: block;
   filter: none;
 
   @media (max-height: 56rem) {
-    width: 4.4rem;
+    width: 4.2rem;
   }
 `;
 
 export const TextAnswerCard = styled.div`
   width: 100%;
-  min-height: clamp(9.5rem, 16vh, 10.5rem);
-  height: 100%;
-  padding: 1.25rem 1.5rem;
+  min-height: clamp(5.9rem, 9.5vh, 6.8rem);
+  height: auto;
+  padding: 0.9rem 1.2rem;
   border-radius: 0.95rem;
   background: rgba(255, 255, 255, 0.97);
   border: 0.0625rem solid #dce3ee;
@@ -469,15 +514,15 @@ export const TextAnswerCard = styled.div`
   box-sizing: border-box;
 
   @media (max-height: 56rem) {
-    min-height: 8rem;
-    padding: 1rem 1.25rem;
+    min-height: 5.2rem;
+    padding: 0.8rem 1rem;
   }
 `;
 
 export const TextAnswerField = styled.textarea`
   width: 100%;
-  height: 100%;
-  min-height: clamp(8rem, 13vh, 9rem);
+  height: auto;
+  min-height: clamp(4.4rem, 7vh, 5.1rem);
   border: none;
   outline: none;
   resize: none;
@@ -491,7 +536,7 @@ export const TextAnswerField = styled.textarea`
   }
 
   @media (max-height: 56rem) {
-    min-height: 6.2rem;
+    min-height: 3.9rem;
     font-size: 1rem;
     line-height: 1.55;
   }
