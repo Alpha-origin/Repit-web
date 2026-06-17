@@ -3,7 +3,7 @@ import { ThemeProvider } from "styled-components";
 import { RouterProvider } from "react-router-dom";
 import { GlobalStyle } from "@/app/styles/GlobalStyle";
 import { theme } from "@/app/styles/theme";
-import {Suspense} from "react";
+import { Suspense } from "react";
 import Loading from "@/shared/components/loading";
 
 import router from "./router.tsx";

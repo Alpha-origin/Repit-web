@@ -6,11 +6,8 @@ import Loading from '@/shared/components/loading';
 const LoginForm = () => {
   const navigate = useNavigate();
   const form = useLoginForm(() => navigate('/main'));
-  const { isLoading, ...rest } = form as typeof form & { isLoading: boolean };
-
-  if (isLoading) return <Loading />;
-
-  return <LoginPanel {...rest} />;
+  if (form.isSubmitting) return <Loading />;
+  return <LoginPanel {...form} />;
 };
 
 export default LoginForm;
