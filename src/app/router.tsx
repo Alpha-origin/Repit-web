@@ -1,17 +1,42 @@
-import MainLayout from "@/app/layout/main-layout";
-import LoginPage from "@/pages/auth-page/login-page";
-import SignUpPage from "@/pages/auth-page/signup-page";
-import FeedbackDetailPage from "@/pages/feedback-page/feedback-detail";
-import FeedbackListPage from "@/pages/feedback-page/feedback-list";
-import FeedbackOverallPage from "@/pages/feedback-page/feedback-overall";
-import InterviewPage from "@/pages/interview-page/interview";
-import SettingInterview from "@/pages/interview-page/setting-interview";
-import LandingPage from "@/pages/landing-page";
-import MainPage from "@/pages/main-page";
-import MyPage from "@/pages/my-page";
-import NotFound from "@/pages/not-found";
+import { lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
+
 import Loading from "@/shared/components/loading";
+
+// Layout
+const MainLayout = lazy(() => import("@/app/layout/main-layout"));
+
+// Auth
+const LoginPage = lazy(() => import("@/pages/auth-page/login-page"));
+const SignUpPage = lazy(() => import("@/pages/auth-page/signup-page"));
+
+// Landing
+const LandingPage = lazy(() => import("@/pages/landing-page"));
+
+// Main
+const MainPage = lazy(() => import("@/pages/main-page"));
+const MyPage = lazy(() => import("@/pages/my-page"));
+
+// Interview
+const InterviewPage = lazy(() => import("@/pages/interview-page/interview"));
+const SettingInterview = lazy(
+  () => import("@/pages/interview-page/setting-interview")
+);
+
+// Feedback
+const FeedbackListPage = lazy(
+  () => import("@/pages/feedback-page/feedback-list")
+);
+const FeedbackOverallPage = lazy(
+  () => import("@/pages/feedback-page/feedback-overall")
+);
+const FeedbackDetailPage = lazy(
+  () => import("@/pages/feedback-page/feedback-detail")
+);
+
+// Error
+const NotFound = lazy(() => import("@/pages/not-found"));
+
 const router = createBrowserRouter([
   {
     path: "/",
