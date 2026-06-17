@@ -58,7 +58,11 @@ const DashboardMain = () => {
 
       <S.BottomCard>
         <S.BottomCardInner>
-          <S.CardImage src={DashboardBottomImage} alt="" aria-hidden="true" />
+          <S.BottomCardImage
+            src={DashboardBottomImage}
+            alt=""
+            aria-hidden="true"
+          />
 
           <S.BottomOverlay>
             <S.ReadyBadge>

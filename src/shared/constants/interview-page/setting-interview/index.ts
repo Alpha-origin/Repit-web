@@ -1,9 +1,11 @@
 export const INTERVIEW_SETTING_OPTION_SECTIONS = [
   {
+    key: 'style',
     title: '면접 스타일',
     options: ['편함', '일반', '압박'],
   },
   {
+    key: 'difficulty',
     title: '면접 난이도',
     options: ['쉬움', '보통', '어려움'],
   },

@@ -8,13 +8,13 @@ export const Section = styled.section`
   min-height: 0;
   max-width: 108rem;
   margin: 0 auto;
-  padding: 0.45rem 1.35rem 0;
+  padding: 0 1.35rem 0;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) minmax(0, 0.88fr);
-  gap: 1.35rem;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
 
   @media (max-width: 64rem) {
-    padding: 0.35rem 1rem 0;
+    padding: 0 1rem 0;
   }
 `;
 
@@ -47,16 +47,24 @@ export const CardImage = styled.img`
   -webkit-user-drag: none;
 `;
 
+export const BottomCardImage = styled(CardImage)`
+  object-position: 58% center;
+
+  @media (max-width: 72rem) {
+    object-position: 60% center;
+  }
+`;
+
 export const TopCardInner = styled.div`
   height: 100%;
   min-height: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  gap: 1.35rem;
 
   @media (max-width: 72rem) {
     grid-template-columns: 1fr;
-    gap: 1.25rem;
+    gap: 1.35rem;
   }
 `;
 
@@ -116,7 +124,7 @@ export const ChallengeBadge = styled.span`
   background-color: #0c66de;
   color: #ffffff;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
   box-shadow: 0 0.25rem 0.75rem rgba(12, 102, 222, 0.24);
 
@@ -167,7 +175,7 @@ export const Description = styled.p`
   flex: 1;
   color: #4b4b4b;
   font-size: clamp(1rem, 1.4vw, 1.25rem);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.35;
   letter-spacing: -0.03rem;
 `;
@@ -196,7 +204,7 @@ export const AiBadge = styled.span`
 export const FeatureGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.35rem;
   align-items: end;
   margin: 1.4rem 0 1rem;
 
@@ -206,23 +214,29 @@ export const FeatureGrid = styled.div`
 `;
 
 export const FeatureItem = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
   text-align: center;
 `;
 
 export const FeatureDescription = styled.p`
   margin: 0;
+  width: 100%;
   color: #4b4b4b;
   font-size: clamp(0.95rem, 1.25vw, 1.2rem);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.35;
   letter-spacing: -0.02rem;
 `;
 
 export const FeatureTitle = styled.strong`
   display: block;
-  margin-top: 0.55rem;
+  width: 100%;
   color: #2874df;
-  font-size: clamp(1.55rem, 2vw, 2.35rem);
+  font-size: clamp(1.38rem, 1.82vw, 2.08rem);
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.05rem;
@@ -231,12 +245,13 @@ export const FeatureTitle = styled.strong`
 export const StartButton = styled.button`
   width: 100%;
   height: 3.55rem;
+  font-family: ${({ theme }) => theme.fontFamily.pretendard};
   border: none;
   border-radius: 0.875rem;
   background-color: #2371dc;
   color: #ffffff;
   font-size: clamp(1rem, 1.4vw, 1.35rem);
-  font-weight: 650;
+  font-weight: 550;
   line-height: 1;
   cursor: pointer;
   box-shadow: 0 0.2rem 0.45rem rgba(0, 65, 150, 0.22);
@@ -280,15 +295,15 @@ export const ReadyBadge = styled.span`
   border-radius: 0.5rem;
   background-color: #0c66de;
   color: #ffffff;
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.12rem;
+  font-weight: 600;
   line-height: 1;
   box-shadow: 0 0.25rem 0.75rem rgba(12, 102, 222, 0.24);
 
   @media (max-width: 72rem) {
     min-width: 6.5rem;
     height: 2rem;
-    font-size: 0.875rem;
+    font-size: 0.98rem;
   }
 `;
 

@@ -15,18 +15,17 @@ export const Section = styled.section`
 
 export const BannerCard = styled.div`
   width: 100%;
-  min-height: 4.7rem;
-  padding: 0.85rem 1.8rem;
+  min-height: 3.05rem;
+  padding: 0.8rem 1.35rem;
   border-radius: 1rem;
   background-color: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
 
   @media (max-width: 48rem) {
-    padding: 1.25rem;
+    padding: 0.85rem;
     flex-direction: column;
     align-items: flex-start;
   }
@@ -34,41 +33,44 @@ export const BannerCard = styled.div`
 
 export const Title = styled.h2`
   margin: 0;
+  font-family: ${({ theme }) => theme.fontFamily.pretendard};
   color: #2d73de;
-  font-size: 1.5rem;
-  font-weight: 500;
+  font-size: 1.38rem;
+  font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.04rem;
 
   @media (max-width: 48rem) {
-    font-size: 1.5rem;
+    font-size: 1.34rem;
   }
 `;
 
 export const ActionButton = styled.button`
   min-width: 15.75rem;
-  height: 3.5rem;
-  padding: 0 1.75rem;
+  height: 2.35rem;
+  padding: 0 1.35rem;
   border: 0.0625rem solid rgba(0, 65, 150, 0.12);
   border-radius: 0.875rem;
   background-color: #ffffff;
   color: #555555;
-  font-size: 1.2rem;
+  font-size: 1.02rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 0.125rem 0.75rem rgba(0, 0, 0, 0.04);
   transition:
     transform 0.2s ease,
-    box-shadow 0.2s ease,
     border-color 0.2s ease;
+
+  && {
+    font-family: ${({ theme }) => theme.fontFamily.pretendard};
+  }
 
   &:hover {
     transform: translateY(-0.0625rem);
     border-color: rgba(45, 115, 222, 0.24);
-    box-shadow: 0 0.25rem 1rem rgba(45, 115, 222, 0.1);
   }
 
   @media (max-width: 48rem) {
     min-width: 100%;
+    height: 2.45rem;
   }
 `;
