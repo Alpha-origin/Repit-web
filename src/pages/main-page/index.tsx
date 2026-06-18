@@ -3,6 +3,7 @@ import MainPageFooter from "@/widgets/main-page/footer";
 import * as S from "./style";
 
 const MainPage = () => {
+
   return (
     <S.Page>
       <DashBoardMain />

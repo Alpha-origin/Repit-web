@@ -25,7 +25,7 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 };
 
 export async function login(formData: LoginFormData): Promise<string | null> {
-  const loginData = {
+  const loginData = { 
     email: formData.email.trim(),
     password: formData.password,
   };
