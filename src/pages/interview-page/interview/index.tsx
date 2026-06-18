@@ -8,6 +8,10 @@ const InterviewPage = () => {
   const interviewSession = useInterviewSession(INTERVIEW_DEFAULT_QUESTION.text);
   const isVoiceMode = interviewSession.mode === "voice";
   const isTextMode = interviewSession.mode === "text";
+  const currentQuestion = {
+    ...INTERVIEW_DEFAULT_QUESTION,
+    id: String(interviewSession.currentInterviewId),
+  };
 
   return (
     <S.Container $textMode={isTextMode} $voiceMode={isVoiceMode}>
@@ -31,7 +35,7 @@ const InterviewPage = () => {
           onModeChange={interviewSession.onModeChange}
           onStartVoice={interviewSession.onStartVoice}
           onToggleQuestionAudio={interviewSession.onToggleQuestionAudio}
-          question={INTERVIEW_DEFAULT_QUESTION}
+          question={currentQuestion}
           voiceLevel={interviewSession.voiceLevel}
         />
       </S.Content>

@@ -9,6 +9,10 @@ export interface FeedbackListItem {
 }
 
 export interface FeedbackListProps {
+  emptyMessage?: string;
+  errorMessage?: string | null;
+  isLoading?: boolean;
   items: readonly FeedbackListItem[];
+  onRetry?: () => void;
   title: string;
 }

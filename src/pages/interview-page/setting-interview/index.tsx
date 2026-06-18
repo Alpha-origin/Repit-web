@@ -37,7 +37,7 @@ const SettingInterviewPage = () => {
       return;
     }
 
-    navigate("/main/interview", {
+    navigate("/main/interview/1", {
       state: {
         interviewSetting: {
           style: selectedStyle,
