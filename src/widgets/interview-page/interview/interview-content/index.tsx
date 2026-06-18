@@ -14,6 +14,7 @@ const InterviewContentView = ({
   onCompleteVoice,
   onModeChange,
   onStartVoice,
+  onSubmitText,
   onToggleQuestionAudio,
   question,
   voiceLevel,
@@ -154,7 +155,9 @@ const InterviewContentView = ({
               모두삭제
             </S.SecondaryAction>
 
-            <S.PrimaryAction type="button">완료</S.PrimaryAction>
+            <S.PrimaryAction type="button" onClick={onSubmitText}>
+              완료
+            </S.PrimaryAction>
           </S.TextActionRow>
         </>
       ) : (

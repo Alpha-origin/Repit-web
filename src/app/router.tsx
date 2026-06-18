@@ -63,7 +63,7 @@ const router = createBrowserRouter([
         element: <MainPage />,
       },
       {
-        path: "interview",
+        path: "interview/:id",
         element: <InterviewPage />,
       },
       {

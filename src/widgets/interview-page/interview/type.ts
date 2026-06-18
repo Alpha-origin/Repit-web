@@ -27,6 +27,7 @@ export interface InterviewContentViewProps {
   onCompleteVoice: () => void;
   onModeChange: (mode: InterviewMode) => void;
   onStartVoice: () => void;
+  onSubmitText: () => void;
   onToggleQuestionAudio: () => void;
   question: InterviewQuestion;
   voiceLevel: number;
