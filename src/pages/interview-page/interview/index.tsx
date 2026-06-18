@@ -34,6 +34,7 @@ const InterviewPage = () => {
           onCompleteVoice={interviewSession.onCompleteVoice}
           onModeChange={interviewSession.onModeChange}
           onStartVoice={interviewSession.onStartVoice}
+          onSubmitText={interviewSession.onSubmitText}
           onToggleQuestionAudio={interviewSession.onToggleQuestionAudio}
           question={currentQuestion}
           voiceLevel={interviewSession.voiceLevel}

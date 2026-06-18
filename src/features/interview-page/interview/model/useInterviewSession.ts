@@ -53,14 +53,14 @@ export const useInterviewSession = (questionText: string) => {
     void voiceAnswer.onStartVoice();
   };
 
-  const handleCompleteVoice = async () => {
+  const submitAnswer = async (content: string) => {
     if (isSubmitting || !canSubmitAnswer) {
       return;
     }
 
-    const content = (await voiceAnswer.onCompleteVoice()).trim();
+    const trimmedContent = content.trim();
 
-    if (!content) {
+    if (!trimmedContent) {
       return;
     }
 
@@ -68,7 +68,7 @@ export const useInterviewSession = (questionText: string) => {
 
     const errorMessage = await createAnswer({
       id: currentInterviewId,
-      content,
+      content: trimmedContent,
     });
 
     setIsSubmitting(false);
@@ -84,6 +84,15 @@ export const useInterviewSession = (questionText: string) => {
     navigate(`/main/interview/${currentInterviewId + 1}`);
   };
 
+  const handleCompleteVoice = async () => {
+    const voiceContent = await voiceAnswer.onCompleteVoice();
+    await submitAnswer(voiceContent || voiceAnswer.answerText);
+  };
+
+  const handleSubmitText = async () => {
+    await submitAnswer(voiceAnswer.answerText);
+  };
+
   return {
     answerStatus: isVoiceMode ? voiceAnswer.voiceStatus : INTERVIEW_STATUS_MESSAGES.text,
     answerText: voiceAnswer.answerText,
@@ -97,6 +106,7 @@ export const useInterviewSession = (questionText: string) => {
     onCompleteVoice: handleCompleteVoice,
     onModeChange: handleModeChange,
     onStartVoice: handleStartVoice,
+    onSubmitText: handleSubmitText,
     onToggleQuestionAudio: questionTts.onToggle,
     videoRef,
     voiceLevel: voiceAnswer.voiceLevel,
