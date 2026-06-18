@@ -1,5 +1,5 @@
 import type { ChangeEvent } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { INTERVIEW_STATUS_MESSAGES } from "@/shared/constants/interview-page/interview";
 
@@ -108,11 +108,39 @@ export const useVoiceAnswer = () => {
   const [isVoiceStarted, setIsVoiceStarted] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isMicrophoneAvailable, setIsMicrophoneAvailable] = useState(true);
+  const [voiceLevel, setVoiceLevel] = useState(0);
   const latestTranscriptTextRef = useRef("");
   const stopResolveRef = useRef<(() => void) | null>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const voiceLevelTimeoutRef = useRef<number | null>(null);
+  const voiceLevelResetTimeoutRef = useRef<number | null>(null);
   const recognitionConstructor = useMemo(() => getSpeechRecognitionConstructor(), []);
   const browserSupportsSpeechRecognition = recognitionConstructor !== null;
+
+  const clearVoiceLevelTimers = useCallback(() => {
+    if (voiceLevelTimeoutRef.current) {
+      window.clearTimeout(voiceLevelTimeoutRef.current);
+      voiceLevelTimeoutRef.current = null;
+    }
+
+    if (voiceLevelResetTimeoutRef.current) {
+      window.clearTimeout(voiceLevelResetTimeoutRef.current);
+      voiceLevelResetTimeoutRef.current = null;
+    }
+  }, []);
+
+  const animateVoiceLevel = useCallback(() => {
+    clearVoiceLevelTimers();
+    setVoiceLevel(1);
+
+    voiceLevelTimeoutRef.current = window.setTimeout(() => {
+      setVoiceLevel(0.45);
+    }, 120);
+
+    voiceLevelResetTimeoutRef.current = window.setTimeout(() => {
+      setVoiceLevel(0.1);
+    }, 260);
+  }, [clearVoiceLevelTimers]);
 
   useEffect(() => {
     if (!recognitionConstructor) {
@@ -126,9 +154,12 @@ export const useVoiceAnswer = () => {
     recognition.lang = VOICE_LANGUAGE;
     recognition.onstart = () => {
       setIsListening(true);
+      setVoiceLevel(0.18);
     };
     recognition.onend = () => {
       setIsListening(false);
+      clearVoiceLevelTimers();
+      setVoiceLevel(0);
       stopResolveRef.current?.();
       stopResolveRef.current = null;
     };
@@ -142,21 +173,27 @@ export const useVoiceAnswer = () => {
       }
     };
     recognition.onresult = (event) => {
+      const previousTranscript = latestTranscriptTextRef.current;
       const nextTranscript = getTranscriptText(event.results);
 
       latestTranscriptTextRef.current = nextTranscript;
       setAnswerText(nextTranscript);
+
+      if (nextTranscript && nextTranscript !== previousTranscript) {
+        animateVoiceLevel();
+      }
     };
 
     recognitionRef.current = recognition;
 
     return () => {
+      clearVoiceLevelTimers();
       stopResolveRef.current?.();
       stopResolveRef.current = null;
       recognition.abort();
       recognitionRef.current = null;
     };
-  }, [recognitionConstructor]);
+  }, [animateVoiceLevel, clearVoiceLevelTimers, recognitionConstructor]);
 
   const saveCurrentTranscript = () => {
     const nextAnswerText = latestTranscriptTextRef.current.trim();
@@ -195,6 +232,7 @@ export const useVoiceAnswer = () => {
     latestTranscriptTextRef.current = "";
     setAnswerText("");
     setIsMicrophoneAvailable(true);
+    setVoiceLevel(0);
 
     try {
       recognition.start();
@@ -223,6 +261,8 @@ export const useVoiceAnswer = () => {
     }
 
     await wait(200);
+    clearVoiceLevelTimers();
+    setVoiceLevel(0);
 
     const nextAnswerText = saveCurrentTranscript() || currentAnswerText;
     return nextAnswerText;
@@ -230,6 +270,8 @@ export const useVoiceAnswer = () => {
 
   const handleExitVoiceMode = () => {
     recognitionRef.current?.abort();
+    clearVoiceLevelTimers();
+    setVoiceLevel(0);
     saveCurrentTranscript();
     setIsVoiceStarted(false);
   };
@@ -251,7 +293,7 @@ export const useVoiceAnswer = () => {
     onCompleteVoice: handleCompleteVoice,
     onExitVoiceMode: handleExitVoiceMode,
     onStartVoice: handleStartVoice,
-    voiceLevel: 0,
+    voiceLevel,
     voiceStatus: getVoiceStatus({
       browserSupportsSpeechRecognition,
       isMicrophoneAvailable,
