@@ -1,0 +1,15 @@
+export const LANDING_STYLE = {
+  gradientTop: "#041b63",
+  gradientMiddle: "#0a3ea8",
+  gradientAccent: "#2f8fff",
+  gradientBottom: "#cfe6ff",
+  logo: "#7ec0ff",
+  login: "#1f6fff",
+  loginHover: "#175de0",
+  mainTitle: "#A8D8FF",
+  badge: "rgba(255, 255, 255, 0.15)",
+  subtitle: "rgba(255, 255, 255, 0.8)",
+  buttonHover: "rgba(255, 255, 255, 0.1)",
+  glowSoft: "rgba(255, 255, 255, 0.08)",
+  glowStrong: "rgba(255, 255, 255, 0.18)",
+} as const;

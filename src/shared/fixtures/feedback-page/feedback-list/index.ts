@@ -1,0 +1,58 @@
+export const FEEDBACK_LIST_TITLE = "지난 면접 목록";
+
+export const FEEDBACK_LIST_ITEMS = [
+  {
+    id: 1,
+    date: "2026/06/12",
+    title: "모의면접",
+    styleLabel: "편함",
+    levelLabel: "쉬움",
+    interviewerName: "면접관1",
+    statusLabel: "분석완료",
+  },
+  {
+    id: 2,
+    date: "2026/06/09",
+    title: "모의면접",
+    styleLabel: "일반",
+    levelLabel: "보통",
+    interviewerName: "면접관2",
+    statusLabel: "분석완료",
+  },
+  {
+    id: 3,
+    date: "2026/06/04",
+    title: "모의면접",
+    styleLabel: "압박",
+    levelLabel: "어려움",
+    interviewerName: "면접관1",
+    statusLabel: "분석완료",
+  },
+  {
+    id: 4,
+    date: "2026/05/29",
+    title: "모의면접",
+    styleLabel: "편함",
+    levelLabel: "보통",
+    interviewerName: "면접관3",
+    statusLabel: "분석완료",
+  },
+  {
+    id: 5,
+    date: "2026/05/20",
+    title: "모의면접",
+    styleLabel: "일반",
+    levelLabel: "쉬움",
+    interviewerName: "면접관2",
+    statusLabel: "분석완료",
+  },
+  {
+    id: 6,
+    date: "2026/05/15",
+    title: "모의면접",
+    styleLabel: "편함",
+    levelLabel: "쉬움",
+    interviewerName: "면접관1",
+    statusLabel: "분석완료",
+  },
+] as const;
