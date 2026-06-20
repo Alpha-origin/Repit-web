@@ -1,3 +1,8 @@
+import {
+  clearActiveInterviewSessionId,
+  getActiveInterviewSessionId,
+  quitInterview,
+} from "@/features/interview-page/interview/api";
 import Repit from "@/shared/img/logo/Repit-logo.svg?url";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as S from "./style";
@@ -17,25 +22,45 @@ const Header = () => {
     pathname.startsWith("/main/feedback/overall/");
   const isMypage = pathname === "/main/mypage";
 
+  const quitActiveInterviewSession = () => {
+    if (!pathname.startsWith("/main/interview")) {
+      return;
+    }
+
+    const sessionId = getActiveInterviewSessionId(location.state);
+
+    if (!sessionId) {
+      return;
+    }
+
+    clearActiveInterviewSessionId();
+    void quitInterview(sessionId);
+  };
+
+  const handleNavigate = (path: string) => {
+    quitActiveInterviewSession();
+    navigate(path);
+  };
+
   return (
     <S.Header>
-      <S.LogoImage src={Repit} alt="Repit" onClick={() => navigate("/main")} />
+      <S.LogoImage src={Repit} alt="Repit" onClick={() => handleNavigate("/main")} />
 
       <S.TopButtons>
         <S.TopButton
-          onClick={() => navigate("/main")}
+          onClick={() => handleNavigate("/main")}
           $active={isInterviewPage}
         >
           면접
         </S.TopButton>
         <S.TopButton
-          onClick={() => navigate("/main/feedback/list")}
+          onClick={() => handleNavigate("/main/feedback/list")}
           $active={isFeedbackPage}
         >
           피드백
         </S.TopButton>
         <S.TopButton
-          onClick={() => navigate("/main/mypage")}
+          onClick={() => handleNavigate("/main/mypage")}
           $active={isMypage}
         >
           마이페이지

@@ -1,7 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { createAnswer } from "@/features/interview-page/interview/api/api";
+import {
+  clearActiveInterviewSessionId,
+  completeInterview,
+  getActiveInterviewSessionId,
+  quitInterview,
+  submitInterviewAnswer,
+  type PreparedInterviewData,
+} from "@/features/interview-page/interview/api";
 import { INTERVIEW_STATUS_MESSAGES } from "@/shared/constants/interview-page/interview";
 
 import type { InterviewMode } from "@/widgets/interview-page/interview/type";
@@ -12,23 +19,46 @@ import { useVoiceAnswer } from "./useVoiceAnswer";
 const FIRST_INTERVIEW_ID = 1;
 const LAST_INTERVIEW_ID = 10;
 
-export const useInterviewSession = (questionText: string) => {
+export const useInterviewSession = (
+  questionText: string,
+  preparedInterview?: PreparedInterviewData | null,
+) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [mode, setMode] = useState<InterviewMode>("voice");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const totalQuestionCount =
+    preparedInterview?.questions.length && preparedInterview.questions.length > 0
+      ? preparedInterview.questions.length
+      : LAST_INTERVIEW_ID;
   const parsedInterviewId = Number(id);
   const currentInterviewId =
     parsedInterviewId >= FIRST_INTERVIEW_ID &&
-    parsedInterviewId <= LAST_INTERVIEW_ID
+    parsedInterviewId <= totalQuestionCount
       ? parsedInterviewId
       : FIRST_INTERVIEW_ID;
-  const canSubmitAnswer = currentInterviewId <= LAST_INTERVIEW_ID;
-  const isLastInterview = currentInterviewId >= LAST_INTERVIEW_ID;
+  const currentQuestion = preparedInterview?.questions[currentInterviewId - 1];
+  const answerTargetId = currentQuestion?.questionId ?? currentInterviewId;
+  const canSubmitAnswer = currentInterviewId <= totalQuestionCount;
+  const isLastInterview = currentInterviewId >= totalQuestionCount;
   const isVoiceMode = mode === "voice";
   const { cameraState, videoRef } = useInterviewCamera(isVoiceMode);
   const voiceAnswer = useVoiceAnswer();
   const questionTts = useSupertoneTts(questionText);
+  const preparedSessionId = preparedInterview?.sessionId ?? null;
+
+  useEffect(() => {
+    return () => {
+      const activeSessionId = getActiveInterviewSessionId();
+
+      if (!preparedSessionId || activeSessionId !== preparedSessionId) {
+        return;
+      }
+
+      clearActiveInterviewSessionId();
+      void quitInterview(activeSessionId);
+    };
+  }, [preparedSessionId]);
 
   const handleModeChange = (nextMode: InterviewMode) => {
     if (nextMode === mode) {
@@ -66,8 +96,18 @@ export const useInterviewSession = (questionText: string) => {
 
     setIsSubmitting(true);
 
-    const errorMessage = await createAnswer({
-      id: currentInterviewId,
+    const activeSessionId =
+      preparedInterview?.sessionId ?? getActiveInterviewSessionId();
+
+    if (!activeSessionId) {
+      setIsSubmitting(false);
+      return;
+    }
+
+    const { errorMessage } = await submitInterviewAnswer({
+      sessionId: activeSessionId,
+      questionId: answerTargetId,
+      responseTime: 0,
       content: trimmedContent,
     });
 
@@ -78,10 +118,18 @@ export const useInterviewSession = (questionText: string) => {
     }
 
     if (isLastInterview) {
+      clearActiveInterviewSessionId();
+
+      if (activeSessionId) {
+        await completeInterview(activeSessionId);
+      }
+
       return;
     }
 
-    navigate(`/main/interview/${currentInterviewId + 1}`);
+    navigate(`/main/interview/${currentInterviewId + 1}`, {
+      state: preparedInterview ? { preparedInterview } : undefined,
+    });
   };
 
   const handleCompleteVoice = async () => {
