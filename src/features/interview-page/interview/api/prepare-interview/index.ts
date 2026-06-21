@@ -41,8 +41,9 @@ const normalizeQuestion = (
 
 const buildPrepareInterviewRequest = (
   params: PrepareInterviewParams,
+  sessionId: string,
 ): PreparedInterviewData => ({
-  sessionId: getTrimmedString(params.sessionId) ?? "",
+  sessionId,
   interviewId:
     (() => {
       const interviewId = getNumericValue(params.interviewId);
@@ -113,7 +114,16 @@ const normalizePreparedInterview = (
 };
 
 export const prepareInterview = async (params: PrepareInterviewParams) => {
-  const requestData = buildPrepareInterviewRequest(params);
+  const normalizedSessionId = getTrimmedString(params.sessionId);
+
+  if (!normalizedSessionId) {
+    return {
+      data: null,
+      errorMessage: "면접 세션 정보가 없어 면접을 시작할 수 없습니다.",
+    };
+  }
+
+  const requestData = buildPrepareInterviewRequest(params, normalizedSessionId);
 
   try {
     const response = await chatInstance.post(PREPARE_INTERVIEW_URL, requestData);

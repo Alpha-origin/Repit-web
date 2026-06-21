@@ -1,6 +1,6 @@
 import { chatInstance } from "@/shared/api/axiosInstance";
 
-import { getErrorMessage, getTrimmedString } from "../shared";
+import { getErrorMessage, getInterviewQuestion, getTrimmedString } from "../shared";
 import type { CurrentInterviewQuestion } from "../type";
 
 export const getCurrentInterviewQuestion = async (sessionId: string) => {
@@ -17,9 +17,17 @@ export const getCurrentInterviewQuestion = async (sessionId: string) => {
     const response = await chatInstance.get<CurrentInterviewQuestion>(
       `/chat/interviews/${encodeURIComponent(normalizedSessionId)}/question`,
     );
+    const currentQuestion = getInterviewQuestion(response.data);
+
+    if (!currentQuestion) {
+      return {
+        data: null,
+        errorMessage: "현재 질문을 불러오지 못했습니다.",
+      };
+    }
 
     return {
-      data: response.data,
+      data: currentQuestion,
       errorMessage: null,
     };
   } catch (error) {

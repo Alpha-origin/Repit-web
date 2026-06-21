@@ -1,5 +1,6 @@
 import {
   clearActiveInterviewSessionId,
+  disconnectInterviewSocket,
   getActiveInterviewSessionId,
   quitInterview,
 } from "@/features/interview-page/interview/api";
@@ -34,6 +35,7 @@ const Header = () => {
     }
 
     clearActiveInterviewSessionId();
+    disconnectInterviewSocket(sessionId);
     void quitInterview(sessionId);
   };
 

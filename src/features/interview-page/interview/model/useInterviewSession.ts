@@ -1,64 +1,219 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   clearActiveInterviewSessionId,
-  completeInterview,
+  disconnectInterviewSocket,
   getActiveInterviewSessionId,
+  getCurrentInterviewQuestion,
+  prepareInterview,
   quitInterview,
   submitInterviewAnswer,
+  type CurrentInterviewQuestion,
+  type InterviewProgressStatus,
   type PreparedInterviewData,
 } from "@/features/interview-page/interview/api";
-import { INTERVIEW_STATUS_MESSAGES } from "@/shared/constants/interview-page/interview";
+import {
+  INTERVIEW_DEFAULT_QUESTION,
+  INTERVIEW_STATUS_MESSAGES,
+} from "@/shared/constants/interview-page/interview";
 
 import type { InterviewMode } from "@/widgets/interview-page/interview/type";
 import { useSupertoneTts } from "./useSupertoneTts";
 import { useInterviewCamera } from "./useInterviewCamera";
+import { useInterviewSocket } from "./useInterviewSocket";
 import { useVoiceAnswer } from "./useVoiceAnswer";
 
-const FIRST_INTERVIEW_ID = 1;
-const LAST_INTERVIEW_ID = 10;
+const buildInitialQuestion = (
+  preparedInterview?: PreparedInterviewData | null,
+): CurrentInterviewQuestion | null => {
+  if (!preparedInterview || preparedInterview.questions.length === 0) {
+    return null;
+  }
+
+  const nextQuestion =
+    preparedInterview.questions[preparedInterview.currentQuestionIndex] ??
+    preparedInterview.questions[0];
+
+  if (!nextQuestion) {
+    return null;
+  }
+
+  return {
+    questionId: nextQuestion.questionId,
+    parentId: 0,
+    type: "ORIGINAL",
+    intention: nextQuestion.intention,
+    content: nextQuestion.content,
+  };
+};
 
 export const useInterviewSession = (
-  questionText: string,
   preparedInterview?: PreparedInterviewData | null,
+  initialQuestionIntention?: string,
 ) => {
   const navigate = useNavigate();
-  const { id } = useParams();
   const [mode, setMode] = useState<InterviewMode>("voice");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const totalQuestionCount =
-    preparedInterview?.questions.length && preparedInterview.questions.length > 0
-      ? preparedInterview.questions.length
-      : LAST_INTERVIEW_ID;
-  const parsedInterviewId = Number(id);
-  const currentInterviewId =
-    parsedInterviewId >= FIRST_INTERVIEW_ID &&
-    parsedInterviewId <= totalQuestionCount
-      ? parsedInterviewId
-      : FIRST_INTERVIEW_ID;
-  const currentQuestion = preparedInterview?.questions[currentInterviewId - 1];
-  const answerTargetId = currentQuestion?.questionId ?? currentInterviewId;
-  const canSubmitAnswer = currentInterviewId <= totalQuestionCount;
-  const isLastInterview = currentInterviewId >= totalQuestionCount;
+  const [currentQuestion, setCurrentQuestion] = useState<CurrentInterviewQuestion | null>(
+    () => buildInitialQuestion(preparedInterview),
+  );
+  const [interviewStatus, setInterviewStatus] = useState<InterviewProgressStatus>(
+    preparedInterview?.status ?? "IN_PROGRESS",
+  );
   const isVoiceMode = mode === "voice";
   const { cameraState, videoRef } = useInterviewCamera(isVoiceMode);
   const voiceAnswer = useVoiceAnswer();
-  const questionTts = useSupertoneTts(questionText);
-  const preparedSessionId = preparedInterview?.sessionId ?? null;
+  const questionTts = useSupertoneTts(currentQuestion?.content ?? "");
+  const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
+  const isSessionClosedRef = useRef(false);
+  const preparedChatSessionIdRef = useRef<string | null>(null);
+  const canSubmitAnswer =
+    interviewStatus === "IN_PROGRESS" && currentQuestion !== null;
+
+  useEffect(() => {
+    setCurrentQuestion(buildInitialQuestion(preparedInterview));
+    setInterviewStatus(preparedInterview?.status ?? "IN_PROGRESS");
+    isSessionClosedRef.current = false;
+  }, [preparedInterview]);
+
+  const applyCurrentQuestion = useCallback((nextQuestion: CurrentInterviewQuestion) => {
+    setCurrentQuestion((previousQuestion) => {
+      if (
+        previousQuestion?.questionId === nextQuestion.questionId &&
+        previousQuestion.content === nextQuestion.content &&
+        previousQuestion.intention === nextQuestion.intention &&
+        previousQuestion.type === nextQuestion.type
+      ) {
+        return previousQuestion;
+      }
+
+      return nextQuestion;
+    });
+  }, []);
+
+  const endInterviewSession = useCallback(
+    async (shouldNavigateToMain: boolean) => {
+      const activeSessionId = sessionId ?? getActiveInterviewSessionId();
+
+      if (!activeSessionId || isSessionClosedRef.current) {
+        if (shouldNavigateToMain) {
+          navigate("/main");
+        }
+
+        return;
+      }
+
+      isSessionClosedRef.current = true;
+      clearActiveInterviewSessionId();
+      disconnectInterviewSocket(activeSessionId);
+      await quitInterview(activeSessionId);
+
+      if (shouldNavigateToMain) {
+        navigate("/main");
+      }
+    },
+    [navigate, sessionId],
+  );
+
+  const handleSocketStatusChange = useCallback(
+    ({
+      question,
+      status,
+    }: {
+      message: string | null;
+      question: CurrentInterviewQuestion | null;
+      status: InterviewProgressStatus | null;
+    }) => {
+      if (question) {
+        applyCurrentQuestion(question);
+      }
+
+      if (!status) {
+        return;
+      }
+
+      setInterviewStatus(status);
+
+      if (status === "COMPLETED") {
+        void endInterviewSession(true);
+      }
+    },
+    [applyCurrentQuestion, endInterviewSession],
+  );
+
+  useInterviewSocket({
+    sessionId,
+    onQuestionReceived: applyCurrentQuestion,
+    onStatusChange: handleSocketStatusChange,
+  });
+
+  useEffect(() => {
+    if (!preparedInterview || !sessionId) {
+      return;
+    }
+
+    if (preparedChatSessionIdRef.current === sessionId) {
+      return;
+    }
+
+    preparedChatSessionIdRef.current = sessionId;
+
+    const startInterviewSession = async () => {
+      const { data, errorMessage } = await prepareInterview({
+        sessionId,
+        interviewId: preparedInterview.interviewId,
+        userId: preparedInterview.userId,
+        personaId: preparedInterview.personaId,
+        personaType: preparedInterview.personaType,
+        questions: [
+          {
+            questionId: 1,
+            intention: initialQuestionIntention?.trim() || "보통",
+            content: INTERVIEW_DEFAULT_QUESTION.text,
+          },
+        ],
+      });
+
+      if (errorMessage || !data) {
+        preparedChatSessionIdRef.current = null;
+        return;
+      }
+
+      if (data.status) {
+        setInterviewStatus(data.status);
+      }
+
+      const { data: nextQuestion } = await getCurrentInterviewQuestion(sessionId);
+
+      if (nextQuestion) {
+        applyCurrentQuestion(nextQuestion);
+      }
+    };
+
+    void startInterviewSession();
+  }, [
+    applyCurrentQuestion,
+    initialQuestionIntention,
+    preparedInterview,
+    sessionId,
+  ]);
 
   useEffect(() => {
     return () => {
       const activeSessionId = getActiveInterviewSessionId();
 
-      if (!preparedSessionId || activeSessionId !== preparedSessionId) {
+      if (
+        !sessionId ||
+        isSessionClosedRef.current ||
+        activeSessionId !== sessionId
+      ) {
         return;
       }
 
-      clearActiveInterviewSessionId();
-      void quitInterview(activeSessionId);
+      void endInterviewSession(false);
     };
-  }, [preparedSessionId]);
+  }, [endInterviewSession, sessionId]);
 
   const handleModeChange = (nextMode: InterviewMode) => {
     if (nextMode === mode) {
@@ -96,17 +251,16 @@ export const useInterviewSession = (
 
     setIsSubmitting(true);
 
-    const activeSessionId =
-      preparedInterview?.sessionId ?? getActiveInterviewSessionId();
+    const activeSessionId = sessionId ?? getActiveInterviewSessionId();
 
     if (!activeSessionId) {
       setIsSubmitting(false);
       return;
     }
 
-    const { errorMessage } = await submitInterviewAnswer({
+    const { data, errorMessage } = await submitInterviewAnswer({
       sessionId: activeSessionId,
-      questionId: answerTargetId,
+      questionId: currentQuestion.questionId,
       responseTime: 0,
       content: trimmedContent,
     });
@@ -117,19 +271,29 @@ export const useInterviewSession = (
       return;
     }
 
-    if (isLastInterview) {
-      clearActiveInterviewSessionId();
+    questionTts.onStop();
+    voiceAnswer.onClearAnswer();
 
-      if (activeSessionId) {
-        await completeInterview(activeSessionId);
-      }
-
-      return;
+    if (data?.question) {
+      applyCurrentQuestion(data.question);
     }
 
-    navigate(`/main/interview/${currentInterviewId + 1}`, {
-      state: preparedInterview ? { preparedInterview } : undefined,
-    });
+    if (data?.status) {
+      setInterviewStatus(data.status);
+
+      if (data.status === "COMPLETED") {
+        await endInterviewSession(true);
+        return;
+      }
+    }
+
+    if (!data?.question) {
+      const { data: nextQuestion } = await getCurrentInterviewQuestion(activeSessionId);
+
+      if (nextQuestion) {
+        applyCurrentQuestion(nextQuestion);
+      }
+    }
   };
 
   const handleCompleteVoice = async () => {
@@ -145,7 +309,7 @@ export const useInterviewSession = (
     answerStatus: isVoiceMode ? voiceAnswer.voiceStatus : INTERVIEW_STATUS_MESSAGES.text,
     answerText: voiceAnswer.answerText,
     cameraState,
-    currentInterviewId,
+    currentQuestion,
     isVoiceStarted: voiceAnswer.isVoiceStarted,
     mode,
     questionAudioStatus: questionTts.status,

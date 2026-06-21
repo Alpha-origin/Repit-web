@@ -1,5 +1,9 @@
-export type PersonaType = "FRIENDLY" | "NORMAL" | "PRESSURE";
-export type InterviewProgressStatus = "IN_PROGRESS" | "COMPLETED" | "READY";
+export type PersonaType = "FRIENDLY" | "NEUTRAL" | "STRESS";
+export type InterviewProgressStatus =
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "READY"
+  | "ABANDONED";
 
 export interface PrepareInterviewQuestion {
   questionId: number;

@@ -1,53 +1,10 @@
 import axios from 'axios';
 
 import type { LoginFormData } from '@/features/auth-page/login/model/types';
+import { setAccessToken, syncAccessTokenFromResponse } from '@/shared/api/accessToken';
 import { authInstance } from '@/shared/api/axiosInstance';
 
 const LOGIN_URL = '/api/v1/auth/login';
-const ACCESS_TOKEN_STORAGE_KEY = "accessToken";
-
-const normalizeToken = (value?: string | null) => {
-  const trimmedValue = value?.trim();
-
-  if (!trimmedValue) {
-    return null;
-  }
-
-  return /^Bearer\s+/i.test(trimmedValue)
-    ? trimmedValue
-    : `Bearer ${trimmedValue}`;
-};
-
-const getTokenFromRecord = (value: unknown): string | null => {
-  if (!value || typeof value !== "object") {
-    return null;
-  }
-
-  const record = value as Record<string, unknown>;
-  const directTokenKeys = ["accessToken", "token", "authorization"];
-
-  for (const key of directTokenKeys) {
-    const tokenValue = record[key];
-
-    if (typeof tokenValue === "string") {
-      return normalizeToken(tokenValue);
-    }
-  }
-
-  if ("data" in record) {
-    return getTokenFromRecord(record.data);
-  }
-
-  return null;
-};
-
-const saveAccessToken = (token: string | null) => {
-  if (!token || typeof window === "undefined") {
-    return;
-  }
-
-  window.sessionStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
-};
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (axios.isAxiosError(error)) {
@@ -76,12 +33,14 @@ export async function login(formData: LoginFormData): Promise<string | null> {
 
   try {
     const response = await authInstance.post(LOGIN_URL, loginData);
-    const headerToken =
-      normalizeToken(response.headers.authorization) ??
-      normalizeToken(response.headers.Authorization as string | undefined);
-    const bodyToken = getTokenFromRecord(response.data);
+    const syncedToken = syncAccessTokenFromResponse({
+      data: response.data,
+      headers: response.headers as Record<string, unknown>,
+    });
 
-    saveAccessToken(headerToken ?? bodyToken);
+    if (!syncedToken) {
+      setAccessToken(null);
+    }
 
     return null;
   } catch (error) {

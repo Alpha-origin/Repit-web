@@ -1,25 +1,23 @@
 import axios from "axios";
-import type { InterviewProgressStatus, PersonaType } from "./type";
+import { getAccessToken } from "@/shared/api/accessToken";
+import type {
+  CurrentInterviewQuestion,
+  InterviewProgressStatus,
+  PersonaType,
+} from "./type";
 
 interface ErrorResponse {
   message?: string;
   error?: string;
 }
 
-const PERSONA_TYPES: readonly PersonaType[] = ["FRIENDLY", "NORMAL", "PRESSURE"];
+const PERSONA_TYPES: readonly PersonaType[] = ["FRIENDLY", "NEUTRAL", "STRESS"];
 const INTERVIEW_PROGRESS_STATUSES: readonly InterviewProgressStatus[] = [
   "IN_PROGRESS",
   "COMPLETED",
   "READY",
+  "ABANDONED",
 ];
-const ACCESS_TOKEN_STORAGE_KEYS = [
-  "accessToken",
-  "ACCESS_TOKEN",
-  "authorization",
-  "Authorization",
-  "authToken",
-  "token",
-] as const;
 
 export const getErrorMessage = (error: unknown, fallback: string) => {
   if (axios.isAxiosError(error)) {
@@ -90,48 +88,81 @@ export const isInterviewProgressStatus = (
   typeof value === "string" &&
   INTERVIEW_PROGRESS_STATUSES.includes(value as InterviewProgressStatus);
 
+export const getInterviewQuestion = (
+  value: unknown,
+): CurrentInterviewQuestion | null => {
+  const questionRecord = getRecord(value);
+  const questionId =
+    getNumericValue(questionRecord?.questionId ?? questionRecord?.id);
+  const content = getTrimmedString(
+    questionRecord?.content ?? questionRecord?.question ?? questionRecord?.text,
+  );
+
+  if (questionId === null || !content) {
+    return null;
+  }
+
+  return {
+    questionId,
+    parentId: getNumericValue(questionRecord?.parentId) ?? 0,
+    type: getTrimmedString(questionRecord?.type) ?? "ORIGINAL",
+    intention:
+      getTrimmedString(questionRecord?.intention ?? questionRecord?.purpose) ??
+      "",
+    content,
+  };
+};
+
+export const getInterviewEvent = (value: unknown) => {
+  const responseRecord = getRecord(value);
+  const responseDataRecord = getRecord(responseRecord?.data);
+  const sourceRecord = responseDataRecord ?? responseRecord;
+  const statusValue = sourceRecord?.status ?? responseRecord?.status;
+
+  return {
+    status: isInterviewProgressStatus(statusValue) ? statusValue : null,
+    question: getInterviewQuestion(sourceRecord?.question ?? sourceRecord),
+    message: getTrimmedString(
+      sourceRecord?.message ?? responseRecord?.message,
+    ),
+  };
+};
+
 export const getCurrentUserId = () => {
-  if (typeof window === "undefined") {
+  const currentAccessToken = getAccessToken();
+  const trimmedValue = currentAccessToken?.replace(/^Bearer\s+/i, "").trim();
+
+  if (!trimmedValue) {
     return 0;
   }
 
-  for (const key of ACCESS_TOKEN_STORAGE_KEYS) {
-    const storedValue =
-      window.sessionStorage.getItem(key) ?? window.localStorage.getItem(key);
-    const trimmedValue = storedValue?.replace(/^Bearer\s+/i, "").trim();
+  const payload = trimmedValue.split(".")[1];
 
-    if (!trimmedValue) {
-      continue;
-    }
+  if (!payload) {
+    return 0;
+  }
 
-    const payload = trimmedValue.split(".")[1];
+  try {
+    const normalizedPayload = payload
+      .replace(/-/g, "+")
+      .replace(/_/g, "/")
+      .padEnd(Math.ceil(payload.length / 4) * 4, "=");
+    const decodedPayload = globalThis.atob(normalizedPayload);
+    const record = getRecord(JSON.parse(decodedPayload));
 
-    if (!payload) {
+    if (!record) {
       return 0;
     }
 
-    try {
-      const normalizedPayload = payload
-        .replace(/-/g, "+")
-        .replace(/_/g, "/")
-        .padEnd(Math.ceil(payload.length / 4) * 4, "=");
-      const decodedPayload = globalThis.atob(normalizedPayload);
-      const record = getRecord(JSON.parse(decodedPayload));
+    for (const claimKey of ["userId", "id", "memberId", "sub"]) {
+      const candidate = getNumericValue(record[claimKey]);
 
-      if (!record) {
-        return 0;
+      if (candidate !== null && candidate >= 0) {
+        return candidate;
       }
-
-      for (const claimKey of ["userId", "id", "memberId", "sub"]) {
-        const candidate = getNumericValue(record[claimKey]);
-
-        if (candidate !== null && candidate >= 0) {
-          return candidate;
-        }
-      }
-    } catch {
-      return 0;
     }
+  } catch {
+    return 0;
   }
 
   return 0;

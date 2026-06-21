@@ -13,7 +13,9 @@ const MAJOR_LABELS: Record<string, string> = {
 const STYLE_LABELS: Record<string, string> = {
   FRIENDLY: "편함",
   NORMAL: "일반",
+  NEUTRAL: "일반",
   PRESSURE: "압박",
+  STRESS: "압박",
   HARD: "압박",
 };
 

@@ -1,4 +1,4 @@
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import type { PreparedInterviewData } from "@/features/interview-page/interview/api";
 import { useInterviewSession } from "@/features/interview-page/interview/model/useInterviewSession";
@@ -21,27 +21,45 @@ const getPreparedInterviewFromState = (state: unknown) => {
   return preparedInterview as PreparedInterviewData;
 };
 
+const getInterviewSettingFromState = (state: unknown) => {
+  if (!state || typeof state !== "object" || !("interviewSetting" in state)) {
+    return null;
+  }
+
+  const interviewSetting = (state as { interviewSetting?: unknown }).interviewSetting;
+
+  if (!interviewSetting || typeof interviewSetting !== "object") {
+    return null;
+  }
+
+  return interviewSetting as { difficulty?: string };
+};
+
 const InterviewPage = () => {
-  const { id } = useParams();
   const location = useLocation();
   const preparedInterview = getPreparedInterviewFromState(location.state);
-  const routeInterviewIndex = Number(id);
-  const preparedQuestion =
-    routeInterviewIndex >= 1
-      ? preparedInterview?.questions[routeInterviewIndex - 1] ?? null
-      : null;
+  const interviewSetting = getInterviewSettingFromState(location.state);
   const interviewSession = useInterviewSession(
-    preparedQuestion?.content ?? INTERVIEW_DEFAULT_QUESTION.text,
     preparedInterview,
+    interviewSetting?.difficulty,
   );
   const isVoiceMode = interviewSession.mode === "voice";
   const isTextMode = interviewSession.mode === "text";
-  const currentPreparedQuestion =
-    preparedInterview?.questions[interviewSession.currentInterviewId - 1] ?? null;
+  const isQuestionLoading = interviewSession.currentQuestion === null;
   const currentQuestion = {
-    id: String(currentPreparedQuestion?.questionId ?? interviewSession.currentInterviewId),
-    text: currentPreparedQuestion?.content ?? INTERVIEW_DEFAULT_QUESTION.text,
+    id: String(
+      interviewSession.currentQuestion?.questionId ??
+        (isQuestionLoading ? "준비중" : INTERVIEW_DEFAULT_QUESTION.id),
+    ),
+    text:
+      interviewSession.currentQuestion?.content ??
+      (isQuestionLoading
+        ? "질문을 불러오는 중입니다. 잠시만 기다려주세요."
+        : INTERVIEW_DEFAULT_QUESTION.text),
   };
+  const answerStatus = isQuestionLoading
+    ? "질문을 준비하고 있어요."
+    : interviewSession.answerStatus;
 
   return (
     <S.Container $textMode={isTextMode} $voiceMode={isVoiceMode}>
@@ -54,7 +72,7 @@ const InterviewPage = () => {
         )}
 
         <InterviewContentView
-          answerStatus={interviewSession.answerStatus}
+          answerStatus={answerStatus}
           answerText={interviewSession.answerText}
           isVoiceStarted={interviewSession.isVoiceStarted}
           mode={interviewSession.mode}

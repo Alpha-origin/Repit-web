@@ -2,11 +2,14 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
+  createInterview,
+  savePersona,
   setActiveInterviewSessionId,
-  prepareInterview,
   type PersonaType,
+  type CreateInterviewPersonaType,
+  type InterviewPersonaGender,
+  type InterviewPersonaMajor,
 } from "@/features/interview-page/interview/api";
-import { INTERVIEW_DEFAULT_QUESTION } from "@/shared/constants/interview-page/interview";
 import {
   INTERVIEW_SETTING_INTERVIEWERS,
   INTERVIEW_SETTING_OPTION_SECTIONS,
@@ -22,11 +25,34 @@ type InterviewDifficultyOption =
 type InterviewerId =
   (typeof INTERVIEW_SETTING_INTERVIEWERS)[number]["id"];
 
-const PERSONA_TYPE_BY_STYLE: Record<InterviewStyleOption, PersonaType> = {
+const PREPARED_PERSONA_TYPE_BY_STYLE: Record<InterviewStyleOption, PersonaType> = {
   편함: "FRIENDLY",
-  일반: "NORMAL",
-  압박: "PRESSURE",
+  일반: "NEUTRAL",
+  압박: "STRESS",
 };
+const CREATE_PERSONA_TYPE_BY_STYLE: Record<
+  InterviewStyleOption,
+  CreateInterviewPersonaType
+> = {
+  편함: "FRIENDLY",
+  일반: "NEUTRAL",
+  압박: "STRESS",
+};
+const CAREER_BY_DIFFICULTY: Record<InterviewDifficultyOption, number> = {
+  쉬움: 0,
+  보통: 3,
+  어려움: 5,
+};
+const REQUEST_PERSONA_NAME_BY_INTERVIEWER_ID: Record<InterviewerId, string> = {
+  1: "도재현",
+  2: "하서율",
+  3: "주이안",
+  4: "윤태린",
+};
+const DEFAULT_INTERVIEW_MAJOR: InterviewPersonaMajor = "BACKEND";
+const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "MALE";
+const buildUniquePersonaName = (personaName: string) =>
+  `${personaName}-${Date.now().toString(36)}`;
 
 const SettingInterviewPage = () => {
   const navigate = useNavigate();
@@ -62,30 +88,65 @@ const SettingInterviewPage = () => {
     setErrorMessage("");
     setIsSubmitting(true);
 
-    const { data, errorMessage: prepareErrorMessage } = await prepareInterview({
-      personaId: selectedInterviewerId,
-      personaType: PERSONA_TYPE_BY_STYLE[selectedStyle],
-      questions: [
-        {
-          questionId: 1,
-          intention: selectedDifficulty,
-          content: INTERVIEW_DEFAULT_QUESTION.text,
-        },
-      ],
-    });
+    const selectedInterviewer = INTERVIEW_SETTING_INTERVIEWERS.find(
+      (interviewer) => interviewer.id === selectedInterviewerId,
+    );
+
+    if (!selectedInterviewer) {
+      setIsSubmitting(false);
+      setErrorMessage("선택한 면접관 정보를 찾을 수 없습니다.");
+      return;
+    }
+
+    const personaPayload = {
+      personaName: buildUniquePersonaName(
+        REQUEST_PERSONA_NAME_BY_INTERVIEWER_ID[selectedInterviewerId],
+      ),
+      major: DEFAULT_INTERVIEW_MAJOR,
+      type: CREATE_PERSONA_TYPE_BY_STYLE[selectedStyle],
+      career: CAREER_BY_DIFFICULTY[selectedDifficulty],
+      gender: DEFAULT_INTERVIEW_GENDER,
+    };
+
+    console.log("[persona/save] request payload", personaPayload);
+
+    const { errorMessage: savePersonaErrorMessage } = await savePersona(
+      personaPayload,
+    );
+
+    if (savePersonaErrorMessage) {
+      setIsSubmitting(false);
+      setErrorMessage(savePersonaErrorMessage);
+      return;
+    }
+
+    console.log("[interviews/create] request payload", personaPayload);
+
+    const { data, errorMessage: createErrorMessage } = await createInterview(
+      personaPayload,
+    );
 
     setIsSubmitting(false);
 
-    if (prepareErrorMessage || !data) {
-      setErrorMessage(prepareErrorMessage ?? "면접 준비에 실패했습니다.");
+    if (createErrorMessage || !data) {
+      setErrorMessage(createErrorMessage ?? "면접 시작에 실패했습니다.");
       return;
     }
 
     setActiveInterviewSessionId(data.sessionId);
 
-    navigate(`/main/interview/${data.currentQuestionIndex + 1}`, {
+    navigate("/main/interview/1", {
       state: {
-        preparedInterview: data,
+        preparedInterview: {
+          sessionId: data.sessionId,
+          interviewId: data.interviewId,
+          userId: data.userId,
+          personaId: data.personaId,
+          personaType: PREPARED_PERSONA_TYPE_BY_STYLE[selectedStyle],
+          status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
+          currentQuestionIndex: 0,
+          questions: [],
+        },
         interviewSetting: {
           style: selectedStyle,
           difficulty: selectedDifficulty,
@@ -96,7 +157,7 @@ const SettingInterviewPage = () => {
   };
 
   return (
-    <S.Container>
+      <S.Container>
       <S.ContentWrapper>
         <SettingContent
           onDifficultySelect={setSelectedDifficulty}
@@ -110,7 +171,7 @@ const SettingInterviewPage = () => {
         <SettingActions
           isBusy={isSubmitting}
           isNextDisabled={!isSelectionComplete || isSubmitting}
-          nextLabel={isSubmitting ? "연결 중..." : undefined}
+          nextLabel={isSubmitting ? "시작 중..." : undefined}
           onBack={handleBack}
           onNext={handleNext}
         />
