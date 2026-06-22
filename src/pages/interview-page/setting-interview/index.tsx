@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import {
   createInterview,
+  getInterviewQuestions,
   savePersona,
   setActiveInterviewSessionId,
   type PersonaType,
@@ -42,12 +43,6 @@ const CAREER_BY_DIFFICULTY: Record<InterviewDifficultyOption, number> = {
   쉬움: 0,
   보통: 3,
   어려움: 5,
-};
-const REQUEST_PERSONA_NAME_BY_INTERVIEWER_ID: Record<InterviewerId, string> = {
-  1: "도재현",
-  2: "하서율",
-  3: "주이안",
-  4: "윤태린",
 };
 const DEFAULT_INTERVIEW_MAJOR: InterviewPersonaMajor = "BACKEND";
 const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "MALE";
@@ -99,9 +94,7 @@ const SettingInterviewPage = () => {
     }
 
     const personaPayload = {
-      personaName: buildUniquePersonaName(
-        REQUEST_PERSONA_NAME_BY_INTERVIEWER_ID[selectedInterviewerId],
-      ),
+      personaName: buildUniquePersonaName(selectedInterviewer.personaName),
       major: DEFAULT_INTERVIEW_MAJOR,
       type: CREATE_PERSONA_TYPE_BY_STYLE[selectedStyle],
       career: CAREER_BY_DIFFICULTY[selectedDifficulty],
@@ -126,12 +119,30 @@ const SettingInterviewPage = () => {
       personaPayload,
     );
 
-    setIsSubmitting(false);
-
     if (createErrorMessage || !data) {
+      setIsSubmitting(false);
       setErrorMessage(createErrorMessage ?? "면접 시작에 실패했습니다.");
       return;
     }
+
+    const {
+      data: questions,
+      errorMessage: getQuestionsErrorMessage,
+    } = await getInterviewQuestions({
+      interviewId: data.interviewId,
+    });
+
+    setIsSubmitting(false);
+
+    if (getQuestionsErrorMessage || !questions || questions.length === 0) {
+      setErrorMessage(
+        getQuestionsErrorMessage ?? "면접 질문을 불러오지 못했습니다.",
+      );
+      return;
+    }
+
+    console.log("[interviews/create] response data", data);
+    console.log("[interviews/create] server sessionId", data.sessionId);
 
     setActiveInterviewSessionId(data.sessionId);
 
@@ -145,7 +156,7 @@ const SettingInterviewPage = () => {
           personaType: PREPARED_PERSONA_TYPE_BY_STYLE[selectedStyle],
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
           currentQuestionIndex: 0,
-          questions: [],
+          questions,
         },
         interviewSetting: {
           style: selectedStyle,

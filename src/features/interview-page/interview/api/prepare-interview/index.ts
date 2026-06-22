@@ -126,6 +126,7 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
   const requestData = buildPrepareInterviewRequest(params, normalizedSessionId);
 
   try {
+    console.log("[chat/interviews] request payload", requestData);
     const response = await chatInstance.post(PREPARE_INTERVIEW_URL, requestData);
     const responseRecord = getRecord(response.data);
 

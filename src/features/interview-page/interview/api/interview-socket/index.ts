@@ -1,4 +1,5 @@
 import { CHAT_URL } from "@/shared/api/axiosInstance";
+import { getAccessToken } from "@/shared/api/accessToken";
 
 import { getInterviewEvent, getTrimmedString } from "../shared";
 
@@ -15,6 +16,12 @@ const createInterviewSocketUrl = (sessionId: string) => {
 
   const socketUrl = new URL("/ws/chat/interviews", baseUrl);
   socketUrl.searchParams.set("sessionId", sessionId);
+
+  const accessToken = getAccessToken()?.replace(/^Bearer\s+/i, "").trim();
+
+  if (accessToken) {
+    socketUrl.searchParams.set("accessToken", accessToken);
+  }
 
   socketUrl.protocol = socketUrl.protocol === "https:" ? "wss:" : "ws:";
 

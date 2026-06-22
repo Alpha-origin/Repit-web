@@ -7,6 +7,7 @@ export { completeInterview } from "./complete-interview";
 export { createInterview } from "./create-interview";
 export { createAnswer } from "./create-answer";
 export { getCurrentInterviewQuestion } from "./current-question";
+export { getInterviewQuestions } from "./get-interview-questions";
 export {
   connectInterviewSocket,
   disconnectInterviewSocket,
@@ -23,9 +24,11 @@ export type {
   CreatedInterviewData,
   CreateAnswerRequest,
   CurrentInterviewQuestion,
+  GetInterviewQuestionsParams,
   CompleteInterviewQuestion,
   CompleteInterviewResponse,
   InterviewLifecycleStatus,
+  InterviewOriginalQuestion,
   InterviewPersonaGender,
   InterviewPersonaMajor,
   InterviewProgressStatus,

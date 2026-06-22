@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import {
   clearActiveInterviewSessionId,
+  completeInterview,
   disconnectInterviewSocket,
   getActiveInterviewSessionId,
   getCurrentInterviewQuestion,
@@ -23,6 +24,8 @@ import { useSupertoneTts } from "./useSupertoneTts";
 import { useInterviewCamera } from "./useInterviewCamera";
 import { useInterviewSocket } from "./useInterviewSocket";
 import { useVoiceAnswer } from "./useVoiceAnswer";
+
+type InterviewCloseReason = "completed" | "quit";
 
 const buildInitialQuestion = (
   preparedInterview?: PreparedInterviewData | null,
@@ -61,6 +64,9 @@ export const useInterviewSession = (
   const [interviewStatus, setInterviewStatus] = useState<InterviewProgressStatus>(
     preparedInterview?.status ?? "IN_PROGRESS",
   );
+  const [isChatSessionReady, setIsChatSessionReady] = useState(
+    () => !preparedInterview,
+  );
   const isVoiceMode = mode === "voice";
   const { cameraState, videoRef } = useInterviewCamera(isVoiceMode);
   const voiceAnswer = useVoiceAnswer();
@@ -74,6 +80,7 @@ export const useInterviewSession = (
   useEffect(() => {
     setCurrentQuestion(buildInitialQuestion(preparedInterview));
     setInterviewStatus(preparedInterview?.status ?? "IN_PROGRESS");
+    setIsChatSessionReady(!preparedInterview);
     isSessionClosedRef.current = false;
   }, [preparedInterview]);
 
@@ -93,7 +100,10 @@ export const useInterviewSession = (
   }, []);
 
   const endInterviewSession = useCallback(
-    async (shouldNavigateToMain: boolean) => {
+    async (
+      shouldNavigateToMain: boolean,
+      reason: InterviewCloseReason = "quit",
+    ) => {
       const activeSessionId = sessionId ?? getActiveInterviewSessionId();
 
       if (!activeSessionId || isSessionClosedRef.current) {
@@ -107,7 +117,11 @@ export const useInterviewSession = (
       isSessionClosedRef.current = true;
       clearActiveInterviewSessionId();
       disconnectInterviewSocket(activeSessionId);
-      await quitInterview(activeSessionId);
+      if (reason === "completed") {
+        await completeInterview(activeSessionId);
+      } else {
+        await quitInterview(activeSessionId);
+      }
 
       if (shouldNavigateToMain) {
         navigate("/main");
@@ -136,14 +150,14 @@ export const useInterviewSession = (
       setInterviewStatus(status);
 
       if (status === "COMPLETED") {
-        void endInterviewSession(true);
+        void endInterviewSession(true, "completed");
       }
     },
     [applyCurrentQuestion, endInterviewSession],
   );
 
   useInterviewSocket({
-    sessionId,
+    sessionId: isChatSessionReady ? sessionId : null,
     onQuestionReceived: applyCurrentQuestion,
     onStatusChange: handleSocketStatusChange,
   });
@@ -160,19 +174,24 @@ export const useInterviewSession = (
     preparedChatSessionIdRef.current = sessionId;
 
     const startInterviewSession = async () => {
+      const questions =
+        preparedInterview.questions.length > 0
+          ? preparedInterview.questions
+          : [
+              {
+                questionId: 1,
+                intention: initialQuestionIntention?.trim() || "보통",
+                content: INTERVIEW_DEFAULT_QUESTION.text,
+              },
+            ];
+
       const { data, errorMessage } = await prepareInterview({
         sessionId,
         interviewId: preparedInterview.interviewId,
         userId: preparedInterview.userId,
         personaId: preparedInterview.personaId,
         personaType: preparedInterview.personaType,
-        questions: [
-          {
-            questionId: 1,
-            intention: initialQuestionIntention?.trim() || "보통",
-            content: INTERVIEW_DEFAULT_QUESTION.text,
-          },
-        ],
+        questions,
       });
 
       if (errorMessage || !data) {
@@ -183,12 +202,7 @@ export const useInterviewSession = (
       if (data.status) {
         setInterviewStatus(data.status);
       }
-
-      const { data: nextQuestion } = await getCurrentInterviewQuestion(sessionId);
-
-      if (nextQuestion) {
-        applyCurrentQuestion(nextQuestion);
-      }
+      setIsChatSessionReady(true);
     };
 
     void startInterviewSession();
@@ -282,7 +296,7 @@ export const useInterviewSession = (
       setInterviewStatus(data.status);
 
       if (data.status === "COMPLETED") {
-        await endInterviewSession(true);
+        await endInterviewSession(true, "completed");
         return;
       }
     }

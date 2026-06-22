@@ -9,6 +9,10 @@ export type {
 export type { CreateAnswerRequest } from "./create-answer";
 export type { CurrentInterviewQuestion } from "./current-question";
 export type {
+  GetInterviewQuestionsParams,
+  InterviewOriginalQuestion,
+} from "./get-interview-questions";
+export type {
   CompleteInterviewQuestion,
   CompleteInterviewResponse,
 } from "./complete-interview";
