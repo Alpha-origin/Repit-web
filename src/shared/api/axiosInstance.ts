@@ -1,5 +1,4 @@
 import axios from "axios";
-import Cookies from "js-cookie";
 
 import type {
   AxiosError,
@@ -7,6 +6,11 @@ import type {
   AxiosInstance,
   InternalAxiosRequestConfig,
 } from "axios";
+import {
+  clearAccessToken,
+  getAccessToken,
+  syncAccessTokenFromResponse,
+} from "./accessToken";
 
 const resolveServerUrl = (url?: string) => {
   if (!url) return "";
@@ -14,52 +18,6 @@ const resolveServerUrl = (url?: string) => {
   const normalizedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
 
   return normalizedUrl.replace(/\/+$/, "");
-};
-
-const AUTH_TOKEN_STORAGE_KEYS = [
-  "accessToken",
-  "ACCESS_TOKEN",
-  "authorization",
-  "Authorization",
-  "authToken",
-  "token",
-] as const;
-
-const normalizeAuthorizationValue = (value?: string | null) => {
-  const trimmedValue = value?.trim();
-
-  if (!trimmedValue) {
-    return null;
-  }
-
-  return /^Bearer\s+/i.test(trimmedValue)
-    ? trimmedValue
-    : `Bearer ${trimmedValue}`;
-};
-
-const getAuthorizationHeader = () => {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  for (const key of AUTH_TOKEN_STORAGE_KEYS) {
-    const storageValue =
-      window.localStorage.getItem(key) ?? window.sessionStorage.getItem(key);
-    const normalizedStorageValue = normalizeAuthorizationValue(storageValue);
-
-    if (normalizedStorageValue) {
-      return normalizedStorageValue;
-    }
-
-    const cookieValue = Cookies.get(key);
-    const normalizedCookieValue = normalizeAuthorizationValue(cookieValue);
-
-    if (normalizedCookieValue) {
-      return normalizedCookieValue;
-    }
-  }
-
-  return null;
 };
 
 export const AUTH_URL = resolveServerUrl(import.meta.env.VITE_AUTH_URL);
@@ -100,7 +58,11 @@ const goToLoginPage = () => {
 
 const tryRefreshSession = async () => {
   try {
-    await authInstance.post("/api/v1/auth/refresh");
+    const response = await authInstance.post("/api/v1/auth/refresh");
+    syncAccessTokenFromResponse({
+      data: response.data,
+      headers: response.headers as Record<string, unknown>,
+    });
     return true;
   } catch {
     return false;
@@ -109,7 +71,7 @@ const tryRefreshSession = async () => {
 
 const addAuthorizationInterceptor = (instance: AxiosInstance) => {
   instance.interceptors.request.use((config) => {
-    const authorizationHeader = getAuthorizationHeader();
+    const authorizationHeader = getAccessToken();
 
     if (!authorizationHeader) {
       return config;
@@ -126,6 +88,17 @@ const addAuthorizationInterceptor = (instance: AxiosInstance) => {
     config.headers = nextHeaders;
 
     return config;
+  });
+};
+
+const addAccessTokenSyncInterceptor = (instance: AxiosInstance) => {
+  instance.interceptors.response.use((response) => {
+    syncAccessTokenFromResponse({
+      data: response.data,
+      headers: response.headers as Record<string, unknown>,
+    });
+
+    return response;
   });
 };
 
@@ -152,6 +125,7 @@ const addRefreshInterceptor = (instance: AxiosInstance) => {
       }
 
       if (error.response?.status === 401) {
+        clearAccessToken();
         goToLoginPage();
       }
 
@@ -160,6 +134,9 @@ const addRefreshInterceptor = (instance: AxiosInstance) => {
   );
 };
 
+addAccessTokenSyncInterceptor(authInstance);
+addAccessTokenSyncInterceptor(apiInstance);
+addAccessTokenSyncInterceptor(chatInstance);
 addRefreshInterceptor(apiInstance);
 addRefreshInterceptor(chatInstance);
 addAuthorizationInterceptor(apiInstance);

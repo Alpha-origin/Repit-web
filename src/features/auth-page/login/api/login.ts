@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import type { LoginFormData } from '@/features/auth-page/login/model/types';
+import { setAccessToken, syncAccessTokenFromResponse } from '@/shared/api/accessToken';
 import { authInstance } from '@/shared/api/axiosInstance';
 
 const LOGIN_URL = '/api/v1/auth/login';
@@ -31,7 +32,16 @@ export async function login(formData: LoginFormData): Promise<string | null> {
   };
 
   try {
-    await authInstance.post(LOGIN_URL, loginData);
+    const response = await authInstance.post(LOGIN_URL, loginData);
+    const syncedToken = syncAccessTokenFromResponse({
+      data: response.data,
+      headers: response.headers as Record<string, unknown>,
+    });
+
+    if (!syncedToken) {
+      setAccessToken(null);
+    }
+
     return null;
   } catch (error) {
     return getErrorMessage(error, '로그인에 실패했습니다.');

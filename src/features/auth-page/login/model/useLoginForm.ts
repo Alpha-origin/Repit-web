@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { login } from '@/features/auth-page/login/api/login';
@@ -7,6 +7,7 @@ import type { LoginFormData } from './types';
 
 export function useLoginForm(onSuccess?: () => void) {
   const [submitError, setSubmitError] = useState('');
+  const isLoginRequestPendingRef = useRef(false);
   const {
     register,
     handleSubmit,
@@ -16,16 +17,25 @@ export function useLoginForm(onSuccess?: () => void) {
   });
 
   async function submitLogin(formData: LoginFormData) {
-    setSubmitError('');
-
-    const errorMessage = await login(formData);
-
-    if (errorMessage) {
-      setSubmitError(errorMessage);
+    if (isLoginRequestPendingRef.current) {
       return;
     }
 
-    onSuccess?.();
+    isLoginRequestPendingRef.current = true;
+    setSubmitError('');
+
+    try {
+      const errorMessage = await login(formData);
+
+      if (errorMessage) {
+        setSubmitError(errorMessage);
+        return;
+      }
+
+      onSuccess?.();
+    } finally {
+      isLoginRequestPendingRef.current = false;
+    }
   }
 
   return {
