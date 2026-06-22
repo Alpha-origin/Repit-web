@@ -30,7 +30,7 @@ const InterviewPage = () => {
   const isQuestionLoading = interviewSession.currentQuestion === null;
   const currentQuestion = {
     id: String(
-      interviewSession.currentQuestion?.questionId ??
+      interviewSession.displayQuestionNumber ||
         (isQuestionLoading ? "준비중" : INTERVIEW_DEFAULT_QUESTION.id),
     ),
     text:

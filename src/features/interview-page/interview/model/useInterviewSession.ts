@@ -26,6 +26,20 @@ import { useVoiceAnswer } from "./useVoiceAnswer";
 
 type InterviewCloseReason = "completed" | "quit";
 
+const buildQuestionKey = (question: CurrentInterviewQuestion | null) => {
+  if (!question) {
+    return null;
+  }
+
+  return [
+    question.questionId,
+    question.parentId,
+    question.type,
+    question.intention,
+    question.content,
+  ].join("|");
+};
+
 const buildInitialQuestion = (
   preparedInterview?: PreparedInterviewData | null,
 ): CurrentInterviewQuestion | null => {
@@ -54,10 +68,14 @@ export const useInterviewSession = (
   preparedInterview?: PreparedInterviewData | null,
 ) => {
   const navigate = useNavigate();
+  const initialQuestion = buildInitialQuestion(preparedInterview);
   const [mode, setMode] = useState<InterviewMode>("voice");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<CurrentInterviewQuestion | null>(
-    () => buildInitialQuestion(preparedInterview),
+    () => initialQuestion,
+  );
+  const [displayQuestionNumber, setDisplayQuestionNumber] = useState(
+    () => (initialQuestion ? 1 : 0),
   );
   const [interviewStatus, setInterviewStatus] = useState<InterviewProgressStatus>(
     preparedInterview?.status ?? "IN_PROGRESS",
@@ -72,29 +90,35 @@ export const useInterviewSession = (
   const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
   const isSessionClosedRef = useRef(false);
   const preparedChatSessionIdRef = useRef<string | null>(null);
+  const currentQuestionKeyRef = useRef<string | null>(
+    buildQuestionKey(initialQuestion),
+  );
   const canSubmitAnswer =
     interviewStatus === "IN_PROGRESS" && currentQuestion !== null;
 
   useEffect(() => {
-    setCurrentQuestion(buildInitialQuestion(preparedInterview));
+    const nextInitialQuestion = buildInitialQuestion(preparedInterview);
+
+    currentQuestionKeyRef.current = buildQuestionKey(nextInitialQuestion);
+    setCurrentQuestion(nextInitialQuestion);
+    setDisplayQuestionNumber(nextInitialQuestion ? 1 : 0);
     setInterviewStatus(preparedInterview?.status ?? "IN_PROGRESS");
     setIsChatSessionReady(!preparedInterview);
     isSessionClosedRef.current = false;
   }, [preparedInterview]);
 
   const applyCurrentQuestion = useCallback((nextQuestion: CurrentInterviewQuestion) => {
-    setCurrentQuestion((previousQuestion) => {
-      if (
-        previousQuestion?.questionId === nextQuestion.questionId &&
-        previousQuestion.content === nextQuestion.content &&
-        previousQuestion.intention === nextQuestion.intention &&
-        previousQuestion.type === nextQuestion.type
-      ) {
-        return previousQuestion;
-      }
+    const nextQuestionKey = buildQuestionKey(nextQuestion);
 
-      return nextQuestion;
-    });
+    if (currentQuestionKeyRef.current === nextQuestionKey) {
+      return;
+    }
+
+    currentQuestionKeyRef.current = nextQuestionKey;
+    setCurrentQuestion(nextQuestion);
+    setDisplayQuestionNumber((previousNumber) =>
+      previousNumber > 0 ? previousNumber + 1 : 1,
+    );
   }, []);
 
   const endInterviewSession = useCallback(
@@ -321,6 +345,7 @@ export const useInterviewSession = (
     answerText: voiceAnswer.answerText,
     cameraState,
     currentQuestion,
+    displayQuestionNumber,
     isVoiceStarted: voiceAnswer.isVoiceStarted,
     mode,
     questionAudioStatus: questionTts.status,
