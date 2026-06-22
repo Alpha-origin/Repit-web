@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 import {
   createInterview,
-  getInterviewQuestions,
   savePersona,
   setActiveInterviewSessionId,
   type PersonaType,
@@ -125,21 +124,7 @@ const SettingInterviewPage = () => {
       return;
     }
 
-    const {
-      data: questions,
-      errorMessage: getQuestionsErrorMessage,
-    } = await getInterviewQuestions({
-      interviewId: data.interviewId,
-    });
-
     setIsSubmitting(false);
-
-    if (getQuestionsErrorMessage || !questions || questions.length === 0) {
-      setErrorMessage(
-        getQuestionsErrorMessage ?? "면접 질문을 불러오지 못했습니다.",
-      );
-      return;
-    }
 
     console.log("[interviews/create] response data", data);
     console.log("[interviews/create] server sessionId", data.sessionId);
@@ -155,8 +140,8 @@ const SettingInterviewPage = () => {
           personaId: data.personaId,
           personaType: PREPARED_PERSONA_TYPE_BY_STYLE[selectedStyle],
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
-          currentQuestionIndex: 0,
-          questions,
+          currentQuestionIndex: data.currentQuestionIndex,
+          questions: data.questions,
         },
         interviewSetting: {
           style: selectedStyle,
@@ -168,7 +153,7 @@ const SettingInterviewPage = () => {
   };
 
   return (
-      <S.Container>
+    <S.Container>
       <S.ContentWrapper>
         <SettingContent
           onDifficultySelect={setSelectedDifficulty}
@@ -178,7 +163,9 @@ const SettingInterviewPage = () => {
           selectedInterviewerId={selectedInterviewerId}
           selectedStyle={selectedStyle}
         />
-        {errorMessage ? <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage> : null}
+        {errorMessage ? (
+          <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage>
+        ) : null}
         <SettingActions
           isBusy={isSubmitting}
           isNextDisabled={!isSelectionComplete || isSubmitting}

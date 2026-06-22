@@ -21,28 +21,10 @@ const getPreparedInterviewFromState = (state: unknown) => {
   return preparedInterview as PreparedInterviewData;
 };
 
-const getInterviewSettingFromState = (state: unknown) => {
-  if (!state || typeof state !== "object" || !("interviewSetting" in state)) {
-    return null;
-  }
-
-  const interviewSetting = (state as { interviewSetting?: unknown }).interviewSetting;
-
-  if (!interviewSetting || typeof interviewSetting !== "object") {
-    return null;
-  }
-
-  return interviewSetting as { difficulty?: string };
-};
-
 const InterviewPage = () => {
   const location = useLocation();
   const preparedInterview = getPreparedInterviewFromState(location.state);
-  const interviewSetting = getInterviewSettingFromState(location.state);
-  const interviewSession = useInterviewSession(
-    preparedInterview,
-    interviewSetting?.difficulty,
-  );
+  const interviewSession = useInterviewSession(preparedInterview);
   const isVoiceMode = interviewSession.mode === "voice";
   const isTextMode = interviewSession.mode === "text";
   const isQuestionLoading = interviewSession.currentQuestion === null;

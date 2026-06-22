@@ -10,6 +10,7 @@ import type {
   CreateInterviewParams,
   CreatedInterviewData,
   InterviewLifecycleStatus,
+  PrepareInterviewQuestion,
 } from "../type";
 
 const CREATE_INTERVIEW_URL = "/api/interviews/create";
@@ -25,6 +26,46 @@ const isInterviewLifecycleStatus = (
   typeof value === "string" &&
   INTERVIEW_LIFECYCLE_STATUSES.includes(value as InterviewLifecycleStatus);
 
+const normalizeQuestion = (
+  value: unknown,
+  index: number,
+): PrepareInterviewQuestion | null => {
+  const questionRecord = getRecord(value);
+  const content = getTrimmedString(
+    questionRecord?.content ?? questionRecord?.question ?? questionRecord?.text,
+  );
+
+  if (!content) {
+    return null;
+  }
+
+  return {
+    questionId:
+      getNumericValue(questionRecord?.questionId ?? questionRecord?.id) ??
+      index + 1,
+    intention:
+      getTrimmedString(questionRecord?.intention ?? questionRecord?.purpose) ??
+      "",
+    content,
+  };
+};
+
+const normalizeQuestions = (value: unknown) => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.reduce<PrepareInterviewQuestion[]>((accumulator, question, index) => {
+    const normalizedQuestion = normalizeQuestion(question, index);
+
+    if (normalizedQuestion) {
+      accumulator.push(normalizedQuestion);
+    }
+
+    return accumulator;
+  }, []);
+};
+
 const normalizeCreatedInterview = (payload: unknown) => {
   const responseRecord = getRecord(payload);
   const responseDataRecord = getRecord(responseRecord?.data);
@@ -33,6 +74,9 @@ const normalizeCreatedInterview = (payload: unknown) => {
   const interviewId = getNumericValue(sourceRecord?.interviewId);
   const userId = getNumericValue(sourceRecord?.userId);
   const personaId = getNumericValue(sourceRecord?.personaId);
+  const questions = normalizeQuestions(
+    sourceRecord?.questions ?? sourceRecord?.interviewQuestions,
+  );
 
   if (
     !sessionId ||
@@ -52,6 +96,14 @@ const normalizeCreatedInterview = (payload: unknown) => {
       ? sourceRecord.status
       : "IN_PROGRESS",
     createdAt: getTrimmedString(sourceRecord?.createdAt),
+    currentQuestionIndex:
+      questions.length > 0
+        ? Math.min(
+            Math.max(getNumericValue(sourceRecord?.currentQuestionIndex) ?? 0, 0),
+            questions.length - 1,
+          )
+        : 0,
+    questions,
   } satisfies CreatedInterviewData;
 };
 

@@ -1,4 +1,5 @@
 import { chatInstance } from "@/shared/api/axiosInstance";
+import { INTERVIEW_DEFAULT_QUESTION } from "@/shared/constants/interview-page/interview";
 
 import {
   getCurrentUserId,
@@ -16,6 +17,11 @@ import type {
 } from "../type";
 
 const PREPARE_INTERVIEW_URL = "/chat/interviews";
+const FALLBACK_PREPARE_QUESTION: PrepareInterviewQuestion = {
+  questionId: 1,
+  intention: "기본 질문",
+  content: INTERVIEW_DEFAULT_QUESTION.text,
+};
 
 const normalizeQuestion = (
   value: unknown,
@@ -42,28 +48,34 @@ const normalizeQuestion = (
 const buildPrepareInterviewRequest = (
   params: PrepareInterviewParams,
   sessionId: string,
-): PreparedInterviewData => ({
-  sessionId,
-  interviewId:
-    (() => {
-      const interviewId = getNumericValue(params.interviewId);
-      return interviewId !== null && interviewId > 0 ? interviewId : Date.now();
-    })(),
-  userId:
-    (() => {
-      const userId = getNumericValue(params.userId);
-      return userId !== null && userId >= 0 ? userId : getCurrentUserId();
-    })(),
-  personaId: params.personaId,
-  personaType: params.personaType,
-  status: "IN_PROGRESS",
-  currentQuestionIndex: 0,
-  questions: params.questions.map((question, index) => ({
+) => {
+  const sourceQuestions =
+    params.questions.length > 0 ? params.questions : [FALLBACK_PREPARE_QUESTION];
+  const normalizedQuestions = sourceQuestions.map((question, index) => ({
     questionId: getNumericValue(question.questionId) ?? index + 1,
     intention: question.intention.trim(),
     content: question.content.trim(),
-  })),
-});
+  }));
+
+  return {
+    sessionId,
+    interviewId:
+      (() => {
+        const interviewId = getNumericValue(params.interviewId);
+        return interviewId !== null && interviewId > 0 ? interviewId : Date.now();
+      })(),
+    userId:
+      (() => {
+        const userId = getNumericValue(params.userId);
+        return userId !== null && userId >= 0 ? userId : getCurrentUserId();
+      })(),
+    personaId: params.personaId,
+    personaType: params.personaType,
+    status: "IN_PROGRESS",
+    currentQuestionIndex: 0,
+    questions: normalizedQuestions,
+  } satisfies PreparedInterviewData;
+};
 
 const normalizePreparedInterview = (
   payload: unknown,
@@ -76,11 +88,11 @@ const normalizePreparedInterview = (
     sourceRecord?.questions ?? sourceRecord?.interviewQuestions;
   const normalizedQuestions = Array.isArray(responseQuestions)
     ? responseQuestions.map((question, index) =>
-        normalizeQuestion(
-          question,
-          fallbackData.questions[index] ?? fallbackData.questions[0],
-          index,
-        ),
+        normalizeQuestion(question, fallbackData.questions[index] ?? {
+          questionId: index + 1,
+          intention: "",
+          content: "",
+        }, index),
       )
     : fallbackData.questions;
   const totalQuestionCount =
@@ -126,8 +138,17 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
   const requestData = buildPrepareInterviewRequest(params, normalizedSessionId);
 
   try {
-    console.log("[chat/interviews] request payload", requestData);
-    const response = await chatInstance.post(PREPARE_INTERVIEW_URL, requestData);
+    const requestPayload = {
+      sessionId: requestData.sessionId,
+      interviewId: requestData.interviewId,
+      userId: requestData.userId,
+      personaId: requestData.personaId,
+      personaType: requestData.personaType,
+      questions: requestData.questions,
+    };
+
+    console.log("[chat/interviews] request payload", requestPayload);
+    const response = await chatInstance.post(PREPARE_INTERVIEW_URL, requestPayload);
     const responseRecord = getRecord(response.data);
 
     if (responseRecord?.success === false) {

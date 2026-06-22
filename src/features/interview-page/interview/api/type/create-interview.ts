@@ -1,3 +1,5 @@
+import type { PrepareInterviewQuestion } from "./prepare-interview";
+
 export type InterviewPersonaMajor = "BACKEND" | "FRONTEND";
 export type CreateInterviewPersonaType = "FRIENDLY" | "NEUTRAL" | "STRESS";
 export type InterviewPersonaGender = "MALE" | "FEMALE";
@@ -21,4 +23,6 @@ export interface CreatedInterviewData {
   sessionId: string;
   status: InterviewLifecycleStatus;
   createdAt: string | null;
+  currentQuestionIndex: number;
+  questions: PrepareInterviewQuestion[];
 }

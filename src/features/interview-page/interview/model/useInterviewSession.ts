@@ -15,7 +15,6 @@ import {
   type PreparedInterviewData,
 } from "@/features/interview-page/interview/api";
 import {
-  INTERVIEW_DEFAULT_QUESTION,
   INTERVIEW_STATUS_MESSAGES,
 } from "@/shared/constants/interview-page/interview";
 
@@ -53,7 +52,6 @@ const buildInitialQuestion = (
 
 export const useInterviewSession = (
   preparedInterview?: PreparedInterviewData | null,
-  initialQuestionIntention?: string,
 ) => {
   const navigate = useNavigate();
   const [mode, setMode] = useState<InterviewMode>("voice");
@@ -174,24 +172,13 @@ export const useInterviewSession = (
     preparedChatSessionIdRef.current = sessionId;
 
     const startInterviewSession = async () => {
-      const questions =
-        preparedInterview.questions.length > 0
-          ? preparedInterview.questions
-          : [
-              {
-                questionId: 1,
-                intention: initialQuestionIntention?.trim() || "보통",
-                content: INTERVIEW_DEFAULT_QUESTION.text,
-              },
-            ];
-
       const { data, errorMessage } = await prepareInterview({
         sessionId,
         interviewId: preparedInterview.interviewId,
         userId: preparedInterview.userId,
         personaId: preparedInterview.personaId,
         personaType: preparedInterview.personaType,
-        questions,
+        questions: preparedInterview.questions,
       });
 
       if (errorMessage || !data) {
@@ -202,16 +189,26 @@ export const useInterviewSession = (
       if (data.status) {
         setInterviewStatus(data.status);
       }
+
+      const firstQuestion = buildInitialQuestion(data);
+
+      if (firstQuestion) {
+        applyCurrentQuestion(firstQuestion);
+      }
+
       setIsChatSessionReady(true);
+
+      if (!firstQuestion) {
+        const { data: nextQuestion } = await getCurrentInterviewQuestion(data.sessionId);
+
+        if (nextQuestion) {
+          applyCurrentQuestion(nextQuestion);
+        }
+      }
     };
 
     void startInterviewSession();
-  }, [
-    applyCurrentQuestion,
-    initialQuestionIntention,
-    preparedInterview,
-    sessionId,
-  ]);
+  }, [applyCurrentQuestion, preparedInterview, sessionId]);
 
   useEffect(() => {
     return () => {
