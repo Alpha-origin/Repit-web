@@ -18,6 +18,9 @@ const MainPage = lazy(() => import("@/pages/main-page"));
 const MyPage = lazy(() => import("@/pages/my-page"));
 
 // Interview
+const InterviewCompletedPage = lazy(
+  () => import("@/pages/interview-page/completed")
+);
 const InterviewPage = lazy(() => import("@/pages/interview-page/interview"));
 const SettingInterview = lazy(
   () => import("@/pages/interview-page/setting-interview")
@@ -61,6 +64,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <MainPage />,
+      },
+      {
+        path: "interview/completed",
+        element: <InterviewCompletedPage />,
       },
       {
         path: "interview/:id",

@@ -7,6 +7,7 @@ import {
   disconnectInterviewSocket,
   getActiveInterviewSessionId,
   getCurrentInterviewQuestion,
+  generateMockInterview,
   prepareInterview,
   quitInterview,
   submitInterviewAnswer,
@@ -25,6 +26,7 @@ import { useInterviewSocket } from "./useInterviewSocket";
 import { useVoiceAnswer } from "./useVoiceAnswer";
 
 type InterviewCloseReason = "completed" | "quit";
+const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
 
 const buildQuestionKey = (question: CurrentInterviewQuestion | null) => {
   if (!question) {
@@ -95,6 +97,11 @@ export const useInterviewSession = (
   );
   const canSubmitAnswer =
     interviewStatus === "IN_PROGRESS" && currentQuestion !== null;
+  const getInterviewExitPath = useCallback(
+    (reason: InterviewCloseReason) =>
+      reason === "completed" ? INTERVIEW_COMPLETED_PATH : "/main",
+    [],
+  );
 
   useEffect(() => {
     const nextInitialQuestion = buildInitialQuestion(preparedInterview);
@@ -127,10 +134,16 @@ export const useInterviewSession = (
       reason: InterviewCloseReason = "quit",
     ) => {
       const activeSessionId = sessionId ?? getActiveInterviewSessionId();
+      const nextPath = getInterviewExitPath(reason);
 
       if (!activeSessionId || isSessionClosedRef.current) {
         if (shouldNavigateToMain) {
-          navigate("/main");
+          navigate(nextPath, {
+            state:
+              reason === "completed"
+                ? { answeredQuestionCount: displayQuestionNumber }
+                : undefined,
+          });
         }
 
         return;
@@ -146,10 +159,15 @@ export const useInterviewSession = (
       }
 
       if (shouldNavigateToMain) {
-        navigate("/main");
+        navigate(nextPath, {
+          state:
+            reason === "completed"
+              ? { answeredQuestionCount: displayQuestionNumber }
+              : undefined,
+        });
       }
     },
-    [navigate, sessionId],
+    [displayQuestionNumber, getInterviewExitPath, navigate, sessionId],
   );
 
   const handleSocketStatusChange = useCallback(
@@ -289,6 +307,14 @@ export const useInterviewSession = (
     const activeSessionId = sessionId ?? getActiveInterviewSessionId();
 
     if (!activeSessionId) {
+      setIsSubmitting(false);
+      return;
+    }
+
+    const { errorMessage: generateMockErrorMessage } =
+      await generateMockInterview();
+
+    if (generateMockErrorMessage) {
       setIsSubmitting(false);
       return;
     }

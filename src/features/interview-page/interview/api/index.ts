@@ -6,6 +6,7 @@ export {
 export { completeInterview } from "./complete-interview";
 export { createInterview } from "./create-interview";
 export { createAnswer } from "./create-answer";
+export { generateMockInterview } from "./generate-mock";
 export { getCurrentInterviewQuestion } from "./current-question";
 export {
   connectInterviewSocket,
@@ -22,6 +23,7 @@ export type {
   CreateInterviewPersonaType,
   CreatedInterviewData,
   CreateAnswerRequest,
+  GenerateMockResponse,
   CurrentInterviewQuestion,
   CompleteInterviewQuestion,
   CompleteInterviewResponse,

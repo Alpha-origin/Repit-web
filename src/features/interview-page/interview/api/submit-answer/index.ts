@@ -1,6 +1,11 @@
 import { chatInstance } from "@/shared/api/axiosInstance";
+import axios from "axios";
 
-import { getErrorMessage, getTrimmedString } from "../shared";
+import {
+  getErrorMessage,
+  getInterviewEvent,
+  getTrimmedString,
+} from "../shared";
 import type {
   SubmitInterviewAnswerParams,
   SubmitInterviewAnswerResponse,
@@ -44,6 +49,21 @@ export const submitInterviewAnswer = async ({
       errorMessage: null,
     };
   } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data) {
+      const fallbackEvent = getInterviewEvent(error.response.data);
+
+      if (fallbackEvent.status) {
+        return {
+          data: {
+            status: fallbackEvent.status,
+            question: fallbackEvent.question ?? undefined,
+            message: fallbackEvent.message ?? undefined,
+          } satisfies SubmitInterviewAnswerResponse,
+          errorMessage: null,
+        };
+      }
+    }
+
     return {
       data: null,
       errorMessage: getErrorMessage(error, "답변 제출에 실패했습니다."),
