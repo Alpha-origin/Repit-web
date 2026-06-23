@@ -38,6 +38,8 @@ export async function login(formData: LoginFormData): Promise<string | null> {
       headers: response.headers as Record<string, unknown>,
     });
 
+    console.log("[POST /api/v1/auth/login] accessToken", syncedToken ?? null);
+
     if (!syncedToken) {
       setAccessToken(null);
     }

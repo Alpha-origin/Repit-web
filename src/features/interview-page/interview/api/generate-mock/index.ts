@@ -26,9 +26,12 @@ const normalizeGenerateMockResponse = (
 export const generateMockInterview = async () => {
   try {
     const response = await apiInstance.post(GENERATE_MOCK_URL);
+    const data = normalizeGenerateMockResponse(response.data);
+
+    console.log("[POST /api/v1/ai/generate-mock] jobId", data.jobId);
 
     return {
-      data: normalizeGenerateMockResponse(response.data),
+      data,
       errorMessage: null,
     };
   } catch (error) {

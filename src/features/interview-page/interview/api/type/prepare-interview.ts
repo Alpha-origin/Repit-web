@@ -17,6 +17,7 @@ export interface PrepareInterviewParams {
   userId?: number;
   personaId: number;
   personaType: PersonaType;
+  jobId?: string;
   questions: PrepareInterviewQuestion[];
 }
 

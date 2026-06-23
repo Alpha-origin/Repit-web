@@ -214,12 +214,23 @@ export const useInterviewSession = (
     preparedChatSessionIdRef.current = sessionId;
 
     const startInterviewSession = async () => {
+      const {
+        data: generateMockData,
+        errorMessage: generateMockErrorMessage,
+      } = await generateMockInterview();
+
+      if (generateMockErrorMessage || !generateMockData?.jobId) {
+        preparedChatSessionIdRef.current = null;
+        return;
+      }
+
       const { data, errorMessage } = await prepareInterview({
         sessionId,
         interviewId: preparedInterview.interviewId,
         userId: preparedInterview.userId,
         personaId: preparedInterview.personaId,
         personaType: preparedInterview.personaType,
+        jobId: generateMockData.jobId,
         questions: preparedInterview.questions,
       });
 
@@ -284,6 +295,12 @@ export const useInterviewSession = (
 
   const handleStartVoice = () => {
     if (isSubmitting || !canSubmitAnswer) {
+      console.warn("[interview] start voice blocked", {
+        canSubmitAnswer,
+        currentQuestion,
+        interviewStatus,
+        isSubmitting,
+      });
       return;
     }
 
@@ -307,14 +324,6 @@ export const useInterviewSession = (
     const activeSessionId = sessionId ?? getActiveInterviewSessionId();
 
     if (!activeSessionId) {
-      setIsSubmitting(false);
-      return;
-    }
-
-    const { errorMessage: generateMockErrorMessage } =
-      await generateMockInterview();
-
-    if (generateMockErrorMessage) {
       setIsSubmitting(false);
       return;
     }

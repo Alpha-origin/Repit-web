@@ -23,6 +23,10 @@ const FALLBACK_PREPARE_QUESTION: PrepareInterviewQuestion = {
   content: INTERVIEW_DEFAULT_QUESTION.text,
 };
 
+interface PrepareInterviewRequestData extends PreparedInterviewData {
+  jobId: string;
+}
+
 const normalizeQuestion = (
   value: unknown,
   fallbackQuestion: PrepareInterviewQuestion,
@@ -48,7 +52,8 @@ const normalizeQuestion = (
 const buildPrepareInterviewRequest = (
   params: PrepareInterviewParams,
   sessionId: string,
-) => {
+  jobId: string,
+): PrepareInterviewRequestData => {
   const sourceQuestions =
     params.questions.length > 0 ? params.questions : [FALLBACK_PREPARE_QUESTION];
   const normalizedQuestions = sourceQuestions.map((question, index) => ({
@@ -71,15 +76,16 @@ const buildPrepareInterviewRequest = (
       })(),
     personaId: params.personaId,
     personaType: params.personaType,
+    jobId,
     status: "IN_PROGRESS",
     currentQuestionIndex: 0,
     questions: normalizedQuestions,
-  } satisfies PreparedInterviewData;
+  };
 };
 
 const normalizePreparedInterview = (
   payload: unknown,
-  fallbackData: PreparedInterviewData,
+  fallbackData: PrepareInterviewRequestData,
 ): PreparedInterviewData => {
   const responseRecord = getRecord(payload);
   const responseDataRecord = getRecord(responseRecord?.data);
@@ -127,6 +133,7 @@ const normalizePreparedInterview = (
 
 export const prepareInterview = async (params: PrepareInterviewParams) => {
   const normalizedSessionId = getTrimmedString(params.sessionId);
+  const normalizedJobId = getTrimmedString(params.jobId);
 
   if (!normalizedSessionId) {
     return {
@@ -135,7 +142,18 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
     };
   }
 
-  const requestData = buildPrepareInterviewRequest(params, normalizedSessionId);
+  if (!normalizedJobId) {
+    return {
+      data: null,
+      errorMessage: "jobId가 없어 면접을 시작할 수 없습니다.",
+    };
+  }
+
+  const requestData = buildPrepareInterviewRequest(
+    params,
+    normalizedSessionId,
+    normalizedJobId,
+  );
 
   try {
     const requestPayload = {
@@ -144,7 +162,7 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
       userId: requestData.userId,
       personaId: requestData.personaId,
       personaType: requestData.personaType,
-      questions: requestData.questions,
+      jobId: requestData.jobId,
     };
 
     console.log("[chat/interviews] request payload", requestPayload);
