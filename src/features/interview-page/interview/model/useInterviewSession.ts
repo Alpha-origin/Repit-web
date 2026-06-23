@@ -27,6 +27,7 @@ import { useVoiceAnswer } from "./useVoiceAnswer";
 
 type InterviewCloseReason = "completed" | "quit";
 const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
+const CHAT_SOCKET_DELAY_MS = 30_000;
 
 const buildQuestionKey = (question: CurrentInterviewQuestion | null) => {
   if (!question) {
@@ -92,6 +93,7 @@ export const useInterviewSession = (
   const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
   const isSessionClosedRef = useRef(false);
   const preparedChatSessionIdRef = useRef<string | null>(null);
+  const chatSessionReadyTimeoutRef = useRef<number | null>(null);
   const currentQuestionKeyRef = useRef<string | null>(
     buildQuestionKey(initialQuestion),
   );
@@ -105,6 +107,11 @@ export const useInterviewSession = (
 
   useEffect(() => {
     const nextInitialQuestion = buildInitialQuestion(preparedInterview);
+
+    if (chatSessionReadyTimeoutRef.current !== null) {
+      window.clearTimeout(chatSessionReadyTimeoutRef.current);
+      chatSessionReadyTimeoutRef.current = null;
+    }
 
     currentQuestionKeyRef.current = buildQuestionKey(nextInitialQuestion);
     setCurrentQuestion(nextInitialQuestion);
@@ -249,8 +256,6 @@ export const useInterviewSession = (
         applyCurrentQuestion(firstQuestion);
       }
 
-      setIsChatSessionReady(true);
-
       if (!firstQuestion) {
         const { data: nextQuestion } = await getCurrentInterviewQuestion(data.sessionId);
 
@@ -258,6 +263,11 @@ export const useInterviewSession = (
           applyCurrentQuestion(nextQuestion);
         }
       }
+
+      chatSessionReadyTimeoutRef.current = window.setTimeout(() => {
+        setIsChatSessionReady(true);
+        chatSessionReadyTimeoutRef.current = null;
+      }, CHAT_SOCKET_DELAY_MS);
     };
 
     void startInterviewSession();
@@ -265,6 +275,11 @@ export const useInterviewSession = (
 
   useEffect(() => {
     return () => {
+      if (chatSessionReadyTimeoutRef.current !== null) {
+        window.clearTimeout(chatSessionReadyTimeoutRef.current);
+        chatSessionReadyTimeoutRef.current = null;
+      }
+
       const activeSessionId = getActiveInterviewSessionId();
 
       if (
