@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 import {
   createInterview,
-  savePersona,
   setActiveInterviewSessionId,
   type PersonaType,
   type CreateInterviewPersonaType,
@@ -101,17 +100,9 @@ const SettingInterviewPage = () => {
     };
 
     console.log("[persona/save] request payload", personaPayload);
-
-    const { errorMessage: savePersonaErrorMessage } = await savePersona(
-      personaPayload,
+    console.log(
+      "[interview setup] skip /api/persona/save and use /api/interviews/create directly",
     );
-
-    if (savePersonaErrorMessage) {
-      setIsSubmitting(false);
-      setErrorMessage(savePersonaErrorMessage);
-      return;
-    }
-
     console.log("[interviews/create] request payload", personaPayload);
 
     const { data, errorMessage: createErrorMessage } = await createInterview(

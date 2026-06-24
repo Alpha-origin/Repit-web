@@ -27,6 +27,7 @@ import { useVoiceAnswer } from "./useVoiceAnswer";
 
 type InterviewCloseReason = "completed" | "quit";
 const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
+const PREPARE_INTERVIEW_DELAY_MS = 40_000;
 const CHAT_SOCKET_DELAY_MS = 30_000;
 
 const buildQuestionKey = (question: CurrentInterviewQuestion | null) => {
@@ -93,6 +94,7 @@ export const useInterviewSession = (
   const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
   const isSessionClosedRef = useRef(false);
   const preparedChatSessionIdRef = useRef<string | null>(null);
+  const prepareInterviewTimeoutRef = useRef<number | null>(null);
   const chatSessionReadyTimeoutRef = useRef<number | null>(null);
   const currentQuestionKeyRef = useRef<string | null>(
     buildQuestionKey(initialQuestion),
@@ -107,6 +109,11 @@ export const useInterviewSession = (
 
   useEffect(() => {
     const nextInitialQuestion = buildInitialQuestion(preparedInterview);
+
+    if (prepareInterviewTimeoutRef.current !== null) {
+      window.clearTimeout(prepareInterviewTimeoutRef.current);
+      prepareInterviewTimeoutRef.current = null;
+    }
 
     if (chatSessionReadyTimeoutRef.current !== null) {
       window.clearTimeout(chatSessionReadyTimeoutRef.current);
@@ -219,12 +226,17 @@ export const useInterviewSession = (
     }
 
     preparedChatSessionIdRef.current = sessionId;
+    let isCancelled = false;
 
     const startInterviewSession = async () => {
       const {
         data: generateMockData,
         errorMessage: generateMockErrorMessage,
       } = await generateMockInterview();
+
+      if (isCancelled) {
+        return;
+      }
 
       if (generateMockErrorMessage || !generateMockData?.jobId) {
         preparedChatSessionIdRef.current = null;
@@ -240,6 +252,10 @@ export const useInterviewSession = (
         jobId: generateMockData.jobId,
         questions: preparedInterview.questions,
       });
+
+      if (isCancelled) {
+        return;
+      }
 
       if (errorMessage || !data) {
         preparedChatSessionIdRef.current = null;
@@ -259,6 +275,10 @@ export const useInterviewSession = (
       if (!firstQuestion) {
         const { data: nextQuestion } = await getCurrentInterviewQuestion(data.sessionId);
 
+        if (isCancelled) {
+          return;
+        }
+
         if (nextQuestion) {
           applyCurrentQuestion(nextQuestion);
         }
@@ -270,11 +290,28 @@ export const useInterviewSession = (
       }, CHAT_SOCKET_DELAY_MS);
     };
 
-    void startInterviewSession();
+    prepareInterviewTimeoutRef.current = window.setTimeout(() => {
+      prepareInterviewTimeoutRef.current = null;
+      void startInterviewSession();
+    }, PREPARE_INTERVIEW_DELAY_MS);
+
+    return () => {
+      isCancelled = true;
+
+      if (prepareInterviewTimeoutRef.current !== null) {
+        window.clearTimeout(prepareInterviewTimeoutRef.current);
+        prepareInterviewTimeoutRef.current = null;
+      }
+    };
   }, [applyCurrentQuestion, preparedInterview, sessionId]);
 
   useEffect(() => {
     return () => {
+      if (prepareInterviewTimeoutRef.current !== null) {
+        window.clearTimeout(prepareInterviewTimeoutRef.current);
+        prepareInterviewTimeoutRef.current = null;
+      }
+
       if (chatSessionReadyTimeoutRef.current !== null) {
         window.clearTimeout(chatSessionReadyTimeoutRef.current);
         chatSessionReadyTimeoutRef.current = null;
