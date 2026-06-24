@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import {
   createInterview,
+  savePersona,
   setActiveInterviewSessionId,
   type PersonaType,
   type CreateInterviewPersonaType,
@@ -100,9 +101,18 @@ const SettingInterviewPage = () => {
     };
 
     console.log("[persona/save] request payload", personaPayload);
-    console.log(
-      "[interview setup] skip /api/persona/save and use /api/interviews/create directly",
-    );
+    const { data: savedPersona, errorMessage: savePersonaErrorMessage } =
+      await savePersona(personaPayload);
+
+    if (savePersonaErrorMessage || !savedPersona) {
+      setIsSubmitting(false);
+      setErrorMessage(
+        savePersonaErrorMessage ?? "페르소나 저장에 실패했습니다.",
+      );
+      return;
+    }
+
+    console.log("[persona/save] response data", savedPersona);
     console.log("[interviews/create] request payload", personaPayload);
 
     const { data, errorMessage: createErrorMessage } = await createInterview(
@@ -120,6 +130,9 @@ const SettingInterviewPage = () => {
     console.log("[interviews/create] response data", data);
     console.log("[interviews/create] server sessionId", data.sessionId);
 
+    const personaId =
+      data.personaId > 0 ? data.personaId : savedPersona.personaId;
+
     setActiveInterviewSessionId(data.sessionId);
 
     navigate("/main/interview/1", {
@@ -128,7 +141,7 @@ const SettingInterviewPage = () => {
           sessionId: data.sessionId,
           interviewId: data.interviewId,
           userId: data.userId,
-          personaId: data.personaId,
+          personaId,
           personaType: PREPARED_PERSONA_TYPE_BY_STYLE[selectedStyle],
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
           currentQuestionIndex: data.currentQuestionIndex,

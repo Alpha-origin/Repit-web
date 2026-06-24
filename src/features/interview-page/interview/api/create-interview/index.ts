@@ -133,9 +133,14 @@ export const createInterview = async (params: CreateInterviewParams) => {
       errorMessage: null,
     };
   } catch (error) {
+    const errorMessage = getErrorMessage(error, "면접 시작에 실패했습니다.");
+
     return {
       data: null,
-      errorMessage: getErrorMessage(error, "면접 시작에 실패했습니다."),
+      errorMessage:
+        errorMessage === "Internal Server Error"
+          ? "면접 시작 서버에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+          : errorMessage,
     };
   }
 };
