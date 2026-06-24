@@ -5,6 +5,7 @@ import {
   type InterviewSummary,
 } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
 import { sortInterviewsByCreatedAt } from "@/features/feedback-page/model/interviewDisplay";
+import { extractErrorMessage } from "@/shared/api/errorMessage";
 
 export const useFeedbackInterview = (id?: string) => {
   const [interview, setInterview] = useState<InterviewSummary | null>(null);
@@ -37,11 +38,7 @@ export const useFeedbackInterview = (id?: string) => {
       }
     } catch (error) {
       setInterview(null);
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "면접 정보를 불러오지 못했습니다.",
-      );
+      setErrorMessage(extractErrorMessage(error, "면접 정보를 불러오지 못했습니다."));
     } finally {
       setIsLoading(false);
     }

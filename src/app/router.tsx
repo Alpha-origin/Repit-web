@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
 
+import RouteErrorPage from "@/pages/error-page";
 import Loading from "@/shared/components/loading";
 
 // Layout
@@ -44,22 +45,27 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <LandingPage />,
+    errorElement: <RouteErrorPage />,
   },
   {
     path: "/loading",
     element: <Loading />,
+    errorElement: <RouteErrorPage />,
   },
   {
     path: "/login",
     element: <LoginPage />,
+    errorElement: <RouteErrorPage />,
   },
   {
     path: "/signup",
     element: <SignUpPage />,
+    errorElement: <RouteErrorPage />,
   },
   {
     path: "/main",
     element: <MainLayout />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         index: true,
@@ -103,6 +109,7 @@ const router = createBrowserRouter([
   {
     path: "*",
     element: <NotFound />,
+    errorElement: <RouteErrorPage />,
   },
 ]);
 
