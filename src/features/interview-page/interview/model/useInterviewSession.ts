@@ -229,18 +229,25 @@ export const useInterviewSession = (
     let isCancelled = false;
 
     const startInterviewSession = async () => {
-      const {
-        data: generateMockData,
-        errorMessage: generateMockErrorMessage,
-      } = await generateMockInterview();
+      const presetJobId = preparedInterview.jobId?.trim() ?? "";
+      let jobId = presetJobId;
 
-      if (isCancelled) {
-        return;
-      }
+      if (!jobId) {
+        const {
+          data: generateMockData,
+          errorMessage: generateMockErrorMessage,
+        } = await generateMockInterview();
 
-      if (generateMockErrorMessage || !generateMockData?.jobId) {
-        preparedChatSessionIdRef.current = null;
-        return;
+        if (isCancelled) {
+          return;
+        }
+
+        if (generateMockErrorMessage || !generateMockData?.jobId) {
+          preparedChatSessionIdRef.current = null;
+          return;
+        }
+
+        jobId = generateMockData.jobId;
       }
 
       const { data, errorMessage } = await prepareInterview({
@@ -249,7 +256,7 @@ export const useInterviewSession = (
         userId: preparedInterview.userId,
         personaId: preparedInterview.personaId,
         personaType: preparedInterview.personaType,
-        jobId: generateMockData.jobId,
+        jobId,
         questions: preparedInterview.questions,
       });
 

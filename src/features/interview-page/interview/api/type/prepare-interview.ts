@@ -27,6 +27,7 @@ export interface PreparedInterviewData {
   userId: number;
   personaId: number;
   personaType: PersonaType;
+  jobId?: string | null;
   status: InterviewProgressStatus;
   currentQuestionIndex: number;
   questions: PrepareInterviewQuestion[];

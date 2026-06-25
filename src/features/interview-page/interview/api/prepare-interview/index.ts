@@ -122,6 +122,7 @@ const normalizePreparedInterview = (
     personaType: isPersonaType(sourceRecord?.personaType)
       ? sourceRecord.personaType
       : fallbackData.personaType,
+    jobId: getTrimmedString(sourceRecord?.jobId) ?? fallbackData.jobId,
     status: isInterviewProgressStatus(sourceRecord?.status)
       ? sourceRecord.status
       : fallbackData.status,
