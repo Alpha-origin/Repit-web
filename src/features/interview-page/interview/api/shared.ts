@@ -1,15 +1,10 @@
-import axios from "axios";
 import { getAccessToken } from "@/shared/api/accessToken";
+import { extractErrorMessage } from "@/shared/api/errorMessage";
 import type {
   CurrentInterviewQuestion,
   InterviewProgressStatus,
   PersonaType,
 } from "./type";
-
-interface ErrorResponse {
-  message?: string;
-  error?: string;
-}
 
 const PERSONA_TYPES: readonly PersonaType[] = ["FRIENDLY", "NEUTRAL", "STRESS"];
 const INTERVIEW_PROGRESS_STATUSES: readonly InterviewProgressStatus[] = [
@@ -20,22 +15,7 @@ const INTERVIEW_PROGRESS_STATUSES: readonly InterviewProgressStatus[] = [
 ];
 
 export const getErrorMessage = (error: unknown, fallback: string) => {
-  if (axios.isAxiosError(error)) {
-    if (!error.response) {
-      return "서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.";
-    }
-
-    const data = error.response.data as ErrorResponse | undefined;
-
-    if (data?.message) return data.message;
-    if (data?.error) return data.error;
-  }
-
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
-  return fallback;
+  return extractErrorMessage(error, fallback);
 };
 
 export const getRecord = (value: unknown) => {

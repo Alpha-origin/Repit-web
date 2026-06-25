@@ -125,6 +125,7 @@ export const useSupertoneTts = (text: string) => {
   };
 
   return {
+    onPlay: play,
     status,
     onStop: stop,
     onToggle: toggle,

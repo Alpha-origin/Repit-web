@@ -1,9 +1,6 @@
 import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyle = createGlobalStyle`
-  @import url('https://cdn.jsdelivr.net/fontsource/fonts/cal-sans@latest/latin-400-normal.css');
-  @import url('https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard.css');
-
   @font-face {
     font-family: 'Wave';
     src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/WavvePADO-Regular.woff2') format('woff2');

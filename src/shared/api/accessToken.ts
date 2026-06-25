@@ -1,5 +1,4 @@
 const TOKEN_RECORD_KEYS = ["accessToken", "token", "authorization"] as const;
-
 let accessToken: string | null = null;
 
 export const normalizeAccessToken = (value?: string | null) => {

@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
 
+import RouteErrorPage from "@/pages/error-page";
 import Loading from "@/shared/components/loading";
 
 // Layout
@@ -18,6 +19,9 @@ const MainPage = lazy(() => import("@/pages/main-page"));
 const MyPage = lazy(() => import("@/pages/my-page"));
 
 // Interview
+const InterviewCompletedPage = lazy(
+  () => import("@/pages/interview-page/completed")
+);
 const InterviewPage = lazy(() => import("@/pages/interview-page/interview"));
 const SettingInterview = lazy(
   () => import("@/pages/interview-page/setting-interview")
@@ -41,26 +45,35 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <LandingPage />,
+    errorElement: <RouteErrorPage />,
   },
   {
     path: "/loading",
     element: <Loading />,
+    errorElement: <RouteErrorPage />,
   },
   {
     path: "/login",
     element: <LoginPage />,
+    errorElement: <RouteErrorPage />,
   },
   {
     path: "/signup",
     element: <SignUpPage />,
+    errorElement: <RouteErrorPage />,
   },
   {
     path: "/main",
     element: <MainLayout />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         index: true,
         element: <MainPage />,
+      },
+      {
+        path: "interview/completed",
+        element: <InterviewCompletedPage />,
       },
       {
         path: "interview/:id",
@@ -96,6 +109,7 @@ const router = createBrowserRouter([
   {
     path: "*",
     element: <NotFound />,
+    errorElement: <RouteErrorPage />,
   },
 ]);
 

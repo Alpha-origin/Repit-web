@@ -7,8 +7,10 @@ import {
   disconnectInterviewSocket,
   getActiveInterviewSessionId,
   getCurrentInterviewQuestion,
+  generateMockInterview,
   prepareInterview,
   quitInterview,
+  setActiveInterviewSessionId,
   submitInterviewAnswer,
   type CurrentInterviewQuestion,
   type InterviewProgressStatus,
@@ -25,6 +27,9 @@ import { useInterviewSocket } from "./useInterviewSocket";
 import { useVoiceAnswer } from "./useVoiceAnswer";
 
 type InterviewCloseReason = "completed" | "quit";
+const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
+const PREPARE_INTERVIEW_DELAY_MS = 40_000;
+const CHAT_SOCKET_DELAY_MS = 30_000;
 
 const buildQuestionKey = (question: CurrentInterviewQuestion | null) => {
   if (!question) {
@@ -90,14 +95,42 @@ export const useInterviewSession = (
   const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
   const isSessionClosedRef = useRef(false);
   const preparedChatSessionIdRef = useRef<string | null>(null);
+  const prepareInterviewTimeoutRef = useRef<number | null>(null);
+  const chatSessionReadyTimeoutRef = useRef<number | null>(null);
+  const sessionIdRef = useRef<string | null>(sessionId);
+  const displayQuestionNumberRef = useRef(displayQuestionNumber);
+  const autoPlayedQuestionKeyRef = useRef<string | null>(null);
   const currentQuestionKeyRef = useRef<string | null>(
     buildQuestionKey(initialQuestion),
   );
   const canSubmitAnswer =
     interviewStatus === "IN_PROGRESS" && currentQuestion !== null;
+  const getInterviewExitPath = useCallback(
+    (reason: InterviewCloseReason) =>
+      reason === "completed" ? INTERVIEW_COMPLETED_PATH : "/main",
+    [],
+  );
+
+  useEffect(() => {
+    sessionIdRef.current = sessionId;
+  }, [sessionId]);
+
+  useEffect(() => {
+    displayQuestionNumberRef.current = displayQuestionNumber;
+  }, [displayQuestionNumber]);
 
   useEffect(() => {
     const nextInitialQuestion = buildInitialQuestion(preparedInterview);
+
+    if (prepareInterviewTimeoutRef.current !== null) {
+      window.clearTimeout(prepareInterviewTimeoutRef.current);
+      prepareInterviewTimeoutRef.current = null;
+    }
+
+    if (chatSessionReadyTimeoutRef.current !== null) {
+      window.clearTimeout(chatSessionReadyTimeoutRef.current);
+      chatSessionReadyTimeoutRef.current = null;
+    }
 
     currentQuestionKeyRef.current = buildQuestionKey(nextInitialQuestion);
     setCurrentQuestion(nextInitialQuestion);
@@ -106,6 +139,21 @@ export const useInterviewSession = (
     setIsChatSessionReady(!preparedInterview);
     isSessionClosedRef.current = false;
   }, [preparedInterview]);
+
+  useEffect(() => {
+    const nextQuestionKey = buildQuestionKey(currentQuestion);
+
+    if (!currentQuestion || !nextQuestionKey) {
+      return;
+    }
+
+    if (autoPlayedQuestionKeyRef.current === nextQuestionKey) {
+      return;
+    }
+
+    autoPlayedQuestionKeyRef.current = nextQuestionKey;
+    void questionTts.onPlay();
+  }, [currentQuestion, questionTts]);
 
   const applyCurrentQuestion = useCallback((nextQuestion: CurrentInterviewQuestion) => {
     const nextQuestionKey = buildQuestionKey(nextQuestion);
@@ -126,11 +174,18 @@ export const useInterviewSession = (
       shouldNavigateToMain: boolean,
       reason: InterviewCloseReason = "quit",
     ) => {
-      const activeSessionId = sessionId ?? getActiveInterviewSessionId();
+      const activeSessionId = sessionIdRef.current ?? getActiveInterviewSessionId();
+      const nextPath = getInterviewExitPath(reason);
+      const answeredQuestionCount = displayQuestionNumberRef.current;
 
       if (!activeSessionId || isSessionClosedRef.current) {
         if (shouldNavigateToMain) {
-          navigate("/main");
+          navigate(nextPath, {
+            state:
+              reason === "completed"
+                ? { answeredQuestionCount }
+                : undefined,
+          });
         }
 
         return;
@@ -146,10 +201,15 @@ export const useInterviewSession = (
       }
 
       if (shouldNavigateToMain) {
-        navigate("/main");
+        navigate(nextPath, {
+          state:
+            reason === "completed"
+              ? { answeredQuestionCount }
+              : undefined,
+        });
       }
     },
-    [navigate, sessionId],
+    [getInterviewExitPath, navigate],
   );
 
   const handleSocketStatusChange = useCallback(
@@ -194,21 +254,51 @@ export const useInterviewSession = (
     }
 
     preparedChatSessionIdRef.current = sessionId;
+    let isCancelled = false;
 
     const startInterviewSession = async () => {
+      const presetJobId = preparedInterview.jobId?.trim() ?? "";
+      let jobId = presetJobId;
+
+      if (!jobId) {
+        const {
+          data: generateMockData,
+          errorMessage: generateMockErrorMessage,
+        } = await generateMockInterview();
+
+        if (isCancelled) {
+          return;
+        }
+
+        if (generateMockErrorMessage || !generateMockData?.jobId) {
+          preparedChatSessionIdRef.current = null;
+          return;
+        }
+
+        jobId = generateMockData.jobId;
+      }
+
       const { data, errorMessage } = await prepareInterview({
         sessionId,
         interviewId: preparedInterview.interviewId,
         userId: preparedInterview.userId,
         personaId: preparedInterview.personaId,
         personaType: preparedInterview.personaType,
+        jobId,
         questions: preparedInterview.questions,
       });
+
+      if (isCancelled) {
+        return;
+      }
 
       if (errorMessage || !data) {
         preparedChatSessionIdRef.current = null;
         return;
       }
+
+      setActiveInterviewSessionId(data.sessionId);
+      sessionIdRef.current = data.sessionId;
 
       if (data.status) {
         setInterviewStatus(data.status);
@@ -220,35 +310,65 @@ export const useInterviewSession = (
         applyCurrentQuestion(firstQuestion);
       }
 
-      setIsChatSessionReady(true);
-
       if (!firstQuestion) {
         const { data: nextQuestion } = await getCurrentInterviewQuestion(data.sessionId);
+
+        if (isCancelled) {
+          return;
+        }
 
         if (nextQuestion) {
           applyCurrentQuestion(nextQuestion);
         }
       }
+
+      chatSessionReadyTimeoutRef.current = window.setTimeout(() => {
+        setIsChatSessionReady(true);
+        chatSessionReadyTimeoutRef.current = null;
+      }, CHAT_SOCKET_DELAY_MS);
     };
 
-    void startInterviewSession();
+    prepareInterviewTimeoutRef.current = window.setTimeout(() => {
+      prepareInterviewTimeoutRef.current = null;
+      void startInterviewSession();
+    }, PREPARE_INTERVIEW_DELAY_MS);
+
+    return () => {
+      isCancelled = true;
+
+      if (prepareInterviewTimeoutRef.current !== null) {
+        window.clearTimeout(prepareInterviewTimeoutRef.current);
+        prepareInterviewTimeoutRef.current = null;
+      }
+    };
   }, [applyCurrentQuestion, preparedInterview, sessionId]);
 
   useEffect(() => {
     return () => {
+      if (prepareInterviewTimeoutRef.current !== null) {
+        window.clearTimeout(prepareInterviewTimeoutRef.current);
+        prepareInterviewTimeoutRef.current = null;
+      }
+
+      if (chatSessionReadyTimeoutRef.current !== null) {
+        window.clearTimeout(chatSessionReadyTimeoutRef.current);
+        chatSessionReadyTimeoutRef.current = null;
+      }
+
       const activeSessionId = getActiveInterviewSessionId();
+      const latestSessionId = sessionIdRef.current;
 
       if (
-        !sessionId ||
+        !latestSessionId ||
         isSessionClosedRef.current ||
-        activeSessionId !== sessionId
+        activeSessionId !== latestSessionId
       ) {
         return;
       }
 
       void endInterviewSession(false);
     };
-  }, [endInterviewSession, sessionId]);
+  }, [endInterviewSession]);
 
   const handleModeChange = (nextMode: InterviewMode) => {
     if (nextMode === mode) {
@@ -266,6 +386,12 @@ export const useInterviewSession = (
 
   const handleStartVoice = () => {
     if (isSubmitting || !canSubmitAnswer) {
+      console.warn("[interview] start voice blocked", {
+        canSubmitAnswer,
+        currentQuestion,
+        interviewStatus,
+        isSubmitting,
+      });
       return;
     }
 
@@ -286,10 +412,11 @@ export const useInterviewSession = (
 
     setIsSubmitting(true);
 
-    const activeSessionId = sessionId ?? getActiveInterviewSessionId();
+    const activeSessionId = sessionIdRef.current ?? getActiveInterviewSessionId();
 
     if (!activeSessionId) {
       setIsSubmitting(false);
+      console.warn("[interview] missing sessionId when submitting answer");
       return;
     }
 

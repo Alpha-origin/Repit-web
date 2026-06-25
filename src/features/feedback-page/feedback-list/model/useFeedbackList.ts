@@ -10,6 +10,7 @@ import {
   getInterviewerName,
   sortInterviewsByCreatedAt,
 } from "@/features/feedback-page/model/interviewDisplay";
+import { extractErrorMessage } from "@/shared/api/errorMessage";
 import type { FeedbackListItem } from "@/widgets/feedback-page/feedback-list/type";
 
 const getListItems = (items: Awaited<ReturnType<typeof getAllInterviews>>) =>
@@ -37,11 +38,7 @@ export const useFeedbackList = () => {
 
       setItems(getListItems(interviews));
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "면접 목록을 불러오지 못했습니다.",
-      );
+      setErrorMessage(extractErrorMessage(error, "면접 목록을 불러오지 못했습니다."));
     } finally {
       setIsLoading(false);
     }
