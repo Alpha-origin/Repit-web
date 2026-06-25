@@ -272,6 +272,15 @@ export const BottomButtonWrapper = styled.div`
   }
 `;
 
+export const ErrorMessage = styled.p`
+  margin: -0.35rem 0 0;
+  color: #d14343;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: center;
+`;
+
 const baseButton = styled.button<ActionButtonProps>`
   width: min(100%, var(--action-button-width));
   min-height: var(--action-button-height);
