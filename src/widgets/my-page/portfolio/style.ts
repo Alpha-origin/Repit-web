@@ -1,7 +1,8 @@
 import styled from "styled-components";
 
 export const PortfolioWrapper = styled.section`
-  width: 80%;
+  width: 100%;
+  max-width: 850px;
   padding: 2.3rem 2.3rem 2rem;
   border-radius: 1.25rem;
   background-color: #ffffff;
@@ -18,7 +19,7 @@ export const PortfolioWrapper = styled.section`
 export const Title = styled.h2`
   margin: 0 0 2.15rem;
   color: #46506a;
-  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+  font-size: clamp(1.3rem, 2.5vw, 1.7rem);
   font-weight: 600;
   line-height: 1.2;
 `;
@@ -26,7 +27,7 @@ export const Title = styled.h2`
 export const UploadBox = styled.div`
   position: relative;
   width: 100%;
-  min-height: 18.7rem;
+  min-height: 18rem;
   border: 0.0938rem solid #dbe1ea;
   border-radius: 0.95rem;
   background-color: #fdfdfe;
@@ -63,10 +64,11 @@ export const UploadContent = styled.div`
 `;
 
 export const FileIcon = styled.img`
-  width: auto;
-  height: clamp(4.9rem, 6vw, 5.9rem);
+  width: 5rem;
+  height: auto;
   display: block;
   margin-left: 0.75rem;
+  padding-top: 0.15rem;
 `;
 
 export const UploadText = styled.p`
@@ -78,6 +80,10 @@ export const UploadText = styled.p`
 
   span {
     color: #8a90a2;
+    font-weight: 500;
+    font-size: clamp(0.8rem, 1.7vw, 1.15rem);
+    text-align: center;
+    padding-left: 0.35rem;
   }
 `;
 
@@ -130,14 +136,14 @@ export const InputSection = styled.div`
 export const Label = styled.h3`
   margin-bottom: 0.9rem;
   color: #46506a;
-  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+  font-size: clamp(1.3rem, 2.5vw, 1.7rem);
   font-weight: 600;
   line-height: 1.2;
 `;
 
 export const Input = styled.input`
   width: 100%;
-  height: 3.45rem;
+  height: 3.15rem;
   padding: 0 1.15rem;
   border: 0.0625rem solid #d9dde5;
   border-radius: 0.7rem;
@@ -162,7 +168,7 @@ export const SelectWrapper = styled.div`
 export const Select = styled.select`
   appearance: none;
   width: 100%;
-  height: 3.45rem;
+  height: 3.15rem;
   padding: 0 3.4rem 0 1.15rem;
   border: 0.0625rem solid #d9dde5;
   border-radius: 0.7rem;
@@ -199,7 +205,7 @@ export const ButtonWrapper = styled.div`
 export const BackButton = styled.button`
   width: min(100%, 18rem);
   min-width: 13rem;
-  height: 3.55rem;
+  height: 3.25rem;
   border: none;
   border-radius: 0.85rem;
   background-color: #f1f2f5;
@@ -208,6 +214,8 @@ export const BackButton = styled.button`
   font-weight: 800;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
 
   &:hover {
     background-color: #e8ebf2;
@@ -217,8 +225,9 @@ export const BackButton = styled.button`
 
 export const SaveButton = styled.button`
   width: min(100%, 18rem);
+  margin-top: -1rem;
   min-width: 13rem;
-  height: 3.55rem;
+  height: 3.25rem;
   border: none;
   border-radius: 0.85rem;
   background-color: #1976e8;
