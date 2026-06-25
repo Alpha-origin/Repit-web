@@ -10,6 +10,7 @@ import {
   generateMockInterview,
   prepareInterview,
   quitInterview,
+  setActiveInterviewSessionId,
   submitInterviewAnswer,
   type CurrentInterviewQuestion,
   type InterviewProgressStatus,
@@ -96,6 +97,9 @@ export const useInterviewSession = (
   const preparedChatSessionIdRef = useRef<string | null>(null);
   const prepareInterviewTimeoutRef = useRef<number | null>(null);
   const chatSessionReadyTimeoutRef = useRef<number | null>(null);
+  const sessionIdRef = useRef<string | null>(sessionId);
+  const displayQuestionNumberRef = useRef(displayQuestionNumber);
+  const autoPlayedQuestionKeyRef = useRef<string | null>(null);
   const currentQuestionKeyRef = useRef<string | null>(
     buildQuestionKey(initialQuestion),
   );
@@ -106,6 +110,14 @@ export const useInterviewSession = (
       reason === "completed" ? INTERVIEW_COMPLETED_PATH : "/main",
     [],
   );
+
+  useEffect(() => {
+    sessionIdRef.current = sessionId;
+  }, [sessionId]);
+
+  useEffect(() => {
+    displayQuestionNumberRef.current = displayQuestionNumber;
+  }, [displayQuestionNumber]);
 
   useEffect(() => {
     const nextInitialQuestion = buildInitialQuestion(preparedInterview);
@@ -128,6 +140,21 @@ export const useInterviewSession = (
     isSessionClosedRef.current = false;
   }, [preparedInterview]);
 
+  useEffect(() => {
+    const nextQuestionKey = buildQuestionKey(currentQuestion);
+
+    if (!currentQuestion || !nextQuestionKey) {
+      return;
+    }
+
+    if (autoPlayedQuestionKeyRef.current === nextQuestionKey) {
+      return;
+    }
+
+    autoPlayedQuestionKeyRef.current = nextQuestionKey;
+    void questionTts.onPlay();
+  }, [currentQuestion, questionTts]);
+
   const applyCurrentQuestion = useCallback((nextQuestion: CurrentInterviewQuestion) => {
     const nextQuestionKey = buildQuestionKey(nextQuestion);
 
@@ -147,15 +174,16 @@ export const useInterviewSession = (
       shouldNavigateToMain: boolean,
       reason: InterviewCloseReason = "quit",
     ) => {
-      const activeSessionId = sessionId ?? getActiveInterviewSessionId();
+      const activeSessionId = sessionIdRef.current ?? getActiveInterviewSessionId();
       const nextPath = getInterviewExitPath(reason);
+      const answeredQuestionCount = displayQuestionNumberRef.current;
 
       if (!activeSessionId || isSessionClosedRef.current) {
         if (shouldNavigateToMain) {
           navigate(nextPath, {
             state:
               reason === "completed"
-                ? { answeredQuestionCount: displayQuestionNumber }
+                ? { answeredQuestionCount }
                 : undefined,
           });
         }
@@ -176,12 +204,12 @@ export const useInterviewSession = (
         navigate(nextPath, {
           state:
             reason === "completed"
-              ? { answeredQuestionCount: displayQuestionNumber }
+              ? { answeredQuestionCount }
               : undefined,
         });
       }
     },
-    [displayQuestionNumber, getInterviewExitPath, navigate, sessionId],
+    [getInterviewExitPath, navigate],
   );
 
   const handleSocketStatusChange = useCallback(
@@ -269,6 +297,9 @@ export const useInterviewSession = (
         return;
       }
 
+      setActiveInterviewSessionId(data.sessionId);
+      sessionIdRef.current = data.sessionId;
+
       if (data.status) {
         setInterviewStatus(data.status);
       }
@@ -325,18 +356,19 @@ export const useInterviewSession = (
       }
 
       const activeSessionId = getActiveInterviewSessionId();
+      const latestSessionId = sessionIdRef.current;
 
       if (
-        !sessionId ||
+        !latestSessionId ||
         isSessionClosedRef.current ||
-        activeSessionId !== sessionId
+        activeSessionId !== latestSessionId
       ) {
         return;
       }
 
       void endInterviewSession(false);
     };
-  }, [endInterviewSession, sessionId]);
+  }, [endInterviewSession]);
 
   const handleModeChange = (nextMode: InterviewMode) => {
     if (nextMode === mode) {
@@ -380,10 +412,11 @@ export const useInterviewSession = (
 
     setIsSubmitting(true);
 
-    const activeSessionId = sessionId ?? getActiveInterviewSessionId();
+    const activeSessionId = sessionIdRef.current ?? getActiveInterviewSessionId();
 
     if (!activeSessionId) {
       setIsSubmitting(false);
+      console.warn("[interview] missing sessionId when submitting answer");
       return;
     }
 
