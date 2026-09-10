@@ -10,6 +10,7 @@ import {
   getAccessToken,
   syncAccessTokenFromResponse,
 } from "./accessToken";
+import { AUTH_REQUIRED_MESSAGE } from "./errorMessage";
 
 const resolveServerUrl = (url?: string) => {
   if (!url) return "";
@@ -55,8 +56,21 @@ interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
+const LOGIN_PATH = "/login";
+const AUTH_PAGE_PATHS = [LOGIN_PATH, "/signup"];
+
 const goToLoginPage = () => {
-  window.location.href = "/login";
+  if (AUTH_PAGE_PATHS.includes(window.location.pathname)) {
+    return;
+  }
+
+  window.location.href = LOGIN_PATH;
+};
+
+// 토큰 누락과 만료가 모두 401로 통일됐으므로 두 경우를 같은 흐름으로 정리한다.
+export const handleAuthenticationFailure = () => {
+  clearAccessToken();
+  goToLoginPage();
 };
 
 const tryRefreshSession = async () => {
@@ -86,7 +100,8 @@ export const ensureAccessToken = async () => {
   const authorizationHeader = await getReadyAccessToken(true);
 
   if (!authorizationHeader) {
-    throw new Error("로그인 토큰을 찾지 못했습니다. 다시 로그인해 주세요.");
+    handleAuthenticationFailure();
+    throw new Error(AUTH_REQUIRED_MESSAGE);
   }
 
   return authorizationHeader;
@@ -180,8 +195,7 @@ const addRefreshInterceptor = (instance: AxiosInstance) => {
       }
 
       if (error.response?.status === 401 && !isSessionlessRequest) {
-        clearAccessToken();
-        goToLoginPage();
+        handleAuthenticationFailure();
       }
       return Promise.reject(error);
     },
