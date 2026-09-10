@@ -15,9 +15,7 @@ const KeywordCloud = ({ items }: KeywordCloudProps) => {
         {items.map((item) => (
           <S.KeywordWord
             key={`${item.text}-${item.top}-${item.left}`}
-            $left={item.left}
             $size={item.size}
-            $top={item.top}
           >
             {item.text}
           </S.KeywordWord>
