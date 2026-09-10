@@ -14,9 +14,7 @@ interface BarValueProps {
 }
 
 interface KeywordWordProps {
-  $left: string;
   $size: "xs" | "sm" | "md" | "xl";
-  $top: string;
 }
 
 interface ScoreRingProps {
@@ -624,26 +622,79 @@ export const QuestionCard = styled.article`
 
 export const KeywordCard = styled.article`
   ${cardSurface}
-  min-height: 15rem;
+  min-height: 20rem;
   align-self: start;
-  padding: 1rem 1.15rem;
+  padding: 1.35rem 1.4rem;
 `;
 
 export const KeywordCanvas = styled.div`
-  position: relative;
   width: 100%;
-  min-height: 13rem;
+  min-height: 17rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+  gap: 1.45rem 1.9rem;
+  padding: 1.2rem 0.5rem;
 `;
 
 export const KeywordWord = styled.span<KeywordWordProps>`
-  position: absolute;
-  top: ${({ $top }) => $top};
-  left: ${({ $left }) => $left};
   font-family: ${({ theme }) => theme.fontFamily.wavvePado};
   color: #2b74e3;
-  letter-spacing: -0.05rem;
-  transform: translate(-50%, -50%);
+  line-height: 1.08;
+  letter-spacing: 0;
+  white-space: nowrap;
+  transform: rotate(-5deg);
   ${({ $size }) => keywordSizeMap[$size]}
+
+  &:nth-child(2n) {
+    transform: rotate(6deg) translateY(0.55rem);
+  }
+
+  &:nth-child(3n) {
+    transform: rotate(-9deg) translateY(-0.45rem);
+  }
+
+  &:nth-child(4n) {
+    transform: rotate(4deg) translateY(-0.75rem);
+  }
+
+  &:nth-child(5n) {
+    transform: rotate(-2deg) translateY(0.85rem);
+  }
+
+  @media (max-width: 48rem) {
+    transform: rotate(-3deg);
+
+    &:nth-child(2n) {
+      transform: rotate(4deg) translateY(0.35rem);
+    }
+
+    &:nth-child(3n) {
+      transform: rotate(-5deg) translateY(-0.3rem);
+    }
+
+    &:nth-child(4n) {
+      transform: rotate(3deg) translateY(-0.45rem);
+    }
+
+    &:nth-child(5n) {
+      transform: rotate(-2deg) translateY(0.5rem);
+    }
+
+    ${({ $size }) =>
+      $size === "xl" &&
+      css`
+        font-size: 2.7rem;
+      `}
+
+    ${({ $size }) =>
+      $size === "md" &&
+      css`
+        font-size: 1.9rem;
+      `}
+  }
 `;
 
 export const PdfButton = styled.button`
