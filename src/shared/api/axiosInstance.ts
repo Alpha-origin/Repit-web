@@ -109,13 +109,20 @@ export const ensureAccessToken = async () => {
 
 const addAuthorizationInterceptor = (
   instance: AxiosInstance,
-  options: { refreshBeforeRequest?: boolean } = {},
+  options: { refreshBeforeRequest?: boolean; requireAccessToken?: boolean } = {},
 ) => {
   instance.interceptors.request.use(async (config) => {
     const authorizationHeader = await getReadyAccessToken(
       options.refreshBeforeRequest ?? false,
     );
-    if (!authorizationHeader) return config;
+
+    // 서버가 모든 엔드포인트에서 토큰을 요구하므로, 헤더 없이 보내면 401만 돌아온다.
+    if (!authorizationHeader) {
+      if (!options.requireAccessToken) return config;
+
+      handleAuthenticationFailure();
+      throw new Error(AUTH_REQUIRED_MESSAGE);
+    }
 
     const nextHeaders = axios.AxiosHeaders.from(config.headers) as AxiosHeaders;
     if (!nextHeaders.has("Authorization")) {
@@ -210,5 +217,11 @@ addRefreshInterceptor(apiInstance);
 addRefreshInterceptor(chatInstance);
 addFormDataInterceptor(apiInstance);
 addAuthorizationInterceptor(authInstance);
-addAuthorizationInterceptor(apiInstance, { refreshBeforeRequest: true });
-addAuthorizationInterceptor(chatInstance, { refreshBeforeRequest: true });
+addAuthorizationInterceptor(apiInstance, {
+  refreshBeforeRequest: true,
+  requireAccessToken: true,
+});
+addAuthorizationInterceptor(chatInstance, {
+  refreshBeforeRequest: true,
+  requireAccessToken: true,
+});
