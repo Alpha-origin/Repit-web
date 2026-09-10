@@ -73,7 +73,7 @@ export const handleAuthenticationFailure = () => {
   goToLoginPage();
 };
 
-const tryRefreshSession = async () => {
+const requestRefreshSession = async () => {
   try {
     const response = await refreshInstance.post("/api/v1/auth/refresh");
     const refreshedAccessToken = syncAccessTokenFromResponse({
@@ -84,6 +84,20 @@ const tryRefreshSession = async () => {
   } catch {
     return false;
   }
+};
+
+// 모든 요청이 토큰을 요구하게 되면서 재발급이 동시에 여러 번 호출될 수 있어,
+// 진행 중인 요청 하나를 공유한다.
+let refreshSessionPromise: Promise<boolean> | null = null;
+
+const tryRefreshSession = () => {
+  if (!refreshSessionPromise) {
+    refreshSessionPromise = requestRefreshSession().finally(() => {
+      refreshSessionPromise = null;
+    });
+  }
+
+  return refreshSessionPromise;
 };
 
 const getReadyAccessToken = async (shouldRefreshBeforeRequest: boolean) => {
