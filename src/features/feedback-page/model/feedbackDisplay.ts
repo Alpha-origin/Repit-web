@@ -174,8 +174,8 @@ export const buildFeedbackOverallContent = (
         items: (feedback.frequentWords ?? []).slice(0, 8).map((item, index) => ({
           text: item.word,
           size: index < 2 ? ("xl" as const) : index < 4 ? ("md" as const) : ("sm" as const),
-          top: `${20 + ((index * 29) % 61)}%`,
-          left: `${15 + ((index * 37) % 70)}%`,
+          top: ["22%", "68%", "40%", "82%", "16%", "54%", "30%", "74%"][index],
+          left: ["28%", "64%", "72%", "38%", "78%", "22%", "48%", "84%"][index],
         })),
       },
       pdfActionLabel: "PDF로 저장",
