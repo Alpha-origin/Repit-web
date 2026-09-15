@@ -79,8 +79,15 @@ Shared axios clients live in `src/shared/api/axiosInstance.ts`.
 - `apiInstance`: main API. In development its base URL is empty so Vite proxy handles `/api`; in production it uses `VITE_API_URL`.
 - `chatInstance`: chat/interview API, based on `VITE_CHAT_URL`.
 - All clients use credentials and sync access tokens from responses.
-- 401 responses try `/api/v1/auth/refresh`; if refresh fails, the token is cleared and the user is sent to `/login`.
+- 401 responses try `/api/v1/auth/refresh`; if refresh fails, the token is cleared and the user is sent to `/login`. Concurrent requests share one refresh call.
+- `apiInstance` and `chatInstance` require an access token. When refresh cannot supply one, the request fails locally with `로그인이 필요합니다.` instead of being sent without an `Authorization` header.
 - `apiInstance` removes `Content-Type` automatically for `FormData`.
+
+Backend auth contract:
+
+- A missing token and an expired token both return `401 { "message": ... }`. There is no 400 auth error anymore.
+- Ownership checks on answer/question queries return `403 { "message": ... }` where a 404 used to be expected. A 403 must not clear the session.
+- Read error text through `extractErrorMessage` in `src/shared/api/errorMessage.ts`; it falls back to status-specific Korean copy for 401 and 403.
 
 Relevant environment variables:
 
