@@ -5,6 +5,7 @@ import type { PreparedInterviewData } from "@/features/interview-page/interview/
 import {
   InterviewSessionProvider,
 } from "@/features/interview-page/interview/model/interviewSessionContext";
+import { useInterviewRecorder } from "@/features/interview-page/interview/model/useInterviewRecorder";
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
 import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
 import MicIcon from "@/shared/img/interview-page/mike.svg?url";
@@ -55,6 +56,7 @@ const InterviewPage = () => {
 
 const InterviewPageContent = () => {
   const interviewSession = useInterviewSessionContext();
+  const interviewRecorder = useInterviewRecorder(interviewSession.cloneVideoTrack);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
@@ -65,6 +67,8 @@ const InterviewPageContent = () => {
   const isQuestionLoading = interviewSession.currentQuestion === null;
   const isAwaitingResponse = interviewSession.isAwaitingResponse;
   const isStartActionDisabled =
+    interviewRecorder.isStarting ||
+    interviewRecorder.isStopping ||
     !interviewSession.isInterviewReady ||
     isQuestionLoading ||
     isAwaitingResponse;
@@ -81,6 +85,11 @@ const InterviewPageContent = () => {
     return () => window.clearInterval(intervalId);
   }, [isTimerRunning]);
 
+  const handleQuitInterview = async () => {
+    await interviewRecorder.stopRecording();
+    await interviewSession.onQuitInterview();
+  };
+
   if (interviewSession.preparationError) {
     return (
       <S.PreparationErrorScreen role="alert">
@@ -89,7 +98,7 @@ const InterviewPageContent = () => {
         </S.PreparationErrorMessage>
         <S.PreparationErrorAction
           type="button"
-          onClick={() => void interviewSession.onQuitInterview()}
+          onClick={() => void handleQuitInterview()}
         >
           메인으로 돌아가기
         </S.PreparationErrorAction>
@@ -102,14 +111,15 @@ const InterviewPageContent = () => {
   }
 
   if (isMultiInterview) {
-    return <InterviewDashboard />;
+    return <InterviewDashboard recorder={interviewRecorder} />;
   }
 
-  const handleStartVoice = () => {
+  const handleStartVoice = async () => {
     if (isAwaitingResponse) {
       return;
     }
 
+    if (!(await interviewRecorder.startRecording())) return;
     setIsVoiceAnswering(true);
     setIsTimerRunning(true);
     interviewSession.onStartVoice();
@@ -121,6 +131,7 @@ const InterviewPageContent = () => {
     }
 
     try {
+      await interviewRecorder.stopRecording();
       await interviewSession.onCompleteVoice();
     } finally {
       setIsVoiceAnswering(false);
@@ -129,6 +140,7 @@ const InterviewPageContent = () => {
 
   const handleModeChange = (nextMode: typeof interviewSession.mode) => {
     if (nextMode === "text") {
+      void interviewRecorder.stopRecording();
       setIsVoiceAnswering(false);
     }
 
@@ -184,10 +196,16 @@ const InterviewPageContent = () => {
           </S.PreparationMessage>
         ) : null}
 
+        {interviewRecorder.errorMessage ? (
+          <S.PreparationMessage role="alert">
+            {interviewRecorder.errorMessage}
+          </S.PreparationMessage>
+        ) : null}
+
         <S.ActionRow>
           <S.SecondaryAction
             type="button"
-            onClick={() => void interviewSession.onQuitInterview()}
+            onClick={() => void handleQuitInterview()}
           >
             그만두기
           </S.SecondaryAction>
@@ -222,7 +240,7 @@ const InterviewPageContent = () => {
               ) : (
                 <S.PrimaryAction
                   type="button"
-                  onClick={handleStartVoice}
+                  onClick={() => void handleStartVoice()}
                   disabled={isStartActionDisabled}
                   aria-disabled={isStartActionDisabled}
                   aria-busy={interviewSession.isPreparingInterview || isAwaitingResponse}

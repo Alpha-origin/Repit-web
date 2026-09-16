@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
+import type { InterviewRecorder } from "@/features/interview-page/interview/model/useInterviewRecorder";
 import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
 import * as S from "./style";
 
@@ -16,7 +17,11 @@ const formatTime = (seconds: number) => {
 const getMemoKey = (sessionId?: string) =>
   sessionId ? `interview-memo:${sessionId}` : null;
 
-const InterviewDashboard = () => {
+interface InterviewDashboardProps {
+  recorder: InterviewRecorder;
+}
+
+const InterviewDashboard = ({ recorder }: InterviewDashboardProps) => {
   const interview = useInterviewSessionContext();
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
@@ -47,7 +52,8 @@ const InterviewDashboard = () => {
       ? questionNumber
       : `${questionNumber}-${interview.followUpQuestionNumber}`;
   const isAnswerDisabled =
-    !interview.isInterviewReady || isQuestionLoading || isAwaitingResponse;
+    !interview.isInterviewReady || isQuestionLoading || isAwaitingResponse ||
+    recorder.isStarting || recorder.isStopping;
 
   useEffect(() => {
     if (
@@ -90,17 +96,19 @@ const InterviewDashboard = () => {
 
   const handleModeChange = (mode: typeof interview.mode) => {
     if (mode === "text") {
+      void recorder.stopRecording();
       setIsVoiceAnswering(false);
     }
 
     interview.onModeChange(mode);
   };
 
-  const handleStartVoice = () => {
+  const handleStartVoice = async () => {
     if (isAwaitingResponse) {
       return;
     }
 
+    if (!(await recorder.startRecording())) return;
     setIsTimerRunning(true);
     setIsVoiceAnswering(true);
     interview.onStartVoice();
@@ -112,10 +120,16 @@ const InterviewDashboard = () => {
     }
 
     try {
+      await recorder.stopRecording();
       await interview.onCompleteVoice();
     } finally {
       setIsVoiceAnswering(false);
     }
+  };
+
+  const handleQuitInterview = async () => {
+    await recorder.stopRecording();
+    await interview.onQuitInterview();
   };
 
   return (
@@ -201,6 +215,12 @@ const InterviewDashboard = () => {
                 />
               )}
 
+              {recorder.errorMessage ? (
+                <S.QuestionAudioError role="alert">
+                  {recorder.errorMessage}
+                </S.QuestionAudioError>
+              ) : null}
+
               <S.BottomRow>
                 <S.Count>글자 수 {interview.answerText.length} / {TEXT_ANSWER_MAX_LENGTH}</S.Count>
                 <S.Actions>
@@ -208,7 +228,7 @@ const InterviewDashboard = () => {
                     <S.Button
                       type="button"
                       $secondary
-                      onClick={() => void interview.onQuitInterview()}
+                      onClick={() => void handleQuitInterview()}
                     >
                       그만두기
                     </S.Button>
@@ -228,7 +248,7 @@ const InterviewDashboard = () => {
                         type="button"
                         disabled={isAnswerDisabled}
                         aria-busy={isAwaitingResponse}
-                        onClick={handleStartVoice}
+                        onClick={() => void handleStartVoice()}
                       >
                         {isAwaitingResponse ? "응답 대기중..." : "음성 답변 시작"}
                       </S.Button>
