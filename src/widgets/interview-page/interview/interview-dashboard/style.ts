@@ -111,7 +111,10 @@ export const MainGrid = styled.main<MultiLayoutProps>`
           --multi-top-row-height: clamp(13rem, 30vh, 15rem);
           grid-template-columns: minmax(0, 1.65fr) minmax(24rem, 0.95fr);
           grid-template-rows: none;
-          align-items: start;
+          /* 질문 패널은 면접관 수와 무관하게 낮게 두되(--multi-top-row-height),
+             두 컬럼이 같은 높이로 늘어나 아래쪽 끝이 맞아야 한다.
+             start로 두면 각 컬럼이 제 콘텐츠 높이에 멈춰 4인에서 4.5rem 어긋난다. */
+          align-items: stretch;
         `
       : ""}
 
