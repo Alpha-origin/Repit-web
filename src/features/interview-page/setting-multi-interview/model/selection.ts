@@ -26,9 +26,12 @@ export const validateSelection = (slots: InterviewerSlot[], count: InterviewerCo
   if (slots.some((slot) => !slot.interviewer || !slot.role)) {
     return `면접관 ${count}명의 설정을 모두 완료해주세요.`;
   }
-  if (slots[0].role !== "TECH" || slots.slice(1).some((slot) =>
-    !ROLE_OPTIONS.some((option) => option.value === slot.role))) {
+  if (slots[0].role !== "TECH") {
     return "첫 번째 면접관은 기술 역할로 설정해주세요.";
+  }
+  if (slots.slice(1).some((slot) =>
+    !ROLE_OPTIONS.some((option) => option.value === slot.role))) {
+    return "면접관의 역할을 다시 선택해주세요.";
   }
   if (new Set(slots.map((slot) => slot.interviewer?.key)).size !== count) {
     return "같은 면접관을 중복 선택할 수 없습니다.";
