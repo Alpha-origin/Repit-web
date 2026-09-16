@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { PERSONALITY_OPTIONS } from "@/shared/constants/interview-page/setting-multi-interview";
 
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
 import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
@@ -126,7 +127,7 @@ const InterviewDashboard = () => {
           {formatTime(elapsedSeconds)}
         </S.Timer>
 
-        <S.MainGrid $multi={isMultiInterview}>
+        <S.MainGrid $multi={isMultiInterview} $count={interviewers.length}>
           <S.LeftColumn $multi={isMultiInterview}>
             <S.QuestionPanel $multi={isMultiInterview} aria-live="polite">
               <S.QuestionMetaRow>
@@ -253,9 +254,9 @@ const InterviewDashboard = () => {
           </S.LeftColumn>
 
           <S.RightColumn $multi={isMultiInterview}>
-            <S.Interviewers $multi={isMultiInterview} aria-label="면접관 목록">
+            <S.Interviewers $multi={isMultiInterview} $count={interviewers.length} aria-label="면접관 목록">
               {interviewers.map((interviewer) => {
-                const isActive = interviewer.personaId === activePersonaId;
+                const isActive = interviewer.personaId === activePersonaId && interview.questionAudioStatus === "playing";
 
                 return (
                   <S.InterviewerCard
@@ -279,22 +280,19 @@ const InterviewDashboard = () => {
                     {isMultiInterview ? (
                       <S.InterviewerTags>
                         <S.InterviewerTag>
-                          {interview.preparedInterview?.personaType === "METICULOUS"
-                            ? "꼼꼼한"
-                            : interview.preparedInterview?.personaType === "REALISTIC"
-                              ? "현실적인"
-                              : "친근한"}
+                          {PERSONALITY_OPTIONS.find((option) => option.value === (interviewer.personaType ?? interview.preparedInterview?.personaType))?.label ?? "친근한"}
                         </S.InterviewerTag>
                         <S.InterviewerTag>
-                          {interview.preparedInterview?.level === "HARD"
+                          {(interviewer.level ?? interview.preparedInterview?.level) === "HARD"
                             ? "어려움"
-                            : interview.preparedInterview?.level === "NORMAL"
+                            : (interviewer.level ?? interview.preparedInterview?.level) === "NORMAL"
                               ? "보통"
                               : "쉬움"}
                         </S.InterviewerTag>
+                        {isActive ? <S.ActiveBadge>질문 중</S.ActiveBadge> : null}
                       </S.InterviewerTags>
                     ) : null}
-                    {isActive ? <S.ActiveBadge>질문 중</S.ActiveBadge> : null}
+                    {!isMultiInterview && isActive ? <S.ActiveBadge>질문 중</S.ActiveBadge> : null}
                   </S.InterviewerCard>
                 );
               })}

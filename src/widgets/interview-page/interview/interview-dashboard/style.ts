@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 interface MultiLayoutProps {
   $multi: boolean;
+  $count?: number;
 }
 
 interface MultiCardProps {
@@ -95,6 +96,9 @@ export const LoadingMessage = styled.span`
 `;
 
 export const MainGrid = styled.main<MultiLayoutProps>`
+  --interviewers-height: ${({ $count }) => $count === 4 ? "25rem" : "16rem"};
+  --interviewer-image-height: ${({ $count }) => $count === 4 ? "5.6rem" : "8rem"};
+  --memo-min-height: ${({ $count }) => $count === 4 ? "13rem" : "19rem"};
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(17rem, 0.95fr);
@@ -155,7 +159,7 @@ export const RightColumn = styled.aside<MultiLayoutProps>`
     $multi
       ? `
           grid-row: auto;
-          grid-template-rows: var(--multi-top-row-height) minmax(19rem, 1fr);
+          grid-template-rows: var(--interviewers-height) minmax(var(--memo-min-height), 1fr);
           gap: 0.8rem;
         `
       : ""}
@@ -382,14 +386,19 @@ export const Interviewers = styled.section<MultiLayoutProps>`
   grid-template-columns: repeat(auto-fit, minmax(6.6rem, 1fr));
   gap: 0.55rem;
 
-  ${({ $multi }) =>
+  ${({ $multi, $count }) =>
     $multi
       ? `
-          height: var(--multi-top-row-height);
+          height: var(--interviewers-height);
           min-height: 0;
           box-sizing: border-box;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-columns: repeat(${$count === 4 ? 2 : Math.max($count ?? 1, 1)}, minmax(0, 1fr));
+          grid-template-rows: repeat(${$count === 4 ? 2 : 1}, minmax(0, 1fr));
           gap: 0.6rem;
+          padding: 0;
+          border: 0;
+          box-shadow: none;
+          background: transparent;
         `
       : ""}
 `;
@@ -419,7 +428,7 @@ export const InterviewerImage = styled.img<MultiLayoutProps>`
     $multi
       ? `
           flex: 0 0 auto;
-          height: 7.4rem;
+          height: var(--interviewer-image-height);
         `
       : ""}
 `;
@@ -457,6 +466,8 @@ export const InterviewerRole = styled.span`
 
 export const InterviewerTags = styled.div`
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 0.35rem;
   margin-top: 0.45rem;
 `;
@@ -473,7 +484,7 @@ export const InterviewerTag = styled.span`
 export const ActiveBadge = styled.span`
   display: block;
   width: fit-content;
-  margin: 0.45rem 0 0 auto;
+  margin: 0 0 0 auto;
   padding: 0.18rem 0.38rem;
   border-radius: 999rem;
   background: #2479ed;
@@ -490,7 +501,7 @@ export const MemoPanel = styled.section<MultiLayoutProps>`
   grid-template-rows: auto minmax(0, 1fr);
   gap: 0.55rem;
 
-  ${({ $multi }) => ($multi ? "min-height: 19rem;" : "")}
+  ${({ $multi }) => ($multi ? "min-height: var(--memo-min-height);" : "")}
 `;
 
 export const MemoLabel = styled.label`
