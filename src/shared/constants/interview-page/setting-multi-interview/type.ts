@@ -5,7 +5,18 @@ import type {
 
 export type InterviewerTemplateRole = "TECH" | "HR" | "CEO" | "PM" | "DESIGN";
 
-export type SlotIndex = 0 | 1 | 2;
+export type InterviewerCount = 2 | 3 | 4;
+export type SlotIndex = 0 | 1 | 2 | 3;
+export type InterviewerPersonality = "FRIENDLY" | "METICULOUS" | "REALISTIC";
+export type InterviewerTone = "GENTLE" | "DIRECT" | "PRESSURING";
+
+export interface InterviewerSlot {
+  interviewer: InterviewerTemplate | null;
+  role: InterviewerTemplateRole | null;
+  personality: InterviewerPersonality;
+  tone: InterviewerTone;
+  major: "BACKEND" | "FRONTEND";
+}
 
 export interface InterviewerTemplate {
   key: string;
@@ -26,11 +37,8 @@ export interface MultiInterviewSelection {
   style: InterviewStyleOption;
   difficulty: InterviewDifficultyOption;
   activeSlot: SlotIndex;
-  slots: [
-    InterviewerTemplate | null,
-    InterviewerTemplate | null,
-    InterviewerTemplate | null,
-  ];
+  interviewerCount: InterviewerCount;
+  slots: InterviewerSlot[];
 }
 
 export interface MultiInterviewValidation {

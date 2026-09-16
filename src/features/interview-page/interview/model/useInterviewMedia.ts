@@ -1,9 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { CameraState } from "@/widgets/interview-page/interview/type";
+import type { CameraState, MicState } from "@/widgets/interview-page/interview/type";
 
-export const useInterviewCamera = (enabled: boolean) => {
+const VIDEO_CONSTRAINTS: MediaTrackConstraints = {
+  facingMode: "user",
+  width: { ideal: 1280 },
+  height: { ideal: 720 },
+};
+
+// 자동 게인을 끄지 않으면 조용할 때도 입력이 증폭돼 마이크 게이지가 계속 차 보인다.
+const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
+  echoCancellation: true,
+  noiseSuppression: true,
+  autoGainControl: false,
+};
+
+export const useInterviewMedia = (enabled: boolean) => {
   const [cameraState, setCameraState] = useState<CameraState>("loading");
+  const [micState, setMicState] = useState<MicState>("loading");
+  const [micStream, setMicStream] = useState<MediaStream | null>(null);
   const videoElementRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const attachStream = useCallback((stream: MediaStream) => {
@@ -41,25 +56,35 @@ export const useInterviewCamera = (enabled: boolean) => {
       return;
     }
 
-    const attachCamera = async () => {
+    const requestMediaStream = async () => {
+      try {
+        return await navigator.mediaDevices.getUserMedia({
+          video: VIDEO_CONSTRAINTS,
+          audio: AUDIO_CONSTRAINTS,
+        });
+      } catch {
+        // 마이크만 거부된 경우에도 카메라 미리보기는 살려둔다.
+        return navigator.mediaDevices.getUserMedia({
+          video: VIDEO_CONSTRAINTS,
+          audio: false,
+        });
+      }
+    };
+
+    const attachMedia = async () => {
       if (!navigator.mediaDevices?.getUserMedia) {
         if (!cancelled) {
           setCameraState("blocked");
+          setMicState("blocked");
         }
         return;
       }
 
       setCameraState("loading");
+      setMicState("loading");
 
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: "user",
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-          audio: false,
-        });
+        const stream = await requestMediaStream();
 
         if (cancelled) {
           stream.getTracks().forEach((track) => track.stop());
@@ -70,15 +95,22 @@ export const useInterviewCamera = (enabled: boolean) => {
         streamRef.current = stream;
         attachStream(stream);
 
+        const audioTracks = stream.getAudioTracks();
+
+        // 음량 측정용으로는 오디오 트랙만 따로 묶어 전달해야 카메라 재연결에 영향받지 않는다.
+        setMicStream(audioTracks.length > 0 ? new MediaStream(audioTracks) : null);
+        setMicState(audioTracks.length > 0 ? "ready" : "blocked");
         setCameraState("ready");
       } catch {
         if (!cancelled) {
           setCameraState("blocked");
+          setMicState("blocked");
+          setMicStream(null);
         }
       }
     };
 
-    void attachCamera();
+    void attachMedia();
 
     return () => {
       cancelled = true;
@@ -90,12 +122,16 @@ export const useInterviewCamera = (enabled: boolean) => {
       if (streamRef.current === currentStream) {
         streamRef.current = null;
       }
+
+      setMicStream(null);
       currentStream?.getTracks().forEach((track) => track.stop());
     };
   }, [attachStream, enabled]);
 
   return {
     cameraState,
+    micState,
+    micStream,
     videoRef,
   };
 };

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import type { PreparedInterviewData } from "@/features/interview-page/interview/api";
@@ -6,6 +6,7 @@ import {
   InterviewSessionProvider,
 } from "@/features/interview-page/interview/model/interviewSessionContext";
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
+import { INTERVIEW_DEVICE_STATUS_LABELS } from "@/shared/constants/interview-page/interview";
 import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
 import MicIcon from "@/shared/img/interview-page/mike.svg?url";
 import Loading from "@/shared/components/loading";
@@ -55,9 +56,8 @@ const InterviewPage = () => {
 
 const InterviewPageContent = () => {
   const interviewSession = useInterviewSessionContext();
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
+  const elapsedSeconds = interviewSession.elapsedSeconds;
   const isMultiInterview = interviewSession.preparedInterview?.mode === "MULTI";
   const isVoiceMode = interviewSession.mode === "voice";
   const isTextMode = interviewSession.mode === "text";
@@ -68,18 +68,9 @@ const InterviewPageContent = () => {
     !interviewSession.isInterviewReady ||
     isQuestionLoading ||
     isAwaitingResponse;
-
-  useEffect(() => {
-    if (!isTimerRunning) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      setElapsedSeconds((previousSeconds) => previousSeconds + 1);
-    }, 1_000);
-
-    return () => window.clearInterval(intervalId);
-  }, [isTimerRunning]);
+  const isCameraReady = interviewSession.cameraState === "ready";
+  const isMicReady = interviewSession.micState === "ready";
+  const micLevel = isMicReady ? interviewSession.voiceLevel : 0;
 
   if (interviewSession.preparationError) {
     return (
@@ -111,7 +102,6 @@ const InterviewPageContent = () => {
     }
 
     setIsVoiceAnswering(true);
-    setIsTimerRunning(true);
     interviewSession.onStartVoice();
   };
 
@@ -194,20 +184,31 @@ const InterviewPageContent = () => {
 
           {isVoiceMode ? (
             <>
-              <S.IconActionButton type="button" aria-label="카메라 상태">
+              <S.IconActionButton
+                role="img"
+                $active={isCameraReady}
+                aria-label={INTERVIEW_DEVICE_STATUS_LABELS.camera[interviewSession.cameraState]}
+              >
                 <S.ActionIconImage
                   src={CameraIcon}
                   alt=""
                   aria-hidden="true"
                   $iconType="camera"
+                  $muted={!isCameraReady}
                 />
               </S.IconActionButton>
-              <S.IconActionButton type="button" aria-label="마이크 상태">
+              <S.IconActionButton
+                role="img"
+                $active={isMicReady}
+                aria-label={INTERVIEW_DEVICE_STATUS_LABELS.mic[interviewSession.micState]}
+              >
+                <S.IconActionLevelFill aria-hidden="true" $level={micLevel} />
                 <S.ActionIconImage
                   src={MicIcon}
                   alt=""
                   aria-hidden="true"
                   $iconType="mic"
+                  $muted={!isMicReady}
                 />
               </S.IconActionButton>
               {isVoiceActionStarted ? (
@@ -217,7 +218,8 @@ const InterviewPageContent = () => {
                   disabled={isAwaitingResponse}
                   aria-busy={isAwaitingResponse}
                 >
-                  {isAwaitingResponse ? "응답 대기중..." : "끝내기"}
+                  {isAwaitingResponse ? <S.ActionSpinner aria-hidden="true" /> : null}
+                  끝내기
                 </S.PrimaryAction>
               ) : (
                 <S.PrimaryAction
@@ -232,11 +234,8 @@ const InterviewPageContent = () => {
                       : undefined
                   }
                 >
-                  {isAwaitingResponse
-                    ? "응답 대기중..."
-                    : interviewSession.isPreparingInterview
-                      ? "준비 중..."
-                      : "시작하기"}
+                  {isAwaitingResponse ? <S.ActionSpinner aria-hidden="true" /> : null}
+                  {interviewSession.isPreparingInterview ? "준비 중..." : "시작하기"}
                 </S.PrimaryAction>
               )}
             </>
