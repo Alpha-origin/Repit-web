@@ -54,47 +54,6 @@ export const TimerDot = styled.span`
   background: #e15858;
 `;
 
-export const LoadingOverlay = styled.div`
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  display: grid;
-  place-items: center;
-  border-radius: 0.75rem;
-  background: rgba(239, 244, 252, 0.52);
-  backdrop-filter: blur(0.12rem);
-`;
-
-export const LoadingModal = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.8rem 1rem;
-  border: 0.0625rem solid #d8e0ed;
-  border-radius: 0.65rem;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 0.35rem 1.2rem rgba(55, 82, 125, 0.14);
-`;
-
-export const LoadingSpinner = styled.span`
-  width: 1rem;
-  height: 1rem;
-  border: 0.15rem solid #cfe0f8;
-  border-top-color: #2179ed;
-  border-radius: 50%;
-  animation: interview-loading-spin 0.75s linear infinite;
-
-  @keyframes interview-loading-spin {
-    to { transform: rotate(360deg); }
-  }
-`;
-
-export const LoadingMessage = styled.span`
-  color: #4e5968;
-  font-size: 0.86rem;
-  font-weight: 700;
-`;
-
 export const MainGrid = styled.main<MultiLayoutProps>`
   --interviewers-height: ${({ $count }) => $count === 4 ? "25rem" : "16rem"};
   --interviewer-image-height: ${({ $count }) => $count === 4 ? "5.6rem" : "8rem"};
@@ -390,8 +349,25 @@ export const Actions = styled.div`
   gap: 0.5rem;
 `;
 
+export const ButtonSpinner = styled.span`
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 0.13rem solid rgba(255, 255, 255, 0.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: interview-button-spin 0.75s linear infinite;
+
+  @keyframes interview-button-spin {
+    to { transform: rotate(360deg); }
+  }
+`;
+
 export const Button = styled.button<{ $secondary?: boolean }>`
   min-height: 2.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
   padding: 0 1rem;
   border: 0.0625rem solid ${({ $secondary }) => ($secondary ? "#cfd8e6" : "#1d76ea")};
   border-radius: 0.45rem;

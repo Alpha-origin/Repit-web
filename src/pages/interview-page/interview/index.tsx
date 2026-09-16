@@ -218,7 +218,8 @@ const InterviewPageContent = () => {
                   disabled={isAwaitingResponse}
                   aria-busy={isAwaitingResponse}
                 >
-                  {isAwaitingResponse ? "응답 대기중..." : "끝내기"}
+                  {isAwaitingResponse ? <S.ActionSpinner aria-hidden="true" /> : null}
+                  끝내기
                 </S.PrimaryAction>
               ) : (
                 <S.PrimaryAction
@@ -233,11 +234,8 @@ const InterviewPageContent = () => {
                       : undefined
                   }
                 >
-                  {isAwaitingResponse
-                    ? "응답 대기중..."
-                    : interviewSession.isPreparingInterview
-                      ? "준비 중..."
-                      : "시작하기"}
+                  {isAwaitingResponse ? <S.ActionSpinner aria-hidden="true" /> : null}
+                  {interviewSession.isPreparingInterview ? "준비 중..." : "시작하기"}
                 </S.PrimaryAction>
               )}
             </>

@@ -224,7 +224,10 @@ const InterviewDashboard = () => {
                         aria-busy={isAwaitingResponse}
                         onClick={() => void handleCompleteVoice()}
                       >
-                        {isAwaitingResponse ? "응답 대기중..." : "답변 끝내기"}
+                        {isAwaitingResponse ? (
+                          <S.ButtonSpinner aria-hidden="true" />
+                        ) : null}
+                        답변 끝내기
                       </S.Button>
                     ) : (
                       <S.Button
@@ -233,7 +236,10 @@ const InterviewDashboard = () => {
                         aria-busy={isAwaitingResponse}
                         onClick={handleStartVoice}
                       >
-                        {isAwaitingResponse ? "응답 대기중..." : "음성 답변 시작"}
+                        {isAwaitingResponse ? (
+                          <S.ButtonSpinner aria-hidden="true" />
+                        ) : null}
+                        음성 답변 시작
                       </S.Button>
                     )
                   ) : (
@@ -243,11 +249,10 @@ const InterviewDashboard = () => {
                       aria-busy={isAwaitingResponse}
                       onClick={() => void interview.onSubmitText()}
                     >
-                      {interview.isSubmitting
-                        ? "제출 중..."
-                        : interview.isAwaitingNextQuestion
-                          ? "응답 대기중..."
-                          : "제출하기"}
+                      {isAwaitingResponse ? (
+                        <S.ButtonSpinner aria-hidden="true" />
+                      ) : null}
+                      제출하기
                     </S.Button>
                   )}
                 </S.Actions>
@@ -320,15 +325,6 @@ const InterviewDashboard = () => {
             </S.MemoPanel>
           </S.RightColumn>
         </S.MainGrid>
-
-        {interview.isAwaitingNextQuestion ? (
-          <S.LoadingOverlay role="status" aria-live="polite">
-            <S.LoadingModal>
-              <S.LoadingSpinner aria-hidden="true" />
-              <S.LoadingMessage>다음 질문을 준비하고 있습니다</S.LoadingMessage>
-            </S.LoadingModal>
-          </S.LoadingOverlay>
-        ) : null}
       </S.Content>
     </S.Page>
   );

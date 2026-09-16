@@ -413,6 +413,10 @@ const actionButtonBase = styled.button`
   font-weight: 800;
   cursor: pointer;
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
   box-shadow: 0 0.35rem 0.75rem rgba(37, 126, 232, 0.2);
   transition:
     transform 0.2s ease,
@@ -506,6 +510,19 @@ export const ActionIconImage = styled.img<ActionIconImageProps>`
   object-fit: contain;
   pointer-events: none;
   filter: ${({ $muted }) => ($muted ? "grayscale(1)" : "none")};
+`;
+
+export const ActionSpinner = styled.span`
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 0.13rem solid rgba(255, 255, 255, 0.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: interview-action-spin 0.75s linear infinite;
+
+  @keyframes interview-action-spin {
+    to { transform: rotate(360deg); }
+  }
 `;
 
 export const InlineVisualizerWrap = styled.div<VoiceLevelProps>`
