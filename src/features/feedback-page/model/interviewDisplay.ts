@@ -73,8 +73,11 @@ export const getInterviewMajorLabel = (major?: string) => {
 export const getInterviewTitle = (major?: string) =>
   `${getInterviewMajorLabel(major)} 모의면접`;
 
-export const getInterviewModeLabel = (interview: InterviewSummary) =>
-  interview.mode === "MULTI" ? "다대일 모의면접" : "일대일 모의면접";
+export const getInterviewModeLabel = (interview: InterviewSummary) => {
+  if (interview.mode !== "MULTI") return "일대일 모의면접";
+  const count = getInterviewerCount(interview);
+  return count > 1 ? `${count}:1 모의면접` : "다대일 모의면접";
+};
 
 export const getInterviewerCount = (interview: InterviewSummary) => {
   if (interview.personaIds && interview.personaIds.length > 0) {
