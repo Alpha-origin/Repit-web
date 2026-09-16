@@ -21,6 +21,7 @@ import {
 import type { InterviewMode } from "@/widgets/interview-page/interview/type";
 import { useElevenLabsTts } from "./useElevenLabsTts";
 import { useSupertoneTts } from "./useSupertoneTts";
+import { useInterviewElapsedTime } from "./useInterviewElapsedTime";
 import { useInterviewCamera } from "./useInterviewCamera";
 import { useInterviewSocket } from "./useInterviewSocket";
 import { useVoiceAnswer } from "./useVoiceAnswer";
@@ -326,6 +327,8 @@ export const useInterviewSession = (
   const isCompletingVoiceRef = useRef(false);
   const questionStartedAtRef = useRef(0);
   const canSubmitAnswer = isChatSessionReady && currentQuestion !== null;
+  // 첫 질문이 도착한 시점을 면접 시작으로 본다.
+  const elapsedSeconds = useInterviewElapsedTime(sessionId, canSubmitAnswer);
   const getInterviewExitPath = useCallback(
     (reason: InterviewCloseReason) =>
       reason === "completed" ? INTERVIEW_COMPLETED_PATH : "/main",
@@ -726,6 +729,7 @@ export const useInterviewSession = (
     cameraState,
     currentQuestion,
     displayQuestionNumber,
+    elapsedSeconds,
     isAwaitingNextQuestion,
     isAwaitingResponse: isSubmitting || isAwaitingNextQuestion,
     isSubmitting,

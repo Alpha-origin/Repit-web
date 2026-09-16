@@ -19,9 +19,8 @@ const getMemoKey = (sessionId?: string) =>
 
 const InterviewDashboard = () => {
   const interview = useInterviewSessionContext();
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
+  const elapsedSeconds = interview.elapsedSeconds;
   const sessionId = interview.preparedInterview?.sessionId;
   const memoKey = useMemo(() => getMemoKey(sessionId), [sessionId]);
   const [memo, setMemo] = useState(() =>
@@ -50,35 +49,6 @@ const InterviewDashboard = () => {
       : `${questionNumber}-${interview.followUpQuestionNumber}`;
   const isAnswerDisabled =
     !interview.isInterviewReady || isQuestionLoading || isAwaitingResponse;
-
-  useEffect(() => {
-    if (
-      !interview.isInterviewReady ||
-      !isTimerRunning ||
-      interview.isAwaitingNextQuestion
-    ) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      setElapsedSeconds((seconds) => seconds + 1);
-    }, 1_000);
-
-    return () => window.clearInterval(intervalId);
-  }, [
-    interview.isInterviewReady,
-    interview.isAwaitingNextQuestion,
-    isTimerRunning,
-  ]);
-
-  useEffect(() => {
-    if (!interview.isAwaitingNextQuestion) {
-      return;
-    }
-
-    setElapsedSeconds(0);
-    setIsTimerRunning(false);
-  }, [interview.isAwaitingNextQuestion]);
 
   useEffect(() => {
     lastSpeakingPersonaIdRef.current = undefined;
@@ -113,7 +83,6 @@ const InterviewDashboard = () => {
       return;
     }
 
-    setIsTimerRunning(true);
     setIsVoiceAnswering(true);
     interview.onStartVoice();
   };

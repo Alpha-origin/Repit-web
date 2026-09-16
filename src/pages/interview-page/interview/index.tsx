@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import type { PreparedInterviewData } from "@/features/interview-page/interview/api";
@@ -55,9 +55,8 @@ const InterviewPage = () => {
 
 const InterviewPageContent = () => {
   const interviewSession = useInterviewSessionContext();
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
+  const elapsedSeconds = interviewSession.elapsedSeconds;
   const isMultiInterview = interviewSession.preparedInterview?.mode === "MULTI";
   const isVoiceMode = interviewSession.mode === "voice";
   const isTextMode = interviewSession.mode === "text";
@@ -68,18 +67,6 @@ const InterviewPageContent = () => {
     !interviewSession.isInterviewReady ||
     isQuestionLoading ||
     isAwaitingResponse;
-
-  useEffect(() => {
-    if (!isTimerRunning) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      setElapsedSeconds((previousSeconds) => previousSeconds + 1);
-    }, 1_000);
-
-    return () => window.clearInterval(intervalId);
-  }, [isTimerRunning]);
 
   if (interviewSession.preparationError) {
     return (
@@ -111,7 +98,6 @@ const InterviewPageContent = () => {
     }
 
     setIsVoiceAnswering(true);
-    setIsTimerRunning(true);
     interviewSession.onStartVoice();
   };
 
