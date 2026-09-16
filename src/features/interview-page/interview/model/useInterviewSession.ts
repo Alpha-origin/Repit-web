@@ -255,7 +255,7 @@ export const useInterviewSession = (
   const [isAwaitingNextQuestion, setIsAwaitingNextQuestion] = useState(false);
   const [preparationError, setPreparationError] = useState<string | null>(null);
   const isVoiceMode = mode === "voice";
-  const { cameraState, videoRef } = useInterviewCamera(isVoiceMode);
+  const { cameraState, cloneVideoTrack, videoRef } = useInterviewCamera(isVoiceMode);
   const voiceAnswer = useVoiceAnswer();
   const multiTtsSpeaker = useMemo(() => {
     if (preparedInterview?.mode !== "MULTI") {
@@ -704,6 +704,7 @@ export const useInterviewSession = (
     answerStatus: isVoiceMode ? voiceAnswer.voiceStatus : INTERVIEW_STATUS_MESSAGES.text,
     answerText: voiceAnswer.answerText,
     cameraState,
+    cloneVideoTrack,
     currentQuestion,
     displayQuestionNumber,
     isAwaitingNextQuestion,
