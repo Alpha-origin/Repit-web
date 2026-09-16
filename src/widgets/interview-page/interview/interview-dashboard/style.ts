@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 
 interface MultiLayoutProps {
   $multi: boolean;
@@ -407,13 +407,26 @@ export const InterviewerCard = styled.article<{ $active: boolean } & MultiCardPr
   min-width: 0;
   min-height: 0;
   padding: 0.65rem;
-  border: 0.0625rem solid ${({ $active }) => ($active ? "#4d98ff" : "#dce2ea")};
+  border: 0.0625rem solid ${({ $active }) => ($active ? "#2f8bff" : "#dce2ea")};
   border-radius: 0.6rem;
   background: ${({ $active }) => ($active ? "#f4f9ff" : "#fff")};
   display: flex;
   flex-direction: column;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+
+  /* 링을 테두리 두께가 아닌 box-shadow로 그려야 활성 카드만 커져서
+     면접관 그리드의 행 높이가 흔들리는 일이 없다. */
+  box-shadow: ${({ $active }) =>
+    $active ? "0 0 0 0.125rem rgba(47, 139, 255, 0.35)" : "none"};
 
   ${({ $multi }) => ($multi ? "padding: 0.55rem;" : "")}
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 `;
 
 export const InterviewerImage = styled.img<MultiLayoutProps>`
@@ -481,16 +494,33 @@ export const InterviewerTag = styled.span`
   line-height: 1.2;
 `;
 
-export const ActiveBadge = styled.span`
+const badgePulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+`;
+
+export const ActiveBadge = styled.span<{ $speaking: boolean }>`
   display: block;
   width: fit-content;
   margin: 0 0 0 auto;
   padding: 0.18rem 0.38rem;
   border-radius: 999rem;
-  background: #2479ed;
+  background: ${({ $speaking }) => ($speaking ? "#2479ed" : "#6b8cb5")};
   color: #fff;
   font-size: 0.62rem;
   font-weight: 800;
+  white-space: nowrap;
+
+  ${({ $speaking }) =>
+    $speaking
+      ? css`
+          animation: ${badgePulse} 1.6s ease-in-out infinite;
+        `
+      : ""}
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 export const MemoPanel = styled.section<MultiLayoutProps>`

@@ -289,6 +289,26 @@ export const useInterviewSession = (
       voiceIndex: speaker.voiceIndex ?? interviewers.indexOf(speaker) + 1,
     };
   }, [currentQuestion?.personaId, preparedInterview]);
+  // TTS는 성별이 섞이지 않게 대표 면접관으로 대체하지만, 화면 강조는 질문에 실제로
+  // 연결된 면접관에게만 준다. 대체 면접관까지 강조하면 personaId가 빠진 응답에서
+  // 1번 면접관이 계속 질문하는 것처럼 보인다.
+  const speakingPersonaId = useMemo(() => {
+    const personaId = currentQuestion?.personaId;
+
+    if (personaId === undefined) {
+      return undefined;
+    }
+
+    if (preparedInterview?.mode !== "MULTI") {
+      return personaId;
+    }
+
+    return (preparedInterview.interviewers ?? []).some(
+      (interviewer) => interviewer.personaId === personaId,
+    )
+      ? personaId
+      : undefined;
+  }, [currentQuestion?.personaId, preparedInterview]);
   const elevenLabsTts = useElevenLabsTts(
     currentQuestion?.content ?? "",
     multiTtsSpeaker?.voiceIndex,
@@ -717,6 +737,7 @@ export const useInterviewSession = (
     questionAudioStatus: questionTts.status,
     questionAudioErrorMessage:
       ttsProvider === "elevenlabs" ? elevenLabsTts.errorMessage : null,
+    speakingPersonaId,
     ttsSpeakerPersonaId: multiTtsSpeaker?.personaId,
     onAnswerTextChange: voiceAnswer.onAnswerTextChange,
     onClearAnswer: voiceAnswer.onClearAnswer,

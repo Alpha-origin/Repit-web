@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PERSONALITY_OPTIONS } from "@/shared/constants/interview-page/setting-multi-interview";
 
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
@@ -30,11 +30,12 @@ const InterviewDashboard = () => {
   const isMultiInterview = interview.preparedInterview?.mode === "MULTI";
   const isVoiceMode = interview.mode === "voice";
   const isQuestionLoading = interview.currentQuestion === null;
-  const activePersonaId = isMultiInterview
-    ? isQuestionLoading
-      ? undefined
-      : interview.ttsSpeakerPersonaId
-    : interview.currentQuestion?.personaId;
+  const isQuestionSpeaking = interview.questionAudioStatus === "playing";
+  const speakingPersonaId = interview.speakingPersonaId;
+  const lastSpeakingPersonaIdRef = useRef<number | undefined>(undefined);
+  // 질문이 도착한 뒤 다음 질문이 올 때까지 같은 면접관을 강조한다.
+  // 질문 로딩 구간에는 personaId가 비므로 직전 발화자를 유지해 강조가 끊기지 않게 한다.
+  const activePersonaId = speakingPersonaId ?? lastSpeakingPersonaIdRef.current;
   const interviewers = interview.preparedInterview?.interviewers ?? [];
   const activeInterviewer = interviewers.find(
     (interviewer) => interviewer.personaId === activePersonaId,
@@ -78,6 +79,16 @@ const InterviewDashboard = () => {
     setElapsedSeconds(0);
     setIsTimerRunning(false);
   }, [interview.isAwaitingNextQuestion]);
+
+  useEffect(() => {
+    lastSpeakingPersonaIdRef.current = undefined;
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (speakingPersonaId !== undefined) {
+      lastSpeakingPersonaIdRef.current = speakingPersonaId;
+    }
+  }, [speakingPersonaId]);
 
   useEffect(() => {
     setMemo(memoKey ? window.sessionStorage.getItem(memoKey) ?? "" : "");
@@ -256,13 +267,14 @@ const InterviewDashboard = () => {
           <S.RightColumn $multi={isMultiInterview}>
             <S.Interviewers $multi={isMultiInterview} $count={interviewers.length} aria-label="면접관 목록">
               {interviewers.map((interviewer) => {
-                const isActive = interviewer.personaId === activePersonaId && interview.questionAudioStatus === "playing";
+                const isActive = interviewer.personaId === activePersonaId;
 
                 return (
                   <S.InterviewerCard
                     key={interviewer.personaId}
                     $active={isActive}
                     $multi={isMultiInterview}
+                    aria-current={isActive ? "true" : undefined}
                   >
                     {interviewer.image ? (
                       <S.InterviewerImage
@@ -289,10 +301,18 @@ const InterviewDashboard = () => {
                               ? "보통"
                               : "쉬움"}
                         </S.InterviewerTag>
-                        {isActive ? <S.ActiveBadge>질문 중</S.ActiveBadge> : null}
+                        {isActive ? (
+                          <S.ActiveBadge $speaking={isQuestionSpeaking}>
+                            {isQuestionSpeaking ? "질문 중" : "답변 대기"}
+                          </S.ActiveBadge>
+                        ) : null}
                       </S.InterviewerTags>
                     ) : null}
-                    {!isMultiInterview && isActive ? <S.ActiveBadge>질문 중</S.ActiveBadge> : null}
+                    {!isMultiInterview && isActive ? (
+                      <S.ActiveBadge $speaking={isQuestionSpeaking}>
+                        {isQuestionSpeaking ? "질문 중" : "답변 대기"}
+                      </S.ActiveBadge>
+                    ) : null}
                   </S.InterviewerCard>
                 );
               })}
