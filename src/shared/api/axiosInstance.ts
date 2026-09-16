@@ -10,6 +10,7 @@ import {
   getAccessToken,
   syncAccessTokenFromResponse,
 } from "./accessToken";
+import { AUTH_REQUIRED_MESSAGE } from "./errorMessage";
 
 const resolveServerUrl = (url?: string) => {
   if (!url) return "";
@@ -55,11 +56,24 @@ interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
+const LOGIN_PATH = "/login";
+const AUTH_PAGE_PATHS = [LOGIN_PATH, "/signup"];
+
 const goToLoginPage = () => {
-  window.location.href = "/login";
+  if (AUTH_PAGE_PATHS.includes(window.location.pathname)) {
+    return;
+  }
+
+  window.location.href = LOGIN_PATH;
 };
 
-const tryRefreshSession = async () => {
+// 토큰 누락과 만료가 모두 401로 통일됐으므로 두 경우를 같은 흐름으로 정리한다.
+export const handleAuthenticationFailure = () => {
+  clearAccessToken();
+  goToLoginPage();
+};
+
+const requestRefreshSession = async () => {
   try {
     const response = await refreshInstance.post("/api/v1/auth/refresh");
     const refreshedAccessToken = syncAccessTokenFromResponse({
@@ -70,6 +84,20 @@ const tryRefreshSession = async () => {
   } catch {
     return false;
   }
+};
+
+// 모든 요청이 토큰을 요구하게 되면서 재발급이 동시에 여러 번 호출될 수 있어,
+// 진행 중인 요청 하나를 공유한다.
+let refreshSessionPromise: Promise<boolean> | null = null;
+
+const tryRefreshSession = () => {
+  if (!refreshSessionPromise) {
+    refreshSessionPromise = requestRefreshSession().finally(() => {
+      refreshSessionPromise = null;
+    });
+  }
+
+  return refreshSessionPromise;
 };
 
 const getReadyAccessToken = async (shouldRefreshBeforeRequest: boolean) => {
@@ -86,7 +114,8 @@ export const ensureAccessToken = async () => {
   const authorizationHeader = await getReadyAccessToken(true);
 
   if (!authorizationHeader) {
-    throw new Error("로그인 토큰을 찾지 못했습니다. 다시 로그인해 주세요.");
+    handleAuthenticationFailure();
+    throw new Error(AUTH_REQUIRED_MESSAGE);
   }
 
   return authorizationHeader;
@@ -94,13 +123,20 @@ export const ensureAccessToken = async () => {
 
 const addAuthorizationInterceptor = (
   instance: AxiosInstance,
-  options: { refreshBeforeRequest?: boolean } = {},
+  options: { refreshBeforeRequest?: boolean; requireAccessToken?: boolean } = {},
 ) => {
   instance.interceptors.request.use(async (config) => {
     const authorizationHeader = await getReadyAccessToken(
       options.refreshBeforeRequest ?? false,
     );
-    if (!authorizationHeader) return config;
+
+    // 서버가 모든 엔드포인트에서 토큰을 요구하므로, 헤더 없이 보내면 401만 돌아온다.
+    if (!authorizationHeader) {
+      if (!options.requireAccessToken) return config;
+
+      handleAuthenticationFailure();
+      throw new Error(AUTH_REQUIRED_MESSAGE);
+    }
 
     const nextHeaders = axios.AxiosHeaders.from(config.headers) as AxiosHeaders;
     if (!nextHeaders.has("Authorization")) {
@@ -180,8 +216,7 @@ const addRefreshInterceptor = (instance: AxiosInstance) => {
       }
 
       if (error.response?.status === 401 && !isSessionlessRequest) {
-        clearAccessToken();
-        goToLoginPage();
+        handleAuthenticationFailure();
       }
       return Promise.reject(error);
     },
@@ -196,5 +231,11 @@ addRefreshInterceptor(apiInstance);
 addRefreshInterceptor(chatInstance);
 addFormDataInterceptor(apiInstance);
 addAuthorizationInterceptor(authInstance);
-addAuthorizationInterceptor(apiInstance, { refreshBeforeRequest: true });
-addAuthorizationInterceptor(chatInstance, { refreshBeforeRequest: true });
+addAuthorizationInterceptor(apiInstance, {
+  refreshBeforeRequest: true,
+  requireAccessToken: true,
+});
+addAuthorizationInterceptor(chatInstance, {
+  refreshBeforeRequest: true,
+  requireAccessToken: true,
+});

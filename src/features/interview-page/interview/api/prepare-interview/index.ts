@@ -1,4 +1,12 @@
-import { API_URL, ensureAccessToken } from "@/shared/api/axiosInstance";
+import {
+  API_URL,
+  ensureAccessToken,
+  handleAuthenticationFailure,
+} from "@/shared/api/axiosInstance";
+import {
+  AUTH_REQUIRED_MESSAGE,
+  FORBIDDEN_MESSAGE,
+} from "@/shared/api/errorMessage";
 
 import {
   getCurrentUserId,
@@ -41,6 +49,37 @@ const getSsePayload = (data: string) => {
   } catch {
     return null;
   }
+};
+
+// axios 인터셉터를 타지 않는 요청이라 401/403 응답을 여기서 직접 정리한다.
+const getResponseErrorMessage = async (response: Response, fallback: string) => {
+  try {
+    const payload = getRecord(await response.json());
+
+    return getTrimmedString(payload?.message) ?? fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const throwSubscribeResponseError = async (response: Response) => {
+  if (response.status === 401) {
+    const errorMessage = await getResponseErrorMessage(
+      response,
+      AUTH_REQUIRED_MESSAGE,
+    );
+
+    handleAuthenticationFailure();
+    throw new Error(errorMessage);
+  }
+
+  if (response.status === 403) {
+    throw new Error(
+      await getResponseErrorMessage(response, FORBIDDEN_MESSAGE),
+    );
+  }
+
+  throw new Error(`AI SSE request failed: ${response.status}`);
 };
 
 const getSseErrorMessage = (data: string, fallback: string) => {
@@ -90,7 +129,7 @@ export const waitForInterviewReady = async (
     });
 
     if (!response.ok) {
-      throw new Error(`AI SSE request failed: ${response.status}`);
+      await throwSubscribeResponseError(response);
     }
 
     if (!response.body) {
