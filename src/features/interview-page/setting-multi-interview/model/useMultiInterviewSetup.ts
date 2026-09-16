@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { createInterview, prepareInterviewRecord, savePersona, setActiveInterviewSessionId, type SavePersonaParams } from "@/features/interview-page/interview/api";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
 import {
-  LEVEL_BY_DIFFICULTY, TYPE_BY_STYLE, TONE_OPTIONS,
+  LEVEL_BY_DIFFICULTY,
   type InterviewerCount, type InterviewerSlot, type MultiInterviewSelection,
   type InterviewerTemplate, type SlotIndex,
 } from "@/shared/constants/interview-page/setting-multi-interview";
@@ -45,11 +45,11 @@ export const useMultiInterviewSetup = () => {
     setErrorMessage("");
   };
 
+  // 면접 스타일은 난이도와 같은 독립 설정값이다.
+  // 면접관별 성격·말투는 슬롯이 직접 들고 있으므로 여기서 건드리지 않는다.
   const changeStyle = (next: InterviewStyleOption) => {
     if (submittingRef.current) return;
     setStyle(next);
-    const tone = TONE_OPTIONS[next === "편함" ? 0 : next === "일반" ? 1 : 2].value;
-    setSlots((previous) => previous.map((slot) => ({ ...slot, personality: TYPE_BY_STYLE[next], tone })));
     setErrorMessage("");
   };
 
