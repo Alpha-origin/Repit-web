@@ -122,19 +122,18 @@ const InterviewDashboard = () => {
                     ? `Question ${questionLabel} / ${interview.totalQuestionCount}`
                     : `Question ${questionLabel}${interview.totalQuestionCount > 0 ? ` · 기본 질문 ${interview.totalQuestionCount}개` : ""}`}
                 </S.QuestionTag>
-                {!isMultiInterview ? (
-                  <S.QuestionAudioButton
-                    type="button"
-                    disabled={isQuestionLoading || interview.questionAudioStatus === "loading"}
-                    onClick={interview.onToggleQuestionAudio}
-                  >
-                    {interview.questionAudioStatus === "loading"
-                      ? "음성 생성 중..."
-                      : interview.questionAudioStatus === "playing"
-                        ? "질문 멈추기"
-                        : "질문 듣기"}
-                  </S.QuestionAudioButton>
-                ) : null}
+                <S.QuestionAudioButton
+                  type="button"
+                  disabled={isQuestionLoading || interview.questionAudioStatus === "loading"}
+                  aria-pressed={interview.questionAudioStatus === "playing"}
+                  onClick={interview.onToggleQuestionAudio}
+                >
+                  {interview.questionAudioStatus === "loading"
+                    ? "음성 생성 중..."
+                    : interview.questionAudioStatus === "playing"
+                      ? "질문 멈추기"
+                      : "질문 듣기"}
+                </S.QuestionAudioButton>
               </S.QuestionMetaRow>
               {activeInterviewer && !isMultiInterview ? (
                 <S.QuestionSpeaker>
