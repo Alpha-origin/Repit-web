@@ -334,16 +334,39 @@ export const VideoControls = styled.div`
   z-index: 2;
 `;
 
-export const RoundButton = styled.button`
+export const StatusIndicator = styled.div<{ $active: boolean }>`
+  position: relative;
   width: 2.8rem;
   height: 2.8rem;
-  border: 0;
   border-radius: 50%;
+  overflow: hidden;
   background: #fff;
-  color: #1f78ef;
   box-shadow: 0 0.2rem 0.7rem rgba(34, 66, 112, 0.2);
-  font-size: 1.1rem;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: ${({ $active }) => ($active ? 1 : 0.55)};
+  transition: opacity 0.2s ease;
+`;
+
+// 실제 입력 음량만큼 아래에서부터 원을 채워 말할 때와 조용할 때를 구분한다.
+export const StatusLevelFill = styled.span<{ $level: number }>`
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: ${({ $level }) => `${Math.round(Math.min(Math.max($level, 0), 1) * 100)}%`};
+  background: linear-gradient(180deg, rgba(31, 120, 239, 0.32), rgba(31, 120, 239, 0.16));
+  transition: height 90ms linear;
+`;
+
+export const StatusIcon = styled.img<{ $muted: boolean }>`
+  position: relative;
+  z-index: 1;
+  width: 1.3rem;
+  height: 1.3rem;
+  object-fit: contain;
+  filter: ${({ $muted }) => ($muted ? "grayscale(1)" : "none")};
 `;
 
 export const BottomRow = styled.div`

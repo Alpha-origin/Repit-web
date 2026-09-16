@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { INTERVIEW_DEVICE_STATUS_LABELS } from "@/shared/constants/interview-page/interview";
 import { PERSONALITY_OPTIONS } from "@/shared/constants/interview-page/setting-multi-interview";
 
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
+import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
+import MicIcon from "@/shared/img/interview-page/mike.svg?url";
 import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
 import * as S from "./style";
 
@@ -49,6 +52,9 @@ const InterviewDashboard = () => {
       : `${questionNumber}-${interview.followUpQuestionNumber}`;
   const isAnswerDisabled =
     !interview.isInterviewReady || isQuestionLoading || isAwaitingResponse;
+  const isCameraReady = interview.cameraState === "ready";
+  const isMicReady = interview.micState === "ready";
+  const micLevel = isMicReady ? interview.voiceLevel : 0;
 
   useEffect(() => {
     lastSpeakingPersonaIdRef.current = undefined;
@@ -170,6 +176,23 @@ const InterviewDashboard = () => {
               {isVoiceMode ? (
                 <S.VideoArea>
                   <InterviewCameraView />
+                  <S.VideoControls>
+                    <S.StatusIndicator
+                      $active={isCameraReady}
+                      role="img"
+                      aria-label={INTERVIEW_DEVICE_STATUS_LABELS.camera[interview.cameraState]}
+                    >
+                      <S.StatusIcon src={CameraIcon} alt="" aria-hidden="true" $muted={!isCameraReady} />
+                    </S.StatusIndicator>
+                    <S.StatusIndicator
+                      $active={isMicReady}
+                      role="img"
+                      aria-label={INTERVIEW_DEVICE_STATUS_LABELS.mic[interview.micState]}
+                    >
+                      <S.StatusLevelFill aria-hidden="true" $level={micLevel} />
+                      <S.StatusIcon src={MicIcon} alt="" aria-hidden="true" $muted={!isMicReady} />
+                    </S.StatusIndicator>
+                  </S.VideoControls>
                 </S.VideoArea>
               ) : (
                 <S.TextArea

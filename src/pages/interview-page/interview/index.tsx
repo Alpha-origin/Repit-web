@@ -6,6 +6,7 @@ import {
   InterviewSessionProvider,
 } from "@/features/interview-page/interview/model/interviewSessionContext";
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
+import { INTERVIEW_DEVICE_STATUS_LABELS } from "@/shared/constants/interview-page/interview";
 import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
 import MicIcon from "@/shared/img/interview-page/mike.svg?url";
 import Loading from "@/shared/components/loading";
@@ -67,6 +68,9 @@ const InterviewPageContent = () => {
     !interviewSession.isInterviewReady ||
     isQuestionLoading ||
     isAwaitingResponse;
+  const isCameraReady = interviewSession.cameraState === "ready";
+  const isMicReady = interviewSession.micState === "ready";
+  const micLevel = isMicReady ? interviewSession.voiceLevel : 0;
 
   if (interviewSession.preparationError) {
     return (
@@ -180,20 +184,31 @@ const InterviewPageContent = () => {
 
           {isVoiceMode ? (
             <>
-              <S.IconActionButton type="button" aria-label="카메라 상태">
+              <S.IconActionButton
+                role="img"
+                $active={isCameraReady}
+                aria-label={INTERVIEW_DEVICE_STATUS_LABELS.camera[interviewSession.cameraState]}
+              >
                 <S.ActionIconImage
                   src={CameraIcon}
                   alt=""
                   aria-hidden="true"
                   $iconType="camera"
+                  $muted={!isCameraReady}
                 />
               </S.IconActionButton>
-              <S.IconActionButton type="button" aria-label="마이크 상태">
+              <S.IconActionButton
+                role="img"
+                $active={isMicReady}
+                aria-label={INTERVIEW_DEVICE_STATUS_LABELS.mic[interviewSession.micState]}
+              >
+                <S.IconActionLevelFill aria-hidden="true" $level={micLevel} />
                 <S.ActionIconImage
                   src={MicIcon}
                   alt=""
                   aria-hidden="true"
                   $iconType="mic"
+                  $muted={!isMicReady}
                 />
               </S.IconActionButton>
               {isVoiceActionStarted ? (

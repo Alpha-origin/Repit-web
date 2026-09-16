@@ -22,6 +22,7 @@ interface VoiceLevelProps {
 
 interface ActionIconImageProps {
   $iconType: "camera" | "mic";
+  $muted?: boolean;
 }
 
 export const Container = styled.section<VoiceLayoutProps & TextLayoutProps>`
@@ -464,27 +465,20 @@ export const PrimaryAction = styled(actionButtonBase)`
   }
 `;
 
-export const IconActionButton = styled.button`
+export const IconActionButton = styled.div<{ $active?: boolean }>`
   position: relative;
   width: 2.55rem;
   height: 2.55rem;
-  border: none;
   border-radius: 50%;
+  overflow: hidden;
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 0.35rem 0.95rem rgba(76, 112, 171, 0.12);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: #1684ef;
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-
-  &:hover {
-    transform: translateY(-0.05rem);
-    box-shadow: 0 0.5rem 1.1rem rgba(76, 112, 171, 0.18);
-  }
+  opacity: ${({ $active = true }) => ($active ? 1 : 0.55)};
+  transition: opacity 0.2s ease;
 
   @media (max-width: 34rem) {
     width: 2.35rem;
@@ -492,12 +486,26 @@ export const IconActionButton = styled.button`
   }
 `;
 
+// 실제 입력 음량만큼 아래에서부터 채워 말할 때와 조용할 때를 구분한다.
+export const IconActionLevelFill = styled.span<{ $level: number }>`
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: ${({ $level }) => `${Math.round(Math.min(Math.max($level, 0), 1) * 100)}%`};
+  background: linear-gradient(180deg, rgba(22, 132, 239, 0.32), rgba(22, 132, 239, 0.16));
+  transition: height 90ms linear;
+`;
+
 export const ActionIconImage = styled.img<ActionIconImageProps>`
+  position: relative;
+  z-index: 1;
   width: ${({ $iconType }) => ($iconType === "camera" ? "1.45rem" : "1.05rem")};
   height: ${({ $iconType }) => ($iconType === "camera" ? "1.45rem" : "1.35rem")};
   display: block;
   object-fit: contain;
   pointer-events: none;
+  filter: ${({ $muted }) => ($muted ? "grayscale(1)" : "none")};
 `;
 
 export const InlineVisualizerWrap = styled.div<VoiceLevelProps>`

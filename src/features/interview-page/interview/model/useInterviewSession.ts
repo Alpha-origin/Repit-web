@@ -22,9 +22,10 @@ import type { InterviewMode } from "@/widgets/interview-page/interview/type";
 import { useElevenLabsTts } from "./useElevenLabsTts";
 import { useSupertoneTts } from "./useSupertoneTts";
 import { useInterviewElapsedTime } from "./useInterviewElapsedTime";
-import { useInterviewCamera } from "./useInterviewCamera";
+import { useInterviewMedia } from "./useInterviewMedia";
 import { useInterviewSocket } from "./useInterviewSocket";
 import { useVoiceAnswer } from "./useVoiceAnswer";
+import { useVoiceLevel } from "./useVoiceLevel";
 
 type InterviewCloseReason = "completed" | "quit";
 const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
@@ -256,7 +257,8 @@ export const useInterviewSession = (
   const [isAwaitingNextQuestion, setIsAwaitingNextQuestion] = useState(false);
   const [preparationError, setPreparationError] = useState<string | null>(null);
   const isVoiceMode = mode === "voice";
-  const { cameraState, videoRef } = useInterviewCamera(isVoiceMode);
+  const { cameraState, micState, micStream, videoRef } = useInterviewMedia(isVoiceMode);
+  const voiceLevel = useVoiceLevel(micStream);
   const voiceAnswer = useVoiceAnswer();
   const multiTtsSpeaker = useMemo(() => {
     if (preparedInterview?.mode !== "MULTI") {
@@ -751,8 +753,9 @@ export const useInterviewSession = (
     onStartVoice: handleStartVoice,
     onSubmitText: handleSubmitText,
     onToggleQuestionAudio: questionTts.onToggle,
+    micState,
     videoRef,
-    voiceLevel: voiceAnswer.voiceLevel,
+    voiceLevel,
     totalQuestionCount,
     followUpQuestionNumber: getFollowUpQuestionNumber(currentQuestion),
   };
