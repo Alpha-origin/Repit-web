@@ -23,6 +23,7 @@ import { useElevenLabsTts } from "./useElevenLabsTts";
 import { useSupertoneTts } from "./useSupertoneTts";
 import { useInterviewElapsedTime } from "./useInterviewElapsedTime";
 import { useInterviewMedia } from "./useInterviewMedia";
+import { useInterviewRecorder } from "./useInterviewRecorder";
 import { useInterviewSocket } from "./useInterviewSocket";
 import { useVoiceAnswer } from "./useVoiceAnswer";
 import { useVoiceLevel } from "./useVoiceLevel";
@@ -257,7 +258,9 @@ export const useInterviewSession = (
   const [isAwaitingNextQuestion, setIsAwaitingNextQuestion] = useState(false);
   const [preparationError, setPreparationError] = useState<string | null>(null);
   const isVoiceMode = mode === "voice";
-  const { cameraState, micState, micStream, videoRef } = useInterviewMedia(isVoiceMode);
+  const { cameraState, cloneAudioTrack, cloneVideoTrack, micState, micStream, videoRef } =
+    useInterviewMedia(isVoiceMode);
+  const recorder = useInterviewRecorder(cloneVideoTrack, cloneAudioTrack);
   const voiceLevel = useVoiceLevel(micStream);
   const voiceAnswer = useVoiceAnswer();
   const multiTtsSpeaker = useMemo(() => {
@@ -599,17 +602,19 @@ export const useInterviewSession = (
     setMode(nextMode);
   };
 
-  const handleStartVoice = () => {
+  const handleStartVoice = async () => {
     if (!isChatSessionReady) {
-      return;
+      return false;
     }
 
     if (isSubmitting || isAwaitingNextQuestion || !canSubmitAnswer) {
-      return;
+      return false;
     }
 
     questionTts.onStop();
+    if (!(await recorder.startRecording())) return false;
     void voiceAnswer.onStartVoice();
+    return true;
   };
 
   const submitAnswer = async (content: string) => {
@@ -729,11 +734,13 @@ export const useInterviewSession = (
     answerStatus: isVoiceMode ? voiceAnswer.voiceStatus : INTERVIEW_STATUS_MESSAGES.text,
     answerText: voiceAnswer.answerText,
     cameraState,
+    recorder,
     currentQuestion,
     displayQuestionNumber,
     elapsedSeconds,
+    interviewId: preparedInterview?.interviewId ?? null,
     isAwaitingNextQuestion,
-    isAwaitingResponse: isSubmitting || isAwaitingNextQuestion,
+    isAwaitingResponse: isSubmitting || isAwaitingNextQuestion || recorder.isStopping,
     isSubmitting,
     isInterviewReady: isChatSessionReady,
     isPreparingInterview: Boolean(preparedInterview) && !isChatSessionReady,

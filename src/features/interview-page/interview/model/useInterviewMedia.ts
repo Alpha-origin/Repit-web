@@ -21,6 +21,14 @@ export const useInterviewMedia = (enabled: boolean) => {
   const [micStream, setMicStream] = useState<MediaStream | null>(null);
   const videoElementRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const cloneVideoTrack = useCallback(() => {
+    const track = streamRef.current?.getVideoTracks()[0];
+    return track?.readyState === "live" ? track.clone() : null;
+  }, []);
+  const cloneAudioTrack = useCallback(() => {
+    const track = streamRef.current?.getAudioTracks()[0];
+    return track?.readyState === "live" ? track.clone() : null;
+  }, []);
   const attachStream = useCallback((stream: MediaStream) => {
     const videoElement = videoElementRef.current;
 
@@ -130,6 +138,8 @@ export const useInterviewMedia = (enabled: boolean) => {
 
   return {
     cameraState,
+    cloneAudioTrack,
+    cloneVideoTrack,
     micState,
     micStream,
     videoRef,

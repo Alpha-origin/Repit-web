@@ -1,4 +1,6 @@
+import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { uploadRecordingInBackground } from "@/features/interview-page/interview/model/uploadRecordingInBackground";
 import { INTERVIEW_DEVICE_STATUS_LABELS } from "@/shared/constants/interview-page/interview";
 import { PERSONALITY_OPTIONS } from "@/shared/constants/interview-page/setting-multi-interview";
 
@@ -22,6 +24,7 @@ const getMemoKey = (sessionId?: string) =>
 
 const InterviewDashboard = () => {
   const interview = useInterviewSessionContext();
+  const recorder = interview.recorder;
   const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
   const elapsedSeconds = interview.elapsedSeconds;
   const sessionId = interview.preparedInterview?.sessionId;
@@ -51,7 +54,8 @@ const InterviewDashboard = () => {
       ? questionNumber
       : `${questionNumber}-${interview.followUpQuestionNumber}`;
   const isAnswerDisabled =
-    !interview.isInterviewReady || isQuestionLoading || isAwaitingResponse;
+    !interview.isInterviewReady || isQuestionLoading || isAwaitingResponse ||
+    recorder.isStarting || recorder.isStopping;
   const isCameraReady = interview.cameraState === "ready";
   const isMicReady = interview.micState === "ready";
   const micLevel = isMicReady ? interview.voiceLevel : 0;
@@ -78,19 +82,20 @@ const InterviewDashboard = () => {
 
   const handleModeChange = (mode: typeof interview.mode) => {
     if (mode === "text") {
+      void recorder.stopRecording();
       setIsVoiceAnswering(false);
     }
 
     interview.onModeChange(mode);
   };
 
-  const handleStartVoice = () => {
+  const handleStartVoice = async () => {
     if (isAwaitingResponse) {
       return;
     }
 
+    if (!(await interview.onStartVoice())) return;
     setIsVoiceAnswering(true);
-    interview.onStartVoice();
   };
 
   const handleCompleteVoice = async () => {
@@ -98,11 +103,31 @@ const InterviewDashboard = () => {
       return;
     }
 
+    // onCompleteVoice 이후에는 다음 질문으로 바뀔 수 있으므로 먼저 저장한다.
+    const answeredQuestionId = interview.currentQuestion?.questionId;
+
     try {
+      const file = await recorder.stopRecording();
+      uploadRecordingInBackground({
+        file,
+        interviewId: interview.interviewId,
+        questionId: answeredQuestionId,
+      });
       await interview.onCompleteVoice();
     } finally {
       setIsVoiceAnswering(false);
     }
+  };
+
+  const handleQuitInterview = async () => {
+    const answeredQuestionId = interview.currentQuestion?.questionId;
+    const file = await recorder.stopRecording();
+    uploadRecordingInBackground({
+      file,
+      interviewId: interview.interviewId,
+      questionId: answeredQuestionId,
+    });
+    await interview.onQuitInterview();
   };
 
   return (
@@ -126,7 +151,7 @@ const InterviewDashboard = () => {
                   type="button"
                   disabled={isQuestionLoading || interview.questionAudioStatus === "loading"}
                   aria-pressed={interview.questionAudioStatus === "playing"}
-                  onClick={interview.onToggleQuestionAudio}
+                  onClick={() => interview.onToggleQuestionAudio()}
                 >
                   {interview.questionAudioStatus === "loading"
                     ? "음성 생성 중..."
@@ -200,9 +225,17 @@ const InterviewDashboard = () => {
                   maxLength={TEXT_ANSWER_MAX_LENGTH}
                   placeholder="이곳에 답변을 입력해주세요. 자신의 경험과 성과를 구체적인 수치와 함께 작성하면 좋은 평가를 받을 수 있습니다."
                   readOnly={isAwaitingResponse}
-                  onChange={interview.onAnswerTextChange}
+                  onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
+                    interview.onAnswerTextChange(event)
+                  }
                 />
               )}
+
+              {recorder.errorMessage ? (
+                <S.QuestionAudioError role="alert">
+                  {recorder.errorMessage}
+                </S.QuestionAudioError>
+              ) : null}
 
               <S.BottomRow>
                 <S.Count>글자 수 {interview.answerText.length} / {TEXT_ANSWER_MAX_LENGTH}</S.Count>
@@ -211,7 +244,7 @@ const InterviewDashboard = () => {
                     <S.Button
                       type="button"
                       $secondary
-                      onClick={() => void interview.onQuitInterview()}
+                      onClick={() => void handleQuitInterview()}
                     >
                       그만두기
                     </S.Button>
@@ -234,7 +267,7 @@ const InterviewDashboard = () => {
                         type="button"
                         disabled={isAnswerDisabled}
                         aria-busy={isAwaitingResponse}
-                        onClick={handleStartVoice}
+                        onClick={() => void handleStartVoice()}
                       >
                         {isAwaitingResponse ? (
                           <S.ButtonSpinner aria-hidden="true" />
@@ -320,7 +353,9 @@ const InterviewDashboard = () => {
                 id="interview-memo"
                 value={memo}
                 placeholder="기억해야 할 키워드를 자유롭게 적어보세요.&#10;평가에 반영되지 않습니다."
-                onChange={(event) => setMemo(event.target.value)}
+                onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
+                  setMemo(event.target.value)
+                }
               />
             </S.MemoPanel>
           </S.RightColumn>

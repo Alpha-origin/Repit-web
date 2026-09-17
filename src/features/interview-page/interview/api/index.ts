@@ -26,6 +26,7 @@ export type {
 export { quitInterview } from "./quit-interview";
 export { savePersona } from "./save-persona";
 export { submitInterviewAnswer } from "./submit-answer";
+export { uploadInterviewRecording } from "./upload-recording";
 
 export type {
   CreateInterviewParams,
