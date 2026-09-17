@@ -22,7 +22,7 @@ import {
   type InterviewerToneOption,
   type InterviewSettingSelectHandlers,
 } from "@/shared/constants/interview-page/setting-interview";
-import InterviewerBackendImage from "@/shared/img/interview-page/interviewer1.svg?url";
+import InterviewerOneImage from "@/shared/img/interview-page/interviewer1.svg?url";
 import InterviewerFrontendImage from "@/shared/img/interview-page/interviewer2.svg?url";
 
 const TONE_BY_OPTION: Record<
@@ -63,7 +63,7 @@ const MAJOR_BY_OPTION: Record<InterviewMajorOption, InterviewPersonaMajor> = {
 // 면접관 카드 선택이 사라지면서, 이미지와 소개 문구는 전문 분야에서 파생한다.
 const INTERVIEWER_IMAGE_BY_MAJOR: Record<InterviewMajorOption, string> = {
   프론트엔드: InterviewerFrontendImage,
-  백엔드: InterviewerBackendImage,
+  백엔드: InterviewerOneImage,
 };
 
 const INTERVIEWER_DESCRIPTION_BY_MAJOR: Record<InterviewMajorOption, string> = {
@@ -72,7 +72,6 @@ const INTERVIEWER_DESCRIPTION_BY_MAJOR: Record<InterviewMajorOption, string> = {
   백엔드: "기술적 역량과 아키텍처 설계 능력을 중점적으로 파악합니다.",
 };
 
-const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "FEMALE";
 const DEFAULT_INTERVIEW_ROLE: InterviewPersonaRole = "TECH";
 
 const buildUniquePersonaName = () =>
@@ -114,6 +113,14 @@ export const useInterviewSetup = () => {
     setErrorMessage("");
     setIsSubmitting(true);
 
+    const isPressureInterview = selectedStyle === "압박";
+    const interviewerGender: InterviewPersonaGender = isPressureInterview
+      ? "MALE"
+      : "FEMALE";
+    const interviewerImage = isPressureInterview
+      ? InterviewerOneImage
+      : INTERVIEWER_IMAGE_BY_MAJOR[selectedMajor];
+
     const personaPayload: SavePersonaParams = {
       personaName: buildUniquePersonaName(),
       role: DEFAULT_INTERVIEW_ROLE,
@@ -121,9 +128,9 @@ export const useInterviewSetup = () => {
       major: MAJOR_BY_OPTION[selectedMajor],
       type: TYPE_BY_PERSONALITY[selectedPersonality],
       career: CAREER_BY_DIFFICULTY[selectedDifficulty],
-      gender: DEFAULT_INTERVIEW_GENDER,
+      gender: interviewerGender,
       tone: TONE_BY_OPTION[selectedTone],
-      imageUrl: INTERVIEWER_IMAGE_BY_MAJOR[selectedMajor],
+      imageUrl: interviewerImage,
       description: INTERVIEWER_DESCRIPTION_BY_MAJOR[selectedMajor],
     };
 
@@ -206,6 +213,7 @@ export const useInterviewSetup = () => {
               name: personaPayload.personaName,
               roleLabel: "기술 면접관",
               image: personaPayload.imageUrl,
+              gender: personaPayload.gender,
             },
           ],
         },
