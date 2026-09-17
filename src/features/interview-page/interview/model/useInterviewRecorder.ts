@@ -1,207 +1,208 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const VIDEO_MIME_TYPE = "video/mp4";
-const MP4_MIME_TYPES = [
-  'video/mp4;codecs="avc1.42E01E,mp4a.40.2"',
-  VIDEO_MIME_TYPE,
-];
-const RECORDING_TIMESLICE_MS = 1_000;
+import { convertAudioToMp3 } from "./convertAudioToMp3";
+import { useInterviewRecordingStore } from "./interviewRecordingStore";
+import { createMediaRecording, getSupportedRecordingType } from "./mediaRecording";
+import type { MediaRecording } from "./mediaRecording";
 
-interface RecordingSession {
+interface FileRecording {
+  capture: MediaRecording;
   result: Promise<File | null>;
-  stop: () => void;
-  dispose: () => void;
 }
 
 const getRecordingErrorMessage = (error: unknown) => {
   if (error instanceof DOMException && error.name === "NotAllowedError") {
     return "카메라와 마이크 권한을 허용한 뒤 다시 시도해주세요.";
   }
-
   if (error instanceof DOMException && error.name === "NotFoundError") {
     return "사용할 수 있는 카메라 또는 마이크를 찾을 수 없습니다.";
   }
-
-  return error instanceof Error ? error.message : "영상 녹화를 시작할 수 없습니다.";
+  return error instanceof Error ? error.message : "녹화 중 오류가 발생했습니다.";
 };
 
-export const useInterviewRecorder = (
-  cloneVideoTrack: () => MediaStreamTrack | null,
-) => {
-  const [videoFile, setVideoFile] = useState<File | null>(null);
+export const useInterviewRecorder = (cloneVideoTrack: () => MediaStreamTrack | null) => {
+  const videoFile = useInterviewRecordingStore((state) => state.videoFile);
+  const audioFiles = useInterviewRecordingStore((state) => state.audioFiles);
+  const [isVideoRecording, setIsVideoRecording] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isStopping, setIsStopping] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const sessionRef = useRef<RecordingSession | null>(null);
+  const [videoError, setVideoError] = useState<string | null>(null);
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const recordingIdRef = useRef(Date.now());
+  const videoRef = useRef<FileRecording | null>(null);
+  const audioRef = useRef<FileRecording | null>(null);
+  const videoStartedRef = useRef(false);
+  const audioIndexRef = useRef(0);
   const startRequestRef = useRef<symbol | null>(null);
-  const isMountedRef = useRef(true);
+  const mountedRef = useRef(true);
+  const closedRef = useRef(false);
+  const finishRef = useRef<Promise<void> | null>(null);
 
-  const reportError = useCallback((error: unknown) => {
-    if (isMountedRef.current) {
-      setErrorMessage(getRecordingErrorMessage(error));
-      console.error("인터뷰 영상 녹화 실패:", error);
-    }
+  const reportVideoError = useCallback((error: unknown) => {
+    if (mountedRef.current) setVideoError(getRecordingErrorMessage(error));
+    console.error("인터뷰 영상 녹화 실패:", error);
+  }, []);
+  const reportAudioError = useCallback((error: unknown) => {
+    if (mountedRef.current) setAudioError(getRecordingErrorMessage(error));
+    console.error("인터뷰 음성 녹음 실패:", error);
   }, []);
 
-  const startRecording = useCallback(async (): Promise<boolean> => {
-    if (!isMountedRef.current || startRequestRef.current || sessionRef.current) {
+  const startVideoRecording = useCallback(() => {
+    if (closedRef.current || videoStartedRef.current || !mountedRef.current) return;
+    let stream: MediaStream | null = null;
+    try {
+      const mimeType = getSupportedRecordingType([
+        'video/mp4;codecs="avc1.42E01E"', "video/mp4",
+      ]);
+      const track = cloneVideoTrack();
+      if (!track) throw new Error("카메라 연결과 권한을 확인해주세요.");
+      // 음성 트랙 없이 카메라 복제 트랙 하나만 전체 면접 동안 녹화한다.
+      stream = new MediaStream([track]);
+      const capture = createMediaRecording(stream, mimeType, reportVideoError);
+      const recordingId = recordingIdRef.current;
+      useInterviewRecordingStore.getState().begin(recordingId);
+      videoStartedRef.current = true;
+      setIsVideoRecording(true);
+      setVideoError(null);
+      const result = capture.result.then((blob) => {
+        if (!blob) return null;
+        const file = new File([blob], `interview-${recordingId}.mp4`, { type: "video/mp4" });
+        useInterviewRecordingStore.getState().setVideoFile(recordingId, file);
+        console.log("인터뷰 전체 무음 videoFile:", file);
+        return file;
+      }).catch((error: unknown) => {
+        reportVideoError(error);
+        return null;
+      }).finally(() => {
+        if (mountedRef.current) setIsVideoRecording(false);
+      });
+      videoRef.current = { capture, result };
+    } catch (error) {
+      stream?.getTracks().forEach((track) => track.stop());
+      reportVideoError(error);
+    }
+  }, [cloneVideoTrack, reportVideoError]);
+
+  const startAudioRecording = useCallback(async (): Promise<boolean> => {
+    if (closedRef.current || startRequestRef.current || audioRef.current || !mountedRef.current) {
       return false;
     }
-
     const request = Symbol();
     startRequestRef.current = request;
     setIsStarting(true);
-    setErrorMessage(null);
+    setAudioError(null);
     let stream: MediaStream | null = null;
-
     try {
-      if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
-        throw new Error("이 브라우저에서는 카메라와 마이크를 사용할 수 없습니다.");
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error("이 브라우저에서는 마이크를 사용할 수 없습니다.");
       }
-
-      const mimeType = typeof MediaRecorder !== "undefined"
-        ? MP4_MIME_TYPES.find((type) => MediaRecorder.isTypeSupported(type))
-        : undefined;
-      if (!mimeType) {
-        throw new Error("이 브라우저에서는 MP4 녹화를 지원하지 않습니다. MP4 녹화를 지원하는 브라우저를 사용해주세요.");
+      if (typeof OfflineAudioContext === "undefined" || typeof Worker === "undefined") {
+        throw new Error("이 브라우저에서는 MP3 변환을 지원하지 않습니다.");
       }
-
+      const mimeType = getSupportedRecordingType([
+        "audio/webm;codecs=opus", "audio/webm", "audio/mp4",
+      ]);
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      if (!isMountedRef.current || startRequestRef.current !== request) {
+      if (closedRef.current || !mountedRef.current || startRequestRef.current !== request) {
         stream.getTracks().forEach((track) => track.stop());
         return false;
       }
-
-      // 녹화용 복제 트랙만 종료해 카메라 미리보기의 원본 트랙을 유지한다.
-      const videoTrack = cloneVideoTrack();
-      if (!videoTrack) {
-        throw new Error("카메라가 준비되지 않았습니다. 카메라 연결과 권한을 확인해주세요.");
-      }
-      stream.addTrack(videoTrack);
-      if (!stream.getAudioTracks().some((track) => track.readyState === "live")) {
-        throw new Error("마이크 연결을 확인한 뒤 다시 시도해주세요.");
-      }
-
-      const recordingStream = stream;
-      const recorder = new MediaRecorder(recordingStream, { mimeType });
-      const chunks: Blob[] = [];
-      let settled = false;
-      let resolveResult: (file: File | null) => void = () => {};
-      const result = new Promise<File | null>((resolve) => {
-        resolveResult = resolve;
+      const capture = createMediaRecording(stream, mimeType, reportAudioError);
+      const recordingId = recordingIdRef.current;
+      const index = ++audioIndexRef.current;
+      useInterviewRecordingStore.getState().begin(recordingId);
+      const result = capture.result.then(async (blob) => {
+        if (mountedRef.current) {
+          setIsRecording(false);
+          setIsStopping(true);
+        }
+        if (!blob) return null;
+        const mp3Blob = await convertAudioToMp3(blob);
+        const file = new File([mp3Blob], `interview-${recordingId}-answer-${index}.mp3`, {
+          type: "audio/mpeg",
+        });
+        useInterviewRecordingStore.getState().addAudioFile(recordingId, file);
+        console.log("인터뷰 답변 audioFile:", file);
+        return file;
+      }).catch((error: unknown) => {
+        reportAudioError(error);
+        return null;
+      }).finally(() => {
+        audioRef.current = null;
+        if (mountedRef.current) {
+          setIsRecording(false);
+          setIsStopping(false);
+        }
       });
-      const finish = (file: File | null) => {
-        if (settled) return;
-        settled = true;
-        recorder.ondataavailable = null;
-        recorder.onstop = null;
-        recorder.onerror = null;
-        try {
-          if (recorder.state !== "inactive") recorder.stop();
-        } catch (error) {
-          reportError(error);
-        } finally {
-          recordingStream.getTracks().forEach((track) => track.stop());
-          chunks.length = 0;
-          sessionRef.current = null;
-          if (isMountedRef.current) {
-            setIsRecording(false);
-            setIsStopping(false);
-            if (file) {
-              setVideoFile(file);
-              console.log("인터뷰 녹화 videoFile:", file);
-            }
-          }
-          resolveResult(file);
-        }
-      };
-
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) chunks.push(event.data);
-      };
-      recorder.onstop = () => {
-        try {
-          const videoBlob = new Blob(chunks, { type: VIDEO_MIME_TYPE });
-          if (!videoBlob.size) throw new Error("녹화된 영상이 없습니다. 다시 시도해주세요.");
-          finish(new File([videoBlob], `interview-${Date.now()}.mp4`, {
-            type: VIDEO_MIME_TYPE,
-          }));
-        } catch (error) {
-          reportError(error);
-          finish(null);
-        }
-      };
-      recorder.onerror = () => {
-        reportError(new Error("영상 녹화 중 오류가 발생했습니다. 다시 시도해주세요."));
-        finish(null);
-      };
-
-      sessionRef.current = {
-        result,
-        stop: () => {
-          if (recorder.state === "inactive") return;
-          try {
-            recorder.stop();
-            recordingStream.getTracks().forEach((track) => track.stop());
-            if (isMountedRef.current) {
-              setIsRecording(false);
-              setIsStopping(true);
-            }
-          } catch (error) {
-            reportError(error);
-            finish(null);
-          }
-        },
-        dispose: () => finish(null),
-      };
-      recorder.start(RECORDING_TIMESLICE_MS);
-      setVideoFile(null);
+      audioRef.current = { capture, result };
       setIsRecording(true);
       return true;
     } catch (error) {
       stream?.getTracks().forEach((track) => track.stop());
-      if (startRequestRef.current === request) {
-        sessionRef.current?.dispose();
-        reportError(error);
-      }
+      if (startRequestRef.current === request) reportAudioError(error);
       return false;
     } finally {
       if (startRequestRef.current === request) {
         startRequestRef.current = null;
-        if (isMountedRef.current) setIsStarting(false);
+        if (mountedRef.current) setIsStarting(false);
       }
     }
-  }, [cloneVideoTrack, reportError]);
+  }, [reportAudioError]);
 
-  const stopRecording = useCallback(async (): Promise<File | null> => {
+  const stopAudioRecording = useCallback(async (): Promise<File | null> => {
     startRequestRef.current = null;
-    if (isMountedRef.current) setIsStarting(false);
-    const session = sessionRef.current;
-    if (!session) return null;
-    session.stop();
-    // 마지막 dataavailable 뒤의 stop 이벤트까지 기다려 완성된 파일을 반환한다.
-    return session.result;
+    if (mountedRef.current) setIsStarting(false);
+    const audio = audioRef.current;
+    if (!audio) return null;
+    void audio.capture.stop();
+    if (mountedRef.current) {
+      setIsRecording(false);
+      setIsStopping(true);
+    }
+    return audio.result;
   }, []);
+
+  const finishInterviewRecording = useCallback((): Promise<void> => {
+    if (finishRef.current) return finishRef.current;
+    closedRef.current = true;
+    // 두 장치는 즉시 정지하고 마지막 청크 및 MP3 인코딩 완료 후 이동한다.
+    const audioResult = stopAudioRecording();
+    const video = videoRef.current;
+    void video?.capture.stop();
+    finishRef.current = Promise.all([audioResult, video?.result]).then(() => {
+      const files = useInterviewRecordingStore.getState();
+      if (files.recordingId === recordingIdRef.current) {
+        console.log("인터뷰 녹화 파일:", {
+          videoFile: files.videoFile,
+          audioFiles: files.audioFiles,
+        });
+      }
+    });
+    return finishRef.current;
+  }, [stopAudioRecording]);
 
   useEffect(() => {
-    isMountedRef.current = true;
+    mountedRef.current = true;
+    closedRef.current = false;
+    finishRef.current = null;
     return () => {
-      isMountedRef.current = false;
-      startRequestRef.current = null;
-      sessionRef.current?.dispose();
+      mountedRef.current = false;
+      void finishInterviewRecording();
     };
-  }, []);
+  }, [finishInterviewRecording]);
 
   return {
     videoFile,
-    errorMessage,
+    audioFiles,
+    isVideoRecording,
     isRecording,
     isStarting,
     isStopping,
-    startRecording,
-    stopRecording,
+    errorMessage: [videoError, audioError].filter(Boolean).join(" ") || null,
+    startVideoRecording,
+    startAudioRecording,
+    stopAudioRecording,
+    finishInterviewRecording,
   };
 };
-
-export type InterviewRecorder = ReturnType<typeof useInterviewRecorder>;
