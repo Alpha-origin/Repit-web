@@ -5,6 +5,7 @@ import type { PreparedInterviewData } from "@/features/interview-page/interview/
 import {
   InterviewSessionProvider,
 } from "@/features/interview-page/interview/model/interviewSessionContext";
+import { uploadRecordingInBackground } from "@/features/interview-page/interview/model/uploadRecordingInBackground";
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
 import { INTERVIEW_DEVICE_STATUS_LABELS } from "@/shared/constants/interview-page/interview";
 import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
@@ -76,6 +77,13 @@ const InterviewPageContent = () => {
   const micLevel = isMicReady ? interviewSession.voiceLevel : 0;
 
   const handleQuitInterview = async () => {
+    const answeredQuestionId = interviewSession.currentQuestion?.questionId;
+    const file = await interviewRecorder.stopRecording();
+    uploadRecordingInBackground({
+      file,
+      interviewId: interviewSession.interviewId,
+      questionId: answeredQuestionId,
+    });
     await interviewSession.onQuitInterview();
   };
 
@@ -117,7 +125,16 @@ const InterviewPageContent = () => {
       return;
     }
 
+    // onCompleteVoice 이후에는 다음 질문으로 바뀔 수 있으므로 먼저 저장한다.
+    const answeredQuestionId = interviewSession.currentQuestion?.questionId;
+
     try {
+      const file = await interviewRecorder.stopRecording();
+      uploadRecordingInBackground({
+        file,
+        interviewId: interviewSession.interviewId,
+        questionId: answeredQuestionId,
+      });
       await interviewSession.onCompleteVoice();
     } finally {
       setIsVoiceAnswering(false);
@@ -126,6 +143,7 @@ const InterviewPageContent = () => {
 
   const handleModeChange = (nextMode: typeof interviewSession.mode) => {
     if (nextMode === "text") {
+      void interviewRecorder.stopRecording();
       setIsVoiceAnswering(false);
     }
 

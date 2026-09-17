@@ -1,5 +1,6 @@
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { uploadRecordingInBackground } from "@/features/interview-page/interview/model/uploadRecordingInBackground";
 import { INTERVIEW_DEVICE_STATUS_LABELS } from "@/shared/constants/interview-page/interview";
 import { PERSONALITY_OPTIONS } from "@/shared/constants/interview-page/setting-multi-interview";
 
@@ -81,6 +82,7 @@ const InterviewDashboard = () => {
 
   const handleModeChange = (mode: typeof interview.mode) => {
     if (mode === "text") {
+      void recorder.stopRecording();
       setIsVoiceAnswering(false);
     }
 
@@ -101,7 +103,16 @@ const InterviewDashboard = () => {
       return;
     }
 
+    // onCompleteVoice 이후에는 다음 질문으로 바뀔 수 있으므로 먼저 저장한다.
+    const answeredQuestionId = interview.currentQuestion?.questionId;
+
     try {
+      const file = await recorder.stopRecording();
+      uploadRecordingInBackground({
+        file,
+        interviewId: interview.interviewId,
+        questionId: answeredQuestionId,
+      });
       await interview.onCompleteVoice();
     } finally {
       setIsVoiceAnswering(false);
@@ -109,6 +120,13 @@ const InterviewDashboard = () => {
   };
 
   const handleQuitInterview = async () => {
+    const answeredQuestionId = interview.currentQuestion?.questionId;
+    const file = await recorder.stopRecording();
+    uploadRecordingInBackground({
+      file,
+      interviewId: interview.interviewId,
+      questionId: answeredQuestionId,
+    });
     await interview.onQuitInterview();
   };
 

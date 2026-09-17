@@ -258,10 +258,9 @@ export const useInterviewSession = (
   const [isAwaitingNextQuestion, setIsAwaitingNextQuestion] = useState(false);
   const [preparationError, setPreparationError] = useState<string | null>(null);
   const isVoiceMode = mode === "voice";
-  const { cameraState, cloneVideoTrack, micState, micStream, videoRef } =
+  const { cameraState, cloneAudioTrack, cloneVideoTrack, micState, micStream, videoRef } =
     useInterviewMedia(isVoiceMode);
-  const recorder = useInterviewRecorder(cloneVideoTrack);
-  const { startVideoRecording, finishInterviewRecording } = recorder;
+  const recorder = useInterviewRecorder(cloneVideoTrack, cloneAudioTrack);
   const voiceLevel = useVoiceLevel(micStream);
   const voiceAnswer = useVoiceAnswer();
   const multiTtsSpeaker = useMemo(() => {
@@ -333,11 +332,6 @@ export const useInterviewSession = (
   const isCompletingVoiceRef = useRef(false);
   const questionStartedAtRef = useRef(0);
   const canSubmitAnswer = isChatSessionReady && currentQuestion !== null;
-  useEffect(() => {
-    if (canSubmitAnswer && cameraState === "ready" && !isSessionClosedRef.current) {
-      startVideoRecording();
-    }
-  }, [canSubmitAnswer, cameraState, startVideoRecording]);
   // 첫 질문이 도착한 시점을 면접 시작으로 본다.
   const elapsedSeconds = useInterviewElapsedTime(sessionId, canSubmitAnswer);
   const getInterviewExitPath = useCallback(
@@ -422,7 +416,6 @@ export const useInterviewSession = (
       shouldNavigateToMain: boolean,
       reason: InterviewCloseReason = "quit",
     ) => {
-      await finishInterviewRecording();
       const activeSessionId = sessionIdRef.current ?? getActiveInterviewSessionId();
       const nextPath = getInterviewExitPath(reason);
       const answeredQuestionCount = displayQuestionNumberRef.current;
@@ -457,7 +450,7 @@ export const useInterviewSession = (
         });
       }
     },
-    [finishInterviewRecording, getInterviewExitPath, navigate],
+    [getInterviewExitPath, navigate],
   );
 
   const handleSocketStatusChange = useCallback(
@@ -603,7 +596,6 @@ export const useInterviewSession = (
     questionTts.onStop();
 
     if (isVoiceMode) {
-      void recorder.stopAudioRecording();
       voiceAnswer.onExitVoiceMode();
     }
 
@@ -620,7 +612,7 @@ export const useInterviewSession = (
     }
 
     questionTts.onStop();
-    if (!(await recorder.startAudioRecording())) return false;
+    if (!(await recorder.startRecording())) return false;
     void voiceAnswer.onStartVoice();
     return true;
   };
@@ -721,9 +713,7 @@ export const useInterviewSession = (
     isCompletingVoiceRef.current = true;
 
     try {
-      const audioResult = recorder.stopAudioRecording();
       const voiceContent = await voiceAnswer.onCompleteVoice();
-      await audioResult;
       await submitAnswer(voiceContent || voiceAnswer.answerText);
     } finally {
       isCompletingVoiceRef.current = false;
@@ -748,6 +738,7 @@ export const useInterviewSession = (
     currentQuestion,
     displayQuestionNumber,
     elapsedSeconds,
+    interviewId: preparedInterview?.interviewId ?? null,
     isAwaitingNextQuestion,
     isAwaitingResponse: isSubmitting || isAwaitingNextQuestion || recorder.isStopping,
     isSubmitting,
