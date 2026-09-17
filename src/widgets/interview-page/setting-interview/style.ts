@@ -34,147 +34,84 @@ const focusRing = css`
 
 export const Container = styled.div`
   width: 100%;
-  height: auto;
   min-height: 100%;
   display: flex;
   justify-content: center;
-  align-items: stretch;
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding: clamp(1.65rem, 4.2vh, 2.15rem) clamp(1.25rem, 6.8vw, 6.5rem)
-    clamp(1.25rem, 3vh, 1.55rem);
+  align-items: flex-start;
+  overflow: visible;
+  padding: clamp(1.75rem, 4vh, 2.7rem) clamp(1.25rem, 6.8vw, 6.125rem)
+    clamp(2rem, 4.6vh, 3.6rem);
   box-sizing: border-box;
 
-  @media (max-width: 52rem) {
-    align-items: flex-start;
-    overflow-y: auto;
-    padding: 0.9rem 1rem 1rem;
-  }
-
-  @media (max-height: 44rem) {
-    padding-top: 0.55rem;
-    padding-bottom: 0.55rem;
+  @media (max-width: 48rem) {
+    padding: 1.25rem 1rem 2rem;
   }
 `;
 
 export const ContentWrapper = styled.div`
-  --setting-group-height: clamp(14rem, 30vh, 16rem);
-  --interviewer-card-height: clamp(10.75rem, 31vh, 11.5rem);
-  --interviewer-image-height: clamp(5.6rem, 17vh, 6rem);
-  --interviewer-grid-offset: clamp(1.2rem, 3vh, 1.55rem);
-  --setting-column-gap: clamp(1.5rem, 4vh, 2.75rem);
-  --style-option-gap: clamp(0.65rem, 1.3vh, 0.85rem);
-
-  position: relative;
-  width: min(100%, 82rem);
-  height: auto;
-  min-height: 100%;
+  width: min(100%, 76.5rem);
+  min-height: min(100%, 42.5rem);
   display: flex;
   flex-direction: column;
-  gap: clamp(0.7rem, 1.8vh, 1.35rem);
+  gap: clamp(1rem, 2.4vh, 1.6rem);
   box-sizing: border-box;
-
-  @media (max-width: 64rem) {
-    --setting-group-height: clamp(12.25rem, 27vh, 14rem);
-
-    width: min(100%, 68rem);
-  }
-
-  @media (max-height: 52rem) {
-    --setting-group-height: clamp(11.25rem, 25vh, 13rem);
-    --interviewer-card-height: clamp(10rem, 28vh, 10.75rem);
-    --interviewer-image-height: clamp(5.1rem, 15vh, 5.6rem);
-    --setting-column-gap: clamp(1.25rem, 3.4vh, 2rem);
-    --style-option-gap: 0.45rem;
-  }
-
-  @media (max-height: 44rem) {
-    --setting-group-height: clamp(10.25rem, 24vh, 11.5rem);
-    --interviewer-card-height: clamp(9.75rem, 25vh, 10.25rem);
-    --interviewer-image-height: clamp(4.8rem, 13vh, 5.2rem);
-    --interviewer-grid-offset: 0.75rem;
-    --setting-column-gap: 0.75rem;
-    --style-option-gap: 0.4rem;
-
-    gap: 0.55rem;
-  }
-
-  @media (max-width: 52rem) {
-    --setting-group-height: 13rem;
-    --setting-column-gap: 1.5rem;
-
-    height: auto;
-    min-height: 100%;
-  }
 `;
 
 export const Sections = styled.div`
   width: 100%;
-  flex: 0 0 auto;
   display: grid;
-  grid-template-columns: minmax(21rem, 0.86fr) minmax(32rem, 1.3fr);
-  gap: clamp(1.7rem, 2.8vw, 2.75rem);
-  align-items: stretch;
+  grid-template-columns: minmax(20rem, 26.5rem) minmax(0, 1fr);
+  gap: clamp(2rem, 4.6vw, 3.75rem);
+  align-items: start;
 
   @media (max-width: 64rem) {
-    grid-template-columns: minmax(18.5rem, 0.82fr) minmax(28rem, 1.18fr);
-    gap: 1.35rem;
+    grid-template-columns: minmax(18rem, 23rem) minmax(0, 1fr);
+    gap: 1.5rem;
   }
 
   @media (max-width: 52rem) {
     grid-template-columns: 1fr;
   }
 
-  @media (max-height: 44rem) {
-    gap: 1rem;
-  }
 `;
 
 export const ControlColumn = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: var(--setting-column-gap);
+  gap: clamp(3.2rem, 8vh, 5rem);
+
+  @media (max-width: 52rem) {
+    gap: 2rem;
+  }
 `;
 
 export const Section = styled.section`
   display: flex;
   flex-direction: column;
-  gap: clamp(0.55rem, 1.5vh, 0.9rem);
-
-  @media (max-height: 44rem) {
-    gap: 0.45rem;
-  }
+  gap: 0.9rem;
 `;
 
 export const Title = styled.h2`
   margin: 0;
   color: #4d5570;
-  font-size: clamp(1.55rem, 1.38rem + 0.34vw, 1.85rem);
+  font-size: clamp(1.35rem, 1.2rem + 0.24vw, 1.5rem);
   font-weight: 800;
   line-height: 1.25;
-
-  @media (max-height: 44rem) {
-    font-size: 1.12rem;
-  }
 `;
 
 export const StyleOptionGroup = styled.div`
   display: grid;
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-  height: var(--setting-group-height);
-  gap: var(--style-option-gap);
+  gap: 0.95rem;
 `;
 
 export const StyleOptionButton = styled.button<SelectedProps>`
   width: 100%;
-  height: 100%;
-  min-height: 0;
+  min-height: 5.35rem;
   display: grid;
-  grid-template-columns: 2.2rem minmax(0, 1fr) 1.5rem;
+  grid-template-columns: 2.25rem minmax(0, 1fr) 1.5rem;
   align-items: center;
-  gap: 0.95rem;
-  padding: 0.6rem 1.65rem 0.6rem 1.2rem;
+  gap: 1rem;
+  padding: 0.95rem 1.85rem 0.95rem 1.25rem;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
   border-radius: 0.5rem;
@@ -200,18 +137,12 @@ export const StyleOptionButton = styled.button<SelectedProps>`
     grid-template-columns: 2.1rem minmax(0, 1fr) 1.35rem;
     padding-inline: 1rem;
   }
-
-  @media (max-height: 44rem) {
-    grid-template-columns: 2rem minmax(0, 1fr) 1.35rem;
-    gap: 0.65rem;
-    padding: 0.45rem 0.8rem;
-  }
 `;
 
 export const StyleIcon = styled.span<StyleIconProps>`
   position: relative;
-  width: 2.15rem;
-  height: 2.15rem;
+  width: 2rem;
+  height: 2rem;
   border: 0.125rem solid #111111;
   border-radius: 50%;
   box-sizing: border-box;
@@ -245,10 +176,6 @@ export const StyleIcon = styled.span<StyleIconProps>`
     transform-origin: center;
   }
 
-  @media (max-height: 44rem) {
-    width: 2rem;
-    height: 2rem;
-  }
 `;
 
 export const StyleTextGroup = styled.span`
@@ -260,24 +187,16 @@ export const StyleTextGroup = styled.span`
 
 export const OptionLabel = styled.span`
   color: #171717;
-  font-size: 1.14rem;
+  font-size: 1rem;
   font-weight: 800;
   line-height: 1.2;
-
-  @media (max-height: 44rem) {
-    font-size: 0.9rem;
-  }
 `;
 
 export const OptionDescription = styled.span`
   color: #262626;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   line-height: 1.35;
-
-  @media (max-height: 44rem) {
-    font-size: 0.76rem;
-  }
 `;
 
 export const SelectionCircle = styled.span<SelectedProps>`
@@ -306,18 +225,15 @@ export const SelectionCircle = styled.span<SelectedProps>`
 export const DifficultyGroup = styled.div`
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  height: 4rem;
-  gap: var(--style-option-gap);
+  gap: 0.9rem;
+
+  @media (max-width: 30rem) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 export const DifficultyButton = styled.button<SelectedProps>`
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 0.75rem;
+  min-height: 4rem;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
   border-radius: 0.5rem;
@@ -338,9 +254,6 @@ export const DifficultyButton = styled.button<SelectedProps>`
 
   ${focusRing}
 
-  @media (max-height: 44rem) {
-    padding-inline: 0.4rem;
-  }
 `;
 
 export const DifficultyIcon = styled.img`
@@ -357,28 +270,12 @@ export const DifficultyIcon = styled.img`
 `;
 
 export const InterviewerGrid = styled.div`
-  height: 100%;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, var(--interviewer-card-height));
-  align-content: space-between;
-  gap: clamp(0.95rem, 2.7vh, 1.45rem) clamp(1.15rem, 1.85vw, 1.6rem);
-  padding-top: var(--interviewer-grid-offset);
-  box-sizing: border-box;
+  gap: clamp(1.4rem, 2.6vw, 1.85rem);
 
   @media (max-width: 34rem) {
-    height: auto;
     grid-template-columns: 1fr;
-    grid-template-rows: none;
-    align-content: start;
-    padding-top: 0;
-  }
-
-  @media (max-width: 52rem) {
-    height: auto;
-    grid-template-rows: none;
-    align-content: start;
-    padding-top: 0;
   }
 `;
 
@@ -386,10 +283,7 @@ export const InterviewerCard = styled.button<SelectedProps>`
   position: relative;
   overflow: hidden;
   min-width: 0;
-  height: var(--interviewer-card-height);
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+  min-height: clamp(16.75rem, 31vh, 18.4rem);
   padding: 0;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
@@ -413,38 +307,26 @@ export const InterviewerCard = styled.button<SelectedProps>`
 
 export const InterviewerImage = styled.img`
   width: 100%;
-  height: var(--interviewer-image-height);
-  flex: 0 0 auto;
+  height: clamp(8.6rem, 15vw, 10rem);
   display: block;
   object-fit: cover;
 `;
 
 export const InterviewerBody = styled.div<SelectedProps>`
-  position: relative;
-  z-index: 1;
-  min-height: 6rem;
-  flex: 1 0 auto;
+  min-height: 8.25rem;
   display: flex;
   flex-direction: column;
-  gap: clamp(0.35rem, 1vh, 0.7rem);
-  padding: clamp(0.75rem, 1.7vh, 1.1rem) clamp(0.8rem, 1.4vw, 1.2rem)
-    clamp(0.85rem, 2vh, 1.35rem);
-  overflow: visible;
-  box-sizing: border-box;
+  gap: 0.6rem;
+  padding: 1rem clamp(1.1rem, 2.8vw, 2.65rem) 1.25rem;
   background: ${({ $selected }) => ($selected ? '#eef6ff' : '#ffffff')};
-
-  @media (max-height: 44rem) {
-    gap: 0.28rem;
-    padding: 0.5rem 0.7rem 0.6rem;
-  }
 `;
 
 export const InterviewerSelectedBadge = styled.span`
   position: absolute;
-  top: 0.7rem;
-  right: 0.7rem;
-  width: 1.25rem;
-  height: 1.25rem;
+  top: 1.15rem;
+  right: 1.15rem;
+  width: 1.45rem;
+  height: 1.45rem;
   border-radius: 50%;
   background: #1f7bf2;
   box-shadow: 0 0.4rem 1rem rgba(31, 123, 242, 0.24);
@@ -452,60 +334,50 @@ export const InterviewerSelectedBadge = styled.span`
   &::after {
     content: '';
     position: absolute;
-    left: 0.38rem;
-    top: 0.24rem;
-    width: 0.3rem;
-    height: 0.55rem;
+    left: 0.48rem;
+    top: 0.31rem;
+    width: 0.38rem;
+    height: 0.68rem;
     border: solid #ffffff;
-    border-width: 0 0.12rem 0.12rem 0;
+    border-width: 0 0.15rem 0.15rem 0;
     transform: rotate(45deg);
   }
 `;
 
 export const InterviewerTitle = styled.h3`
-  position: relative;
-  z-index: 1;
   margin: 0;
   color: #3c3c3c;
-  font-size: clamp(0.95rem, 0.85rem + 0.2vw, 1.2rem);
+  font-size: 1.15rem;
   font-weight: 800;
   line-height: 1.2;
 `;
 
 export const TagList = styled.div`
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 0.35rem;
 `;
 
 export const Tag = styled.span`
   display: inline-flex;
   align-items: center;
-  min-height: 0.85rem;
-  padding: 0.04rem 0.25rem;
+  min-height: 1rem;
+  padding: 0.08rem 0.32rem;
   border: 0.0625rem solid #94c3ff;
   border-radius: 0.12rem;
   background: #eaf4ff;
   color: #1376ef;
-  font-size: 0.6rem;
+  font-size: 0.68rem;
   font-weight: 700;
   line-height: 1.2;
 `;
 
 export const InterviewerDescription = styled.p`
-  position: relative;
-  z-index: 1;
-  display: -webkit-box;
-  overflow: hidden;
   margin: 0;
   color: #4b4b4b;
-  font-size: clamp(0.68rem, 0.62rem + 0.1vw, 0.8rem);
+  font-size: 0.78rem;
   font-weight: 500;
   line-height: 1.35;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 `;
 
 export const BottomButtonWrapper = styled.div`
