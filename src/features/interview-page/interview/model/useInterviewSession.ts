@@ -34,7 +34,7 @@ const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
 const AWAITING_RESPONSE_TIMEOUT_MS = 30_000;
 const INTERVIEW_PREPARATION_POLL_INTERVAL_MS = 1_000;
 const INTERVIEW_PREPARATION_MAX_ATTEMPTS = 120;
-const PRESSURE_SOLO_VOICE_INDEX = 3;
+const DEFAULT_SOLO_VOICE_INDEX = 1;
 
 export type InterviewTtsProvider = "elevenlabs" | "supertone";
 
@@ -318,11 +318,16 @@ export const useInterviewSession = (
       ? personaId
       : undefined;
   }, [currentQuestion?.personaId, preparedInterview]);
+  const soloTtsVoiceIndex =
+    preparedInterview?.mode === "SOLO"
+      ? preparedInterview.interviewers?.[0]?.voiceIndex
+      : undefined;
   const elevenLabsTts = useElevenLabsTts(
     currentQuestion?.content ?? "",
-    preparedInterview?.mode === "SOLO" && interviewStyle === "압박"
-      ? PRESSURE_SOLO_VOICE_INDEX
-      : multiTtsSpeaker?.voiceIndex,
+    soloTtsVoiceIndex ??
+      (preparedInterview?.mode === "SOLO" && interviewStyle === "압박"
+        ? DEFAULT_SOLO_VOICE_INDEX
+        : multiTtsSpeaker?.voiceIndex),
     preparedInterview?.mode === "SOLO"
       ? {
           interviewStyle,

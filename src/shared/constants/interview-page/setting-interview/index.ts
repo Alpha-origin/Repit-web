@@ -1,4 +1,5 @@
 import type {
+  InterviewSettingInterviewer,
   InterviewSettingOptionSection,
   InterviewSettingSelection,
   InterviewSettingStyleMeta,
@@ -33,21 +34,36 @@ export const INTERVIEW_SETTING_STYLE_META = {
   },
 } as const satisfies Record<InterviewStyleOption, InterviewSettingStyleMeta>;
 
-export const INTERVIEW_SETTING_INTERVIEWER_SECTION_TITLE = '면접관 설정';
-
-export const INTERVIEW_SETTING_PERSONALITY_OPTIONS = [
-  '친근한',
-  '현실적인',
-  '꼼꼼한',
-] as const;
-
-export const INTERVIEW_SETTING_TONE_OPTIONS = [
-  '부드러운',
-  '직설적인',
-  '압박하는',
-] as const;
-
-export const INTERVIEW_SETTING_MAJOR_OPTIONS = ['프론트엔드', '백엔드'] as const;
+export const INTERVIEW_SETTING_INTERVIEWERS = [
+  {
+    id: 1,
+    name: '면접관1',
+    personaName: '면접관1',
+    tags: ['성격', '말투', '전문 분야'],
+    description: '기술적 역량과 아키텍처 설계 능력을 중점적으로 파악합니다.',
+  },
+  {
+    id: 2,
+    name: '면접관2',
+    personaName: '면접관2',
+    tags: ['성격', '말투', '전문 분야'],
+    description: '문제 해결 프로세스와 데이터 기반의 의사결정 능력을 평가합니다.',
+  },
+  {
+    id: 3,
+    name: '면접관3',
+    personaName: '면접관3',
+    tags: ['성격', '말투', '전문 분야'],
+    description: '사용자 중심의 사고방식과 시각적 커뮤니케이션 능력을 심층 질문합니다.',
+  },
+  {
+    id: 4,
+    name: '면접관4',
+    personaName: '면접관4',
+    tags: ['성격', '말투', '전문 분야'],
+    description: '협업 능력과 가치관이 팀의 문화와 얼마나 잘 부합하는지 확인합니다.',
+  },
+] as const satisfies readonly InterviewSettingInterviewer[];
 
 export const INTERVIEW_SETTING_ACTION_LABELS = {
   back: '돌아가기',
@@ -56,17 +72,13 @@ export const INTERVIEW_SETTING_ACTION_LABELS = {
 
 export const INTERVIEW_SETTING_DEFAULT_SELECTION: InterviewSettingSelection = {
   difficulty: '쉬움',
-  major: '프론트엔드',
-  personality: '친근한',
+  interviewerId: 1,
   style: '편함',
-  tone: '부드러운',
 };
 
 export type {
-  InterviewMajorOption,
   InterviewDifficultyOption,
-  InterviewerPersonalityOption,
-  InterviewerToneOption,
+  InterviewerId,
   InterviewSettingSelectHandlers,
   InterviewSettingSelection,
   InterviewSettingStyleIcon,
