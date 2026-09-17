@@ -1,3 +1,8 @@
+import type {
+  InterviewPersonality,
+  InterviewTone,
+} from "../api/type/create-interview";
+import type { InterviewStyleOption } from "@/shared/constants/interview-page/setting-interview";
 import type { QuestionAudioStatus } from "@/widgets/interview-page/interview/type";
 import { useEffect, useRef, useState } from "react";
 
@@ -11,6 +16,106 @@ const ELEVENLABS_FALLBACK_VOICE_NAME = "Sarah - Mature, Reassuring, Confident";
 const ELEVENLABS_MODEL_ID = "eleven_multilingual_v2";
 const ELEVENLABS_OUTPUT_FORMAT = "mp3_44100_128";
 const ELEVENLABS_SPEECH_SPEED = 1.1;
+
+export interface InterviewerSpeechStyle {
+  interviewStyle?: InterviewStyleOption;
+  personality?: InterviewPersonality;
+  tone?: InterviewTone;
+}
+
+interface VoiceSettings {
+  stability: number;
+  similarity_boost: number;
+  style: number;
+  speed: number;
+  use_speaker_boost: boolean;
+}
+
+const DEFAULT_VOICE_SETTINGS: VoiceSettings = {
+  stability: 0.55,
+  similarity_boost: 0.8,
+  style: 0.1,
+  speed: ELEVENLABS_SPEECH_SPEED,
+  use_speaker_boost: true,
+};
+
+const TONE_PRESETS: Record<
+  InterviewTone,
+  Pick<VoiceSettings, "stability" | "style" | "speed">
+> = {
+  GENTLE: { stability: 0.72, style: 0.04, speed: 1.02 },
+  DIRECT: { stability: 0.42, style: 0.38, speed: 1.13 },
+  // 낮은 안정성 + 강한 style + 빠른 속도로 긴장감과 압박감을 크게 높인다.
+  PRESSURING: { stability: 0.2, style: 0.82, speed: 1.17 },
+};
+
+const INTERVIEW_STYLE_PRESETS: Record<
+  InterviewStyleOption,
+  Pick<VoiceSettings, "stability" | "style" | "speed">
+> = {
+  편함: { stability: 0.74, style: 0.04, speed: 1.02 },
+  일반: { stability: 0.55, style: 0.18, speed: 1.1 },
+  압박: { stability: 0.05, style: 1, speed: 1.17 },
+};
+
+const PERSONALITY_ADJUSTMENTS: Record<
+  InterviewPersonality,
+  Partial<Pick<VoiceSettings, "stability" | "style" | "speed">>
+> = {
+  FRIENDLY: { style: -0.04, speed: -0.02 },
+  REALISTIC: { style: 0.04 },
+  METICULOUS: { stability: 0.04, style: 0.02, speed: -0.01 },
+};
+
+const clamp = (value: number) => Math.min(1, Math.max(0, value));
+
+const TONE_ADJUSTMENTS: Record<
+  InterviewTone,
+  Partial<Pick<VoiceSettings, "stability" | "style" | "speed">>
+> = {
+  GENTLE: { stability: 0.04, style: -0.03, speed: -0.02 },
+  DIRECT: { stability: -0.04, style: 0.08, speed: 0.02 },
+  PRESSURING: { stability: -0.08, style: 0.12, speed: 0.03 },
+};
+
+const getVoiceSettings = ({
+  interviewStyle,
+  personality,
+  tone,
+}: InterviewerSpeechStyle = {}): VoiceSettings => {
+  const basePreset = interviewStyle
+    ? INTERVIEW_STYLE_PRESETS[interviewStyle]
+    : tone
+      ? TONE_PRESETS[tone]
+      : DEFAULT_VOICE_SETTINGS;
+  const personalityAdjustment = personality
+    ? PERSONALITY_ADJUSTMENTS[personality]
+    : {};
+  const toneAdjustment = tone ? TONE_ADJUSTMENTS[tone] : {};
+
+  return {
+    ...DEFAULT_VOICE_SETTINGS,
+    stability: clamp(
+      basePreset.stability +
+        (personalityAdjustment.stability ?? 0) +
+        (toneAdjustment.stability ?? 0),
+    ),
+    style: clamp(
+      basePreset.style +
+        (personalityAdjustment.style ?? 0) +
+        (toneAdjustment.style ?? 0),
+    ),
+    speed: Math.min(
+      1.2,
+      Math.max(
+        0.8,
+        basePreset.speed +
+          (personalityAdjustment.speed ?? 0) +
+          (toneAdjustment.speed ?? 0),
+      ),
+    ),
+  };
+};
 
 const isPlaceholderVoiceId = (voiceId: string | undefined) =>
   !voiceId || voiceId === "Kelee_K_Voice_ID";
@@ -98,16 +203,19 @@ const getVoiceIdFromAccount = async (
   );
 };
 
-const createSpeechRequest = (text: string) =>
+const createSpeechRequest = (text: string, voiceSettings: VoiceSettings) =>
   JSON.stringify({
     text,
     model_id: ELEVENLABS_MODEL_ID,
-    voice_settings: {
-      speed: ELEVENLABS_SPEECH_SPEED,
-    },
+    voice_settings: voiceSettings,
   });
 
-const requestSpeech = (voiceId: string, text: string, signal: AbortSignal) =>
+const requestSpeech = (
+  voiceId: string,
+  text: string,
+  voiceSettings: VoiceSettings,
+  signal: AbortSignal,
+) =>
   fetch(
     `${ELEVENLABS_TTS_API_URL}/${encodeURIComponent(voiceId)}?output_format=${ELEVENLABS_OUTPUT_FORMAT}`,
     {
@@ -115,7 +223,7 @@ const requestSpeech = (voiceId: string, text: string, signal: AbortSignal) =>
       headers: {
         "Content-Type": "application/json",
       },
-      body: createSpeechRequest(text),
+      body: createSpeechRequest(text, voiceSettings),
       signal,
     },
   );
@@ -132,7 +240,11 @@ const isVoiceAccessRestricted = async (response: Response) => {
   );
 };
 
-export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
+export const useElevenLabsTts = (
+  text: string,
+  voiceIndex?: number,
+  speechStyle?: InterviewerSpeechStyle,
+) => {
   const [status, setStatus] = useState<QuestionAudioStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -142,6 +254,7 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
   const resolvedVoiceIdRef = useRef<string | null>(null);
   const voiceIdRequestRef = useRef<Promise<string> | null>(null);
   const configuredVoiceId = getConfiguredVoiceId(voiceIndex);
+  const voiceSettings = getVoiceSettings(speechStyle);
 
   const clearAudioUrl = () => {
     if (audioUrlRef.current) {
@@ -194,7 +307,11 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
     };
   }, []);
 
-  const playWithBrowserSpeech = (speechText: string, signal: AbortSignal) => {
+  const playWithBrowserSpeech = (
+    speechText: string,
+    signal: AbortSignal,
+    speechRate = voiceSettings.speed,
+  ) => {
     if (typeof window === "undefined" || !window.speechSynthesis) {
       throw new Error("브라우저 음성 기능을 사용할 수 없습니다.");
     }
@@ -202,7 +319,7 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
     return new Promise<void>((resolve, reject) => {
       const utterance = new SpeechSynthesisUtterance(speechText);
       utterance.lang = "ko-KR";
-      utterance.rate = ELEVENLABS_SPEECH_SPEED;
+      utterance.rate = speechRate;
       speechRef.current = utterance;
 
       const finish = () => {
@@ -277,6 +394,7 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
       let response = await requestSpeech(
         resolvedVoiceId,
         text,
+        voiceSettings,
         controller.signal,
       );
 
@@ -294,12 +412,19 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
           response = await requestSpeech(
             fallbackVoiceId,
             text,
+            voiceSettings,
             controller.signal,
           );
         }
       }
 
       if (!response.ok) {
+        const responseMessage = await response.clone().text();
+        console.error("ElevenLabs TTS response error:", {
+          status: response.status,
+          body: responseMessage,
+        });
+
         if (response.status === 401) {
           setErrorMessage(
             "ElevenLabs 인증에 실패했습니다. API 키와 권한을 확인해주세요.",
@@ -311,7 +436,8 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
         setErrorMessage(
           `ElevenLabs TTS 요청에 실패했습니다. (${response.status})`,
         );
-        throw new Error(`ElevenLabs TTS failed with ${response.status}`);
+        await playWithBrowserSpeech(text, controller.signal);
+        return;
       }
 
       const contentType = response.headers.get("content-type") ?? "";

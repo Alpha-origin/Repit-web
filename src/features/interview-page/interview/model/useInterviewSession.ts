@@ -17,6 +17,7 @@ import {
 import {
   INTERVIEW_STATUS_MESSAGES,
 } from "@/shared/constants/interview-page/interview";
+import type { InterviewStyleOption } from "@/shared/constants/interview-page/setting-interview";
 
 import type { InterviewMode } from "@/widgets/interview-page/interview/type";
 import { useElevenLabsTts } from "./useElevenLabsTts";
@@ -33,6 +34,7 @@ const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
 const AWAITING_RESPONSE_TIMEOUT_MS = 30_000;
 const INTERVIEW_PREPARATION_POLL_INTERVAL_MS = 1_000;
 const INTERVIEW_PREPARATION_MAX_ATTEMPTS = 120;
+const PRESSURE_SOLO_VOICE_INDEX = 3;
 
 export type InterviewTtsProvider = "elevenlabs" | "supertone";
 
@@ -236,6 +238,7 @@ const interviewSessionReducer = (
 export const useInterviewSession = (
   preparedInterview?: PreparedInterviewData | null,
   ttsProvider: InterviewTtsProvider = "elevenlabs",
+  interviewStyle?: InterviewStyleOption,
 ) => {
   const navigate = useNavigate();
   const [session, dispatch] = useReducer(
@@ -317,7 +320,16 @@ export const useInterviewSession = (
   }, [currentQuestion?.personaId, preparedInterview]);
   const elevenLabsTts = useElevenLabsTts(
     currentQuestion?.content ?? "",
-    multiTtsSpeaker?.voiceIndex,
+    preparedInterview?.mode === "SOLO" && interviewStyle === "압박"
+      ? PRESSURE_SOLO_VOICE_INDEX
+      : multiTtsSpeaker?.voiceIndex,
+    preparedInterview?.mode === "SOLO"
+      ? {
+          interviewStyle,
+          personality: preparedInterview.personaType,
+          tone: preparedInterview.tone,
+        }
+      : undefined,
   );
   const supertoneTts = useSupertoneTts(currentQuestion?.content ?? "");
   const questionTts = ttsProvider === "elevenlabs" ? elevenLabsTts : supertoneTts;

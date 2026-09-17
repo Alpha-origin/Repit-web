@@ -8,6 +8,7 @@ import {
 import { uploadRecordingInBackground } from "@/features/interview-page/interview/model/uploadRecordingInBackground";
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
 import { INTERVIEW_DEVICE_STATUS_LABELS } from "@/shared/constants/interview-page/interview";
+import type { InterviewStyleOption } from "@/shared/constants/interview-page/setting-interview";
 import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
 import MicIcon from "@/shared/img/interview-page/mike.svg?url";
 import Loading from "@/shared/components/loading";
@@ -30,6 +31,26 @@ const getPreparedInterviewFromState = (state: unknown) => {
   return preparedInterview as PreparedInterviewData;
 };
 
+const getInterviewStyleFromState = (
+  state: unknown,
+): InterviewStyleOption | undefined => {
+  if (!state || typeof state !== "object" || !("interviewSetting" in state)) {
+    return undefined;
+  }
+
+  const interviewSetting = (state as { interviewSetting?: unknown }).interviewSetting;
+
+  if (!interviewSetting || typeof interviewSetting !== "object") {
+    return undefined;
+  }
+
+  const style = (interviewSetting as { style?: unknown }).style;
+
+  return style === "편함" || style === "일반" || style === "압박"
+    ? style
+    : undefined;
+};
+
 const formatElapsedTime = (elapsedSeconds: number) => {
   const minutes = Math.floor(elapsedSeconds / 60);
   const seconds = elapsedSeconds % 60;
@@ -43,10 +64,15 @@ const InterviewPage = () => {
     () => getPreparedInterviewFromState(location.state),
     [location.state],
   );
+  const interviewStyle = useMemo(
+    () => getInterviewStyleFromState(location.state),
+    [location.state],
+  );
   const ttsProvider = "elevenlabs" as const;
 
   return (
     <InterviewSessionProvider
+      interviewStyle={interviewStyle}
       preparedInterview={preparedInterview}
       ttsProvider={ttsProvider}
     >
