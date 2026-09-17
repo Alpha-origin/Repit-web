@@ -2,21 +2,15 @@ import type {
   InterviewSettingSelectHandlers,
   InterviewSettingSelection,
 } from '@/shared/constants/interview-page/setting-interview';
+import type { SettingInterviewerCard } from '../data';
 
 export interface InterviewerOptionsProps {
-  onSelect: Pick<
-    InterviewSettingSelectHandlers,
-    'major' | 'personality' | 'tone'
-  >;
-  selection: Pick<
-    InterviewSettingSelection,
-    'major' | 'personality' | 'tone'
-  >;
+  onSelect: InterviewSettingSelectHandlers['interviewer'];
+  selectedValue: InterviewSettingSelection['interviewerId'];
 }
 
-export interface InterviewerSettingGroupProps<Option extends string> {
-  label: string;
-  onSelect: (value: Option) => void;
-  options: readonly Option[];
-  selectedValue: Option;
+export interface InterviewerCardProps {
+  interviewer: SettingInterviewerCard;
+  isSelected: boolean;
+  onSelect: InterviewSettingSelectHandlers['interviewer'];
 }
