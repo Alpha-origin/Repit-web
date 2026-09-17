@@ -89,14 +89,29 @@ const getMessageFromValue = (value: unknown, depth = 0): string | null => {
   return getTrimmedString(record.code);
 };
 
+// 백엔드 인증 계약: 토큰 누락과 만료가 모두 401 { message } 로 통일됐고,
+// 소유권 검사에 걸린 조회는 404가 아니라 403 { message } 로 내려온다.
+export const AUTH_REQUIRED_MESSAGE = "로그인이 필요합니다.";
+export const FORBIDDEN_MESSAGE = "접근 권한이 없습니다.";
+
+const FALLBACK_MESSAGE_BY_STATUS: Record<number, string> = {
+  401: AUTH_REQUIRED_MESSAGE,
+  403: FORBIDDEN_MESSAGE,
+};
+
+const getFallbackMessage = (status: number, fallback: string) =>
+  FALLBACK_MESSAGE_BY_STATUS[status] ?? fallback;
+
 export const extractErrorMessage = (error: unknown, fallback: string) => {
   if (axios.isAxiosError(error)) {
     if (!error.response) {
       return "서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.";
     }
 
+    const statusFallback = getFallbackMessage(error.response.status, fallback);
+
     if (getContentType(error.response.headers).includes("text/html")) {
-      return fallback;
+      return statusFallback;
     }
 
     const responseMessage = getMessageFromValue(error.response.data);
@@ -105,7 +120,7 @@ export const extractErrorMessage = (error: unknown, fallback: string) => {
       return responseMessage;
     }
 
-    return fallback;
+    return statusFallback;
   }
 
   const nestedMessage = getMessageFromValue(error);

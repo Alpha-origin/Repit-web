@@ -1,7 +1,8 @@
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 
 interface MultiLayoutProps {
   $multi: boolean;
+  $count?: number;
 }
 
 interface MultiCardProps {
@@ -53,48 +54,10 @@ export const TimerDot = styled.span`
   background: #e15858;
 `;
 
-export const LoadingOverlay = styled.div`
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  display: grid;
-  place-items: center;
-  border-radius: 0.75rem;
-  background: rgba(239, 244, 252, 0.52);
-  backdrop-filter: blur(0.12rem);
-`;
-
-export const LoadingModal = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.8rem 1rem;
-  border: 0.0625rem solid #d8e0ed;
-  border-radius: 0.65rem;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 0.35rem 1.2rem rgba(55, 82, 125, 0.14);
-`;
-
-export const LoadingSpinner = styled.span`
-  width: 1rem;
-  height: 1rem;
-  border: 0.15rem solid #cfe0f8;
-  border-top-color: #2179ed;
-  border-radius: 50%;
-  animation: interview-loading-spin 0.75s linear infinite;
-
-  @keyframes interview-loading-spin {
-    to { transform: rotate(360deg); }
-  }
-`;
-
-export const LoadingMessage = styled.span`
-  color: #4e5968;
-  font-size: 0.86rem;
-  font-weight: 700;
-`;
-
 export const MainGrid = styled.main<MultiLayoutProps>`
+  --interviewers-height: ${({ $count }) => $count === 4 ? "25rem" : "16rem"};
+  --interviewer-image-height: ${({ $count }) => $count === 4 ? "5.6rem" : "8rem"};
+  --memo-min-height: ${({ $count }) => $count === 4 ? "13rem" : "19rem"};
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(17rem, 0.95fr);
@@ -107,7 +70,10 @@ export const MainGrid = styled.main<MultiLayoutProps>`
           --multi-top-row-height: clamp(13rem, 30vh, 15rem);
           grid-template-columns: minmax(0, 1.65fr) minmax(24rem, 0.95fr);
           grid-template-rows: none;
-          align-items: start;
+          /* 질문 패널은 면접관 수와 무관하게 낮게 두되(--multi-top-row-height),
+             두 컬럼이 같은 높이로 늘어나 아래쪽 끝이 맞아야 한다.
+             start로 두면 각 컬럼이 제 콘텐츠 높이에 멈춰 4인에서 4.5rem 어긋난다. */
+          align-items: stretch;
         `
       : ""}
 
@@ -155,7 +121,7 @@ export const RightColumn = styled.aside<MultiLayoutProps>`
     $multi
       ? `
           grid-row: auto;
-          grid-template-rows: var(--multi-top-row-height) minmax(19rem, 1fr);
+          grid-template-rows: var(--interviewers-height) minmax(var(--memo-min-height), 1fr);
           gap: 0.8rem;
         `
       : ""}
@@ -327,16 +293,39 @@ export const VideoControls = styled.div`
   z-index: 2;
 `;
 
-export const RoundButton = styled.button`
+export const StatusIndicator = styled.div<{ $active: boolean }>`
+  position: relative;
   width: 2.8rem;
   height: 2.8rem;
-  border: 0;
   border-radius: 50%;
+  overflow: hidden;
   background: #fff;
-  color: #1f78ef;
   box-shadow: 0 0.2rem 0.7rem rgba(34, 66, 112, 0.2);
-  font-size: 1.1rem;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: ${({ $active }) => ($active ? 1 : 0.55)};
+  transition: opacity 0.2s ease;
+`;
+
+// 실제 입력 음량만큼 아래에서부터 원을 채워 말할 때와 조용할 때를 구분한다.
+export const StatusLevelFill = styled.span<{ $level: number }>`
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: ${({ $level }) => `${Math.round(Math.min(Math.max($level, 0), 1) * 100)}%`};
+  background: linear-gradient(180deg, rgba(31, 120, 239, 0.32), rgba(31, 120, 239, 0.16));
+  transition: height 90ms linear;
+`;
+
+export const StatusIcon = styled.img<{ $muted: boolean }>`
+  position: relative;
+  z-index: 1;
+  width: 1.3rem;
+  height: 1.3rem;
+  object-fit: contain;
+  filter: ${({ $muted }) => ($muted ? "grayscale(1)" : "none")};
 `;
 
 export const BottomRow = styled.div`
@@ -360,8 +349,25 @@ export const Actions = styled.div`
   gap: 0.5rem;
 `;
 
+export const ButtonSpinner = styled.span`
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 0.13rem solid rgba(255, 255, 255, 0.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: interview-button-spin 0.75s linear infinite;
+
+  @keyframes interview-button-spin {
+    to { transform: rotate(360deg); }
+  }
+`;
+
 export const Button = styled.button<{ $secondary?: boolean }>`
   min-height: 2.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
   padding: 0 1rem;
   border: 0.0625rem solid ${({ $secondary }) => ($secondary ? "#cfd8e6" : "#1d76ea")};
   border-radius: 0.45rem;
@@ -382,14 +388,19 @@ export const Interviewers = styled.section<MultiLayoutProps>`
   grid-template-columns: repeat(auto-fit, minmax(6.6rem, 1fr));
   gap: 0.55rem;
 
-  ${({ $multi }) =>
+  ${({ $multi, $count }) =>
     $multi
       ? `
-          height: var(--multi-top-row-height);
+          height: var(--interviewers-height);
           min-height: 0;
           box-sizing: border-box;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-columns: repeat(${$count === 4 ? 2 : Math.max($count ?? 1, 1)}, minmax(0, 1fr));
+          grid-template-rows: repeat(${$count === 4 ? 2 : 1}, minmax(0, 1fr));
           gap: 0.6rem;
+          padding: 0;
+          border: 0;
+          box-shadow: none;
+          background: transparent;
         `
       : ""}
 `;
@@ -398,13 +409,26 @@ export const InterviewerCard = styled.article<{ $active: boolean } & MultiCardPr
   min-width: 0;
   min-height: 0;
   padding: 0.65rem;
-  border: 0.0625rem solid ${({ $active }) => ($active ? "#4d98ff" : "#dce2ea")};
+  border: 0.0625rem solid ${({ $active }) => ($active ? "#2f8bff" : "#dce2ea")};
   border-radius: 0.6rem;
   background: ${({ $active }) => ($active ? "#f4f9ff" : "#fff")};
   display: flex;
   flex-direction: column;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+
+  /* 링을 테두리 두께가 아닌 box-shadow로 그려야 활성 카드만 커져서
+     면접관 그리드의 행 높이가 흔들리는 일이 없다. */
+  box-shadow: ${({ $active }) =>
+    $active ? "0 0 0 0.125rem rgba(47, 139, 255, 0.35)" : "none"};
 
   ${({ $multi }) => ($multi ? "padding: 0.55rem;" : "")}
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 `;
 
 export const InterviewerImage = styled.img<MultiLayoutProps>`
@@ -419,7 +443,7 @@ export const InterviewerImage = styled.img<MultiLayoutProps>`
     $multi
       ? `
           flex: 0 0 auto;
-          height: 7.4rem;
+          height: var(--interviewer-image-height);
         `
       : ""}
 `;
@@ -457,6 +481,8 @@ export const InterviewerRole = styled.span`
 
 export const InterviewerTags = styled.div`
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 0.35rem;
   margin-top: 0.45rem;
 `;
@@ -470,16 +496,33 @@ export const InterviewerTag = styled.span`
   line-height: 1.2;
 `;
 
-export const ActiveBadge = styled.span`
+const badgePulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+`;
+
+export const ActiveBadge = styled.span<{ $speaking: boolean }>`
   display: block;
   width: fit-content;
-  margin: 0.45rem 0 0 auto;
+  margin: 0 0 0 auto;
   padding: 0.18rem 0.38rem;
   border-radius: 999rem;
-  background: #2479ed;
+  background: ${({ $speaking }) => ($speaking ? "#2479ed" : "#6b8cb5")};
   color: #fff;
   font-size: 0.62rem;
   font-weight: 800;
+  white-space: nowrap;
+
+  ${({ $speaking }) =>
+    $speaking
+      ? css`
+          animation: ${badgePulse} 1.6s ease-in-out infinite;
+        `
+      : ""}
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 export const MemoPanel = styled.section<MultiLayoutProps>`
@@ -490,7 +533,7 @@ export const MemoPanel = styled.section<MultiLayoutProps>`
   grid-template-rows: auto minmax(0, 1fr);
   gap: 0.55rem;
 
-  ${({ $multi }) => ($multi ? "min-height: 19rem;" : "")}
+  ${({ $multi }) => ($multi ? "min-height: var(--memo-min-height);" : "")}
 `;
 
 export const MemoLabel = styled.label`

@@ -24,6 +24,9 @@ export interface PreparedInterviewer {
   image?: string;
   gender?: InterviewPersonaGender;
   voiceIndex?: number;
+  personaType?: PersonaType;
+  tone?: InterviewTone;
+  level?: InterviewLevel;
 }
 
 export interface PrepareInterviewQuestion {

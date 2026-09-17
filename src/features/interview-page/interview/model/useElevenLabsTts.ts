@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
 import type { QuestionAudioStatus } from "@/widgets/interview-page/interview/type";
+import { useEffect, useRef, useState } from "react";
 
 const ELEVENLABS_TTS_API_URL = "/api/elevenlabs/tts";
 const ELEVENLABS_VOICES_API_URL = "/api/elevenlabs/voices";
@@ -17,7 +17,8 @@ const isPlaceholderVoiceId = (voiceId: string | undefined) =>
 
 const getConfiguredVoiceId = (voiceIndex?: number) => {
   if (voiceIndex !== undefined) {
-    const voiceId = ELEVENLABS_ENV[`VITE_ELEVENLABS_VOICE_ID${voiceIndex}`]?.trim();
+    const voiceId =
+      ELEVENLABS_ENV[`VITE_ELEVENLABS_VOICE_ID${voiceIndex}`]?.trim();
 
     if (voiceId) {
       return voiceId;
@@ -47,7 +48,9 @@ const getVoiceIdFromAccount = async (
 
   const payload: unknown = await response.json();
   const voices =
-    payload && typeof payload === "object" && "voices" in payload &&
+    payload &&
+    typeof payload === "object" &&
+    "voices" in payload &&
     Array.isArray(payload.voices)
       ? payload.voices
       : [];
@@ -77,7 +80,9 @@ const getVoiceIdFromAccount = async (
       return false;
     }
 
-    return (voice as { name?: unknown }).name === ELEVENLABS_FALLBACK_VOICE_NAME;
+    return (
+      (voice as { name?: unknown }).name === ELEVENLABS_FALLBACK_VOICE_NAME
+    );
   });
   const fallbackVoiceId =
     fallbackVoice && typeof fallbackVoice === "object"
@@ -177,7 +182,7 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
   useEffect(() => {
     resolvedVoiceIdRef.current = isPlaceholderVoiceId(configuredVoiceId)
       ? null
-      : configuredVoiceId ?? null;
+      : (configuredVoiceId ?? null);
   }, [configuredVoiceId]);
 
   useEffect(() => {
@@ -251,7 +256,8 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
           resolvedVoiceIdRef.current = configuredVoiceId;
         } else {
           const voiceIdRequest =
-            voiceIdRequestRef.current ?? getVoiceIdFromAccount(controller.signal);
+            voiceIdRequestRef.current ??
+            getVoiceIdFromAccount(controller.signal);
           voiceIdRequestRef.current = voiceIdRequest;
 
           try {
@@ -263,8 +269,13 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
         }
       }
 
+      const resolvedVoiceId = resolvedVoiceIdRef.current;
+      if (!resolvedVoiceId) {
+        throw new Error("ElevenLabs voice ID를 확인할 수 없습니다.");
+      }
+
       let response = await requestSpeech(
-        resolvedVoiceIdRef.current,
+        resolvedVoiceId,
         text,
         controller.signal,
       );
@@ -297,10 +308,20 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
           return;
         }
 
-        setErrorMessage(`ElevenLabs TTS 요청에 실패했습니다. (${response.status})`);
+        setErrorMessage(
+          `ElevenLabs TTS 요청에 실패했습니다. (${response.status})`,
+        );
         throw new Error(`ElevenLabs TTS failed with ${response.status}`);
       }
 
+      const contentType = response.headers.get("content-type") ?? "";
+      if (!contentType.toLowerCase().startsWith("audio/")) {
+        setErrorMessage(
+          "TTS 응답이 오디오가 아닙니다. 프록시 설정을 확인해주세요.",
+        );
+        await playWithBrowserSpeech(text, controller.signal);
+        return;
+      }
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);

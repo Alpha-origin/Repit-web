@@ -43,8 +43,8 @@ const loadingDots = keyframes`
 
 export const Container = styled.div`
   width: 100%;
-  height: auto;
-  min-height: 100%;
+  height: 100%;
+  min-height: 0;
   display: flex;
   justify-content: center;
   align-items: stretch;
@@ -141,10 +141,14 @@ export const SectionTitle = styled.h2`
   line-height: 1.25;
 `;
 
-export const SlotGrid = styled.div`
+export const SlotGrid = styled.div<{ $count: number }>`
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(${({ $count }) => $count}, minmax(0, 1fr));
   gap: 0.65rem;
+
+  @media (max-width: 64rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 
   @media (max-width: 32rem) {
     grid-template-columns: 1fr;
@@ -159,6 +163,7 @@ export const SlotButton = styled.button<SlotButtonProps>`
   padding: 0;
   border: 0.1rem solid
     ${({ $active, $filled }) => ($active ? "#3388f7" : $filled ? "#d3d8e1" : "#e2e6ed")};
+  border-style: ${({ $filled }) => ($filled ? "solid" : "dashed")};
   border-radius: 0.5rem;
   background: ${({ $active }) => ($active ? "#eef4ff" : "#ffffff")};
   color: #171717;
@@ -431,4 +436,74 @@ export const LoadingText = styled.p`
   color: #ffffff;
   font-size: 1rem;
   font-weight: 800;
+`;
+
+export const OptionsLock = styled.fieldset`
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+`;
+
+export const SettingsPanel = styled(OptionsLock)`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.lg};
+`;
+
+export const ChoiceRow = styled.div<{ $columns: number }>`
+  display: grid;
+  grid-template-columns: repeat(${({ $columns }) => $columns}, minmax(0, 1fr));
+  gap: 0.7rem;
+  & + & { margin-top: 0.7rem; }
+`;
+
+export const ChoiceButton = styled.button<{ $selected: boolean; $unavailable?: boolean }>`
+  min-width: 0;
+  min-height: 3rem;
+  padding: 0.6rem 0.3rem;
+  border: 1px solid ${({ $selected, theme }) => $selected ? theme.colors.brand.blue : "#d3d8e1"};
+  border-radius: ${({ theme }) => theme.radius.sm};
+  background: ${({ $selected, theme }) => $selected ? theme.colors.surface.blueLight : theme.colors.white};
+  color: ${({ theme }) => theme.colors.text.default};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  font-weight: 600;
+  cursor: pointer;
+  &:disabled {
+    cursor: ${({ $unavailable }) => $unavailable ? "not-allowed" : "wait"};
+    opacity: 0.65;
+    ${({ $unavailable, theme }) => $unavailable ? `background: ${theme.colors.surface.subtle};` : ""}
+  }
+  ${focusRing}
+`;
+
+export const SelectedLabel = styled.span`
+  display: block;
+  margin-top: 0.2rem;
+  color: ${({ theme }) => theme.colors.text.default};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-weight: 500;
+`;
+
+export const IdentityRow = styled.div`
+  display: grid;
+  grid-template-columns: repeat(5, minmax(5rem, 1fr));
+  gap: 0.55rem;
+  overflow-x: auto;
+  padding-bottom: 0.3rem;
+`;
+
+export const IdentityButton = styled(ChoiceButton)`
+  padding: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+`;
+
+export const IdentityImage = styled.img`
+  width: 100%;
+  height: 4rem;
+  object-fit: cover;
+  border-radius: 0.3rem;
 `;

@@ -11,3 +11,16 @@ export const INTERVIEW_STATUS_MESSAGES = {
   voiceCompleting: '음성 답변 정리 중...',
   text: '텍스트로 답변을 작성해주세요.',
 } as const;
+
+export const INTERVIEW_DEVICE_STATUS_LABELS = {
+  camera: {
+    loading: '카메라 연결 중',
+    ready: '카메라 연결됨',
+    blocked: '카메라 연결 안 됨',
+  },
+  mic: {
+    loading: '마이크 연결 중',
+    ready: '마이크 연결됨',
+    blocked: '마이크 연결 안 됨',
+  },
+} as const;
