@@ -21,10 +21,12 @@ import {
 import type { InterviewMode } from "@/widgets/interview-page/interview/type";
 import { useElevenLabsTts } from "./useElevenLabsTts";
 import { useSupertoneTts } from "./useSupertoneTts";
-import { useInterviewCamera } from "./useInterviewCamera";
+import { useInterviewElapsedTime } from "./useInterviewElapsedTime";
+import { useInterviewMedia } from "./useInterviewMedia";
 import { useInterviewRecorder } from "./useInterviewRecorder";
 import { useInterviewSocket } from "./useInterviewSocket";
 import { useVoiceAnswer } from "./useVoiceAnswer";
+import { useVoiceLevel } from "./useVoiceLevel";
 
 type InterviewCloseReason = "completed" | "quit";
 const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
@@ -256,9 +258,11 @@ export const useInterviewSession = (
   const [isAwaitingNextQuestion, setIsAwaitingNextQuestion] = useState(false);
   const [preparationError, setPreparationError] = useState<string | null>(null);
   const isVoiceMode = mode === "voice";
-  const { cameraState, cloneVideoTrack, videoRef } = useInterviewCamera(true);
+  const { cameraState, cloneVideoTrack, micState, micStream, videoRef } =
+    useInterviewMedia(isVoiceMode);
   const recorder = useInterviewRecorder(cloneVideoTrack);
   const { startVideoRecording, finishInterviewRecording } = recorder;
+  const voiceLevel = useVoiceLevel(micStream);
   const voiceAnswer = useVoiceAnswer();
   const multiTtsSpeaker = useMemo(() => {
     if (preparedInterview?.mode !== "MULTI") {
@@ -292,6 +296,26 @@ export const useInterviewSession = (
       voiceIndex: speaker.voiceIndex ?? interviewers.indexOf(speaker) + 1,
     };
   }, [currentQuestion?.personaId, preparedInterview]);
+  // TTS는 성별이 섞이지 않게 대표 면접관으로 대체하지만, 화면 강조는 질문에 실제로
+  // 연결된 면접관에게만 준다. 대체 면접관까지 강조하면 personaId가 빠진 응답에서
+  // 1번 면접관이 계속 질문하는 것처럼 보인다.
+  const speakingPersonaId = useMemo(() => {
+    const personaId = currentQuestion?.personaId;
+
+    if (personaId === undefined) {
+      return undefined;
+    }
+
+    if (preparedInterview?.mode !== "MULTI") {
+      return personaId;
+    }
+
+    return (preparedInterview.interviewers ?? []).some(
+      (interviewer) => interviewer.personaId === personaId,
+    )
+      ? personaId
+      : undefined;
+  }, [currentQuestion?.personaId, preparedInterview]);
   const elevenLabsTts = useElevenLabsTts(
     currentQuestion?.content ?? "",
     multiTtsSpeaker?.voiceIndex,
@@ -314,6 +338,8 @@ export const useInterviewSession = (
       startVideoRecording();
     }
   }, [canSubmitAnswer, cameraState, startVideoRecording]);
+  // 첫 질문이 도착한 시점을 면접 시작으로 본다.
+  const elapsedSeconds = useInterviewElapsedTime(sessionId, canSubmitAnswer);
   const getInterviewExitPath = useCallback(
     (reason: InterviewCloseReason) =>
       reason === "completed" ? INTERVIEW_COMPLETED_PATH : "/main",
@@ -721,6 +747,7 @@ export const useInterviewSession = (
     recorder,
     currentQuestion,
     displayQuestionNumber,
+    elapsedSeconds,
     isAwaitingNextQuestion,
     isAwaitingResponse: isSubmitting || isAwaitingNextQuestion || recorder.isStopping,
     isSubmitting,
@@ -732,6 +759,7 @@ export const useInterviewSession = (
     questionAudioStatus: questionTts.status,
     questionAudioErrorMessage:
       ttsProvider === "elevenlabs" ? elevenLabsTts.errorMessage : null,
+    speakingPersonaId,
     ttsSpeakerPersonaId: multiTtsSpeaker?.personaId,
     onAnswerTextChange: voiceAnswer.onAnswerTextChange,
     onClearAnswer: voiceAnswer.onClearAnswer,
@@ -741,8 +769,9 @@ export const useInterviewSession = (
     onStartVoice: handleStartVoice,
     onSubmitText: handleSubmitText,
     onToggleQuestionAudio: questionTts.onToggle,
+    micState,
     videoRef,
-    voiceLevel: voiceAnswer.voiceLevel,
+    voiceLevel,
     totalQuestionCount,
     followUpQuestionNumber: getFollowUpQuestionNumber(currentQuestion),
   };

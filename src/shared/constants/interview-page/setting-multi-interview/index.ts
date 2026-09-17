@@ -6,7 +6,6 @@ import InterviewerImage4 from "@/shared/img/interview-page/interviewer4.svg?url"
 import type {
   InterviewerTemplate,
   InterviewerTemplateRole,
-  SlotIndex,
 } from "./type";
 
 export const TYPE_BY_STYLE = {
@@ -98,53 +97,26 @@ export const getInterviewerGender = (
   voiceIndex: InterviewerTemplate["voiceIndex"],
 ) => (voiceIndex <= 2 ? "FEMALE" : "MALE");
 
-interface InterviewerRoleConfig {
-  role: InterviewerTemplateRole;
-  roleLabel: string;
-  specialty: string;
-  major?: "BACKEND" | "FRONTEND";
-}
+export const INTERVIEWER_COUNT_OPTIONS = [2, 3, 4] as const;
 
-const MULTI_INTERVIEW_ROLE_CONFIGS: readonly (readonly InterviewerRoleConfig[])[] = [
-  [
-    { role: "TECH", roleLabel: "기술 면접관", specialty: "백엔드 아키텍처", major: "BACKEND" },
-    { role: "TECH", roleLabel: "기술 면접관", specialty: "프론트엔드 리드", major: "FRONTEND" },
-    { role: "TECH", roleLabel: "기술 면접관", specialty: "플랫폼 엔지니어링", major: "BACKEND" },
-    { role: "TECH", roleLabel: "기술 면접관", specialty: "프론트엔드 개발", major: "FRONTEND" },
-    { role: "TECH", roleLabel: "기술 면접관", specialty: "데이터 엔지니어링", major: "BACKEND" },
-  ],
-  [
-    { role: "HR", roleLabel: "인사 면접관", specialty: "조직 문화와 협업" },
-    { role: "PM", roleLabel: "PM 면접관", specialty: "프로덕트 전략" },
-    { role: "DESIGN", roleLabel: "디자인 면접관", specialty: "프로덕트 경험" },
-    { role: "HR", roleLabel: "인사 면접관", specialty: "인재 성장" },
-    { role: "PM", roleLabel: "PM 면접관", specialty: "그로스와 실험" },
-  ],
-  [
-    { role: "CEO", roleLabel: "대표 면접관", specialty: "사업 전략" },
-    { role: "CEO", roleLabel: "대표 면접관", specialty: "비즈니스 리더십" },
-    { role: "HR", roleLabel: "인사 면접관", specialty: "조직 적합성" },
-    { role: "DESIGN", roleLabel: "디자인 면접관", specialty: "브랜드 경험" },
-    { role: "PM", roleLabel: "PM 면접관", specialty: "제품 의사결정" },
-  ],
-];
-
-export const getInterviewerRoleConfigForSlot = (
-  slot: SlotIndex,
-  interviewerIndex: number,
-) => MULTI_INTERVIEW_ROLE_CONFIGS[slot][interviewerIndex];
-
-export const MULTI_INTERVIEW_SLOT_LABELS = [
-  "기술",
-  "직무·조직 적합성",
-  "리더십·비즈니스",
+export const PERSONALITY_OPTIONS = [
+  { value: "FRIENDLY", label: "친근한" },
+  { value: "METICULOUS", label: "꼼꼼한" },
+  { value: "REALISTIC", label: "현실적인" },
 ] as const;
 
-export const getInterviewerCandidatesForSlot = (slot: SlotIndex) =>
-  MULTI_INTERVIEWER_TEMPLATES.map((interviewer, index) => ({
-    ...interviewer,
-    ...getInterviewerRoleConfigForSlot(slot, index),
-  }));
+export const TONE_OPTIONS = [
+  { value: "GENTLE", label: "부드러운" },
+  { value: "DIRECT", label: "직설적인" },
+  { value: "PRESSURING", label: "강압적인" },
+] as const;
+
+export const ROLE_OPTIONS = [
+  { value: "HR", label: "HR" },
+  { value: "DESIGN", label: "Design" },
+  { value: "PM", label: "PM" },
+  { value: "CEO", label: "CEO" },
+] as const;
 
 const ROLE_LABELS: Record<InterviewerTemplateRole, string> = {
   TECH: "기술 면접관",
@@ -159,7 +131,11 @@ export const getRoleLabel = (role: InterviewerTemplateRole) => ROLE_LABELS[role]
 export type {
   InterviewerTemplate,
   InterviewerTemplateRole,
+  InterviewerCount,
+  InterviewerSlot,
+  InterviewerPersonality,
+  InterviewerTone,
+  SlotIndex,
   MultiInterviewSelection,
   MultiInterviewValidation,
-  SlotIndex,
 } from "./type";

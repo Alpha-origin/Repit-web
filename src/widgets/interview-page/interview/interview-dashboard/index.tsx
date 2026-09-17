@@ -1,6 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import type { ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { INTERVIEW_DEVICE_STATUS_LABELS } from "@/shared/constants/interview-page/interview";
+import { PERSONALITY_OPTIONS } from "@/shared/constants/interview-page/setting-multi-interview";
 
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
+import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
+import MicIcon from "@/shared/img/interview-page/mike.svg?url";
 import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
 import * as S from "./style";
 
@@ -19,9 +24,8 @@ const getMemoKey = (sessionId?: string) =>
 const InterviewDashboard = () => {
   const interview = useInterviewSessionContext();
   const recorder = interview.recorder;
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
+  const elapsedSeconds = interview.elapsedSeconds;
   const sessionId = interview.preparedInterview?.sessionId;
   const memoKey = useMemo(() => getMemoKey(sessionId), [sessionId]);
   const [memo, setMemo] = useState(() =>
@@ -30,11 +34,12 @@ const InterviewDashboard = () => {
   const isMultiInterview = interview.preparedInterview?.mode === "MULTI";
   const isVoiceMode = interview.mode === "voice";
   const isQuestionLoading = interview.currentQuestion === null;
-  const activePersonaId = isMultiInterview
-    ? isQuestionLoading
-      ? undefined
-      : interview.ttsSpeakerPersonaId
-    : interview.currentQuestion?.personaId;
+  const isQuestionSpeaking = interview.questionAudioStatus === "playing";
+  const speakingPersonaId = interview.speakingPersonaId;
+  const lastSpeakingPersonaIdRef = useRef<number | undefined>(undefined);
+  // 질문이 도착한 뒤 다음 질문이 올 때까지 같은 면접관을 강조한다.
+  // 질문 로딩 구간에는 personaId가 비므로 직전 발화자를 유지해 강조가 끊기지 않게 한다.
+  const activePersonaId = speakingPersonaId ?? lastSpeakingPersonaIdRef.current;
   const interviewers = interview.preparedInterview?.interviewers ?? [];
   const activeInterviewer = interviewers.find(
     (interviewer) => interviewer.personaId === activePersonaId,
@@ -50,35 +55,19 @@ const InterviewDashboard = () => {
   const isAnswerDisabled =
     !interview.isInterviewReady || isQuestionLoading || isAwaitingResponse ||
     recorder.isStarting || recorder.isStopping;
+  const isCameraReady = interview.cameraState === "ready";
+  const isMicReady = interview.micState === "ready";
+  const micLevel = isMicReady ? interview.voiceLevel : 0;
 
   useEffect(() => {
-    if (
-      !interview.isInterviewReady ||
-      !isTimerRunning ||
-      interview.isAwaitingNextQuestion
-    ) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      setElapsedSeconds((seconds) => seconds + 1);
-    }, 1_000);
-
-    return () => window.clearInterval(intervalId);
-  }, [
-    interview.isInterviewReady,
-    interview.isAwaitingNextQuestion,
-    isTimerRunning,
-  ]);
+    lastSpeakingPersonaIdRef.current = undefined;
+  }, [sessionId]);
 
   useEffect(() => {
-    if (!interview.isAwaitingNextQuestion) {
-      return;
+    if (speakingPersonaId !== undefined) {
+      lastSpeakingPersonaIdRef.current = speakingPersonaId;
     }
-
-    setElapsedSeconds(0);
-    setIsTimerRunning(false);
-  }, [interview.isAwaitingNextQuestion]);
+  }, [speakingPersonaId]);
 
   useEffect(() => {
     setMemo(memoKey ? window.sessionStorage.getItem(memoKey) ?? "" : "");
@@ -104,7 +93,6 @@ const InterviewDashboard = () => {
     }
 
     if (!(await interview.onStartVoice())) return;
-    setIsTimerRunning(true);
     setIsVoiceAnswering(true);
   };
 
@@ -132,7 +120,7 @@ const InterviewDashboard = () => {
           {formatTime(elapsedSeconds)}
         </S.Timer>
 
-        <S.MainGrid $multi={isMultiInterview}>
+        <S.MainGrid $multi={isMultiInterview} $count={interviewers.length}>
           <S.LeftColumn $multi={isMultiInterview}>
             <S.QuestionPanel $multi={isMultiInterview} aria-live="polite">
               <S.QuestionMetaRow>
@@ -141,19 +129,18 @@ const InterviewDashboard = () => {
                     ? `Question ${questionLabel} / ${interview.totalQuestionCount}`
                     : `Question ${questionLabel}${interview.totalQuestionCount > 0 ? ` · 기본 질문 ${interview.totalQuestionCount}개` : ""}`}
                 </S.QuestionTag>
-                {!isMultiInterview ? (
-                  <S.QuestionAudioButton
-                    type="button"
-                    disabled={isQuestionLoading || interview.questionAudioStatus === "loading"}
-                    onClick={interview.onToggleQuestionAudio}
-                  >
-                    {interview.questionAudioStatus === "loading"
-                      ? "음성 생성 중..."
-                      : interview.questionAudioStatus === "playing"
-                        ? "질문 멈추기"
-                        : "질문 듣기"}
-                  </S.QuestionAudioButton>
-                ) : null}
+                <S.QuestionAudioButton
+                  type="button"
+                  disabled={isQuestionLoading || interview.questionAudioStatus === "loading"}
+                  aria-pressed={interview.questionAudioStatus === "playing"}
+                  onClick={() => interview.onToggleQuestionAudio()}
+                >
+                  {interview.questionAudioStatus === "loading"
+                    ? "음성 생성 중..."
+                    : interview.questionAudioStatus === "playing"
+                      ? "질문 멈추기"
+                      : "질문 듣기"}
+                </S.QuestionAudioButton>
               </S.QuestionMetaRow>
               {activeInterviewer && !isMultiInterview ? (
                 <S.QuestionSpeaker>
@@ -195,6 +182,23 @@ const InterviewDashboard = () => {
               {isVoiceMode ? (
                 <S.VideoArea>
                   <InterviewCameraView />
+                  <S.VideoControls>
+                    <S.StatusIndicator
+                      $active={isCameraReady}
+                      role="img"
+                      aria-label={INTERVIEW_DEVICE_STATUS_LABELS.camera[interview.cameraState]}
+                    >
+                      <S.StatusIcon src={CameraIcon} alt="" aria-hidden="true" $muted={!isCameraReady} />
+                    </S.StatusIndicator>
+                    <S.StatusIndicator
+                      $active={isMicReady}
+                      role="img"
+                      aria-label={INTERVIEW_DEVICE_STATUS_LABELS.mic[interview.micState]}
+                    >
+                      <S.StatusLevelFill aria-hidden="true" $level={micLevel} />
+                      <S.StatusIcon src={MicIcon} alt="" aria-hidden="true" $muted={!isMicReady} />
+                    </S.StatusIndicator>
+                  </S.VideoControls>
                 </S.VideoArea>
               ) : (
                 <S.TextArea
@@ -203,7 +207,9 @@ const InterviewDashboard = () => {
                   maxLength={TEXT_ANSWER_MAX_LENGTH}
                   placeholder="이곳에 답변을 입력해주세요. 자신의 경험과 성과를 구체적인 수치와 함께 작성하면 좋은 평가를 받을 수 있습니다."
                   readOnly={isAwaitingResponse}
-                  onChange={interview.onAnswerTextChange}
+                  onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
+                    interview.onAnswerTextChange(event)
+                  }
                 />
               )}
 
@@ -233,7 +239,10 @@ const InterviewDashboard = () => {
                         aria-busy={isAwaitingResponse}
                         onClick={() => void handleCompleteVoice()}
                       >
-                        {isAwaitingResponse ? "응답 대기중..." : "답변 끝내기"}
+                        {isAwaitingResponse ? (
+                          <S.ButtonSpinner aria-hidden="true" />
+                        ) : null}
+                        답변 끝내기
                       </S.Button>
                     ) : (
                       <S.Button
@@ -242,7 +251,10 @@ const InterviewDashboard = () => {
                         aria-busy={isAwaitingResponse}
                         onClick={() => void handleStartVoice()}
                       >
-                        {isAwaitingResponse ? "응답 대기중..." : "음성 답변 시작"}
+                        {isAwaitingResponse ? (
+                          <S.ButtonSpinner aria-hidden="true" />
+                        ) : null}
+                        음성 답변 시작
                       </S.Button>
                     )
                   ) : (
@@ -252,11 +264,10 @@ const InterviewDashboard = () => {
                       aria-busy={isAwaitingResponse}
                       onClick={() => void interview.onSubmitText()}
                     >
-                      {interview.isSubmitting
-                        ? "제출 중..."
-                        : interview.isAwaitingNextQuestion
-                          ? "응답 대기중..."
-                          : "제출하기"}
+                      {isAwaitingResponse ? (
+                        <S.ButtonSpinner aria-hidden="true" />
+                      ) : null}
+                      제출하기
                     </S.Button>
                   )}
                 </S.Actions>
@@ -265,7 +276,7 @@ const InterviewDashboard = () => {
           </S.LeftColumn>
 
           <S.RightColumn $multi={isMultiInterview}>
-            <S.Interviewers $multi={isMultiInterview} aria-label="면접관 목록">
+            <S.Interviewers $multi={isMultiInterview} $count={interviewers.length} aria-label="면접관 목록">
               {interviewers.map((interviewer) => {
                 const isActive = interviewer.personaId === activePersonaId;
 
@@ -274,6 +285,7 @@ const InterviewDashboard = () => {
                     key={interviewer.personaId}
                     $active={isActive}
                     $multi={isMultiInterview}
+                    aria-current={isActive ? "true" : undefined}
                   >
                     {interviewer.image ? (
                       <S.InterviewerImage
@@ -291,22 +303,27 @@ const InterviewDashboard = () => {
                     {isMultiInterview ? (
                       <S.InterviewerTags>
                         <S.InterviewerTag>
-                          {interview.preparedInterview?.personaType === "METICULOUS"
-                            ? "꼼꼼한"
-                            : interview.preparedInterview?.personaType === "REALISTIC"
-                              ? "현실적인"
-                              : "친근한"}
+                          {PERSONALITY_OPTIONS.find((option) => option.value === (interviewer.personaType ?? interview.preparedInterview?.personaType))?.label ?? "친근한"}
                         </S.InterviewerTag>
                         <S.InterviewerTag>
-                          {interview.preparedInterview?.level === "HARD"
+                          {(interviewer.level ?? interview.preparedInterview?.level) === "HARD"
                             ? "어려움"
-                            : interview.preparedInterview?.level === "NORMAL"
+                            : (interviewer.level ?? interview.preparedInterview?.level) === "NORMAL"
                               ? "보통"
                               : "쉬움"}
                         </S.InterviewerTag>
+                        {isActive ? (
+                          <S.ActiveBadge $speaking={isQuestionSpeaking}>
+                            {isQuestionSpeaking ? "질문 중" : "답변 대기"}
+                          </S.ActiveBadge>
+                        ) : null}
                       </S.InterviewerTags>
                     ) : null}
-                    {isActive ? <S.ActiveBadge>질문 중</S.ActiveBadge> : null}
+                    {!isMultiInterview && isActive ? (
+                      <S.ActiveBadge $speaking={isQuestionSpeaking}>
+                        {isQuestionSpeaking ? "질문 중" : "답변 대기"}
+                      </S.ActiveBadge>
+                    ) : null}
                   </S.InterviewerCard>
                 );
               })}
@@ -318,20 +335,13 @@ const InterviewDashboard = () => {
                 id="interview-memo"
                 value={memo}
                 placeholder="기억해야 할 키워드를 자유롭게 적어보세요.&#10;평가에 반영되지 않습니다."
-                onChange={(event) => setMemo(event.target.value)}
+                onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
+                  setMemo(event.target.value)
+                }
               />
             </S.MemoPanel>
           </S.RightColumn>
         </S.MainGrid>
-
-        {interview.isAwaitingNextQuestion ? (
-          <S.LoadingOverlay role="status" aria-live="polite">
-            <S.LoadingModal>
-              <S.LoadingSpinner aria-hidden="true" />
-              <S.LoadingMessage>다음 질문을 준비하고 있습니다</S.LoadingMessage>
-            </S.LoadingModal>
-          </S.LoadingOverlay>
-        ) : null}
       </S.Content>
     </S.Page>
   );
