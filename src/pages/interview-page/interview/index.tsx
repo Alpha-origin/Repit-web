@@ -5,7 +5,6 @@ import type { PreparedInterviewData } from "@/features/interview-page/interview/
 import {
   InterviewSessionProvider,
 } from "@/features/interview-page/interview/model/interviewSessionContext";
-import { useInterviewRecorder } from "@/features/interview-page/interview/model/useInterviewRecorder";
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
 import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
 import MicIcon from "@/shared/img/interview-page/mike.svg?url";
@@ -56,7 +55,7 @@ const InterviewPage = () => {
 
 const InterviewPageContent = () => {
   const interviewSession = useInterviewSessionContext();
-  const interviewRecorder = useInterviewRecorder(interviewSession.cloneVideoTrack);
+  const interviewRecorder = interviewSession.recorder;
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
@@ -86,7 +85,6 @@ const InterviewPageContent = () => {
   }, [isTimerRunning]);
 
   const handleQuitInterview = async () => {
-    await interviewRecorder.stopRecording();
     await interviewSession.onQuitInterview();
   };
 
@@ -111,7 +109,7 @@ const InterviewPageContent = () => {
   }
 
   if (isMultiInterview) {
-    return <InterviewDashboard recorder={interviewRecorder} />;
+    return <InterviewDashboard />;
   }
 
   const handleStartVoice = async () => {
@@ -119,10 +117,9 @@ const InterviewPageContent = () => {
       return;
     }
 
-    if (!(await interviewRecorder.startRecording())) return;
+    if (!(await interviewSession.onStartVoice())) return;
     setIsVoiceAnswering(true);
     setIsTimerRunning(true);
-    interviewSession.onStartVoice();
   };
 
   const handleCompleteVoice = async () => {
@@ -131,7 +128,6 @@ const InterviewPageContent = () => {
     }
 
     try {
-      await interviewRecorder.stopRecording();
       await interviewSession.onCompleteVoice();
     } finally {
       setIsVoiceAnswering(false);
@@ -140,7 +136,6 @@ const InterviewPageContent = () => {
 
   const handleModeChange = (nextMode: typeof interviewSession.mode) => {
     if (nextMode === "text") {
-      void interviewRecorder.stopRecording();
       setIsVoiceAnswering(false);
     }
 

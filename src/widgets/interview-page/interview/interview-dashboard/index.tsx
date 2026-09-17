@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
-import type { InterviewRecorder } from "@/features/interview-page/interview/model/useInterviewRecorder";
 import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
 import * as S from "./style";
 
@@ -17,12 +16,9 @@ const formatTime = (seconds: number) => {
 const getMemoKey = (sessionId?: string) =>
   sessionId ? `interview-memo:${sessionId}` : null;
 
-interface InterviewDashboardProps {
-  recorder: InterviewRecorder;
-}
-
-const InterviewDashboard = ({ recorder }: InterviewDashboardProps) => {
+const InterviewDashboard = () => {
   const interview = useInterviewSessionContext();
+  const recorder = interview.recorder;
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
@@ -96,7 +92,6 @@ const InterviewDashboard = ({ recorder }: InterviewDashboardProps) => {
 
   const handleModeChange = (mode: typeof interview.mode) => {
     if (mode === "text") {
-      void recorder.stopRecording();
       setIsVoiceAnswering(false);
     }
 
@@ -108,10 +103,9 @@ const InterviewDashboard = ({ recorder }: InterviewDashboardProps) => {
       return;
     }
 
-    if (!(await recorder.startRecording())) return;
+    if (!(await interview.onStartVoice())) return;
     setIsTimerRunning(true);
     setIsVoiceAnswering(true);
-    interview.onStartVoice();
   };
 
   const handleCompleteVoice = async () => {
@@ -120,7 +114,6 @@ const InterviewDashboard = ({ recorder }: InterviewDashboardProps) => {
     }
 
     try {
-      await recorder.stopRecording();
       await interview.onCompleteVoice();
     } finally {
       setIsVoiceAnswering(false);
@@ -128,7 +121,6 @@ const InterviewDashboard = ({ recorder }: InterviewDashboardProps) => {
   };
 
   const handleQuitInterview = async () => {
-    await recorder.stopRecording();
     await interview.onQuitInterview();
   };
 

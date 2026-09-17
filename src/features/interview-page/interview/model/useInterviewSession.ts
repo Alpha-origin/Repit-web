@@ -22,6 +22,7 @@ import type { InterviewMode } from "@/widgets/interview-page/interview/type";
 import { useElevenLabsTts } from "./useElevenLabsTts";
 import { useSupertoneTts } from "./useSupertoneTts";
 import { useInterviewCamera } from "./useInterviewCamera";
+import { useInterviewRecorder } from "./useInterviewRecorder";
 import { useInterviewSocket } from "./useInterviewSocket";
 import { useVoiceAnswer } from "./useVoiceAnswer";
 
@@ -255,7 +256,9 @@ export const useInterviewSession = (
   const [isAwaitingNextQuestion, setIsAwaitingNextQuestion] = useState(false);
   const [preparationError, setPreparationError] = useState<string | null>(null);
   const isVoiceMode = mode === "voice";
-  const { cameraState, cloneVideoTrack, videoRef } = useInterviewCamera(isVoiceMode);
+  const { cameraState, cloneVideoTrack, videoRef } = useInterviewCamera(true);
+  const recorder = useInterviewRecorder(cloneVideoTrack);
+  const { startVideoRecording, finishInterviewRecording } = recorder;
   const voiceAnswer = useVoiceAnswer();
   const multiTtsSpeaker = useMemo(() => {
     if (preparedInterview?.mode !== "MULTI") {
@@ -306,6 +309,11 @@ export const useInterviewSession = (
   const isCompletingVoiceRef = useRef(false);
   const questionStartedAtRef = useRef(0);
   const canSubmitAnswer = isChatSessionReady && currentQuestion !== null;
+  useEffect(() => {
+    if (canSubmitAnswer && cameraState === "ready" && !isSessionClosedRef.current) {
+      startVideoRecording();
+    }
+  }, [canSubmitAnswer, cameraState, startVideoRecording]);
   const getInterviewExitPath = useCallback(
     (reason: InterviewCloseReason) =>
       reason === "completed" ? INTERVIEW_COMPLETED_PATH : "/main",
@@ -388,6 +396,7 @@ export const useInterviewSession = (
       shouldNavigateToMain: boolean,
       reason: InterviewCloseReason = "quit",
     ) => {
+      await finishInterviewRecording();
       const activeSessionId = sessionIdRef.current ?? getActiveInterviewSessionId();
       const nextPath = getInterviewExitPath(reason);
       const answeredQuestionCount = displayQuestionNumberRef.current;
@@ -422,7 +431,7 @@ export const useInterviewSession = (
         });
       }
     },
-    [getInterviewExitPath, navigate],
+    [finishInterviewRecording, getInterviewExitPath, navigate],
   );
 
   const handleSocketStatusChange = useCallback(
@@ -568,23 +577,26 @@ export const useInterviewSession = (
     questionTts.onStop();
 
     if (isVoiceMode) {
+      void recorder.stopAudioRecording();
       voiceAnswer.onExitVoiceMode();
     }
 
     setMode(nextMode);
   };
 
-  const handleStartVoice = () => {
+  const handleStartVoice = async () => {
     if (!isChatSessionReady) {
-      return;
+      return false;
     }
 
     if (isSubmitting || isAwaitingNextQuestion || !canSubmitAnswer) {
-      return;
+      return false;
     }
 
     questionTts.onStop();
+    if (!(await recorder.startAudioRecording())) return false;
     void voiceAnswer.onStartVoice();
+    return true;
   };
 
   const submitAnswer = async (content: string) => {
@@ -683,7 +695,9 @@ export const useInterviewSession = (
     isCompletingVoiceRef.current = true;
 
     try {
+      const audioResult = recorder.stopAudioRecording();
       const voiceContent = await voiceAnswer.onCompleteVoice();
+      await audioResult;
       await submitAnswer(voiceContent || voiceAnswer.answerText);
     } finally {
       isCompletingVoiceRef.current = false;
@@ -704,11 +718,11 @@ export const useInterviewSession = (
     answerStatus: isVoiceMode ? voiceAnswer.voiceStatus : INTERVIEW_STATUS_MESSAGES.text,
     answerText: voiceAnswer.answerText,
     cameraState,
-    cloneVideoTrack,
+    recorder,
     currentQuestion,
     displayQuestionNumber,
     isAwaitingNextQuestion,
-    isAwaitingResponse: isSubmitting || isAwaitingNextQuestion,
+    isAwaitingResponse: isSubmitting || isAwaitingNextQuestion || recorder.isStopping,
     isSubmitting,
     isInterviewReady: isChatSessionReady,
     isPreparingInterview: Boolean(preparedInterview) && !isChatSessionReady,
