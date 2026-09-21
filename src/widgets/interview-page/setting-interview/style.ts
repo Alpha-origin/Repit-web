@@ -348,6 +348,7 @@ export const InterviewerImage = styled.img`
   flex: 0 0 auto;
   display: block;
   object-fit: cover;
+  object-position: center bottom;
 
   @media (max-width: 52rem) {
     height: 8.6rem;
