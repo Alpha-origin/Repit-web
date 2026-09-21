@@ -1,21 +1,29 @@
 import { apiInstance } from "@/shared/api/axiosInstance";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
 
+export type InterviewRecordingKind = "ANSWER" | "FULL_INTERVIEW";
+
 interface UploadInterviewRecordingParams {
   interviewId: number;
   questionId?: number | null;
   file: File;
+  kind?: InterviewRecordingKind;
 }
 
 export const uploadInterviewRecording = async ({
   interviewId,
   questionId,
   file,
+  kind,
 }: UploadInterviewRecordingParams) => {
   const formData = new FormData();
   formData.append("file", file);
 
-  if (questionId != null) {
+  if (kind) {
+    formData.append("kind", kind);
+  }
+
+  if (kind !== "FULL_INTERVIEW" && questionId != null) {
     formData.append("questionId", String(questionId));
   }
 
