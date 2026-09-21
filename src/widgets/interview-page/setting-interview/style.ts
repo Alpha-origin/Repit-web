@@ -312,11 +312,16 @@ export const InterviewerGrid = styled.div`
 
 export const InterviewerCard = styled.button<SelectedProps>`
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
   overflow: hidden;
   min-width: 0;
   min-height: 0;
   height: 100%;
   padding: 0;
+  appearance: none;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
   border-radius: 0.5rem;
@@ -348,7 +353,7 @@ export const InterviewerImage = styled.img`
   flex: 0 0 auto;
   display: block;
   object-fit: cover;
-  object-position: center bottom;
+  object-position: center;
 
   @media (max-width: 52rem) {
     height: 8.6rem;
