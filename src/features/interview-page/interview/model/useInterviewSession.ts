@@ -14,6 +14,7 @@ import {
   type InterviewProgressStatus,
   type PreparedInterviewData,
 } from "@/features/interview-page/interview/api";
+import { uploadRecordingInBackground } from "./uploadRecordingInBackground";
 import {
   INTERVIEW_STATUS_MESSAGES,
 } from "@/shared/constants/interview-page/interview";
@@ -262,8 +263,17 @@ export const useInterviewSession = (
   const [preparationError, setPreparationError] = useState<string | null>(null);
   const isVoiceMode = mode === "voice";
   const { cameraState, cloneAudioTrack, cloneVideoTrack, micState, micStream, videoRef } =
-    useInterviewMedia(isVoiceMode);
-  const recorder = useInterviewRecorder(cloneVideoTrack, cloneAudioTrack);
+    useInterviewMedia(true);
+  const recorder = useInterviewRecorder(cloneVideoTrack, cloneAudioTrack, {
+    audioOnly: true,
+  });
+  const sessionRecorder = useInterviewRecorder(cloneVideoTrack, cloneAudioTrack);
+  const {
+    isRecording: isSessionRecording,
+    isStarting: isSessionStarting,
+    startRecording: startSessionRecording,
+    stopRecording: stopSessionRecording,
+  } = sessionRecorder;
   const voiceLevel = useVoiceLevel(micStream);
   const voiceAnswer = useVoiceAnswer();
   const multiTtsSpeaker = useMemo(() => {
@@ -349,6 +359,29 @@ export const useInterviewSession = (
   const isCompletingVoiceRef = useRef(false);
   const questionStartedAtRef = useRef(0);
   const canSubmitAnswer = isChatSessionReady && currentQuestion !== null;
+
+  useEffect(() => {
+    if (
+      !isChatSessionReady ||
+      !currentQuestion ||
+      isSessionClosedRef.current ||
+      isSessionRecording ||
+      isSessionStarting
+    ) {
+      return;
+    }
+
+    void startSessionRecording();
+  }, [
+    cameraState,
+    currentQuestion,
+    isChatSessionReady,
+    micState,
+    isSessionRecording,
+    isSessionStarting,
+    startSessionRecording,
+  ]);
+
   // 첫 질문이 도착한 시점을 면접 시작으로 본다.
   const elapsedSeconds = useInterviewElapsedTime(sessionId, canSubmitAnswer);
   const getInterviewExitPath = useCallback(
@@ -369,6 +402,20 @@ export const useInterviewSession = (
       setIsAwaitingNextQuestion(false);
     }, AWAITING_RESPONSE_TIMEOUT_MS);
   }, [clearAwaitingResponseTimeout]);
+
+  const stopAndUploadFullInterview = useCallback(async () => {
+    try {
+      const file = await stopSessionRecording();
+
+      uploadRecordingInBackground({
+        file,
+        interviewId: preparedInterview?.interviewId ?? null,
+        kind: "FULL_INTERVIEW",
+      });
+    } catch (error) {
+      console.error("면접 전체 녹화 처리 실패:", error);
+    }
+  }, [preparedInterview?.interviewId, stopSessionRecording]);
 
   useEffect(() => {
     return () => {
@@ -433,11 +480,27 @@ export const useInterviewSession = (
       shouldNavigateToMain: boolean,
       reason: InterviewCloseReason = "quit",
     ) => {
+      if (isSessionClosedRef.current) {
+        if (shouldNavigateToMain) {
+          navigate(getInterviewExitPath(reason), {
+            state:
+              reason === "completed"
+                ? { answeredQuestionCount: displayQuestionNumberRef.current }
+                : undefined,
+          });
+        }
+
+        return;
+      }
+
+      isSessionClosedRef.current = true;
+      await stopAndUploadFullInterview();
+
       const activeSessionId = sessionIdRef.current ?? getActiveInterviewSessionId();
       const nextPath = getInterviewExitPath(reason);
       const answeredQuestionCount = displayQuestionNumberRef.current;
 
-      if (!activeSessionId || isSessionClosedRef.current) {
+      if (!activeSessionId) {
         if (shouldNavigateToMain) {
           navigate(nextPath, {
             state:
@@ -450,7 +513,6 @@ export const useInterviewSession = (
         return;
       }
 
-      isSessionClosedRef.current = true;
       clearActiveInterviewSessionId();
       if (reason === "quit") {
         await quitInterview(activeSessionId);
@@ -467,7 +529,11 @@ export const useInterviewSession = (
         });
       }
     },
-    [getInterviewExitPath, navigate],
+    [
+      getInterviewExitPath,
+      navigate,
+      stopAndUploadFullInterview,
+    ],
   );
 
   const handleSocketStatusChange = useCallback(
@@ -752,6 +818,7 @@ export const useInterviewSession = (
     answerText: voiceAnswer.answerText,
     cameraState,
     recorder,
+    sessionRecorder,
     currentQuestion,
     displayQuestionNumber,
     elapsedSeconds,
