@@ -12,3 +12,4 @@ export const AUTH_PAGE_SIDE_CONTENT = {
     switchAuthPath: '/login',
   },
 } as const;
+
