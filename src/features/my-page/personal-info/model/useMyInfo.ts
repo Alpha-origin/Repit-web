@@ -95,14 +95,17 @@ export const useMyInfo = () => {
 
     const { errorMessage: saveErrorMessage } = await updateMyInfo(nextDraft);
 
-    setIsSaving(false);
-
     if (saveErrorMessage) {
+      setIsSaving(false);
       setErrorMessage(saveErrorMessage);
       return;
     }
 
-    setUser(nextDraft);
+    // 저장은 성공했으므로 재조회가 실패하면 입력값으로 대신 갱신한다.
+    const { data: savedUser } = await getMyInfo();
+
+    setIsSaving(false);
+    setUser(savedUser ?? nextDraft);
     setDraftOverrides({});
     setSaveMessage("개인정보가 저장되었습니다.");
   }, [draft, isSaving, setUser]);

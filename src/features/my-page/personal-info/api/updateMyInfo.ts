@@ -11,7 +11,11 @@
 
     export const updateMyInfo = async (params: UpdateMyInfoParams) => {
     try {
-        await authInstance.patch(UPDATE_MY_INFO_URL, params);
+        await authInstance.patch(UPDATE_MY_INFO_URL, {
+        username: params.name,
+        nickname: params.nickname,
+        email: params.email,
+        });
 
         return { errorMessage: null };
     } catch (error) {
