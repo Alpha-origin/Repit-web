@@ -6,7 +6,6 @@ import {
 export interface MyPageMetaData {
   gitUrls: string[];
   fileUrl: string;
-  jobRole?: string;
 }
 
 interface MetaDataResponse {
@@ -40,13 +39,11 @@ export const getMyPageMetaData = async () => {
 interface UploadMyPageMetaDataParams {
   file: File;
   gitUrls: string[];
-  jobRole: string;
 }
 
 export const uploadMyPageMetaData = async ({
   file,
   gitUrls,
-  jobRole,
 }: UploadMyPageMetaDataParams) => {
   const authorizationHeader = await ensureAccessToken();
   const formData = new FormData();
@@ -54,7 +51,6 @@ export const uploadMyPageMetaData = async ({
   gitUrls.forEach((gitUrl) => {
     formData.append("gitUrls", gitUrl);
   });
-  formData.append("jobRole", jobRole);
 
   await apiInstance.post<MetaDataUploadResponse>(
     META_DATA_UPLOAD_URL,
@@ -69,6 +65,5 @@ export const uploadMyPageMetaData = async ({
   return {
     gitUrls,
     fileUrl: "",
-    jobRole,
   } satisfies MyPageMetaData;
 };

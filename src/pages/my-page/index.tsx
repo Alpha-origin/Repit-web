@@ -23,7 +23,6 @@ const MyPage = () => {
   );
   const portfolioForm = usePortfolioForm({
     initialGitUrls,
-    initialJobRole: metaData?.jobRole,
     onUploadSuccess: setMetaData,
   });
 
