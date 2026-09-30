@@ -4,10 +4,10 @@ import { getMyInfo } from "@/features/my-page/personal-info/api/getMyInfo";
 import { updateMyInfo } from "@/features/my-page/personal-info/api/updateMyInfo";
 import { useUserStore } from "@/shared/store/userStore";
 
+// 이메일은 로그인 ID라 서버가 수정하지 않으므로 편집 대상에서 뺀다.
 export interface PersonalInfoDraft {
   name: string;
   nickname: string;
-  email: string;
 }
 
 export const useMyInfo = () => {
@@ -28,9 +28,8 @@ export const useMyInfo = () => {
     () => ({
       name: draftOverrides.name ?? name,
       nickname: draftOverrides.nickname ?? nickname,
-      email: draftOverrides.email ?? email,
     }),
-    [draftOverrides, email, name, nickname],
+    [draftOverrides, name, nickname],
   );
   const isLoading = isFetching && !isLoaded;
 
@@ -80,11 +79,10 @@ export const useMyInfo = () => {
     const nextDraft = {
       name: draft.name.trim(),
       nickname: draft.nickname.trim(),
-      email: draft.email.trim(),
     };
 
-    if (!nextDraft.name || !nextDraft.nickname || !nextDraft.email) {
-      setErrorMessage("이름, 닉네임, 이메일을 모두 입력해주세요.");
+    if (!nextDraft.name || !nextDraft.nickname) {
+      setErrorMessage("이름과 닉네임을 모두 입력해주세요.");
       setSaveMessage("");
       return;
     }
@@ -112,6 +110,7 @@ export const useMyInfo = () => {
 
   return {
     draft,
+    email,
     errorMessage,
     isLoading,
     isSaving,

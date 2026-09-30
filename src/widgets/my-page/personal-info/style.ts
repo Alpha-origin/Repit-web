@@ -99,6 +99,12 @@ export const EditInput = styled.input`
     cursor: not-allowed;
     opacity: 0.65;
   }
+
+  &:read-only {
+    background-color: #f5f6f9;
+    color: #8a93a6;
+    cursor: default;
+  }
 `;
 
 export const StatusText = styled.p`

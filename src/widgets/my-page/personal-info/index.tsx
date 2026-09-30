@@ -6,6 +6,7 @@ import * as S from "./style";
 
 interface PersonalInfoProps {
   draft: PersonalInfoDraft;
+  email: string;
   errorMessage: string;
   isLoading: boolean;
   isSaving: boolean;
@@ -16,6 +17,7 @@ interface PersonalInfoProps {
 
 const PersonalInfo = ({
   draft,
+  email,
   errorMessage,
   isLoading,
   isSaving,
@@ -69,9 +71,8 @@ const PersonalInfo = ({
                 id="my-page-email"
                 type="email"
                 autoComplete="email"
-                value={draft.email}
-                disabled={isSaving}
-                onChange={(event) => onFieldChange("email", event.target.value)}
+                value={email}
+                readOnly
               />
             </S.InfoRow>
           </S.InfoList>

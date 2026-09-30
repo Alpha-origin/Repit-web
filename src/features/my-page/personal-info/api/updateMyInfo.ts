@@ -3,10 +3,10 @@
 
     const UPDATE_MY_INFO_URL = "/api/v1/users/me";
 
+    // 이메일은 로그인 ID라 서버가 수정하지 않는다.
     export interface UpdateMyInfoParams {
     name: string;
     nickname: string;
-    email: string;
     }
 
     export const updateMyInfo = async (params: UpdateMyInfoParams) => {
@@ -14,7 +14,6 @@
         await authInstance.patch(UPDATE_MY_INFO_URL, {
         username: params.name,
         nickname: params.nickname,
-        email: params.email,
         });
 
         return { errorMessage: null };
