@@ -1,6 +1,5 @@
 import type { ChangeEvent, KeyboardEvent, RefObject } from "react";
 
-import { MY_PAGE_PORTFOLIO_JOB_ROLE_OPTIONS } from "@/shared/constants/my-page";
 import MyPageFileImage from "@/shared/img/my-page/Repit-mypage.svg?url";
 
 import * as S from "./style";
@@ -11,14 +10,11 @@ interface PortfolioProps {
   gitInput: string;
   gitUrls: string[];
   isSaving: boolean;
-  jobRole: string;
-  jobRoleError: string;
   onBack: () => void;
   onGitAdd: () => void;
   onGitInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onGitInputKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
   onGitRemove: (gitUrl: string) => void;
-  onJobRoleChange: (event: ChangeEvent<HTMLSelectElement>) => void;
   onPortfolioFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onPortfolioSave: () => void;
   onPortfolioUploadClick: () => void;
@@ -48,14 +44,11 @@ const Portfolio = ({
   gitInput,
   gitUrls,
   isSaving,
-  jobRole,
-  jobRoleError,
   onBack,
   onGitAdd,
   onGitInputChange,
   onGitInputKeyDown,
   onGitRemove,
-  onJobRoleChange,
   onPortfolioFileChange,
   onPortfolioSave,
   onPortfolioUploadClick,
@@ -146,34 +139,6 @@ const Portfolio = ({
               </S.GitUrlRow>
             ))}
           </S.GitUrlList>
-        )}
-      </S.InputSection>
-
-      <S.InputSection>
-        <S.Label htmlFor="my-page-job-role">직무</S.Label>
-
-        <S.SelectWrapper>
-          <S.Select
-            id="my-page-job-role"
-            value={jobRole}
-            onChange={onJobRoleChange}
-          >
-            <option value="" disabled>
-              본인의 직무를 선택해주세요.
-            </option>
-
-            {MY_PAGE_PORTFOLIO_JOB_ROLE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </S.Select>
-
-          <S.Arrow aria-hidden="true">▼</S.Arrow>
-        </S.SelectWrapper>
-
-        {jobRoleError && (
-          <S.FieldError role="alert">{jobRoleError}</S.FieldError>
         )}
       </S.InputSection>
 

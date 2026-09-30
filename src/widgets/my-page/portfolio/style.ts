@@ -354,44 +354,6 @@ export const GitRemoveButton = styled.button`
   }
 `;
 
-export const SelectWrapper = styled.div`
-  position: relative;
-`;
-
-export const Select = styled.select`
-  appearance: none;
-  width: 100%;
-  height: 2.3rem;
-  padding: 0 2.8rem 0 0.8rem;
-  border: 0.0625rem solid #d6dce5;
-  border-radius: 0.45rem;
-  outline: none;
-  background-color: #f9fafc;
-  color: #47516a;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-
-  @media (min-width: 90rem) {
-    height: 2.5rem;
-  }
-
-  &:focus-visible {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 0.14rem rgba(59, 130, 246, 0.12);
-  }
-`;
-
-export const Arrow = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 0.85rem;
-  color: #596076;
-  font-size: 0.85rem;
-  pointer-events: none;
-  transform: translateY(-50%);
-`;
-
 export const SaveStatus = styled.p<{ $isError: boolean }>`
   margin: 0.9rem 0 0;
   color: ${({ $isError }) => ($isError ? "#d64f4f" : "#1976e8")};
