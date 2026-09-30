@@ -91,7 +91,8 @@ export const useMyInfo = () => {
     setErrorMessage("");
     setSaveMessage("");
 
-    const { errorMessage: saveErrorMessage } = await updateMyInfo(nextDraft);
+    const { data: updatedUser, errorMessage: saveErrorMessage } =
+      await updateMyInfo(nextDraft);
 
     if (saveErrorMessage) {
       setIsSaving(false);
@@ -99,8 +100,8 @@ export const useMyInfo = () => {
       return;
     }
 
-    // 저장은 성공했으므로 재조회가 실패하면 입력값으로 대신 갱신한다.
-    const { data: savedUser } = await getMyInfo();
+    // 서버가 수정된 사용자를 돌려준다. 응답이 비었으면 재조회하고, 그것도 실패하면 입력값으로 갱신한다.
+    const savedUser = updatedUser ?? (await getMyInfo()).data;
 
     setIsSaving(false);
     setUser(savedUser ?? nextDraft);
