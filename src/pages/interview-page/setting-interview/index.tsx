@@ -12,6 +12,8 @@ const SettingInterviewPage = () => {
       <S.ContentWrapper>
         <S.Sections>
           <SettingOptions
+            answerMode={setup.answerMode}
+            onAnswerModeChange={setup.onAnswerModeChange}
             onSelect={setup.select}
             selection={setup.selection}
           />

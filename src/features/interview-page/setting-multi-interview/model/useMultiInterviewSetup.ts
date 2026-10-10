@@ -14,6 +14,7 @@ const buildPersonaName = (template: InterviewerTemplate) => `${template.key}-${c
 
 export const useMultiInterviewSetup = () => {
   const navigate = useNavigate();
+  const [answerMode, setAnswerMode] = useState<"voice" | "text">("voice");
   const [style, setStyle] = useState<InterviewStyleOption>(INTERVIEW_SETTING_DEFAULT_SELECTION.style);
   const [difficulty, setDifficulty] = useState<InterviewDifficultyOption>(INTERVIEW_SETTING_DEFAULT_SELECTION.difficulty);
   const [activeSlot, setActiveSlot] = useState<SlotIndex>(0);
@@ -155,6 +156,7 @@ export const useMultiInterviewSetup = () => {
             currentQuestionIndex: createdInterview.currentQuestionIndex,
             questions: [],
             mode: "MULTI",
+            answerMode,
             interviewers: selectedSlots.map((interviewer, index) =>
               ({
                 personaId: savedPersonaIds[index], name: interviewer.name,
@@ -184,6 +186,8 @@ export const useMultiInterviewSetup = () => {
   };
 
   return {
+    answerMode,
+    onAnswerModeChange: setAnswerMode,
     errorMessage, isPortfolioAnalyzing: false, isSubmitting,
     isNextDisabled: isSubmitting,
     onBack: () => navigate(-1), onNext: handleNext, updateSlot,

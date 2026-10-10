@@ -80,6 +80,7 @@ const buildUniquePersonaName = () =>
 
 export const useInterviewSetup = () => {
   const navigate = useNavigate();
+  const [answerMode, setAnswerMode] = useState<"voice" | "text">("voice");
 
   const [selectedStyle, setSelectedStyle] = useState(
     INTERVIEW_SETTING_DEFAULT_SELECTION.style,
@@ -200,6 +201,7 @@ export const useInterviewSetup = () => {
           currentQuestionIndex: data.currentQuestionIndex,
           questions: [],
           mode: "SOLO",
+          answerMode,
           interviewers: [
             {
               personaId,
@@ -229,6 +231,8 @@ export const useInterviewSetup = () => {
   };
 
   return {
+    answerMode,
+    onAnswerModeChange: setAnswerMode,
     errorMessage,
     isNextDisabled: isSubmitting,
     isPortfolioAnalyzing: false,

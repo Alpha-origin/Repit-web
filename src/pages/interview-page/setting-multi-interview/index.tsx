@@ -16,6 +16,8 @@ const SettingMultiInterviewPage = () => {
         <S.MainGrid>
           <S.OptionsLock disabled={setup.isSubmitting}>
           <SettingOptions
+            answerMode={setup.answerMode}
+            onAnswerModeChange={setup.onAnswerModeChange}
             onSelect={{
               difficulty: setup.select.difficulty,
               style: setup.select.style,

@@ -579,3 +579,18 @@ export const LoadingMessage = styled.p`
   font-weight: 700;
   line-height: 1.4;
 `;
+
+export const AnswerModeGroup = styled.div`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing.sm};
+`;
+
+export const AnswerModeButton = styled(StyleOptionButton)`
+  grid-template-columns: minmax(0, 1fr) 1.5rem;
+  height: auto;
+  min-height: 5.5rem;
+
+  @media (max-width: 30rem), (max-height: 44rem) {
+    grid-template-columns: minmax(0, 1fr) 1.35rem;
+  }
+`;
