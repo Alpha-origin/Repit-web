@@ -16,10 +16,11 @@ export const createMediaRecording = (
   stream: MediaStream,
   mimeType: string,
   onError: (error: unknown) => void,
+  options: MediaRecorderOptions = {},
 ): MediaRecording => {
   const release = () => stream.getTracks().forEach((track) => track.stop());
   try {
-    const recorder = new MediaRecorder(stream, { mimeType });
+    const recorder = new MediaRecorder(stream, { ...options, mimeType });
     const chunks: Blob[] = [];
     let settled = false;
     let resolveResult: (blob: Blob | null) => void = () => {};
@@ -64,7 +65,6 @@ export const createMediaRecording = (
         if (!settled && recorder.state !== "inactive") {
           try {
             recorder.stop();
-            release();
           } catch (error) {
             onError(error);
             finish(null);

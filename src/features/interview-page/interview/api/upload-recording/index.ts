@@ -1,31 +1,31 @@
 import { apiInstance } from "@/shared/api/axiosInstance";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
 
-interface UploadInterviewRecordingParams {
+export type RecordingEndReason = "user" | "timeout" | "interrupted" | "unknown";
+
+export type UploadInterviewRecordingParams = {
   interviewId: number;
-  questionId?: number | null;
   file: File;
-}
+} & (
+  | { kind: "ANSWER"; questionId: number; endReason: RecordingEndReason }
+  | { kind: "FULL_INTERVIEW"; questionId?: never; endReason?: never }
+);
 
-export const uploadInterviewRecording = async ({
-  interviewId,
-  questionId,
-  file,
-}: UploadInterviewRecordingParams) => {
+export const uploadInterviewRecording = async (params: UploadInterviewRecordingParams) => {
   const formData = new FormData();
-  formData.append("file", file);
-
-  if (questionId != null) {
-    formData.append("questionId", String(questionId));
+  formData.append("file", params.file);
+  formData.append("kind", params.kind);
+  if (params.kind === "ANSWER") {
+    formData.append("questionId", String(params.questionId));
+    formData.append("endReason", params.endReason);
   }
 
   try {
     const response = await apiInstance.post(
-      `/api/interviews/${encodeURIComponent(interviewId)}/recordings`,
+      `/api/interviews/${encodeURIComponent(params.interviewId)}/recordings`,
       formData,
-      { headers: { "Content-Type": "multipart/form-data" } },
+      { timeout: 120_000 },
     );
-
     return { data: response.data.data, errorMessage: null };
   } catch (error) {
     return {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useBlocker, useNavigate } from "react-router-dom";
 
 import {
   clearActiveInterviewSessionId,
@@ -18,12 +18,15 @@ import {
   INTERVIEW_STATUS_MESSAGES,
 } from "@/shared/constants/interview-page/interview";
 
-import type { InterviewMode } from "@/widgets/interview-page/interview/type";
 import { useElevenLabsTts } from "./useElevenLabsTts";
 import { useSupertoneTts } from "./useSupertoneTts";
 import { useInterviewElapsedTime } from "./useInterviewElapsedTime";
 import { useInterviewMedia } from "./useInterviewMedia";
 import { useInterviewRecorder } from "./useInterviewRecorder";
+import { useAnswerRecorder } from "./useAnswerRecorder";
+import { enqueueRecordingUpload, reportRecordingFailure } from "./interviewRecordingStore";
+import { registerInterviewLifecycle } from "./activeInterviewLifecycle";
+import type { RecordingEndReason } from "../api/upload-recording";
 import { useInterviewSocket } from "./useInterviewSocket";
 import { useVoiceAnswer } from "./useVoiceAnswer";
 import { useVoiceLevel } from "./useVoiceLevel";
@@ -249,18 +252,20 @@ export const useInterviewSession = (
     isChatSessionReady,
     totalQuestionCount,
   } = session;
-  const [mode, setMode] = useState<InterviewMode>(
-    preparedInterview?.mode === "MULTI" || ttsProvider === "supertone"
-      ? "text"
-      : "voice",
-  );
+  const mode = preparedInterview?.answerMode ?? "voice";
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCompletingVoice, setIsCompletingVoice] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [isAwaitingNextQuestion, setIsAwaitingNextQuestion] = useState(false);
   const [preparationError, setPreparationError] = useState<string | null>(null);
+  const [answerError, setAnswerError] = useState<string | null>(null);
   const isVoiceMode = mode === "voice";
-  const { cameraState, cloneAudioTrack, cloneVideoTrack, micState, micStream, videoRef } =
-    useInterviewMedia(isVoiceMode);
-  const recorder = useInterviewRecorder(cloneVideoTrack, cloneAudioTrack);
+  const { cameraState, cloneAudioTrack, cloneVideoTrack, micState, micStream, videoRef, releaseMedia } =
+    useInterviewMedia(isVoiceMode && !isClosing);
+  const fullRecorder = useInterviewRecorder(cloneVideoTrack, cloneAudioTrack);
+  const recorder = useAnswerRecorder(cloneAudioTrack);
+  const { stopRecording: stopAnswerRecording } = recorder;
+  const { startRecording: startFullRecording, stopRecording: stopFullRecording } = fullRecorder;
   const voiceLevel = useVoiceLevel(micStream);
   const voiceAnswer = useVoiceAnswer();
   const multiTtsSpeaker = useMemo(() => {
@@ -321,9 +326,23 @@ export const useInterviewSession = (
   );
   const supertoneTts = useSupertoneTts(currentQuestion?.content ?? "");
   const questionTts = ttsProvider === "elevenlabs" ? elevenLabsTts : supertoneTts;
+  const controlsRef = useRef({ questionTts, voiceAnswer });
+  useEffect(() => { controlsRef.current = { questionTts, voiceAnswer }; });
   const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
   const isSessionClosedRef = useRef(false);
-  const hasPreparedChatSessionRef = useRef(false);
+  const isFinalizingRef = useRef(false);
+  const closePromiseRef = useRef<Promise<void> | null>(null);
+  const closeReasonRef = useRef<InterviewCloseReason | null>(null);
+  const hasNavigatedRef = useRef(false);
+  const fullRecordingStartedRef = useRef(false);
+  const answerRecordingRef = useRef<{
+    question: CurrentInterviewQuestion;
+    startedAt: number;
+  } | null>(null);
+  const answerStopPromiseRef = useRef<Promise<void> | null>(null);
+  const answerTimeoutRef = useRef<number | null>(null);
+  const completionRef = useRef<(reason: RecordingEndReason) => Promise<void>>(async () => {});
+  const submittingRef = useRef(false);
   const preparingSessionIdRef = useRef<string | null>(null);
   const sessionIdRef = useRef<string | null>(sessionId);
   const displayQuestionNumberRef = useRef(displayQuestionNumber);
@@ -370,7 +389,6 @@ export const useInterviewSession = (
   useEffect(() => {
     dispatch({ type: "RESET_SESSION", preparedInterview });
     isSessionClosedRef.current = false;
-    hasPreparedChatSessionRef.current = false;
   }, [preparedInterview]);
 
   useEffect(() => {
@@ -389,17 +407,18 @@ export const useInterviewSession = (
     // 새 질문(꼬리질문 포함)이 도착했다면 HTTP·소켓 경로와 무관하게 응답 대기를 끝낸다.
     clearAwaitingResponseTimeout();
     setIsAwaitingNextQuestion(false);
-    void questionTts.onPlay();
+    if (isVoiceMode && !isSessionClosedRef.current) void questionTts.onPlay();
   }, [
     clearAwaitingResponseTimeout,
     currentQuestion,
     isChatSessionReady,
+    isVoiceMode,
     questionTts,
   ]);
 
   const syncCurrentQuestion = useCallback(
     (nextQuestion: CurrentInterviewQuestion) => {
-      dispatch({ type: "SYNC_QUESTION", question: nextQuestion });
+      if (!isSessionClosedRef.current) dispatch({ type: "SYNC_QUESTION", question: nextQuestion });
     },
     [dispatch],
   );
@@ -411,47 +430,114 @@ export const useInterviewSession = (
     [dispatch],
   );
 
+  const clearAnswerTimeout = useCallback(() => {
+    if (answerTimeoutRef.current !== null) {
+      window.clearTimeout(answerTimeoutRef.current);
+      answerTimeoutRef.current = null;
+    }
+  }, []);
+
+  const finishAnswerRecording = useCallback((endReason: RecordingEndReason) => {
+    clearAnswerTimeout();
+    const recording = answerRecordingRef.current;
+    answerRecordingRef.current = null;
+    if (!recording) return answerStopPromiseRef.current ?? Promise.resolve();
+    const pending = stopAnswerRecording().then((file) => {
+      if (file && preparedInterview?.interviewId != null) {
+        enqueueRecordingUpload({
+          file, interviewId: preparedInterview.interviewId,
+          kind: "ANSWER", questionId: recording.question.questionId, endReason,
+        });
+      } else if (!file && preparedInterview?.interviewId != null) {
+        reportRecordingFailure({
+          interviewId: preparedInterview.interviewId, kind: "ANSWER", questionId: recording.question.questionId,
+          errorMessage: "답변 음성 파일을 만들지 못했습니다. 녹화 중 장치 연결과 브라우저 지원 여부를 확인해주세요.",
+        });
+      }
+    });
+    answerStopPromiseRef.current = pending;
+    return pending;
+  }, [clearAnswerTimeout, preparedInterview?.interviewId, stopAnswerRecording]);
+
   const endInterviewSession = useCallback(
-    async (
-      shouldNavigateToMain: boolean,
-      reason: InterviewCloseReason = "quit",
-    ) => {
-      const activeSessionId = sessionIdRef.current ?? getActiveInterviewSessionId();
-      const nextPath = getInterviewExitPath(reason);
-      const answeredQuestionCount = displayQuestionNumberRef.current;
-
-      if (!activeSessionId || isSessionClosedRef.current) {
-        if (shouldNavigateToMain) {
-          navigate(nextPath, {
-            state:
-              reason === "completed"
-                ? { answeredQuestionCount }
-                : undefined,
-          });
-        }
-
-        return;
+    async (shouldNavigate: boolean, reason: InterviewCloseReason = "quit") => {
+      if (!closePromiseRef.current) {
+        isSessionClosedRef.current = true;
+        closeReasonRef.current = reason;
+        setIsClosing(true);
+        isFinalizingRef.current = true;
+        clearAwaitingResponseTimeout();
+        controlsRef.current.questionTts.onStop();
+        controlsRef.current.voiceAnswer.onExitVoiceMode();
+        const activeSessionId = sessionIdRef.current ?? getActiveInterviewSessionId();
+        // 같은 종료 Promise를 HTTP, 소켓, 메뉴와 뒤로가기가 공유한다.
+        closePromiseRef.current = (async () => {
+          try {
+            await Promise.all([
+              finishAnswerRecording("interrupted"),
+              stopFullRecording().then((file) => {
+                if (file && preparedInterview?.interviewId != null) {
+                  enqueueRecordingUpload({ file, interviewId: preparedInterview.interviewId, kind: "FULL_INTERVIEW" });
+                } else if (!file && fullRecordingStartedRef.current && preparedInterview?.interviewId != null) {
+                  reportRecordingFailure({
+                    interviewId: preparedInterview.interviewId, kind: "FULL_INTERVIEW",
+                    errorMessage: "전체 영상 파일을 만들지 못했습니다. 녹화 중 장치 연결과 브라우저 지원 여부를 확인해주세요.",
+                  });
+                }
+              }),
+            ]);
+            if (activeSessionId && reason === "quit") await quitInterview(activeSessionId);
+          } finally {
+            isFinalizingRef.current = false;
+            releaseMedia();
+            clearActiveInterviewSessionId();
+            if (activeSessionId) disconnectInterviewSocket(activeSessionId);
+          }
+        })();
       }
-
-      isSessionClosedRef.current = true;
-      clearActiveInterviewSessionId();
-      if (reason === "quit") {
-        await quitInterview(activeSessionId);
-      }
-
-      disconnectInterviewSocket(activeSessionId);
-
-      if (shouldNavigateToMain) {
-        navigate(nextPath, {
-          state:
-            reason === "completed"
-              ? { answeredQuestionCount }
-              : undefined,
+      await closePromiseRef.current;
+      if (shouldNavigate && closeReasonRef.current === reason && !hasNavigatedRef.current) {
+        hasNavigatedRef.current = true;
+        navigate(getInterviewExitPath(reason), {
+          state: reason === "completed" ? { answeredQuestionCount: displayQuestionNumberRef.current } : undefined,
         });
       }
     },
-    [getInterviewExitPath, navigate],
+    [clearAwaitingResponseTimeout, finishAnswerRecording, stopFullRecording,
+      getInterviewExitPath, navigate, preparedInterview?.interviewId, releaseMedia],
   );
+
+  useEffect(() => {
+    if (!isVoiceMode || !canSubmitAnswer || cameraState !== "ready" || micState !== "ready" ||
+      fullRecordingStartedRef.current || isSessionClosedRef.current) return;
+    fullRecordingStartedRef.current = true;
+    startFullRecording();
+  }, [cameraState, canSubmitAnswer, startFullRecording, isVoiceMode, micState]);
+
+  const closeLatestRef = useRef(endInterviewSession);
+  useEffect(() => { closeLatestRef.current = endInterviewSession; }, [endInterviewSession]);
+  useEffect(() => {
+    const unregister = registerInterviewLifecycle(() => closeLatestRef.current(false, "quit"));
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!isVoiceMode || (isSessionClosedRef.current && !isFinalizingRef.current)) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => {
+      unregister();
+      window.removeEventListener("beforeunload", warnBeforeUnload);
+      clearAnswerTimeout();
+      if (!isSessionClosedRef.current) void closeLatestRef.current(false, "quit");
+    };
+  }, [clearAnswerTimeout, isVoiceMode]);
+
+  const blocker = useBlocker(({ currentLocation, nextLocation }) =>
+    !isSessionClosedRef.current && currentLocation.pathname !== nextLocation.pathname);
+  useEffect(() => {
+    if (blocker.state !== "blocked") return;
+    void endInterviewSession(false, "quit").then(() => blocker.proceed());
+  }, [blocker, endInterviewSession]);
 
   const handleSocketStatusChange = useCallback(
     ({
@@ -462,6 +548,8 @@ export const useInterviewSession = (
       question: CurrentInterviewQuestion | null;
       status: InterviewProgressStatus | null;
     }) => {
+      if (isSessionClosedRef.current) return;
+
       if (question) {
         syncCurrentQuestion(question);
       }
@@ -507,7 +595,7 @@ export const useInterviewSession = (
         preparedInterview.interviewId,
       );
 
-      if (isCancelled) {
+      if (isCancelled || isSessionClosedRef.current) {
         return;
       }
 
@@ -519,7 +607,6 @@ export const useInterviewSession = (
         preparingSessionIdRef.current = null;
         setActiveInterviewSessionId(sessionId);
         sessionIdRef.current = sessionId;
-        hasPreparedChatSessionRef.current = true;
 
         const firstQuestion = data.questions[0];
 
@@ -569,66 +656,41 @@ export const useInterviewSession = (
     };
   }, [preparedInterview, sessionId, syncCurrentQuestion]);
 
-  useEffect(() => {
-    return () => {
-      const activeSessionId = getActiveInterviewSessionId();
-      const latestSessionId = sessionIdRef.current;
-
-      if (
-        !latestSessionId ||
-        !hasPreparedChatSessionRef.current ||
-        isSessionClosedRef.current ||
-        activeSessionId !== latestSessionId
-      ) {
-        return;
-      }
-
-      clearActiveInterviewSessionId();
-      disconnectInterviewSocket(activeSessionId);
-    };
-  }, []);
-
-  const handleModeChange = (nextMode: InterviewMode) => {
-    if (nextMode === mode) {
-      return;
-    }
-
-    questionTts.onStop();
-
-    if (isVoiceMode) {
-      voiceAnswer.onExitVoiceMode();
-    }
-
-    setMode(nextMode);
-  };
-
   const handleStartVoice = async () => {
-    if (!isChatSessionReady) {
-      return false;
-    }
-
-    if (isSubmitting || isAwaitingNextQuestion || !canSubmitAnswer) {
-      return false;
-    }
-
+    if (!isVoiceMode || isSessionClosedRef.current || isCompletingVoiceRef.current ||
+      submittingRef.current || isAwaitingNextQuestion || !canSubmitAnswer ||
+      cameraState !== "ready" || micState !== "ready" || !fullRecorder.isRecording) return false;
     questionTts.onStop();
-    if (!(await recorder.startRecording())) return false;
+    if (!recorder.startRecording()) return false;
+    answerRecordingRef.current = { question: currentQuestion, startedAt: questionStartedAtRef.current };
+    setAnswerError(null);
     void voiceAnswer.onStartVoice();
+    clearAnswerTimeout();
+    answerTimeoutRef.current = window.setTimeout(() => {
+      void completionRef.current("timeout");
+    }, 210_000);
     return true;
   };
 
-  const submitAnswer = async (content: string) => {
-    if (isSubmitting || isAwaitingNextQuestion || !canSubmitAnswer) {
+  const submitAnswer = async (
+    content: string,
+    submittedQuestion = currentQuestion,
+    startedAt = questionStartedAtRef.current,
+  ) => {
+    if (isSessionClosedRef.current || submittingRef.current || isAwaitingNextQuestion || !canSubmitAnswer || !submittedQuestion) {
       return;
     }
 
     const trimmedContent = content.trim();
 
     if (!trimmedContent) {
+      setAnswerError("답변을 인식하지 못했습니다. 다시 답변해주세요.");
       return;
     }
 
+    submittingRef.current = true;
     setIsSubmitting(true);
+    setAnswerError(null);
     // 제출이 끝나도 다음 질문이 도착할 때까지 대기 상태를 유지한다.
     setIsAwaitingNextQuestion(true);
     scheduleAwaitingResponseTimeout();
@@ -642,22 +704,23 @@ export const useInterviewSession = (
         return;
       }
 
-      const submittedQuestion = currentQuestion;
-
       const { data, errorMessage } = await submitInterviewAnswer({
         sessionId: activeSessionId,
-        questionId: currentQuestion.questionId,
+        questionId: submittedQuestion.questionId,
         responseTime:
-          questionStartedAtRef.current > 0
+          startedAt > 0
             ? Math.max(
                 0,
-                Math.round((Date.now() - questionStartedAtRef.current) / 1_000),
+                Math.round((Date.now() - startedAt) / 1_000),
               )
             : 0,
         content: trimmedContent,
       });
 
+      if (isSessionClosedRef.current) return;
+
       if (errorMessage) {
+        setAnswerError(errorMessage);
         clearAwaitingResponseTimeout();
         setIsAwaitingNextQuestion(false);
         return;
@@ -701,50 +764,53 @@ export const useInterviewSession = (
         }
       }
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
     }
   };
 
-  const handleCompleteVoice = async () => {
-    if (isCompletingVoiceRef.current || isSubmitting || isAwaitingNextQuestion) {
-      return;
-    }
-
+  const handleCompleteVoice = async (reason: RecordingEndReason = "user") => {
+    const recording = answerRecordingRef.current;
+    if (!recording || isSessionClosedRef.current || isCompletingVoiceRef.current || submittingRef.current || isAwaitingNextQuestion) return;
     isCompletingVoiceRef.current = true;
-
+    setIsCompletingVoice(true);
     try {
+      // 먼저 음성 파일을 확정해 업로드를 시작하고, 녹음 시작 때 보관한 질문으로 제출한다.
+      await finishAnswerRecording(reason);
+      if (isSessionClosedRef.current) return;
       const voiceContent = await voiceAnswer.onCompleteVoice();
-      await submitAnswer(voiceContent || voiceAnswer.answerText);
+      await submitAnswer(voiceContent || voiceAnswer.answerText, recording.question, recording.startedAt);
     } finally {
       isCompletingVoiceRef.current = false;
+      setIsCompletingVoice(false);
     }
   };
+  useEffect(() => { completionRef.current = handleCompleteVoice; });
 
   const handleSubmitText = async () => {
-    await submitAnswer(voiceAnswer.answerText);
+    if (!isVoiceMode) await submitAnswer(voiceAnswer.answerText);
   };
-
-  const handleQuitInterview = async () => {
-    questionTts.onStop();
-    voiceAnswer.onExitVoiceMode();
-    await endInterviewSession(true, "quit");
-  };
+  const handleQuitInterview = () => endInterviewSession(true, "quit");
 
   return {
     answerStatus: isVoiceMode ? voiceAnswer.voiceStatus : INTERVIEW_STATUS_MESSAGES.text,
     answerText: voiceAnswer.answerText,
     cameraState,
     recorder,
+    recordingErrorMessage: recorder.errorMessage ?? fullRecorder.errorMessage,
+    answerError,
     currentQuestion,
     displayQuestionNumber,
     elapsedSeconds,
     interviewId: preparedInterview?.interviewId ?? null,
     isAwaitingNextQuestion,
-    isAwaitingResponse: isSubmitting || isAwaitingNextQuestion || recorder.isStopping,
+    isAwaitingResponse: isClosing || isCompletingVoice || isSubmitting || isAwaitingNextQuestion || recorder.isStopping,
     isSubmitting,
+    isClosing,
+    isMediaReady: cameraState === "ready" && micState === "ready" && fullRecorder.isRecording,
     isInterviewReady: isChatSessionReady,
     isPreparingInterview: Boolean(preparedInterview) && !isChatSessionReady,
-    isVoiceStarted: voiceAnswer.isVoiceStarted,
+    isVoiceStarted: recorder.isRecording,
     mode,
     preparationError,
     questionAudioStatus: questionTts.status,
@@ -754,8 +820,7 @@ export const useInterviewSession = (
     ttsSpeakerPersonaId: multiTtsSpeaker?.personaId,
     onAnswerTextChange: voiceAnswer.onAnswerTextChange,
     onClearAnswer: voiceAnswer.onClearAnswer,
-    onCompleteVoice: handleCompleteVoice,
-    onModeChange: handleModeChange,
+    onCompleteVoice: () => handleCompleteVoice("user"),
     onQuitInterview: handleQuitInterview,
     onStartVoice: handleStartVoice,
     onSubmitText: handleSubmitText,

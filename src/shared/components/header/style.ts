@@ -198,3 +198,9 @@ export const LogoutButton = styled.button`
     font-size: 0.95rem;
   }
 `;
+export const ErrorMessage = styled.p`
+  grid-column: 1 / -1;
+  margin: ${({ theme }) => theme.spacing.sm} 0;
+  color: ${({ theme }) => theme.colors.text.default};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+`;

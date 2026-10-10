@@ -50,6 +50,12 @@ export const useInterviewMedia = (enabled: boolean) => {
     [attachStream],
   );
 
+  const releaseMedia = useCallback(() => {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    if (videoElementRef.current) videoElementRef.current.srcObject = null;
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     let currentStream: MediaStream | null = null;
@@ -138,6 +144,7 @@ export const useInterviewMedia = (enabled: boolean) => {
 
   return {
     cameraState,
+    releaseMedia,
     cloneAudioTrack,
     cloneVideoTrack,
     micState,

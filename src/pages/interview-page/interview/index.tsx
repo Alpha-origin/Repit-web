@@ -1,11 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
 
 import type { PreparedInterviewData } from "@/features/interview-page/interview/api";
 import {
   InterviewSessionProvider,
 } from "@/features/interview-page/interview/model/interviewSessionContext";
-import { uploadRecordingInBackground } from "@/features/interview-page/interview/model/uploadRecordingInBackground";
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
 import { INTERVIEW_DEVICE_STATUS_LABELS } from "@/shared/constants/interview-page/interview";
 import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
@@ -47,6 +46,7 @@ const InterviewPage = () => {
 
   return (
     <InterviewSessionProvider
+      key={preparedInterview?.sessionId ?? location.pathname}
       preparedInterview={preparedInterview}
       ttsProvider={ttsProvider}
     >
@@ -58,34 +58,25 @@ const InterviewPage = () => {
 const InterviewPageContent = () => {
   const interviewSession = useInterviewSessionContext();
   const interviewRecorder = interviewSession.recorder;
-  const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
   const elapsedSeconds = interviewSession.elapsedSeconds;
   const isMultiInterview = interviewSession.preparedInterview?.mode === "MULTI";
   const isVoiceMode = interviewSession.mode === "voice";
   const isTextMode = interviewSession.mode === "text";
-  const isVoiceActionStarted = isVoiceAnswering || interviewSession.isVoiceStarted;
+  const isVoiceActionStarted = interviewSession.isVoiceStarted;
   const isQuestionLoading = interviewSession.currentQuestion === null;
   const isAwaitingResponse = interviewSession.isAwaitingResponse;
   const isStartActionDisabled =
     interviewRecorder.isStarting ||
     interviewRecorder.isStopping ||
     !interviewSession.isInterviewReady ||
+    !interviewSession.isMediaReady ||
     isQuestionLoading ||
     isAwaitingResponse;
   const isCameraReady = interviewSession.cameraState === "ready";
   const isMicReady = interviewSession.micState === "ready";
   const micLevel = isMicReady ? interviewSession.voiceLevel : 0;
 
-  const handleQuitInterview = async () => {
-    const answeredQuestionId = interviewSession.currentQuestion?.questionId;
-    const file = await interviewRecorder.stopRecording();
-    uploadRecordingInBackground({
-      file,
-      interviewId: interviewSession.interviewId,
-      questionId: answeredQuestionId,
-    });
-    await interviewSession.onQuitInterview();
-  };
+  const handleQuitInterview = interviewSession.onQuitInterview;
 
   if (interviewSession.preparationError) {
     return (
@@ -111,44 +102,8 @@ const InterviewPageContent = () => {
     return <InterviewDashboard />;
   }
 
-  const handleStartVoice = async () => {
-    if (isAwaitingResponse) {
-      return;
-    }
-
-    if (!(await interviewSession.onStartVoice())) return;
-    setIsVoiceAnswering(true);
-  };
-
-  const handleCompleteVoice = async () => {
-    if (isAwaitingResponse) {
-      return;
-    }
-
-    // onCompleteVoice 이후에는 다음 질문으로 바뀔 수 있으므로 먼저 저장한다.
-    const answeredQuestionId = interviewSession.currentQuestion?.questionId;
-
-    try {
-      const file = await interviewRecorder.stopRecording();
-      uploadRecordingInBackground({
-        file,
-        interviewId: interviewSession.interviewId,
-        questionId: answeredQuestionId,
-      });
-      await interviewSession.onCompleteVoice();
-    } finally {
-      setIsVoiceAnswering(false);
-    }
-  };
-
-  const handleModeChange = (nextMode: typeof interviewSession.mode) => {
-    if (nextMode === "text") {
-      void interviewRecorder.stopRecording();
-      setIsVoiceAnswering(false);
-    }
-
-    interviewSession.onModeChange(nextMode);
-  };
+  const handleStartVoice = interviewSession.onStartVoice;
+  const handleCompleteVoice = interviewSession.onCompleteVoice;
 
   return (
     <S.Container $textMode={isTextMode} $voiceMode={isVoiceMode}>
@@ -161,32 +116,13 @@ const InterviewPageContent = () => {
                 {formatElapsedTime(elapsedSeconds)}
               </S.TimerPill>
 
-              <S.ModeControl>
-                <S.ModeButton
-                  type="button"
-                  $active={interviewSession.mode === "text"}
-                  aria-pressed={interviewSession.mode === "text"}
-                  disabled={isAwaitingResponse}
-                  onClick={() => handleModeChange("text")}
-                >
-                  텍스트
-                </S.ModeButton>
-                <S.ModeButton
-                  type="button"
-                  $active={interviewSession.mode === "voice"}
-                  aria-pressed={interviewSession.mode === "voice"}
-                  disabled={isAwaitingResponse}
-                  onClick={() => handleModeChange("voice")}
-                >
-                  음성
-                </S.ModeButton>
-              </S.ModeControl>
+
             </S.TopControls>
           </S.TopControlBar>
         ) : null}
 
         <S.InterviewStage $textMode={isTextMode} $voiceMode={isVoiceMode}>
-          <InterviewContentView onModeChange={handleModeChange} />
+          <InterviewContentView />
 
           {isVoiceMode && (
             <InterviewCameraView />
@@ -199,15 +135,22 @@ const InterviewPageContent = () => {
           </S.PreparationMessage>
         ) : null}
 
-        {interviewRecorder.errorMessage ? (
+        {interviewSession.recordingErrorMessage ? (
           <S.PreparationMessage role="alert">
-            {interviewRecorder.errorMessage}
+            {interviewSession.recordingErrorMessage}
           </S.PreparationMessage>
         ) : null}
 
+        {interviewSession.answerError ? (
+          <S.PreparationMessage role="alert">{interviewSession.answerError}</S.PreparationMessage>
+        ) : null}
+        {isVoiceMode && (interviewSession.cameraState === "blocked" || interviewSession.micState === "blocked") ? (
+          <S.PreparationMessage role="alert">카메라와 마이크 권한을 허용해주세요. 텍스트 면접은 사전설정에서 선택할 수 있습니다.</S.PreparationMessage>
+        ) : null}
         <S.ActionRow>
           <S.SecondaryAction
             type="button"
+            disabled={interviewSession.isClosing}
             onClick={() => void handleQuitInterview()}
           >
             그만두기

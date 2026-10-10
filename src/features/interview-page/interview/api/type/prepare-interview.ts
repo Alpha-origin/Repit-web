@@ -75,5 +75,6 @@ export interface PreparedInterviewData {
   currentQuestionIndex: number;
   questions: PrepareInterviewQuestion[];
   mode: PreparedInterviewMode;
+  answerMode?: "voice" | "text";
   interviewers?: PreparedInterviewer[];
 }
