@@ -751,4 +751,9 @@ export const PreparationErrorAction = styled.button`
   font-size: 0.95rem;
   font-weight: 800;
   cursor: pointer;
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.65;
+  }
 `;

@@ -18,6 +18,7 @@ export {
 export {
   getInterviewPreparation,
   prepareInterviewRecord,
+  retryInterviewPreparation,
 } from "./prepare-interview-record";
 export type {
   InterviewPreparationData,

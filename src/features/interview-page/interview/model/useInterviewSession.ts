@@ -7,6 +7,8 @@ import {
   getActiveInterviewSessionId,
   getCurrentInterviewQuestion,
   getInterviewPreparation,
+  prepareInterviewRecord,
+  retryInterviewPreparation,
   quitInterview,
   setActiveInterviewSessionId,
   submitInterviewAnswer,
@@ -33,8 +35,8 @@ import { useVoiceLevel } from "./useVoiceLevel";
 type InterviewCloseReason = "completed" | "quit";
 const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
 const AWAITING_RESPONSE_TIMEOUT_MS = 30_000;
-const INTERVIEW_PREPARATION_POLL_INTERVAL_MS = 1_000;
-const INTERVIEW_PREPARATION_MAX_ATTEMPTS = 120;
+const INTERVIEW_PREPARATION_POLL_INTERVAL_MS = 2_000;
+const INTERVIEW_PREPARATION_TIMEOUT_MS = 20 * 60 * 1_000;
 const DEFAULT_SOLO_VOICE_INDEX = 1;
 
 export type InterviewTtsProvider = "elevenlabs" | "supertone";
@@ -261,6 +263,10 @@ export const useInterviewSession = (
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAwaitingNextQuestion, setIsAwaitingNextQuestion] = useState(false);
   const [preparationError, setPreparationError] = useState<string | null>(null);
+  const [preparationMessage, setPreparationMessage] = useState("면접 질문을 준비하고 있어요.");
+  const [canRetryPreparation, setCanRetryPreparation] = useState(false);
+  const [isRetryingPreparation, setIsRetryingPreparation] = useState(false);
+  const [preparationAttempt, setPreparationAttempt] = useState(0);
   const isVoiceMode = mode === "voice";
   const { cameraState, cloneAudioTrack, cloneVideoTrack, micState, micStream, videoRef } =
     useInterviewMedia(true);
@@ -579,64 +585,69 @@ export const useInterviewSession = (
 
     preparingSessionIdRef.current = sessionId;
     let isCancelled = false;
-    let attemptCount = 0;
+    const startedAt = Date.now();
     let timeoutId: number | null = null;
-    let lastErrorMessage: string | null = null;
+    let retriedNotRequested = false;
 
     const waitForChatSession = async () => {
-      attemptCount += 1;
-
       const { data, errorMessage } = await getInterviewPreparation(
         preparedInterview.interviewId,
       );
 
-      if (isCancelled) {
+      if (isCancelled) return;
+
+      if (errorMessage || !data) {
+        setPreparationError(errorMessage ?? "면접 준비 상태를 확인하지 못했습니다.");
+        preparingSessionIdRef.current = null;
         return;
       }
 
-      if (errorMessage || !data) {
-        lastErrorMessage = errorMessage ?? "면접 준비 상태를 확인하지 못했습니다.";
+      if (Date.now() - startedAt >= INTERVIEW_PREPARATION_TIMEOUT_MS) {
+        setPreparationError("면접 준비 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.");
+        preparingSessionIdRef.current = null;
+        return;
       }
 
-      if (data?.chatDelivered) {
+      if (data.preparationStatus === "READY") {
         preparingSessionIdRef.current = null;
         setActiveInterviewSessionId(sessionId);
         sessionIdRef.current = sessionId;
         hasPreparedChatSessionRef.current = true;
-
         const firstQuestion = data.questions[0];
-
-        if (firstQuestion) {
-          syncCurrentQuestion(firstQuestion);
-        }
-
+        if (firstQuestion) syncCurrentQuestion(firstQuestion);
         dispatch({ type: "SET_QUESTION_COUNT", count: data.questions.length });
         dispatch({ type: "SET_CHAT_SESSION_READY" });
         return;
       }
 
-      if (data?.status === "FAILED") {
+      if (data.preparationStatus === "FAILED") {
         preparingSessionIdRef.current = null;
-        setPreparationError(data.errorMessage ?? "면접 질문 준비에 실패했습니다.");
+        setPreparationError(data.errorMessage ?? "면접 준비에 실패했습니다.");
+        setCanRetryPreparation(data.retryable);
         return;
       }
 
-      if (attemptCount >= INTERVIEW_PREPARATION_MAX_ATTEMPTS) {
-        preparingSessionIdRef.current = null;
-        setPreparationError(
-          lastErrorMessage ??
-            "면접 준비 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.",
-        );
-        return;
+      if (data.preparationStatus === "NOT_REQUESTED") {
+        if (retriedNotRequested) {
+          preparingSessionIdRef.current = null;
+          setPreparationError("면접 준비 요청을 확인하지 못했습니다. 다시 시작해주세요.");
+          return;
+        }
+        retriedNotRequested = true;
+        const retry = await prepareInterviewRecord(preparedInterview.interviewId);
+        if (isCancelled) return;
+        if (retry.errorMessage || !retry.data) {
+          preparingSessionIdRef.current = null;
+          setPreparationError(retry.errorMessage ?? "면접 준비 요청에 실패했습니다.");
+          return;
+        }
       }
 
-      const retryAfterMs = data?.retryAfterMs ?? INTERVIEW_PREPARATION_POLL_INTERVAL_MS;
-
-      timeoutId = window.setTimeout(() => {
-        void waitForChatSession();
-      }, retryAfterMs);
+      setPreparationMessage(data.status === "WAITING"
+        ? "새 질문을 준비하고 있어요. 1분 정도 걸려요."
+        : "면접 질문을 준비하고 있어요.");
+      timeoutId = window.setTimeout(() => void waitForChatSession(), INTERVIEW_PREPARATION_POLL_INTERVAL_MS);
     };
-
     void waitForChatSession();
 
     return () => {
@@ -650,7 +661,7 @@ export const useInterviewSession = (
         preparingSessionIdRef.current = null;
       }
     };
-  }, [preparedInterview, sessionId, syncCurrentQuestion]);
+  }, [preparedInterview, sessionId, syncCurrentQuestion, preparationAttempt]);
 
   useEffect(() => {
     return () => {
@@ -670,6 +681,28 @@ export const useInterviewSession = (
       disconnectInterviewSocket(activeSessionId);
     };
   }, []);
+
+  const handleRetryPreparation = async () => {
+    if (!preparedInterview || isRetryingPreparation || !canRetryPreparation) return;
+    setIsRetryingPreparation(true);
+    const result = await retryInterviewPreparation(preparedInterview.interviewId);
+    setIsRetryingPreparation(false);
+
+    if (result.errorMessage || !result.data) {
+      setPreparationError(result.errorMessage ?? "면접 준비 재시도에 실패했습니다.");
+      return;
+    }
+    if (result.data.preparationStatus === "FAILED") {
+      setPreparationError(result.data.errorMessage ?? "면접 준비에 실패했습니다.");
+      setCanRetryPreparation(result.data.retryable);
+      return;
+    }
+
+    setPreparationError(null);
+    setCanRetryPreparation(false);
+    setPreparationMessage("면접 질문을 준비하고 있어요.");
+    setPreparationAttempt((attempt) => attempt + 1);
+  };
 
   const handleModeChange = (nextMode: InterviewMode) => {
     if (nextMode === mode) {
@@ -831,6 +864,10 @@ export const useInterviewSession = (
     isVoiceStarted: voiceAnswer.isVoiceStarted,
     mode,
     preparationError,
+    preparationMessage,
+    canRetryPreparation,
+    isRetryingPreparation,
+    onRetryPreparation: handleRetryPreparation,
     questionAudioStatus: questionTts.status,
     questionAudioErrorMessage:
       ttsProvider === "elevenlabs" ? elevenLabsTts.errorMessage : null,
