@@ -672,9 +672,10 @@ export const useInterviewSession = (
         return;
       }
 
-      const retryAfterMs = data?.status === "WAITING"
+      const pollIntervalMs = data?.status === "WAITING"
         ? INTERVIEW_QUESTIONS_WAITING_POLL_INTERVAL_MS
         : INTERVIEW_PREPARATION_POLL_INTERVAL_MS;
+      const retryAfterMs = Math.max(pollIntervalMs, data?.retryAfterMs ?? 0);
 
       timeoutId = window.setTimeout(() => {
         void waitForChatSession();

@@ -28,7 +28,7 @@ const MyPage = () => {
   );
   const portfolioForm = usePortfolioForm({
     initialGitUrls,
-    isSaveBlocked: profileStatus.isLoading || !profileStatus.profile || isAnalyzing || profileStatus.isRestarting,
+    isSaveBlocked: profileStatus.isLoading || isAnalyzing || profileStatus.isRestarting,
     requiresChangeConfirmation: profileStatus.profile?.status === "COMPLETED",
     onAnalysisStarted: profileStatus.markPending,
     onUploadSuccess: setMetaData,
