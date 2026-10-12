@@ -101,7 +101,7 @@ async function fixture({ multi = false, answerMode = "voice", timeout = false, d
     }
     if (pathname.endsWith("/quit")) { quits.push(pathname); return json({ status: "ABANDONED" }); }
     if (pathname.endsWith("/question")) return json(current);
-    if (pathname === "/api/questions/tailor") return json({ data: { status: "SUCCEEDED", chatDelivered: true, questions: [current, question(102)], interviewId: 42 } });
+    if (pathname === "/api/questions/tailor") return json({ data: { status: "SUCCEEDED", preparationStatus: "READY", chatDelivered: true, questions: [current, question(102)], interviewId: 42 } });
     if (pathname.endsWith("/me")) return json({ data: { id: 7, name: "테스트", nickname: "테스트" } });
     if (pathname.includes("/elevenlabs/") || pathname.includes("/supertone/")) return json({ message: "TTS mock" }, 503);
     if (pathname.endsWith("/refresh")) return json({ accessToken: "test-only-token" });
