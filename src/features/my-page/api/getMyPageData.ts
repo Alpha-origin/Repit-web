@@ -23,9 +23,12 @@ interface MetaDataUploadResponse {
 const META_DATA_URL = "/api/v1/metaData/getMetaData";
 const META_DATA_UPLOAD_URL = "/api/v1/metaData/dataUpload";
 
-export const getMyPageMetaData = async () => {
+export { getLatestProfile } from "@/features/profile/api";
+
+export const getMyPageMetaData = async (signal?: AbortSignal) => {
   const response = await apiInstance.get<MyPageMetaData | MetaDataResponse>(
     META_DATA_URL,
+    { signal, timeout: 15_000 },
   );
   const payload = response.data;
 
@@ -52,7 +55,7 @@ export const uploadMyPageMetaData = async ({
     formData.append("gitUrls", gitUrl);
   });
 
-  await apiInstance.post<MetaDataUploadResponse>(
+  const response = await apiInstance.post<MetaDataUploadResponse>(
     META_DATA_UPLOAD_URL,
     formData,
     {
@@ -62,8 +65,11 @@ export const uploadMyPageMetaData = async ({
     },
   );
 
+  const payload = response.data.data ?? response.data;
+
   return {
+    jobId: payload.jobId ?? payload.job_id ?? null,
     gitUrls,
     fileUrl: "",
-  } satisfies MyPageMetaData;
+  } satisfies MyPageMetaData & { jobId: string | null };
 };
