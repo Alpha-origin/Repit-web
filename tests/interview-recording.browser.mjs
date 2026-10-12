@@ -12,13 +12,13 @@ const question = (id) => ({ questionId: id, parentId: 0, type: "ORIGINAL", inten
 const results = [];
 const report = (result) => { results.push(result); console.log(`PASS ${result}`); };
 
-async function fixture({ multi = false, answerMode = "voice", timeout = false, denied = false, fail = false, delayUploads = false, complete = false, mimeMode, socketOnAnswer = false } = {}) {
+async function fixture({ multi = false, answerMode = "voice", timeout = false, denied = false, fail = false, delayUploads = false, complete = false, mimeMode, socketOnAnswer = false, preparationFailed = false, recorderFails = false, slowStop = false } = {}) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage();
   page.setDefaultTimeout(10_000);
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.addInitScript(({ timeout, denied, mimeMode }) => {
+  await page.addInitScript(({ timeout, denied, mimeMode, recorderFails, slowStop }) => {
     window.__tracks = [];
     window.__captures = [];
     window.__sockets = [];
@@ -47,7 +47,15 @@ async function fixture({ multi = false, answerMode = "voice", timeout = false, d
         this.__info = { kinds: stream.getTracks().map((track) => track.kind), mimeType: this.mimeType, options, stops: 0 };
         window.__captures.push(this.__info);
       }
-      stop() { this.__info.stops++; super.stop(); }
+      start(...args) {
+        if (recorderFails) throw new Error("테스트 녹화 시작 실패");
+        super.start(...args);
+      }
+      stop() {
+        this.__info.stops++;
+        if (slowStop) setTimeout(() => super.stop(), 500);
+        else super.stop();
+      }
     };
     window.SpeechRecognition = class {
       start() {
@@ -71,7 +79,7 @@ async function fixture({ multi = false, answerMode = "voice", timeout = false, d
       const originalTimeout = window.setTimeout.bind(window);
       window.setTimeout = (callback, delay, ...args) => originalTimeout(callback, delay === 210_000 ? 1_200 : delay, ...args);
     }
-  }, { timeout, denied, mimeMode });
+  }, { timeout, denied, mimeMode, recorderFails, slowStop });
   const uploads = [];
   const answers = [];
   const quits = [];
@@ -101,7 +109,7 @@ async function fixture({ multi = false, answerMode = "voice", timeout = false, d
     }
     if (pathname.endsWith("/quit")) { quits.push(pathname); return json({ status: "ABANDONED" }); }
     if (pathname.endsWith("/question")) return json(current);
-    if (pathname === "/api/questions/tailor") return json({ data: { status: "SUCCEEDED", chatDelivered: true, questions: [current, question(102)], interviewId: 42 } });
+    if (pathname === "/api/questions/tailor") return json({ data: { status: preparationFailed ? "FAILED" : "SUCCEEDED", preparationStatus: preparationFailed ? "FAILED" : "READY", errorMessage: preparationFailed ? "테스트 면접 준비 실패" : null, retryable: false, chatDelivered: !preparationFailed, questions: [current, question(102)], interviewId: 42 } });
     if (pathname.endsWith("/me")) return json({ data: { id: 7, name: "테스트", nickname: "테스트" } });
     if (pathname.includes("/elevenlabs/") || pathname.includes("/supertone/")) return json({ message: "TTS mock" }, 503);
     if (pathname.endsWith("/refresh")) return json({ accessToken: "test-only-token" });
@@ -124,7 +132,7 @@ async function fixture({ multi = false, answerMode = "voice", timeout = false, d
   }, { multi, answerMode });
   const start = page.getByRole("button", { name: multi ? "음성 답변 시작" : "시작하기", exact: true });
   const finish = page.getByRole("button", { name: multi ? "답변 끝내기" : "끝내기", exact: true });
-  if (answerMode === "voice" && !denied) {
+  if (answerMode === "voice" && !denied && !preparationFailed) {
     try { await start.waitFor({ state: "visible" }); }
     catch (error) {
       console.error("Fixture failed:", page.url(), errors, await page.locator("body").innerText());
@@ -146,7 +154,35 @@ async function waitUntil(check) {
   for (let i = 0; i < 100; i++) { if (check()) return; await new Promise((resolve) => setTimeout(resolve, 50)); }
   assert.fail("timed out waiting for network assertion");
 }
+const unloadWarns = (page) => page.evaluate(() => !window.dispatchEvent(new Event("beforeunload", { cancelable: true })));
 try {
+  for (const options of [{ denied: true }, { preparationFailed: true }, { recorderFails: true }]) {
+    const f = await fixture(options);
+    await f.page.getByText(options.denied ? "카메라와 마이크 권한을 허용해주세요." : options.preparationFailed ? "테스트 면접 준비 실패" : "테스트 녹화 시작 실패", { exact: false }).first().waitFor();
+    assert.equal(await unloadWarns(f.page), false);
+    assert.equal(f.uploads.length, 0);
+    await f.page.getByRole("button", { name: options.preparationFailed ? "메인으로 돌아가기" : "그만두기", exact: true }).click();
+    await f.page.waitForURL("**/main");
+    assert.equal(await unloadWarns(f.page), false);
+    await f.context.close();
+    report(`unload without recording: ${Object.keys(options)[0]}`);
+  }
+  const stopping = await fixture({ slowStop: true, delayUploads: true });
+  await stopping.start.click();
+  await stopping.finish.waitFor();
+  await stopping.page.waitForTimeout(250);
+  await stopping.page.getByRole("button", { name: "그만두기", exact: true }).click();
+  assert.equal(await unloadWarns(stopping.page), true, "finalizing files stays protected");
+  await stopping.page.waitForURL("**/main");
+  await waitUntil(() => stopping.uploads.length === 2);
+  assert.equal(await unloadWarns(stopping.page), true, "queued files stay protected after navigation");
+  stopping.release();
+  await stopping.page.getByText("업로드 완료", { exact: true }).first().waitFor();
+  await stopping.page.waitForFunction(async () => !(await import("/src/features/interview-page/interview/model/interviewRecordingStore.ts")).hasUnsavedRecordings());
+  assert.equal(await unloadWarns(stopping.page), false);
+  await assertReleased(stopping);
+  await stopping.context.close();
+  report("unload covers file finalization and uploads, clears after success");
   for (const multi of [false, true]) {
     const f = await fixture({ multi });
     await f.start.click();
@@ -259,8 +295,24 @@ try {
   await assertReleased(failed);
   await failed.context.close();
   report("failed upload: visible failure, retry preserved files, logout deferred");
+  const discarded = await fixture({ fail: true });
+  await discarded.start.click();
+  await discarded.finish.waitFor();
+  await discarded.page.waitForTimeout(250);
+  await discarded.page.getByRole("button", { name: "그만두기", exact: true }).click();
+  await discarded.page.waitForURL("**/main");
+  await discarded.page.getByRole("button", { name: "파일 폐기", exact: true }).first().waitFor();
+  assert.equal(await unloadWarns(discarded.page), true);
+  while (await discarded.page.getByRole("button", { name: "파일 폐기", exact: true }).count()) {
+    await discarded.page.getByRole("button", { name: "파일 폐기", exact: true }).first().click();
+  }
+  assert.equal(await unloadWarns(discarded.page), false);
+  await assertReleased(discarded);
+  await discarded.context.close();
+  report("discarding failed files clears unload warning");
   for (const multi of [false, true]) {
     const f = await fixture({ multi, answerMode: "text", complete: true });
+    assert.equal(await unloadWarns(f.page), false);
     await f.page.getByRole("textbox").first().fill("프로젝트 경험에 대한 텍스트 답변입니다.");
     await f.page.getByRole("button", { name: "제출하기", exact: true }).click();
     await f.page.waitForURL("**/main/interview/completed");
