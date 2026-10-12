@@ -1,84 +1,95 @@
 import styled from "styled-components";
 
-export const Card = styled.section`
-  width: min(100%, 38rem);
+export const Content = styled.section`
+  width: min(100%, 34rem);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.35rem;
-  padding: 3rem 2rem 2.2rem;
-  border: 1px solid rgba(112, 140, 190, 0.18);
-  border-radius: 2rem;
-  background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.98), rgba(240, 246, 255, 0.94)),
-    #ffffff;
-  box-shadow: 0 1rem 2.5rem rgba(61, 102, 171, 0.12);
   text-align: center;
 `;
 
-export const Badge = styled.span`
-  padding: 0.45rem 0.8rem;
-  border-radius: 999px;
-  background: rgba(59, 130, 246, 0.1);
-  color: #2867c7;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+export const SuccessIcon = styled.img`
+  width: 4.5rem;
+  height: 4.5rem;
+  margin-bottom: 1.25rem;
+
+  @media (max-width: 36rem) {
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 export const Title = styled.h1`
   margin: 0;
-  color: #111827;
-  font-size: clamp(1.9rem, 2.4vw, 2.4rem);
-  font-weight: 800;
-  letter-spacing: -0.05rem;
+  color: #111111;
+  font-size: clamp(1.45rem, 2vw, 1.75rem);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 1.35;
 `;
 
 export const Description = styled.p`
-  margin: 0;
-  color: #4b5563;
-  font-size: 1rem;
-  line-height: 1.7;
+  margin: 0.45rem 0 0;
+  color: #8b8b8b;
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.5;
 `;
 
 export const ActionRow = styled.div`
-  width: 100%;
   display: flex;
-  gap: 0.9rem;
-  margin-top: 0.5rem;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
 
-  @media (max-width: 40rem) {
+  @media (max-width: 34rem) {
+    width: 100%;
     flex-direction: column;
+    margin-top: 1.5rem;
   }
 `;
 
 const BaseButton = styled.button`
-  flex: 1;
-  min-height: 3.2rem;
-  border-radius: 1rem;
-  font-size: 1rem;
-  font-weight: 700;
+  width: 12.4rem;
+  min-height: 2.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.55rem;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  transition:
-    transform 0.16s ease,
-    box-shadow 0.16s ease,
-    background-color 0.16s ease;
+  transition: background-color 0.16s ease, transform 0.16s ease;
 
   &:hover {
     transform: translateY(-1px);
   }
+
+  &:focus-visible {
+    outline: 2px solid rgba(33, 118, 237, 0.45);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 34rem) {
+    width: 100%;
+  }
 `;
 
 export const PrimaryButton = styled(BaseButton)`
-  border: none;
-  background: linear-gradient(135deg, #2f6ee5, #4f8ffc);
+  border: 1px solid #2176ed;
+  background: #2176ed;
   color: #ffffff;
-  box-shadow: 0 0.8rem 1.8rem rgba(47, 110, 229, 0.22);
+
+  &:hover {
+    background: #1768d8;
+  }
 `;
 
 export const SecondaryButton = styled(BaseButton)`
-  border: 1px solid rgba(112, 140, 190, 0.28);
+  border: 1px solid #bdd5ff;
   background: #ffffff;
-  color: #334155;
+  color: #2176ed;
+
+  &:hover {
+    background: #f7faff;
+  }
 `;

@@ -1,11 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
 
 import * as S from "./style";
+import CompleteImage from "@/shared/img/interview-page/complete.svg?url";
 
 const getAnsweredQuestionCount = (state: unknown) => {
-  if (!state || typeof state !== "object") {
-    return null;
-  }
+  if (!state || typeof state !== "object") return null;
 
   const record = state as { answeredQuestionCount?: unknown };
   return typeof record.answeredQuestionCount === "number" &&
@@ -21,18 +20,18 @@ const InterviewCompletedContent = () => {
   const answeredQuestionCount = getAnsweredQuestionCount(location.state);
 
   return (
-    <S.Card>
-      <S.Badge>Interview Complete</S.Badge>
+    <S.Content>
+      <S.SuccessIcon src={CompleteImage} alt="" aria-hidden="true" />
       <S.Title>면접이 종료되었습니다.</S.Title>
       <S.Description>
         {answeredQuestionCount
-          ? `${answeredQuestionCount}개의 질문에 답변했고 면접이 정상적으로 마무리되었어요.`
-          : "면접이 정상적으로 마무리되었어요."}
+          ? `${answeredQuestionCount}개의 질문에 답변했고 면접이 정상적으로 마무리 되었습니다.`
+          : "면접이 정상적으로 마무리 되었습니다."}
       </S.Description>
 
       <S.ActionRow>
         <S.SecondaryButton type="button" onClick={() => navigate("/main")}>
-          메인으로
+          메인으로 돌아가기
         </S.SecondaryButton>
         <S.PrimaryButton
           type="button"
@@ -41,7 +40,7 @@ const InterviewCompletedContent = () => {
           피드백 보러가기
         </S.PrimaryButton>
       </S.ActionRow>
-    </S.Card>
+    </S.Content>
   );
 };
 
