@@ -9,11 +9,13 @@ import {
 } from "@/shared/constants/interview-page/setting-multi-interview";
 import { INTERVIEW_SETTING_DEFAULT_SELECTION, type InterviewDifficultyOption, type InterviewStyleOption } from "@/shared/constants/interview-page/setting-interview";
 import { completeSlot, createSlot, resizeSlots, validateSelection } from "./selection";
+import { usePortfolioInterviewGate } from "@/features/interview-page/setting-interview/model/usePortfolioInterviewGate";
 
 const buildPersonaName = (template: InterviewerTemplate) => `${template.key}-${crypto.randomUUID()}`;
 
 export const useMultiInterviewSetup = () => {
   const navigate = useNavigate();
+  const portfolioGate = usePortfolioInterviewGate();
   const [style, setStyle] = useState<InterviewStyleOption>(INTERVIEW_SETTING_DEFAULT_SELECTION.style);
   const [difficulty, setDifficulty] = useState<InterviewDifficultyOption>(INTERVIEW_SETTING_DEFAULT_SELECTION.difficulty);
   const [activeSlot, setActiveSlot] = useState<SlotIndex>(0);
@@ -54,7 +56,7 @@ export const useMultiInterviewSetup = () => {
   };
 
   const handleNext = async () => {
-    if (submittingRef.current) return;
+    if (submittingRef.current || portfolioGate.isBlocked) return;
     const validationError = validateSelection(slots, interviewerCount);
     if (validationError) {
       setErrorMessage(validationError);
@@ -184,8 +186,9 @@ export const useMultiInterviewSetup = () => {
   };
 
   return {
-    errorMessage, isPortfolioAnalyzing: false, isSubmitting,
-    isNextDisabled: isSubmitting,
+    errorMessage, isPortfolioAnalyzing: portfolioGate.isPortfolioAnalyzing, isSubmitting,
+    portfolioMessage: portfolioGate.message, requiresPortfolio: portfolioGate.requiresPortfolio,
+    isNextDisabled: isSubmitting || portfolioGate.isBlocked,
     onBack: () => navigate(-1), onNext: handleNext, updateSlot,
     select: {
       count: changeCount,

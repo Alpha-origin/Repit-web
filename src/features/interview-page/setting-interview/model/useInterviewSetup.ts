@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { usePortfolioInterviewGate } from "./usePortfolioInterviewGate";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -75,6 +76,7 @@ const buildUniquePersonaName = (personaName: string) =>
 
 export const useInterviewSetup = () => {
   const navigate = useNavigate();
+  const portfolioGate = usePortfolioInterviewGate();
   const [selectedStyle, setSelectedStyle] = useState(
     INTERVIEW_SETTING_DEFAULT_SELECTION.style,
   );
@@ -90,7 +92,7 @@ export const useInterviewSetup = () => {
   const handleBack = () => navigate(-1);
 
   const handleNext = async () => {
-    if (isSubmitting) {
+    if (isSubmitting || portfolioGate.isBlocked) {
       return;
     }
 
@@ -220,8 +222,10 @@ export const useInterviewSetup = () => {
 
   return {
     errorMessage,
-    isNextDisabled: isSubmitting,
-    isPortfolioAnalyzing: false,
+    isNextDisabled: isSubmitting || portfolioGate.isBlocked,
+    isPortfolioAnalyzing: portfolioGate.isPortfolioAnalyzing,
+    portfolioMessage: portfolioGate.message,
+    requiresPortfolio: portfolioGate.requiresPortfolio,
     isSubmitting,
     onBack: handleBack,
     onNext: handleNext,

@@ -486,3 +486,20 @@ export const SaveButton = styled.button`
     min-width: 0;
   }
 `;
+
+
+export const AnalysisStatus = styled.div<{ $pending: boolean; $failed: boolean }>`
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0 0 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid ${({ $failed }) => ($failed ? "#f1caca" : "#dce2ec")};
+  border-radius: 0.55rem;
+  background: ${({ $pending, $failed }) => ($failed ? "#fff7f7" : $pending ? "#f2f7ff" : "#f8f9fc")};
+  color: ${({ $failed }) => ($failed ? "#a84242" : "#46506a")};
+  font-size: 0.78rem;
+  line-height: 1.45;
+
+  strong { font-size: 0.82rem; }
+`;

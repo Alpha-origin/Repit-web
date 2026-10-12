@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   useMultiInterviewSetup,
 } from "@/features/interview-page/setting-multi-interview/model/useMultiInterviewSetup";
@@ -55,6 +56,9 @@ const SettingMultiInterviewPage = () => {
           </S.InterviewerColumn>
         </S.MainGrid>
 
+        {setup.portfolioMessage ? (
+          <S.ErrorMessage role="status">{setup.portfolioMessage}{setup.requiresPortfolio ? <> <Link to="/main/mypage" style={{ color: "inherit", fontWeight: 700 }}>마이페이지로 이동</Link></> : null}</S.ErrorMessage>
+        ) : null}
         {setup.errorMessage ? (
           <S.ErrorMessage role="alert">{setup.errorMessage}</S.ErrorMessage>
         ) : null}

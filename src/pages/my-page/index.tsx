@@ -7,6 +7,8 @@ import {
 } from "@/features/my-page/api/getMyPageData";
 import { useMyInfo } from "@/features/my-page/personal-info/model/useMyInfo";
 import { usePortfolioForm } from "@/features/my-page/portfolio/model/usePortfolioForm";
+import { usePortfolioAnalysis } from "@/features/my-page/portfolio/model/usePortfolioAnalysis";
+import type { PortfolioAnalysis } from "@/features/my-page/api/portfolioAnalysis";
 import PersonalInfo from "@/widgets/my-page/personal-info";
 import Portfolio from "@/widgets/my-page/portfolio";
 
@@ -16,6 +18,7 @@ const MyPage = () => {
   const navigate = useNavigate();
   const [metaData, setMetaData] = useState<MyPageMetaData | null>(null);
   const personalInfo = useMyInfo();
+  const portfolioAnalysis = usePortfolioAnalysis();
 
   const initialGitUrls = useMemo(
     () => metaData?.gitUrls ?? [],
@@ -24,7 +27,10 @@ const MyPage = () => {
   const portfolioForm = usePortfolioForm({
     initialGitUrls,
     initialJobRole: metaData?.jobRole,
-    onUploadSuccess: setMetaData,
+    onUploadSuccess: (nextMetaData) => {
+      setMetaData(nextMetaData);
+      portfolioAnalysis.setAnalysis({ jobId: null, status: "PENDING", errorStatusCode: null, errorMessage: null, failureReason: null, completedAt: null, projectSummary: null } satisfies PortfolioAnalysis);
+    },
   });
 
   useEffect(() => {
@@ -63,7 +69,7 @@ const MyPage = () => {
   return (
     <S.Page>
       <PersonalInfo {...personalInfo} />
-      <Portfolio {...portfolioForm} onBack={handleBack} />
+      <Portfolio {...portfolioForm} analysis={portfolioAnalysis.analysis} analysisError={portfolioAnalysis.error} onBack={handleBack} />
     </S.Page>
   );
 };

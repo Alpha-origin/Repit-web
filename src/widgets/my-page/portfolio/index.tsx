@@ -1,11 +1,14 @@
 import type { ChangeEvent, KeyboardEvent, RefObject } from "react";
 
 import { MY_PAGE_PORTFOLIO_JOB_ROLE_OPTIONS } from "@/shared/constants/my-page";
+import { getPortfolioAnalysisFailureMessage, type PortfolioAnalysis } from "@/features/my-page/api/portfolioAnalysis";
 import MyPageFileImage from "@/shared/img/my-page/Repit-mypage.svg?url";
 
 import * as S from "./style";
 
 interface PortfolioProps {
+  analysis: PortfolioAnalysis | null;
+  analysisError: string;
   fileError: string;
   fileInputRef: RefObject<HTMLInputElement | null>;
   gitInput: string;
@@ -43,6 +46,8 @@ const TrashIcon = () => (
 );
 
 const Portfolio = ({
+  analysis,
+  analysisError,
   fileError,
   fileInputRef,
   gitInput,
@@ -68,6 +73,12 @@ const Portfolio = ({
   return (
     <S.PortfolioWrapper>
       <S.Title>포트폴리오</S.Title>
+
+      <S.AnalysisStatus role={analysisError ? "alert" : "status"} $pending={analysis?.status === "PENDING"} $failed={analysis?.status === "FAILED"}>
+        <strong>종합 데이터 분석</strong>
+        <span>{analysisError || (analysis?.status === "PENDING" ? "분석 중이에요. 완료될 때까지 이 화면을 열어두지 않아도 돼요." : analysis?.status === "COMPLETED" ? `분석 완료${analysis.completedAt ? ` · ${new Date(analysis.completedAt).toLocaleString("ko-KR")}` : ""}` : analysis?.status === "FAILED" ? getPortfolioAnalysisFailureMessage(analysis) : analysis ? "아직 분석을 요청하지 않았어요. 자료를 저장하면 분석을 시작합니다." : "분석 상태를 확인하고 있어요.")}</span>
+        {analysis?.status === "COMPLETED" && analysis.projectSummary?.techStack?.length ? <span>기술 스택: {analysis.projectSummary.techStack.join(", ")}</span> : null}
+      </S.AnalysisStatus>
 
       <S.UploadBox>
         <S.GuideBadge>
