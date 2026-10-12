@@ -276,8 +276,9 @@ export const useInterviewSession = (
     useInterviewMedia(isVoiceMode && !isClosing);
   const fullRecorder = useInterviewRecorder(cloneVideoTrack, cloneAudioTrack);
   const recorder = useAnswerRecorder(cloneAudioTrack);
-  const { stopRecording: stopAnswerRecording } = recorder;
-  const { startRecording: startFullRecording, stopRecording: stopFullRecording } = fullRecorder;
+  const { stopRecording: stopAnswerRecording, hasPendingRecording: hasPendingAnswerRecording } = recorder;
+  const { startRecording: startFullRecording, stopRecording: stopFullRecording,
+    hasPendingRecording: hasPendingFullRecording } = fullRecorder;
   const voiceLevel = useVoiceLevel(micStream);
   const voiceAnswer = useVoiceAnswer();
   const multiTtsSpeaker = useMemo(() => {
@@ -356,7 +357,6 @@ export const useInterviewSession = (
   useEffect(() => { controlsRef.current = { questionTts, voiceAnswer }; });
   const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
   const isSessionClosedRef = useRef(false);
-  const isFinalizingRef = useRef(false);
   const closePromiseRef = useRef<Promise<void> | null>(null);
   const closeReasonRef = useRef<InterviewCloseReason | null>(null);
   const hasNavigatedRef = useRef(false);
@@ -491,7 +491,6 @@ export const useInterviewSession = (
         isSessionClosedRef.current = true;
         closeReasonRef.current = reason;
         setIsClosing(true);
-        isFinalizingRef.current = true;
         clearAwaitingResponseTimeout();
         controlsRef.current.questionTts.onStop();
         controlsRef.current.voiceAnswer.onExitVoiceMode();
@@ -514,7 +513,6 @@ export const useInterviewSession = (
             ]);
             if (activeSessionId && reason === "quit") await quitInterview(activeSessionId);
           } finally {
-            isFinalizingRef.current = false;
             releaseMedia();
             clearActiveInterviewSessionId();
             if (activeSessionId) disconnectInterviewSocket(activeSessionId);
@@ -536,8 +534,7 @@ export const useInterviewSession = (
   useEffect(() => {
     if (!isVoiceMode || !canSubmitAnswer || cameraState !== "ready" || micState !== "ready" ||
       fullRecordingStartedRef.current || isSessionClosedRef.current) return;
-    fullRecordingStartedRef.current = true;
-    startFullRecording();
+    fullRecordingStartedRef.current = startFullRecording();
   }, [cameraState, canSubmitAnswer, startFullRecording, isVoiceMode, micState]);
 
   const closeLatestRef = useRef(endInterviewSession);
@@ -545,7 +542,7 @@ export const useInterviewSession = (
   useEffect(() => {
     const unregister = registerInterviewLifecycle(() => closeLatestRef.current(false, "quit"));
     const warnBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!isVoiceMode || (isSessionClosedRef.current && !isFinalizingRef.current)) return;
+      if (!hasPendingFullRecording() && !hasPendingAnswerRecording()) return;
       event.preventDefault();
       event.returnValue = "";
     };
@@ -556,7 +553,7 @@ export const useInterviewSession = (
       clearAnswerTimeout();
       if (!isSessionClosedRef.current) void closeLatestRef.current(false, "quit");
     };
-  }, [clearAnswerTimeout, isVoiceMode]);
+  }, [clearAnswerTimeout, hasPendingFullRecording, hasPendingAnswerRecording]);
 
   const blocker = useBlocker(({ currentLocation, nextLocation }) =>
     !isSessionClosedRef.current && currentLocation.pathname !== nextLocation.pathname);

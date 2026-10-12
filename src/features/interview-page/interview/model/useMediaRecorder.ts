@@ -19,6 +19,7 @@ export const useMediaRecorder = (
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const sessionRef = useRef<MediaRecording | null>(null);
   const stoppingRef = useRef(false);
+  const hasPendingRecording = useCallback(() => sessionRef.current !== null || stoppingRef.current, []);
   const mountedRef = useRef(true);
   const reportError = useCallback((error: unknown) => {
     if (mountedRef.current) {
@@ -91,5 +92,5 @@ export const useMediaRecorder = (
     };
   }, []);
 
-  return { errorMessage, isRecording, isStarting, isStopping, startRecording, stopRecording };
+  return { errorMessage, isRecording, isStarting, isStopping, hasPendingRecording, startRecording, stopRecording };
 };
