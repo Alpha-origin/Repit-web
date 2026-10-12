@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { useInterviewEligibility } from "@/features/profile/model/useInterviewEligibility";
 import { createInterview, prepareInterviewRecord, savePersona, setActiveInterviewSessionId, type SavePersonaParams } from "@/features/interview-page/interview/api";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
 import {
@@ -14,6 +16,9 @@ const buildPersonaName = (template: InterviewerTemplate) => `${template.key}-${c
 
 export const useMultiInterviewSetup = () => {
   const navigate = useNavigate();
+  const [answerMode, setAnswerMode] = useState<"voice" | "text">("voice");
+  const eligibility = useInterviewEligibility();
+  const [requiresMaterials, setRequiresMaterials] = useState(false);
   const [style, setStyle] = useState<InterviewStyleOption>(INTERVIEW_SETTING_DEFAULT_SELECTION.style);
   const [difficulty, setDifficulty] = useState<InterviewDifficultyOption>(INTERVIEW_SETTING_DEFAULT_SELECTION.difficulty);
   const [activeSlot, setActiveSlot] = useState<SlotIndex>(0);
@@ -54,7 +59,8 @@ export const useMultiInterviewSetup = () => {
   };
 
   const handleNext = async () => {
-    if (submittingRef.current) return;
+    if (submittingRef.current || !eligibility.canStart) return;
+    setRequiresMaterials(false);
     const validationError = validateSelection(slots, interviewerCount);
     if (validationError) {
       setErrorMessage(validationError);
@@ -120,10 +126,11 @@ export const useMultiInterviewSetup = () => {
         throw new Error("생성된 면접의 면접관 정보가 선택한 설정과 일치하지 않습니다.");
       }
 
-      const { data: preparedInterviewRecord, errorMessage: prepareError } =
+      const { data: preparedInterviewRecord, errorMessage: prepareError, statusCode } =
         await prepareInterviewRecord(createdInterview.interviewId);
 
       if (prepareError || !preparedInterviewRecord) {
+        setRequiresMaterials(statusCode === 404);
         throw new Error(prepareError ?? "질문 준비에 실패했습니다.");
       }
 
@@ -150,11 +157,14 @@ export const useMultiInterviewSetup = () => {
             gender: representative.gender,
             tone: representative.tone,
             jobId: preparedInterviewRecord.jobId ?? "",
+            analysisJobId: preparedInterviewRecord.analysisJobId,
+            questionPreparationStatus: preparedInterviewRecord.status,
             status:
               createdInterview.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
             currentQuestionIndex: createdInterview.currentQuestionIndex,
             questions: [],
             mode: "MULTI",
+            answerMode,
             interviewers: selectedSlots.map((interviewer, index) =>
               ({
                 personaId: savedPersonaIds[index], name: interviewer.name,
@@ -184,8 +194,13 @@ export const useMultiInterviewSetup = () => {
   };
 
   return {
-    errorMessage, isPortfolioAnalyzing: false, isSubmitting,
-    isNextDisabled: isSubmitting,
+    answerMode,
+    onAnswerModeChange: setAnswerMode,
+    errorMessage, isPortfolioAnalyzing: eligibility.isPortfolioAnalyzing, isSubmitting,
+    profileGuidance: eligibility.guidance,
+    showMyPageLink: eligibility.showMyPageLink || requiresMaterials,
+    onRefreshProfile: eligibility.hasLoadError ? eligibility.refetch : undefined,
+    isNextDisabled: isSubmitting || !eligibility.canStart,
     onBack: () => navigate(-1), onNext: handleNext, updateSlot,
     select: {
       count: changeCount,

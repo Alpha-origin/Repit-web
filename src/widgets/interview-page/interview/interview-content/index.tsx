@@ -1,6 +1,5 @@
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
 import InterviewVisualizerIcon from "@/shared/img/interview-page/Repit-Interview.svg?url";
-import type { InterviewMode } from "../type";
 import * as S from "../style";
 
 const TEXT_ANSWER_MAX_LENGTH = 10000;
@@ -35,11 +34,7 @@ const formatQuestionLabel = ({
   )}`;
 };
 
-interface InterviewContentViewProps {
-  onModeChange: (mode: InterviewMode) => void;
-}
-
-const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
+const InterviewContentView = () => {
   const {
     answerText,
     currentQuestion,
@@ -107,26 +102,8 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
       {mode === "text" ? (
         <S.TextAnswerCard>
           <S.TextAnswerHeader>
-            <S.TextModeControl>
-              <S.TextModeButton
-                type="button"
-                $active
-                aria-pressed="true"
-                disabled={isAwaitingResponse}
-                onClick={() => onModeChange("text")}
-              >
-                텍스트
-              </S.TextModeButton>
-              <S.TextModeButton
-                type="button"
-                $active={false}
-                aria-pressed="false"
-                disabled={isAwaitingResponse}
-                onClick={() => onModeChange("voice")}
-              >
-                음성
-              </S.TextModeButton>
-            </S.TextModeControl>
+            <span>텍스트 답변</span>
+
 
             <S.TextSubmitButton
               type="button"

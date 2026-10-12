@@ -1,16 +1,25 @@
 import {
-  INTERVIEW_SETTING_INTERVIEWER_SECTION_TITLE,
-  INTERVIEW_SETTING_MAJOR_OPTIONS,
+  INTERVIEW_SETTING_INTERVIEWERS,
   INTERVIEW_SETTING_OPTION_SECTIONS,
-  INTERVIEW_SETTING_PERSONALITY_OPTIONS,
   INTERVIEW_SETTING_STYLE_META,
-  INTERVIEW_SETTING_TONE_OPTIONS,
+  type InterviewerId,
 } from '@/shared/constants/interview-page/setting-interview';
+import InterviewerImage1 from '@/shared/img/interview-page/interviewer1.svg?url';
+import InterviewerImage2 from '@/shared/img/interview-page/interviewer2.svg?url';
+import InterviewerImage3 from '@/shared/img/interview-page/interviewer3.svg?url';
+import InterviewerImage4 from '@/shared/img/interview-page/interviewer4.svg?url';
 import DifficultyEasyImage from '@/shared/img/interview-page/easy.svg?url';
 import DifficultyNormalImage from '@/shared/img/interview-page/normal.svg?url';
 import DifficultyHardImage from '@/shared/img/interview-page/hard.svg?url';
 
 const [styleSection, difficultySection] = INTERVIEW_SETTING_OPTION_SECTIONS;
+
+const INTERVIEWER_IMAGES: Record<InterviewerId, string> = {
+  1: InterviewerImage1,
+  2: InterviewerImage2,
+  3: InterviewerImage3,
+  4: InterviewerImage4,
+};
 
 const DIFFICULTY_IMAGES: Record<
   (typeof difficultySection.options)[number],
@@ -37,23 +46,11 @@ export const SETTING_DIFFICULTY_SECTION = {
   })),
 };
 
-export const SETTING_INTERVIEWER_SECTION = {
-  title: INTERVIEW_SETTING_INTERVIEWER_SECTION_TITLE,
-  groups: [
-    {
-      key: 'personality',
-      title: '성격',
-      options: INTERVIEW_SETTING_PERSONALITY_OPTIONS,
-    },
-    {
-      key: 'tone',
-      title: '말투',
-      options: INTERVIEW_SETTING_TONE_OPTIONS,
-    },
-    {
-      key: 'major',
-      title: '전문 분야',
-      options: INTERVIEW_SETTING_MAJOR_OPTIONS,
-    },
-  ],
-} as const;
+export const SETTING_INTERVIEWER_CARDS = INTERVIEW_SETTING_INTERVIEWERS.map(
+  (interviewer) => ({
+    ...interviewer,
+    image: INTERVIEWER_IMAGES[interviewer.id],
+  }),
+);
+
+export type SettingInterviewerCard = (typeof SETTING_INTERVIEWER_CARDS)[number];

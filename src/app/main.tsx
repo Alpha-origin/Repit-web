@@ -6,6 +6,8 @@ import { theme } from "@/app/styles/theme";
 import { Suspense } from "react";
 import Loading from "@/shared/components/loading";
 
+import RecordingUploads from "@/widgets/recording-uploads";
+
 import router from "./router.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -13,6 +15,7 @@ createRoot(document.getElementById("root")!).render(
     <Suspense fallback={<Loading />}>
       <RouterProvider router={router} />
     </Suspense>
+    <RecordingUploads />
     <GlobalStyle />
   </ThemeProvider>,
 );

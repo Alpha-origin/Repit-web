@@ -7,6 +7,9 @@ import {
 } from "@/features/my-page/api/getMyPageData";
 import { useMyInfo } from "@/features/my-page/personal-info/model/useMyInfo";
 import { usePortfolioForm } from "@/features/my-page/portfolio/model/usePortfolioForm";
+import { useProfileStatus } from "@/features/profile/model/useProfileStatus";
+import ChangeConfirmation from "@/widgets/my-page/portfolio/change-confirmation";
+import ProfileStatusCard from "@/widgets/my-page/profile-status";
 import PersonalInfo from "@/widgets/my-page/personal-info";
 import Portfolio from "@/widgets/my-page/portfolio";
 
@@ -16,6 +19,8 @@ const MyPage = () => {
   const navigate = useNavigate();
   const [metaData, setMetaData] = useState<MyPageMetaData | null>(null);
   const personalInfo = useMyInfo();
+  const profileStatus = useProfileStatus();
+  const isAnalyzing = profileStatus.profile?.status === "PENDING";
 
   const initialGitUrls = useMemo(
     () => metaData?.gitUrls ?? [],
@@ -23,6 +28,9 @@ const MyPage = () => {
   );
   const portfolioForm = usePortfolioForm({
     initialGitUrls,
+    isSaveBlocked: profileStatus.isLoading || isAnalyzing || profileStatus.isRestarting,
+    requiresChangeConfirmation: profileStatus.profile?.status === "COMPLETED",
+    onAnalysisStarted: profileStatus.markPending,
     onUploadSuccess: setMetaData,
   });
 
@@ -62,7 +70,24 @@ const MyPage = () => {
   return (
     <S.Page>
       <PersonalInfo {...personalInfo} />
-      <Portfolio {...portfolioForm} onBack={handleBack} />
+      <Portfolio {...portfolioForm} isAnalyzing={isAnalyzing} onBack={handleBack}>
+        <ProfileStatusCard
+          {...profileStatus}
+          onRefresh={() => void profileStatus.refetch()}
+          onReanalyze={() => void profileStatus.reanalyze()}
+          onEdit={() => portfolioForm.gitInputRef.current?.focus()}
+          onReplaceFile={portfolioForm.onPortfolioUploadClick}
+          onSave={() => void portfolioForm.onPortfolioSave()}
+          isSaving={portfolioForm.isSaving}
+        />
+      </Portfolio>
+      {portfolioForm.isChangeConfirmationOpen ? (
+        <ChangeConfirmation
+          disabled={portfolioForm.isSaveDisabled}
+          onCancel={portfolioForm.onCancelChange}
+          onConfirm={() => void portfolioForm.onConfirmChange()}
+        />
+      ) : null}
     </S.Page>
   );
 };

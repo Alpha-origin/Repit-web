@@ -10,6 +10,9 @@ import { extractErrorMessage } from "@/shared/api/errorMessage";
 
 interface UsePortfolioFormOptions {
   initialGitUrls?: string[];
+  isSaveBlocked?: boolean;
+  requiresChangeConfirmation?: boolean;
+  onAnalysisStarted?: (jobId: string | null) => void;
   onUploadSuccess?: (metaData: MyPageMetaData) => void;
 }
 
@@ -17,11 +20,14 @@ const normalizeGitUrl = (value: string) => value.trim();
 
 export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const gitInputRef = useRef<HTMLInputElement | null>(null);
+  const savingRef = useRef(false);
   const [portfolioFile, setPortfolioFile] = useState<File | null>(null);
   const [portfolioFileError, setPortfolioFileError] = useState("");
   const [gitInput, setGitInput] = useState("");
   const [gitUrls, setGitUrls] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isChangeConfirmationOpen, setIsChangeConfirmationOpen] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const isGitListEditedRef = useRef(false);
@@ -128,8 +134,8 @@ export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
     return isValid;
   };
 
-  const handlePortfolioSave = async () => {
-    if (isSaving) {
+  const savePortfolio = async () => {
+    if (savingRef.current || options.isSaveBlocked) {
       return;
     }
 
@@ -139,6 +145,7 @@ export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
       return;
     }
 
+    savingRef.current = true;
     setIsSaving(true);
 
     try {
@@ -146,25 +153,48 @@ export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
         file: portfolioFile,
         gitUrls,
       });
+      options.onAnalysisStarted?.(uploadedMetaData.jobId);
       // 업로드는 성공했으므로 재조회가 실패하면 입력값으로 대신 갱신한다.
       const nextMetaData = await getMyPageMetaData().catch(
         () => uploadedMetaData,
       );
 
       options.onUploadSuccess?.(nextMetaData);
-      setSaveMessage("포트폴리오가 저장되었습니다.");
+      setSaveMessage("");
     } catch (error) {
       setSaveError(
         extractErrorMessage(error, "포트폴리오 저장에 실패했습니다."),
       );
     } finally {
+      savingRef.current = false;
       setIsSaving(false);
     }
   };
 
+  const handlePortfolioSave = async () => {
+    if (savingRef.current || options.isSaveBlocked) return;
+    clearSaveStatus();
+    if (!validateBeforeSave()) return;
+    if (options.requiresChangeConfirmation) {
+      setIsChangeConfirmationOpen(true);
+      return;
+    }
+    await savePortfolio();
+  };
+
+  const handleConfirmChange = async () => {
+    setIsChangeConfirmationOpen(false);
+    await savePortfolio();
+  };
+
   return {
+    isChangeConfirmationOpen,
+    onCancelChange: () => setIsChangeConfirmationOpen(false),
+    onConfirmChange: handleConfirmChange,
     fileError: portfolioFileError,
     fileInputRef,
+    gitInputRef,
+    isSaveDisabled: isSaving || Boolean(options.isSaveBlocked),
     gitInput,
     gitUrls,
     isSaving,

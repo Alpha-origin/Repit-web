@@ -2,11 +2,7 @@ export type InterviewStyleOption = '편함' | '일반' | '압박';
 
 export type InterviewDifficultyOption = '쉬움' | '보통' | '어려움';
 
-export type InterviewerPersonalityOption = '친근한' | '현실적인' | '꼼꼼한';
-
-export type InterviewerToneOption = '부드러운' | '직설적인' | '압박하는';
-
-export type InterviewMajorOption = '프론트엔드' | '백엔드';
+export type InterviewerId = 1 | 2 | 3 | 4;
 
 export type InterviewSettingStyleIcon = 'smile' | 'neutral' | 'pressure';
 
@@ -27,18 +23,22 @@ export interface InterviewSettingStyleMeta {
   icon: InterviewSettingStyleIcon;
 }
 
+export interface InterviewSettingInterviewer {
+  description: string;
+  id: InterviewerId;
+  name: string;
+  personaName: string;
+  tags: readonly string[];
+}
+
 export interface InterviewSettingSelection {
   difficulty: InterviewDifficultyOption;
-  major: InterviewMajorOption;
-  personality: InterviewerPersonalityOption;
+  interviewerId: InterviewerId;
   style: InterviewStyleOption;
-  tone: InterviewerToneOption;
 }
 
 export interface InterviewSettingSelectHandlers {
   difficulty: (value: InterviewDifficultyOption) => void;
-  major: (value: InterviewMajorOption) => void;
-  personality: (value: InterviewerPersonalityOption) => void;
+  interviewer: (value: InterviewerId) => void;
   style: (value: InterviewStyleOption) => void;
-  tone: (value: InterviewerToneOption) => void;
 }
