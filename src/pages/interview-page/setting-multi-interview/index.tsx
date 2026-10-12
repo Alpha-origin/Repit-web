@@ -1,3 +1,4 @@
+import ProfileGuidance from "@/widgets/interview-page/profile-guidance";
 import {
   useMultiInterviewSetup,
 } from "@/features/interview-page/setting-multi-interview/model/useMultiInterviewSetup";
@@ -57,6 +58,11 @@ const SettingMultiInterviewPage = () => {
           </S.InterviewerColumn>
         </S.MainGrid>
 
+        <ProfileGuidance
+          message={setup.profileGuidance}
+          showMyPageLink={setup.showMyPageLink}
+          onRetry={setup.onRefreshProfile}
+        />
         {setup.errorMessage ? (
           <S.ErrorMessage role="alert">{setup.errorMessage}</S.ErrorMessage>
         ) : null}
@@ -87,7 +93,7 @@ const SettingMultiInterviewPage = () => {
       {setup.isSubmitting ? (
         <S.LoadingOverlay role="status" aria-live="polite">
           <S.LoadingSpinner aria-hidden="true" />
-          <S.LoadingText>면접관과 질문을 준비하고 있습니다</S.LoadingText>
+          <S.LoadingText>면접을 준비하고 있어요</S.LoadingText>
         </S.LoadingOverlay>
       ) : null}
     </S.Container>

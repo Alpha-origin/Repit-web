@@ -57,6 +57,8 @@ export interface PrepareInterviewParams {
 }
 
 export interface PreparedInterviewData {
+  analysisJobId?: string;
+  questionPreparationStatus?: string | null;
   sessionId: string;
   interviewId: number;
   userId: number;

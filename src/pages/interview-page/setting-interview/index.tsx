@@ -1,3 +1,4 @@
+import ProfileGuidance from "@/widgets/interview-page/profile-guidance";
 import { useInterviewSetup } from "@/features/interview-page/setting-interview/model/useInterviewSetup";
 import InterviewerOptions from "@/widgets/interview-page/setting-interview/interviewer-options";
 import SettingActions from "@/widgets/interview-page/setting-interview/setting-actions";
@@ -22,6 +23,11 @@ const SettingInterviewPage = () => {
             selectedValue={setup.selection.interviewerId}
           />
         </S.Sections>
+        <ProfileGuidance
+          message={setup.profileGuidance}
+          showMyPageLink={setup.showMyPageLink}
+          onRetry={setup.onRefreshProfile}
+        />
         {setup.errorMessage ? (
           <S.ErrorMessage role="alert">{setup.errorMessage}</S.ErrorMessage>
         ) : null}
@@ -36,7 +42,7 @@ const SettingInterviewPage = () => {
       {setup.isSubmitting ? (
         <S.LoadingOverlay role="status" aria-live="polite">
           <S.LoadingSpinner aria-hidden="true" />
-          <S.LoadingMessage>질문 생성중입니다</S.LoadingMessage>
+          <S.LoadingMessage>면접을 준비하고 있어요</S.LoadingMessage>
         </S.LoadingOverlay>
       ) : null}
     </S.Container>
