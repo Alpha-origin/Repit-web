@@ -110,8 +110,18 @@ const InterviewPageContent = () => {
         <S.PreparationErrorMessage>
           {interviewSession.preparationError}
         </S.PreparationErrorMessage>
+        {interviewSession.canRetryPreparation ? (
+          <S.PreparationErrorAction
+            type="button"
+            disabled={interviewSession.isRetryingPreparation}
+            onClick={() => void interviewSession.onRetryPreparation()}
+          >
+            {interviewSession.isRetryingPreparation ? "다시 요청 중…" : "다시 시도"}
+          </S.PreparationErrorAction>
+        ) : null}
         <S.PreparationErrorAction
           type="button"
+          disabled={interviewSession.isRetryingPreparation}
           onClick={() => void handleQuitInterview()}
         >
           메인으로 돌아가기
@@ -121,7 +131,9 @@ const InterviewPageContent = () => {
   }
 
   if (interviewSession.isPreparingInterview) {
-    return <Loading message="포트폴리오 분석 및 면접 준비 중입니다..." />;
+    return <Loading message={interviewSession.isWaitingForQuestions
+      ? "새 질문을 준비하고 있어요. 길게는 몇 분 걸릴 수 있어요"
+      : "면접을 준비하고 있어요"} />;
   }
 
   if (isMultiInterview) {

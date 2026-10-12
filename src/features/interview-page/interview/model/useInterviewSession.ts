@@ -8,6 +8,7 @@ import {
   getCurrentInterviewQuestion,
   getInterviewPreparation,
   quitInterview,
+  retryInterviewPreparation,
   setActiveInterviewSessionId,
   submitInterviewAnswer,
   type CurrentInterviewQuestion,
@@ -36,8 +37,9 @@ type InterviewCloseReason = "completed" | "quit";
 const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
 const AWAITING_RESPONSE_TIMEOUT_MS = 30_000;
 const INTERVIEW_PREPARATION_POLL_INTERVAL_MS = 1_000;
-const INTERVIEW_PREPARATION_MAX_ATTEMPTS = 120;
 const DEFAULT_SOLO_VOICE_INDEX = 1;
+const INTERVIEW_PREPARATION_TIMEOUT_MS = 20 * 60_000;
+const INTERVIEW_QUESTIONS_WAITING_POLL_INTERVAL_MS = 3_000;
 
 export type InterviewTtsProvider = "elevenlabs" | "supertone";
 
@@ -262,6 +264,13 @@ export const useInterviewSession = (
   const [isAwaitingNextQuestion, setIsAwaitingNextQuestion] = useState(false);
   const [preparationError, setPreparationError] = useState<string | null>(null);
   const [answerError, setAnswerError] = useState<string | null>(null);
+  const [isWaitingForQuestions, setIsWaitingForQuestions] = useState(
+    preparedInterview?.questionPreparationStatus === "WAITING",
+  );
+  const [canRetryPreparation, setCanRetryPreparation] = useState(false);
+  const [isRetryingPreparation, setIsRetryingPreparation] = useState(false);
+  const [preparationAttempt, setPreparationAttempt] = useState(0);
+  const retryRequestRef = useRef<AbortController | null>(null);
   const isVoiceMode = mode === "voice";
   const { cameraState, cloneAudioTrack, cloneVideoTrack, micState, micStream, videoRef, releaseMedia } =
     useInterviewMedia(isVoiceMode && !isClosing);
@@ -598,15 +607,26 @@ export const useInterviewSession = (
 
     preparingSessionIdRef.current = sessionId;
     let isCancelled = false;
-    let attemptCount = 0;
+    const abortController = new AbortController();
     let timeoutId: number | null = null;
     let lastErrorMessage: string | null = null;
 
+    const safetyTimeoutId = window.setTimeout(() => {
+      isCancelled = true;
+      abortController.abort();
+      preparingSessionIdRef.current = null;
+      setCanRetryPreparation(false);
+      setPreparationError(
+        lastErrorMessage ?? "면접 준비 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.",
+      );
+    }, INTERVIEW_PREPARATION_TIMEOUT_MS);
+
     const waitForChatSession = async () => {
-      attemptCount += 1;
+      if (isCancelled) return;
 
       const { data, errorMessage } = await getInterviewPreparation(
         preparedInterview.interviewId,
+        abortController.signal,
       );
 
       if (isCancelled || isSessionClosedRef.current) {
@@ -615,9 +635,16 @@ export const useInterviewSession = (
 
       if (errorMessage || !data) {
         lastErrorMessage = errorMessage ?? "면접 준비 상태를 확인하지 못했습니다.";
+      } else {
+        lastErrorMessage = null;
       }
 
-      if (data?.chatDelivered) {
+      if (data) {
+        setIsWaitingForQuestions(data.status === "WAITING");
+      }
+
+      if (data?.preparationStatus === "READY") {
+        window.clearTimeout(safetyTimeoutId);
         preparingSessionIdRef.current = null;
         setActiveInterviewSessionId(sessionId);
         sessionIdRef.current = sessionId;
@@ -633,22 +660,22 @@ export const useInterviewSession = (
         return;
       }
 
-      if (data?.status === "FAILED") {
-        preparingSessionIdRef.current = null;
-        setPreparationError(data.errorMessage ?? "면접 질문 준비에 실패했습니다.");
-        return;
-      }
-
-      if (attemptCount >= INTERVIEW_PREPARATION_MAX_ATTEMPTS) {
+      if (data?.preparationStatus === "FAILED") {
+        window.clearTimeout(safetyTimeoutId);
+        setCanRetryPreparation(data.retryable);
         preparingSessionIdRef.current = null;
         setPreparationError(
-          lastErrorMessage ??
-            "면접 준비 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.",
+          data.errorMessage ?? (data.failureStage === "CHAT_DELIVERY"
+            ? "채팅 면접을 준비하지 못했습니다."
+            : "면접 질문 준비에 실패했습니다."),
         );
         return;
       }
 
-      const retryAfterMs = data?.retryAfterMs ?? INTERVIEW_PREPARATION_POLL_INTERVAL_MS;
+      const pollIntervalMs = data?.status === "WAITING"
+        ? INTERVIEW_QUESTIONS_WAITING_POLL_INTERVAL_MS
+        : INTERVIEW_PREPARATION_POLL_INTERVAL_MS;
+      const retryAfterMs = Math.max(pollIntervalMs, data?.retryAfterMs ?? 0);
 
       timeoutId = window.setTimeout(() => {
         void waitForChatSession();
@@ -659,6 +686,8 @@ export const useInterviewSession = (
 
     return () => {
       isCancelled = true;
+      abortController.abort();
+      window.clearTimeout(safetyTimeoutId);
 
       if (timeoutId !== null) {
         window.clearTimeout(timeoutId);
@@ -668,7 +697,30 @@ export const useInterviewSession = (
         preparingSessionIdRef.current = null;
       }
     };
-  }, [preparedInterview, sessionId, syncCurrentQuestion]);
+  }, [preparedInterview, preparationAttempt, sessionId, syncCurrentQuestion]);
+
+  useEffect(() => () => retryRequestRef.current?.abort(), []);
+
+  const handleRetryPreparation = async () => {
+    if (!preparedInterview || !canRetryPreparation || retryRequestRef.current) return;
+    const controller = new AbortController();
+    retryRequestRef.current = controller;
+    setIsRetryingPreparation(true);
+    const { errorMessage } = await retryInterviewPreparation(
+      preparedInterview.interviewId,
+      controller.signal,
+    );
+    if (controller.signal.aborted) return;
+    retryRequestRef.current = null;
+    setIsRetryingPreparation(false);
+    if (errorMessage) {
+      setPreparationError(errorMessage);
+      return;
+    }
+    setPreparationError(null);
+    setCanRetryPreparation(false);
+    setPreparationAttempt((attempt) => attempt + 1);
+  };
 
   const handleStartVoice = async () => {
     if (!isVoiceMode || isSessionClosedRef.current || isCompletingVoiceRef.current ||
@@ -827,6 +879,10 @@ export const useInterviewSession = (
     isVoiceStarted: recorder.isRecording,
     mode,
     preparationError,
+    canRetryPreparation,
+    isRetryingPreparation,
+    isWaitingForQuestions,
+    onRetryPreparation: handleRetryPreparation,
     questionAudioStatus: questionTts.status,
     questionAudioErrorMessage:
       ttsProvider === "elevenlabs" ? elevenLabsTts.errorMessage : null,

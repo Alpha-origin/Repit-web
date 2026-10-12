@@ -1,10 +1,14 @@
-import type { ChangeEvent, KeyboardEvent, RefObject } from "react";
+import type { ChangeEvent, KeyboardEvent, RefObject, ReactNode } from "react";
 
 import MyPageFileImage from "@/shared/img/my-page/Repit-mypage.svg?url";
 
 import * as S from "./style";
 
 interface PortfolioProps {
+  children?: ReactNode;
+  gitInputRef: RefObject<HTMLInputElement | null>;
+  isSaveDisabled: boolean;
+  isAnalyzing: boolean;
   fileError: string;
   fileInputRef: RefObject<HTMLInputElement | null>;
   gitInput: string;
@@ -39,6 +43,10 @@ const TrashIcon = () => (
 );
 
 const Portfolio = ({
+  children,
+  gitInputRef,
+  isSaveDisabled,
+  isAnalyzing,
   fileError,
   fileInputRef,
   gitInput,
@@ -61,6 +69,7 @@ const Portfolio = ({
   return (
     <S.PortfolioWrapper>
       <S.Title>포트폴리오</S.Title>
+      {children}
 
       <S.UploadBox>
         <S.GuideBadge>
@@ -107,6 +116,7 @@ const Portfolio = ({
 
         <S.GitInputWrapper>
           <S.Input
+            ref={gitInputRef}
             id="my-page-git"
             type="text"
             value={gitInput}
@@ -155,10 +165,10 @@ const Portfolio = ({
 
         <S.SaveButton
           type="button"
-          disabled={isSaving}
+          disabled={isSaveDisabled}
           onClick={onPortfolioSave}
         >
-          {isSaving ? "저장 중..." : "저장"}
+          {isSaving ? "저장 중..." : isAnalyzing ? "분석 중…" : "저장"}
         </S.SaveButton>
       </S.ButtonWrapper>
     </S.PortfolioWrapper>

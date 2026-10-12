@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useInterviewEligibility } from "@/features/profile/model/useInterviewEligibility";
+
 import {
   createInterview,
   prepareInterviewRecord,
@@ -76,6 +78,8 @@ const buildUniquePersonaName = (personaName: string) =>
 export const useInterviewSetup = () => {
   const navigate = useNavigate();
   const [answerMode, setAnswerMode] = useState<"voice" | "text">("voice");
+  const eligibility = useInterviewEligibility();
+  const [requiresMaterials, setRequiresMaterials] = useState(false);
 
   const [selectedStyle, setSelectedStyle] = useState(
     INTERVIEW_SETTING_DEFAULT_SELECTION.style,
@@ -92,11 +96,12 @@ export const useInterviewSetup = () => {
   const handleBack = () => navigate(-1);
 
   const handleNext = async () => {
-    if (isSubmitting) {
+    if (isSubmitting || !eligibility.canStart) {
       return;
     }
 
     setErrorMessage("");
+    setRequiresMaterials(false);
     setIsSubmitting(true);
 
     const selectedInterviewer = INTERVIEW_SETTING_INTERVIEWERS.find(
@@ -151,9 +156,11 @@ export const useInterviewSetup = () => {
     const {
       data: preparedInterviewRecord,
       errorMessage: prepareInterviewErrorMessage,
+      statusCode,
     } = await prepareInterviewRecord(data.interviewId);
 
     if (prepareInterviewErrorMessage || !preparedInterviewRecord) {
+      setRequiresMaterials(statusCode === 404);
       setIsSubmitting(false);
       setErrorMessage(
         prepareInterviewErrorMessage ?? "면접 준비에 실패했습니다.",
@@ -187,6 +194,8 @@ export const useInterviewSetup = () => {
           gender: personaPayload.gender,
           tone: personaPayload.tone,
           jobId: preparedInterviewRecord.jobId ?? "",
+          analysisJobId: preparedInterviewRecord.analysisJobId,
+          questionPreparationStatus: preparedInterviewRecord.status,
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
           currentQuestionIndex: data.currentQuestionIndex,
           questions: [],
@@ -225,8 +234,11 @@ export const useInterviewSetup = () => {
     answerMode,
     onAnswerModeChange: setAnswerMode,
     errorMessage,
-    isNextDisabled: isSubmitting,
-    isPortfolioAnalyzing: false,
+    isNextDisabled: isSubmitting || !eligibility.canStart,
+    isPortfolioAnalyzing: eligibility.isPortfolioAnalyzing,
+    profileGuidance: eligibility.guidance,
+    showMyPageLink: eligibility.showMyPageLink || requiresMaterials,
+    onRefreshProfile: eligibility.hasLoadError ? eligibility.refetch : undefined,
     isSubmitting,
     onBack: handleBack,
     onNext: handleNext,
