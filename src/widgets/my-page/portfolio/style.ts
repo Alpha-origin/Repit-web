@@ -300,6 +300,10 @@ export const SaveStatus = styled.p<{ $isError: boolean }>`
   overflow-wrap: anywhere;
 `;
 
+export const AnalysisStatus = styled.div`
+  margin-top: 1.75rem;
+`;
+
 export const Footer = styled.div`
   display: flex;
   align-items: center;

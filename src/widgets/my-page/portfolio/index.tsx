@@ -4,6 +4,7 @@ import * as S from "./style";
 
 interface PortfolioProps {
   children?: ReactNode;
+  jobSelection: ReactNode;
   gitInputRef: RefObject<HTMLInputElement | null>;
   isSaveDisabled: boolean;
   isAnalyzing: boolean;
@@ -46,6 +47,7 @@ const TrashIcon = () => (
 
 const Portfolio = ({
   children,
+  jobSelection,
   gitInputRef,
   isSaveDisabled,
   isAnalyzing,
@@ -77,11 +79,11 @@ const Portfolio = ({
         </S.Description>
       </S.Header>
 
-      {children}
+      {jobSelection}
 
       <S.Section aria-labelledby="portfolio-file-title">
         <S.SectionHeading>
-          <S.SectionNumber aria-hidden="true">01</S.SectionNumber>
+          <S.SectionNumber aria-hidden="true">02</S.SectionNumber>
           <S.SectionTitle id="portfolio-file-title">포트폴리오</S.SectionTitle>
           <S.RequiredBadge>필수</S.RequiredBadge>
         </S.SectionHeading>
@@ -121,7 +123,7 @@ const Portfolio = ({
 
       <S.Section aria-labelledby="github-section-title">
         <S.SectionHeading>
-          <S.SectionNumber aria-hidden="true">02</S.SectionNumber>
+          <S.SectionNumber aria-hidden="true">03</S.SectionNumber>
           <S.SectionTitle id="github-section-title">
             <S.Label htmlFor="my-page-git">GitHub</S.Label>
           </S.SectionTitle>
@@ -173,6 +175,8 @@ const Portfolio = ({
           </S.GitUrlList>
         )}
       </S.Section>
+
+      {children && <S.AnalysisStatus>{children}</S.AnalysisStatus>}
 
       {(saveMessage || saveError) && (
         <S.SaveStatus role={saveError ? "alert" : "status"} $isError={!!saveError}>
