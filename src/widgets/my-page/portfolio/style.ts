@@ -1,113 +1,154 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
+
+const buttonStyle = css`
+  min-height: 2.75rem;
+  padding: 0 1.125rem;
+  border: 1px solid #dfe5ed;
+  border-radius: ${({ theme }) => theme.radius.sm};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.brand.blue};
+    outline-offset: 3px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+`;
 
 export const PortfolioWrapper = styled.section`
-  width: 100%;
   min-width: 0;
-  min-height: 40.625rem;
-  padding: 2rem 2rem 0.8rem;
-  border: 0.0625rem solid #dce2ec;
-  border-radius: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.96);
-
-  @media (min-width: 90rem) {
-    min-height: 37.375rem;
-  }
-
-  @media (max-width: 56rem) {
-    min-height: auto;
-    padding: 1.6rem 1.5rem 1.4rem;
-  }
+  padding: ${({ theme }) => theme.spacing.xl};
+  border: 1px solid #e1e7ef;
+  border-radius: ${({ theme }) => theme.radius.lg};
+  background: ${({ theme }) => theme.colors.white};
+  box-shadow: 0 4px 24px rgba(34, 55, 88, 0.025);
 
   @media (max-width: 36rem) {
-    padding: 1.3rem 1rem 1.2rem;
+    padding: 1.5rem 1.25rem;
   }
+`;
+
+export const Header = styled.div`
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
 export const Title = styled.h2`
-  margin: 0 0 0.85rem;
-  color: #46506a;
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
+  color: #25324a;
   font-size: 1.25rem;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.4;
+  letter-spacing: -0.025em;
+`;
 
-  @media (min-width: 90rem) {
-    font-size: 1.125rem;
+export const Description = styled.p`
+  color: #748095;
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  line-height: 1.6;
+  word-break: keep-all;
+`;
+
+export const Section = styled.section`
+  margin-top: 1.75rem;
+
+  & + & {
+    padding-top: 1.75rem;
+    border-top: 1px solid #edf0f5;
   }
 `;
 
-export const UploadBox = styled.div`
-  position: relative;
-  width: 100%;
-  min-height: 11.4rem;
-  overflow: hidden;
-  border: 0.0625rem solid #dce1e9;
-  border-radius: 0.45rem;
-  background-color: #ffffff;
+export const SectionHeading = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
+`;
 
-  @media (min-width: 90rem) {
-    min-height: 12rem;
+export const SectionNumber = styled.span`
+  margin-right: 0.125rem;
+  color: #95a4ba;
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+`;
+
+export const SectionTitle = styled.h3`
+  color: #344159;
+  font-size: ${({ theme }) => theme.fontSize.md};
+  font-weight: 650;
+  line-height: 1.5;
+`;
+
+export const Label = styled.label`
+  cursor: pointer;
+`;
+
+export const RequiredBadge = styled.span`
+  padding: 0.1875rem 0.4375rem;
+  border-radius: 0.25rem;
+  background: ${({ theme }) => theme.colors.surface.blueLight};
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.4;
+`;
+
+export const UploadBox = styled.div<{ $hasFile: boolean; $hasError: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  margin-top: ${({ theme }) => theme.spacing.md};
+  padding: 1.5rem 1.25rem;
+  border: 1px ${({ $hasFile }) => ($hasFile ? "solid" : "dashed")}
+    ${({ $hasError, $hasFile }) => $hasError ? "#d77a7a" : $hasFile ? "#b8d3f6" : "#ccd8e8"};
+  border-radius: ${({ theme }) => theme.radius.md};
+  background: #f8faff;
+
+  @media (max-width: 64rem) and (min-width: 56.01rem), (max-width: 36rem) {
+    flex-wrap: wrap;
+    padding: 1.125rem;
   }
 `;
 
-export const GuideBadge = styled.div`
-  position: absolute;
-  top: 0.7rem;
-  right: 0.75rem;
-  z-index: 1;
-  padding: 0.45rem 0.65rem;
-  border-radius: 0.5rem;
-  background-color: #eef4ff;
-  color: #2f3545;
-  font-size: 0.65rem;
-  font-weight: 700;
-  line-height: 1;
-
-  span {
-    color: #397df1;
-  }
-
-  @media (max-width: 36rem) {
-    font-size: 0.58rem;
-  }
+export const FileIcon = styled.div`
+  display: grid;
+  place-items: center;
+  flex: 0 0 2.75rem;
+  height: 2.75rem;
+  border: 1px solid #e2eaf6;
+  border-radius: ${({ theme }) => theme.radius.sm};
+  background: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.brand.blue};
 `;
 
 export const UploadContent = styled.div`
-  min-height: 11.4rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.55rem;
-  padding: 2.3rem 1rem 1rem;
-  text-align: center;
-
-  @media (min-width: 90rem) {
-    min-height: 12rem;
-  }
+  flex: 1;
+  min-width: 0;
 `;
 
-export const FileIcon = styled.img`
-  width: auto;
-  height: 4.1rem;
-  display: block;
-  margin-left: 0.4rem;
-
-  @media (min-width: 90rem) {
-    height: 4.375rem;
-  }
+export const UploadTitle = styled.p`
+  overflow: hidden;
+  color: #42516b;
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  font-weight: 600;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 export const UploadText = styled.p`
-  margin: 0;
-  color: #50576a;
-  font-size: 0.83rem;
-  font-weight: 550;
-  line-height: 1.4;
-
-  span {
-    color: #8a90a2;
-    font-size: 0.7rem;
-  }
+  margin-top: 0.375rem;
+  color: #748095;
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  line-height: 1.6;
+  word-break: keep-all;
 `;
 
 export const HiddenFileInput = styled.input`
@@ -115,336 +156,195 @@ export const HiddenFileInput = styled.input`
 `;
 
 export const UploadButton = styled.button`
-  min-width: 5.3rem;
-  height: 1.75rem;
-  margin-top: 0.05rem;
-  padding: 0 0.85rem;
-  border: none;
-  border-radius: 0.45rem;
-  background-color: #323b5a;
-  color: #ffffff;
-  font-size: 0.72rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-
-  @media (min-width: 90rem) {
-    height: 1.875rem;
-  }
+  ${buttonStyle}
+  flex-shrink: 0;
+  min-height: 2.5rem;
+  padding: 0 0.875rem;
+  background: ${({ theme }) => theme.colors.white};
+  color: #465b79;
+  font-size: ${({ theme }) => theme.fontSize.xs};
 
   &:hover {
-    background-color: #242d4c;
-    transform: translateY(-0.0625rem);
+    border-color: ${({ theme }) => theme.colors.brand.blueLight};
+    background: ${({ theme }) => theme.colors.surface.blueLight};
   }
 
-  &:focus-visible {
-    outline: 0.125rem solid rgba(36, 123, 237, 0.45);
-    outline-offset: 0.15rem;
-  }
-`;
-
-export const SelectedFileRow = styled.div`
-  width: 100%;
-  min-height: 2.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-  padding: 0.25rem 0.45rem 0.25rem 0.75rem;
-  border: 0.0625rem solid #cfd7e3;
-  border-radius: 0.45rem;
-  background-color: #ffffff;
-
-  @media (min-width: 90rem) {
-    min-height: 2.5rem;
+  @media (max-width: 64rem) and (min-width: 56.01rem), (max-width: 36rem) {
+    width: 100%;
+    min-height: 2.75rem;
   }
 `;
 
-export const SelectedFileName = styled.span`
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  color: #56617a;
-  font-size: 0.78rem;
-  font-weight: 500;
-  line-height: 1.4;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+export const FieldHint = styled.p`
+  margin-top: 0.625rem;
+  color: #7b8799;
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  line-height: 1.6;
+  word-break: keep-all;
 `;
 
-export const ReplaceFileButton = styled.button`
-  width: 1.25rem;
-  height: 1.25rem;
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-radius: 50%;
-  background-color: #343c59;
-  color: #ffffff;
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: #1976e8;
-  }
-
-  &:focus-visible {
-    outline: 0.125rem solid rgba(36, 123, 237, 0.45);
-    outline-offset: 0.15rem;
-  }
-`;
-
-export const FieldError = styled.p`
-  margin: 0.4rem 0 0;
-  color: #d64f4f;
-  font-size: 0.72rem;
-  font-weight: 600;
-  line-height: 1.35;
-`;
-
-export const InputSection = styled.div`
-  margin-top: 1.65rem;
-
-  @media (min-width: 90rem) {
-    margin-top: 1.75rem;
-  }
-`;
-
-export const Label = styled.label`
-  display: block;
-  margin: 0 0 0.65rem;
-  color: #46506a;
-  font-size: 1.2rem;
-  font-weight: 700;
-  line-height: 1.2;
-
-  @media (min-width: 90rem) {
-    font-size: 1.125rem;
-  }
+export const FieldError = styled(FieldHint)`
+  color: #c24141;
 `;
 
 export const GitInputWrapper = styled.div`
-  width: 100%;
-  height: 2.25rem;
   display: flex;
   align-items: center;
-  overflow: hidden;
-  border: 0.0625rem solid #d6dce5;
-  border-radius: 0.45rem;
-  background-color: #f9fafc;
+  gap: 0.625rem;
+  min-height: 3rem;
+  margin-top: ${({ theme }) => theme.spacing.md};
+  padding: 0.25rem 0.375rem 0.25rem 0.875rem;
+  border: 1px solid #dfe5ed;
+  border-radius: ${({ theme }) => theme.radius.sm};
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
-  @media (min-width: 90rem) {
-    height: 2.5rem;
-  }
-
   &:focus-within {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 0.14rem rgba(59, 130, 246, 0.12);
+    border-color: ${({ theme }) => theme.colors.brand.blue};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.surface.blueLight};
   }
+`;
+
+export const InputIcon = styled.span`
+  display: flex;
+  flex-shrink: 0;
+  color: #8a96a8;
 `;
 
 export const Input = styled.input`
   flex: 1;
   min-width: 0;
-  height: 100%;
-  padding: 0 0.8rem;
+  width: 100%;
+  height: 2.375rem;
+  padding: 0;
   border: none;
   outline: none;
-  background-color: transparent;
-  color: #47516a;
-  font-size: 0.75rem;
+  background: transparent;
+  color: #344159;
+  font-size: ${({ theme }) => theme.fontSize.sm};
 
-  &::placeholder {
-    color: #8d98ad;
+  &::placeholder { color: #8b96a8; }
+
+  @media (max-width: 36rem) {
+    font-size: ${({ theme }) => theme.fontSize.md};
   }
 `;
 
 export const GitAddButton = styled.button`
-  width: 2.25rem;
-  height: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background-color: transparent;
-  color: #46506a;
-  font-size: 1.45rem;
-  font-weight: 500;
-  line-height: 1;
-  cursor: pointer;
-  transition: color 0.2s ease, opacity 0.2s ease;
+  ${buttonStyle}
+  min-height: 2.25rem;
+  padding: 0 0.875rem;
+  border-color: transparent;
+  background: ${({ theme }) => theme.colors.surface.blueLight};
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: ${({ theme }) => theme.fontSize.xs};
 
-  &:hover:not(:disabled) {
-    color: #1976e8;
-  }
-
-  &:focus-visible {
-    outline: 0.125rem solid rgba(36, 123, 237, 0.45);
-    outline-offset: -0.2rem;
-  }
-
-  &:disabled {
-    cursor: default;
-    opacity: 0.45;
-  }
+  &:hover:not(:disabled) { background: #e3efff; }
 `;
 
-export const GitUrlList = styled.div`
+export const GitUrlList = styled.ul`
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
-  margin-top: 0.65rem;
+  gap: ${({ theme }) => theme.spacing.sm};
+  margin-top: 0.75rem;
 `;
 
-export const GitUrlRow = styled.div`
-  width: 100%;
-  min-height: 2.25rem;
+export const GitUrlRow = styled.li`
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0 0.45rem 0 0.8rem;
-  border: 0.0625rem solid #cfd7e3;
-  border-radius: 0.45rem;
-  background-color: #ffffff;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.25rem 0.375rem 0.25rem 0.875rem;
+  border-radius: ${({ theme }) => theme.radius.sm};
+  background: ${({ theme }) => theme.colors.surface.muted};
+`;
 
-  @media (min-width: 90rem) {
-    min-height: 2.5rem;
-  }
+export const LinkIndicator = styled.span`
+  color: #8a96a8;
+  font-size: ${({ theme }) => theme.fontSize.md};
 `;
 
 export const GitUrlText = styled.span`
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  color: #7b869c;
-  font-size: 0.75rem;
-  font-weight: 500;
-  line-height: 1.4;
+  color: #596a82;
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  line-height: 1.5;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
 
 export const GitRemoveButton = styled.button`
-  width: 1.7rem;
-  height: 1.7rem;
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+  flex: 0 0 2.25rem;
+  height: 2.25rem;
   border: none;
-  border-radius: 0.3rem;
-  background-color: transparent;
-  color: #596076;
+  border-radius: ${({ theme }) => theme.radius.sm};
+  background: transparent;
+  color: #8290a4;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
 
-  &:hover {
-    background-color: #eef4ff;
-    color: #1976e8;
-  }
-
+  &:hover { background: #fceeee; color: #c24141; }
   &:focus-visible {
-    outline: 0.125rem solid rgba(36, 123, 237, 0.45);
+    outline: 2px solid ${({ theme }) => theme.colors.brand.blue};
+    outline-offset: 2px;
   }
 `;
 
 export const SaveStatus = styled.p<{ $isError: boolean }>`
-  margin: 0.9rem 0 0;
-  color: ${({ $isError }) => ($isError ? "#d64f4f" : "#1976e8")};
-  font-size: 0.75rem;
-  font-weight: 700;
-  line-height: 1.4;
-  text-align: right;
+  margin-top: ${({ theme }) => theme.spacing.md};
+  color: ${({ $isError, theme }) => $isError ? "#c24141" : theme.colors.brand.blue};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+`;
+
+export const Footer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.spacing.md};
+  margin-top: ${({ theme }) => theme.spacing.xl};
+  padding-top: ${({ theme }) => theme.spacing.lg};
+  border-top: 1px solid #edf0f5;
+
+  @media (max-width: 64rem) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
+export const FooterHint = styled.p`
+  color: #7b8799;
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  line-height: 1.6;
 `;
 
 export const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-  gap: 1.4rem;
-  margin-top: 2.75rem;
-
-  @media (min-width: 90rem) {
-    margin-top: 4rem;
-  }
-
-  @media (max-width: 36rem) {
-    gap: 0.75rem;
-    margin-top: 2rem;
-  }
+  gap: ${({ theme }) => theme.spacing.sm};
 `;
 
 export const BackButton = styled.button`
-  width: 8rem;
-  height: 2.5rem;
-  border: none;
-  border-radius: 0.5rem;
-  background-color: #f1f2f5;
-  color: #2175e6;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  ${buttonStyle}
+  background: ${({ theme }) => theme.colors.white};
+  color: #68758a;
 
-  @media (min-width: 90rem) {
-    width: 8.5rem;
-  }
+  &:hover { background: ${({ theme }) => theme.colors.surface.muted}; }
 
-  &:hover {
-    background-color: #e8ebf2;
-    transform: translateY(-0.0625rem);
-  }
-
-  &:focus-visible {
-    outline: 0.125rem solid rgba(36, 123, 237, 0.45);
-    outline-offset: 0.15rem;
-  }
-
-  @media (max-width: 36rem) {
-    flex: 1;
-    min-width: 0;
-  }
+  @media (max-width: 36rem) { flex: 1; }
 `;
 
 export const SaveButton = styled.button`
-  width: 8rem;
-  height: 2.5rem;
-  border: none;
-  border-radius: 0.5rem;
-  background-color: #1976e8;
-  color: #ffffff;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  ${buttonStyle}
+  min-width: 6rem;
+  border-color: ${({ theme }) => theme.colors.brand.blue};
+  background: ${({ theme }) => theme.colors.brand.blue};
+  color: ${({ theme }) => theme.colors.white};
 
-  @media (min-width: 90rem) {
-    width: 8.5rem;
-  }
+  &:hover:not(:disabled) { background: #1268d8; border-color: #1268d8; }
 
-  &:hover:not(:disabled) {
-    background-color: #0f67d6;
-    transform: translateY(-0.0625rem);
-  }
-
-  &:focus-visible {
-    outline: 0.125rem solid rgba(36, 123, 237, 0.45);
-    outline-offset: 0.15rem;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.65;
-    transform: none;
-  }
-
-  @media (max-width: 36rem) {
-    flex: 1;
-    min-width: 0;
-  }
+  @media (max-width: 36rem) { flex: 1; }
 `;

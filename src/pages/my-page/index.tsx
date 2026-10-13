@@ -69,18 +69,26 @@ const MyPage = () => {
 
   return (
     <S.Page>
-      <PersonalInfo {...personalInfo} />
-      <Portfolio {...portfolioForm} isAnalyzing={isAnalyzing} onBack={handleBack}>
-        <ProfileStatusCard
-          {...profileStatus}
-          onRefresh={() => void profileStatus.refetch()}
-          onReanalyze={() => void profileStatus.reanalyze()}
-          onEdit={() => portfolioForm.gitInputRef.current?.focus()}
-          onReplaceFile={portfolioForm.onPortfolioUploadClick}
-          onSave={() => void portfolioForm.onPortfolioSave()}
-          isSaving={portfolioForm.isSaving}
-        />
-      </Portfolio>
+      <S.PageHeader>
+        <S.PageTitle>마이페이지</S.PageTitle>
+        <S.PageDescription>
+          나의 정보와 경험을 채우고, 나에게 맞는 면접을 준비하세요.
+        </S.PageDescription>
+      </S.PageHeader>
+      <S.Content>
+        <PersonalInfo {...personalInfo} />
+        <Portfolio {...portfolioForm} isAnalyzing={isAnalyzing} onBack={handleBack}>
+          <ProfileStatusCard
+            {...profileStatus}
+            onRefresh={() => void profileStatus.refetch()}
+            onReanalyze={() => void profileStatus.reanalyze()}
+            onEdit={() => portfolioForm.gitInputRef.current?.focus()}
+            onReplaceFile={portfolioForm.onPortfolioUploadClick}
+            onSave={() => void portfolioForm.onPortfolioSave()}
+            isSaving={portfolioForm.isSaving}
+          />
+        </Portfolio>
+      </S.Content>
       {portfolioForm.isChangeConfirmationOpen ? (
         <ChangeConfirmation
           disabled={portfolioForm.isSaveDisabled}

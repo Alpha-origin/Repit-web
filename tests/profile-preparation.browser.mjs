@@ -115,7 +115,7 @@ async function fixture(options = {}) {
 const saveButton = (page) => page.getByRole("button", { name: "저장", exact: true }).last();
 async function fillPortfolio(page) {
   await page.locator('input[type="file"]').setInputFiles({ name: "portfolio.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\n%%EOF") });
-  await page.getByLabel("git", { exact: true }).fill("https://github.com/example/new-project");
+  await page.getByRole("textbox", { name: "GitHub", exact: true }).fill("https://github.com/example/new-project");
   await page.getByRole("button", { name: "Git 주소 추가", exact: true }).click();
 }
 async function expectEnabled(locator, enabled) {
