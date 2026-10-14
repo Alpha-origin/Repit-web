@@ -6,6 +6,7 @@ export {
 export { createInterview } from "./create-interview";
 export { createAnswer } from "./create-answer";
 export { getCurrentInterviewQuestion } from "./current-question";
+export { getQuestionAudio } from "./question-audio";
 export {
   connectInterviewSocket,
   disconnectInterviewSocket,
