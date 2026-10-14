@@ -57,7 +57,7 @@ const Header = () => {
   const handleLogout = () => { void handleLeave("/login", true); };
 
   return (
-    <S.Header>
+    <S.Header $compact={pathname.startsWith("/main/feedback/overall/")}>
       <S.LogoImage src={Repit} alt="Repit" onClick={() => handleNavigate("/main")} />
 
       <S.TopButtons>

@@ -8,6 +8,7 @@ const MainLayout = () => {
   const { pathname } = useLocation();
   useSessionCheck();
   const normalizedPathname = pathname.toLowerCase().replace(/\/+$/, "");
+  const isFeedbackOverallRoute = normalizedPathname.startsWith("/main/feedback/overall/");
   const isInterviewRoute =
     normalizedPathname === "/main/interview" ||
     normalizedPathname.startsWith("/main/interview/");
@@ -15,7 +16,7 @@ const MainLayout = () => {
   return (
     <S.Page>
       <BackGroundPage />
-      <S.Content $isInterviewRoute={isInterviewRoute}>
+      <S.Content $isInterviewRoute={isInterviewRoute} $isFeedbackOverallRoute={isFeedbackOverallRoute}>
         <Header />
         <S.OutletArea $isInterviewRoute={isInterviewRoute}>
           <Outlet />
