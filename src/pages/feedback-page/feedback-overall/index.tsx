@@ -15,15 +15,16 @@ const FeedbackOverallPage = () => {
     feedback,
     feedbackErrorMessage,
     interview,
+    previousFeedback,
     isLoading,
     refetch,
-  } = useFeedbackInterview(id);
+  } = useFeedbackInterview(id, true);
   const isAnalysisPending =
     feedback?.status === "PENDING" || feedback?.status === "IN_PROGRESS";
   const isAnalysisFailed = feedback?.status === "FAILED";
   const content =
     feedback && !isAnalysisPending && !isAnalysisFailed
-      ? buildFeedbackOverallContent(feedback, interview)
+      ? buildFeedbackOverallContent(feedback, interview, previousFeedback)
       : null;
   const panelRef = useRef<HTMLElement | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);

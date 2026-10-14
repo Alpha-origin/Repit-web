@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import {
+  getAllFeedbacks,
   getAllInterviews,
   getFeedback,
   type FeedbackData,
@@ -12,9 +13,10 @@ import {
 } from "@/features/feedback-page/model/interviewDisplay";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
 
-export const useFeedbackInterview = (id?: string) => {
+export const useFeedbackInterview = (id?: string, includePreviousFeedback = false) => {
   const [interview, setInterview] = useState<InterviewSummary | null>(null);
   const [feedback, setFeedback] = useState<FeedbackData | null>(null);
+  const [previousFeedback, setPreviousFeedback] = useState<FeedbackData | null>(null);
   const [feedbackErrorMessage, setFeedbackErrorMessage] = useState<string | null>(
     null,
   );
@@ -23,6 +25,7 @@ export const useFeedbackInterview = (id?: string) => {
 
   const loadInterview = useCallback(async () => {
     const interviewId = Number(id);
+    setPreviousFeedback(null);
 
     if (!interviewId) {
       setInterview(null);
@@ -36,9 +39,10 @@ export const useFeedbackInterview = (id?: string) => {
     setErrorMessage(null);
     setFeedbackErrorMessage(null);
 
-    const [interviewsResult, feedbackResult] = await Promise.allSettled([
+    const [interviewsResult, feedbackResult, historyResult] = await Promise.allSettled([
       getAllInterviews(),
       getFeedback(interviewId),
+      includePreviousFeedback ? getAllFeedbacks() : Promise.resolve([]),
     ]);
 
     if (interviewsResult.status === "fulfilled") {
@@ -48,6 +52,26 @@ export const useFeedbackInterview = (id?: string) => {
         null;
 
       setInterview(nextInterview);
+
+      if (nextInterview?.createdAt && historyResult.status === "fulfilled") {
+        const currentTime = new Date(nextInterview.createdAt).getTime();
+        const completedFeedbacks = new Map(
+          historyResult.value
+            .filter((entry) =>
+              (entry.status === "SUCCEEDED" || entry.status === "COMPLETED") &&
+              typeof entry.totalScore === "number" && Number.isFinite(entry.totalScore),
+            )
+            .map((entry) => [entry.interviewId, entry]),
+        );
+        const priorInterview = sortedInterviews.find((item) =>
+          item.createdAt && new Date(item.createdAt).getTime() < currentTime &&
+          completedFeedbacks.has(getInterviewId(item)),
+        );
+
+        if (priorInterview) {
+          setPreviousFeedback(completedFeedbacks.get(getInterviewId(priorInterview)) ?? null);
+        }
+      }
 
       if (!nextInterview) {
         setErrorMessage("면접 정보를 찾을 수 없습니다.");
@@ -75,7 +99,7 @@ export const useFeedbackInterview = (id?: string) => {
     }
 
     setIsLoading(false);
-  }, [id]);
+  }, [id, includePreviousFeedback]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -92,6 +116,7 @@ export const useFeedbackInterview = (id?: string) => {
     feedback,
     feedbackErrorMessage,
     interview,
+    previousFeedback,
     isLoading,
     refetch: loadInterview,
   };
