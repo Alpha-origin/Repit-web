@@ -1,6 +1,7 @@
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
 import InterviewVisualizerIcon from "@/shared/img/interview-page/Repit-Interview.svg?url";
 import * as S from "../style";
+import QuestionAudioControl, { QuestionAudioError } from "../question-audio-control";
 
 const TEXT_ANSWER_MAX_LENGTH = 10000;
 const TEXT_ANSWER_PLACEHOLDER =
@@ -78,12 +79,14 @@ const InterviewContentView = () => {
         <S.QuestionBody>
           <S.QuestionContentStack>
             <S.QuestionLabel>{question.id}</S.QuestionLabel>
+            <QuestionAudioControl />
             {activeInterviewer ? (
               <S.QuestionSpeaker>
                 현재 면접관 · {activeInterviewer.name} ({activeInterviewer.roleLabel})
               </S.QuestionSpeaker>
             ) : null}
             <S.QuestionText>{question.text}</S.QuestionText>
+            <QuestionAudioError />
 
             {isVoiceMode ? (
               <S.InlineVisualizerWrap aria-hidden="true" $voiceLevel={visualizerLevel}>

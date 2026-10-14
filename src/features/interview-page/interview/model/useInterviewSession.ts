@@ -18,10 +18,8 @@ import {
 import {
   INTERVIEW_STATUS_MESSAGES,
 } from "@/shared/constants/interview-page/interview";
-import type { InterviewStyleOption } from "@/shared/constants/interview-page/setting-interview";
 
-import { useElevenLabsTts } from "./useElevenLabsTts";
-import { useSupertoneTts } from "./useSupertoneTts";
+import { useQuestionAudio } from "./useQuestionAudio";
 import { useInterviewElapsedTime } from "./useInterviewElapsedTime";
 import { useInterviewMedia } from "./useInterviewMedia";
 import { useInterviewRecorder } from "./useInterviewRecorder";
@@ -37,11 +35,8 @@ type InterviewCloseReason = "completed" | "quit";
 const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
 const AWAITING_RESPONSE_TIMEOUT_MS = 30_000;
 const INTERVIEW_PREPARATION_POLL_INTERVAL_MS = 1_000;
-const DEFAULT_SOLO_VOICE_INDEX = 1;
 const INTERVIEW_PREPARATION_TIMEOUT_MS = 20 * 60_000;
 const INTERVIEW_QUESTIONS_WAITING_POLL_INTERVAL_MS = 3_000;
-
-export type InterviewTtsProvider = "elevenlabs" | "supertone";
 
 const buildQuestionKey = (question: CurrentInterviewQuestion | null) => {
   if (!question) {
@@ -242,8 +237,6 @@ const interviewSessionReducer = (
 
 export const useInterviewSession = (
   preparedInterview?: PreparedInterviewData | null,
-  ttsProvider: InterviewTtsProvider = "elevenlabs",
-  interviewStyle?: InterviewStyleOption,
 ) => {
   const navigate = useNavigate();
   const [session, dispatch] = useReducer(
@@ -281,41 +274,6 @@ export const useInterviewSession = (
     hasPendingRecording: hasPendingFullRecording } = fullRecorder;
   const voiceLevel = useVoiceLevel(micStream);
   const voiceAnswer = useVoiceAnswer();
-  const multiTtsSpeaker = useMemo(() => {
-    if (preparedInterview?.mode !== "MULTI") {
-      return undefined;
-    }
-
-    const interviewers = preparedInterview.interviewers ?? [];
-    if (interviewers.length === 0) {
-      return undefined;
-    }
-
-    // 질문에 연결된 persona를 우선 사용해야 질문 내용과 면접관 음성이 일치한다.
-    // personaId가 없는 응답은 대표 면접관으로 대체해 성별이 섞이지 않게 한다.
-    const speaker =
-      (currentQuestion?.personaId
-        ? interviewers.find(
-            (interviewer) => interviewer.personaId === currentQuestion.personaId,
-          )
-        : undefined) ??
-      interviewers.find(
-        (interviewer) => interviewer.personaId === preparedInterview.personaId,
-      ) ??
-      interviewers[0];
-
-    if (!speaker) {
-      return undefined;
-    }
-
-    return {
-      personaId: speaker.personaId,
-      voiceIndex: speaker.voiceIndex ?? interviewers.indexOf(speaker) + 1,
-    };
-  }, [currentQuestion?.personaId, preparedInterview]);
-  // TTS는 성별이 섞이지 않게 대표 면접관으로 대체하지만, 화면 강조는 질문에 실제로
-  // 연결된 면접관에게만 준다. 대체 면접관까지 강조하면 personaId가 빠진 응답에서
-  // 1번 면접관이 계속 질문하는 것처럼 보인다.
   const speakingPersonaId = useMemo(() => {
     const personaId = currentQuestion?.personaId;
 
@@ -333,29 +291,15 @@ export const useInterviewSession = (
       ? personaId
       : undefined;
   }, [currentQuestion?.personaId, preparedInterview]);
-  const soloTtsVoiceIndex =
-    preparedInterview?.mode === "SOLO"
-      ? preparedInterview.interviewers?.[0]?.voiceIndex
-      : undefined;
-  const elevenLabsTts = useElevenLabsTts(
-    currentQuestion?.content ?? "",
-    soloTtsVoiceIndex ??
-      (preparedInterview?.mode === "SOLO" && interviewStyle === "압박"
-        ? DEFAULT_SOLO_VOICE_INDEX
-        : multiTtsSpeaker?.voiceIndex),
-    preparedInterview?.mode === "SOLO"
-      ? {
-          interviewStyle,
-          personality: preparedInterview.personaType,
-          tone: preparedInterview.tone,
-        }
-      : undefined,
-  );
-  const supertoneTts = useSupertoneTts(currentQuestion?.content ?? "");
-  const questionTts = ttsProvider === "elevenlabs" ? elevenLabsTts : supertoneTts;
-  const controlsRef = useRef({ questionTts, voiceAnswer });
-  useEffect(() => { controlsRef.current = { questionTts, voiceAnswer }; });
   const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
+  const questionAudio = useQuestionAudio({
+    sessionId,
+    questionId: currentQuestion?.questionId ?? null,
+    enabled: isChatSessionReady && currentQuestion !== null && !isClosing,
+    autoplay: isVoiceMode,
+  });
+  const controlsRef = useRef({ questionAudio, voiceAnswer });
+  useEffect(() => { controlsRef.current = { questionAudio, voiceAnswer }; });
   const isSessionClosedRef = useRef(false);
   const closePromiseRef = useRef<Promise<void> | null>(null);
   const closeReasonRef = useRef<InterviewCloseReason | null>(null);
@@ -372,10 +316,10 @@ export const useInterviewSession = (
   const preparingSessionIdRef = useRef<string | null>(null);
   const sessionIdRef = useRef<string | null>(sessionId);
   const displayQuestionNumberRef = useRef(displayQuestionNumber);
-  const autoPlayedQuestionKeyRef = useRef<string | null>(null);
+  const currentQuestionKeyRef = useRef<string | null>(null);
   const awaitingResponseTimeoutRef = useRef<number | null>(null);
   const isCompletingVoiceRef = useRef(false);
-  const questionStartedAtRef = useRef(0);
+  const textAnswerStartedAtRef = useRef(0);
   const canSubmitAnswer = isChatSessionReady && currentQuestion !== null;
   // 첫 질문이 도착한 시점을 면접 시작으로 본다.
   const elapsedSeconds = useInterviewElapsedTime(sessionId, canSubmitAnswer);
@@ -424,23 +368,26 @@ export const useInterviewSession = (
       return;
     }
 
-    if (autoPlayedQuestionKeyRef.current === nextQuestionKey) {
+    if (currentQuestionKeyRef.current === nextQuestionKey) {
       return;
     }
 
-    autoPlayedQuestionKeyRef.current = nextQuestionKey;
-    questionStartedAtRef.current = Date.now();
+    currentQuestionKeyRef.current = nextQuestionKey;
+    textAnswerStartedAtRef.current = 0;
     // 새 질문(꼬리질문 포함)이 도착했다면 HTTP·소켓 경로와 무관하게 응답 대기를 끝낸다.
     clearAwaitingResponseTimeout();
     setIsAwaitingNextQuestion(false);
-    if (isVoiceMode && !isSessionClosedRef.current) void questionTts.onPlay();
   }, [
     clearAwaitingResponseTimeout,
     currentQuestion,
     isChatSessionReady,
-    isVoiceMode,
-    questionTts,
   ]);
+
+  useEffect(() => {
+    if (!isVoiceMode && canSubmitAnswer && voiceAnswer.answerText.trim() && textAnswerStartedAtRef.current === 0) {
+      textAnswerStartedAtRef.current = Date.now();
+    }
+  }, [canSubmitAnswer, currentQuestion, isVoiceMode, voiceAnswer.answerText]);
 
   const syncCurrentQuestion = useCallback(
     (nextQuestion: CurrentInterviewQuestion) => {
@@ -492,7 +439,7 @@ export const useInterviewSession = (
         closeReasonRef.current = reason;
         setIsClosing(true);
         clearAwaitingResponseTimeout();
-        controlsRef.current.questionTts.onStop();
+        controlsRef.current.questionAudio.onStop();
         controlsRef.current.voiceAnswer.onExitVoiceMode();
         const activeSessionId = sessionIdRef.current ?? getActiveInterviewSessionId();
         // 같은 종료 Promise를 HTTP, 소켓, 메뉴와 뒤로가기가 공유한다.
@@ -726,9 +673,9 @@ export const useInterviewSession = (
     if (!isVoiceMode || isSessionClosedRef.current || isCompletingVoiceRef.current ||
       submittingRef.current || isAwaitingNextQuestion || !canSubmitAnswer ||
       cameraState !== "ready" || micState !== "ready" || !fullRecorder.isRecording) return false;
-    questionTts.onStop();
+    questionAudio.onStop();
     if (!recorder.startRecording()) return false;
-    answerRecordingRef.current = { question: currentQuestion, startedAt: questionStartedAtRef.current };
+    answerRecordingRef.current = { question: currentQuestion, startedAt: Date.now() };
     setAnswerError(null);
     void voiceAnswer.onStartVoice();
     clearAnswerTimeout();
@@ -741,7 +688,7 @@ export const useInterviewSession = (
   const submitAnswer = async (
     content: string,
     submittedQuestion = currentQuestion,
-    startedAt = questionStartedAtRef.current,
+    startedAt = 0,
   ) => {
     if (isSessionClosedRef.current || submittingRef.current || isAwaitingNextQuestion || !canSubmitAnswer || !submittedQuestion) {
       return;
@@ -792,7 +739,7 @@ export const useInterviewSession = (
         return;
       }
 
-      questionTts.onStop();
+      questionAudio.onStop();
       voiceAnswer.onClearAnswer();
 
       if (data?.status) {
@@ -854,7 +801,7 @@ export const useInterviewSession = (
   useEffect(() => { completionRef.current = handleCompleteVoice; });
 
   const handleSubmitText = async () => {
-    if (!isVoiceMode) await submitAnswer(voiceAnswer.answerText);
+    if (!isVoiceMode) await submitAnswer(voiceAnswer.answerText, currentQuestion, textAnswerStartedAtRef.current);
   };
   const handleQuitInterview = () => endInterviewSession(true, "quit");
 
@@ -883,18 +830,16 @@ export const useInterviewSession = (
     isRetryingPreparation,
     isWaitingForQuestions,
     onRetryPreparation: handleRetryPreparation,
-    questionAudioStatus: questionTts.status,
-    questionAudioErrorMessage:
-      ttsProvider === "elevenlabs" ? elevenLabsTts.errorMessage : null,
+    questionAudioStatus: questionAudio.status,
+    questionAudioErrorMessage: questionAudio.errorMessage,
     speakingPersonaId,
-    ttsSpeakerPersonaId: multiTtsSpeaker?.personaId,
     onAnswerTextChange: voiceAnswer.onAnswerTextChange,
     onClearAnswer: voiceAnswer.onClearAnswer,
     onCompleteVoice: () => handleCompleteVoice("user"),
     onQuitInterview: handleQuitInterview,
     onStartVoice: handleStartVoice,
     onSubmitText: handleSubmitText,
-    onToggleQuestionAudio: questionTts.onToggle,
+    onToggleQuestionAudio: questionAudio.onToggle,
     micState,
     videoRef,
     voiceLevel,

@@ -7,6 +7,7 @@ import { useInterviewSessionContext } from "@/features/interview-page/interview/
 import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
 import MicIcon from "@/shared/img/interview-page/mike.svg?url";
 import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
+import QuestionAudioControl, { QuestionAudioError } from "../question-audio-control";
 import * as S from "./style";
 
 const TEXT_ANSWER_MAX_LENGTH = 10_000;
@@ -89,18 +90,7 @@ const InterviewDashboard = () => {
                     ? `Question ${questionLabel} / ${interview.totalQuestionCount}`
                     : `Question ${questionLabel}${interview.totalQuestionCount > 0 ? ` · 기본 질문 ${interview.totalQuestionCount}개` : ""}`}
                 </S.QuestionTag>
-                <S.QuestionAudioButton
-                  type="button"
-                  disabled={isQuestionLoading || interview.questionAudioStatus === "loading"}
-                  aria-pressed={interview.questionAudioStatus === "playing"}
-                  onClick={() => interview.onToggleQuestionAudio()}
-                >
-                  {interview.questionAudioStatus === "loading"
-                    ? "음성 생성 중..."
-                    : interview.questionAudioStatus === "playing"
-                      ? "질문 멈추기"
-                      : "질문 듣기"}
-                </S.QuestionAudioButton>
+                <QuestionAudioControl />
               </S.QuestionMetaRow>
               {activeInterviewer && !isMultiInterview ? (
                 <S.QuestionSpeaker>
@@ -110,11 +100,7 @@ const InterviewDashboard = () => {
               <S.QuestionText>
                 {interview.currentQuestion?.content ?? "질문을 불러오는 중입니다."}
               </S.QuestionText>
-              {interview.questionAudioErrorMessage ? (
-                <S.QuestionAudioError role="status">
-                  {interview.questionAudioErrorMessage}
-                </S.QuestionAudioError>
-              ) : null}
+              <QuestionAudioError />
             </S.QuestionPanel>
 
             <S.AnswerPanel $multi={isMultiInterview}>
