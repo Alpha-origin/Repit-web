@@ -41,7 +41,7 @@ Chat 비종료 응답 정규화·운영 CORS·최종 음성 튜닝은 Web 밖의
 ## 구현·검증 결과 (2026-10-14)
 
 - W-A: 구현 완료, PR #133 (`codex/132-tts-voice-index` → dev). 설정 화면 저장 검증 7개 통과.
-- W-B~G: 구현 완료. Chat API·재생 훅·세션·시간·공통 버튼·직접 합성 제거 및 브라우저 회귀 추가.
+- W-B~G: 구현 완료, draft PR #135 (`codex/132-tts-audio` → `codex/132-tts-voice-index`). #133 병합 뒤 base를 dev로 변경한다. Chat API·재생 훅·세션·시간·공통 버튼·직접 합성 제거 및 브라우저 회귀 추가.
 - `npm run lint` / `npm run build` 통과. 기존 router.tsx의 미사용 eslint-disable 경고 1개가 남아 있다.
 - 기존 녹화/업로드 브라우저 회귀 22개, 오디오 회귀 23개 통과. 실제 HTTPS Audio 재생과 SOLO/MULTI 화면 캡처를 확인했다.
 - 자체 리뷰: 저장 매핑, 취소/재시도/대기 상한, 세션·질문·재생 Promise 경쟁, 응답 시간, 녹화 정리를 확인했다. 질문 번호 불일치·형식 오류를 거부하고 대기 상한 이후 READY도 재생하지 않는다.
