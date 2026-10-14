@@ -14,6 +14,7 @@ export type {
 } from "./create-interview";
 export type { CreateAnswerRequest } from "./create-answer";
 export type { CurrentInterviewQuestion } from "./current-question";
+export type { QuestionAudioResponse, QuestionAudioServerStatus } from "./question-audio";
 export type {
   InterviewLevel,
   InterviewProgressStatus,

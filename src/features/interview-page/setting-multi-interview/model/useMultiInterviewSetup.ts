@@ -85,6 +85,7 @@ export const useMultiInterviewSetup = () => {
           level: LEVEL_BY_DIFFICULTY[difficulty],
           career: template.career,
           gender: template.gender,
+          voiceIndex: template.voiceIndex,
           imageUrl: template.image,
           description: template.description,
         };

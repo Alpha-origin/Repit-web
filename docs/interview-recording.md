@@ -61,6 +61,8 @@ API 서버에서 면접 소유권을 검사하는 조회 API와 질문·답변·
 
 ```sh
 node tests/interview-recording.browser.mjs
+node tests/interview-persona.browser.mjs
+node tests/question-audio.browser.mjs
 ```
 
 `INTERVIEW_TEST_ORIGIN`으로 개발 서버 주소를 변경할 수 있다(기본 `http://127.0.0.1:5173`).
@@ -69,3 +71,15 @@ node tests/interview-recording.browser.mjs
 업로드 실패·재시도·파일 폐기, 장치 권한 거부, 텍스트의 장치 미요청을 검증한다.
 준비 실패·권한 거부·녹화 시작 실패에는 새로고침 경고가 없고, 녹화·파일 확정·미저장 업로드 중에는 경고가 유지되며 업로드 완료·폐기 후 해제되는 것도 확인한다.
 실제 API/S3 및 실장치 호환성 검증은 별도로 필요하다.
+
+질문 음성은 Chat 오디오 조회 API(long-poll, wait=20)로 받은 HTTPS URL을 재생한다.
+음성 면접은 질문마다 한 번 자동 재생하고 텍스트 면접은 `질문 듣기`로 재생한다.
+답변 녹음 시작·답변 제출 성공·종료 시 정지하며, 정지한 질문의 늦은 음성은 자동 재생하지 않는다.
+자동 재생이 브라우저에 차단되면 버튼으로 재생할 수 있고, 서버/파일 실패는 같은 안내 문구를 표시한다.
+응답 시간은 질문 도착이 아닌 녹음 시작 또는 텍스트 첫 입력부터 계산한다.
+
+`interview-persona.browser.mjs`는 실제 설정 화면의 SOLO/MULTI 저장 요청 번호·성별·슬롯 순서·저장 실패를 검증한다.
+`question-audio.browser.mjs`는 HTTPS 가상 저장소의 무음 WAV를 실제 Audio로 재생한다.
+자동/수동 재생, 입력 중 재생 유지, 응답 시간, PENDING/QUEUED/GENERATING, 실패·404·재시도,
+180초 상한, 자동 재생 차단, 질문 전환·종료 취소, 늦은 응답·play Promise를 검증한다.
+재시도·상한 시나리오의 타이머만 단축하며, 운영 서버·외부 합성 서비스에는 요청하지 않는다.

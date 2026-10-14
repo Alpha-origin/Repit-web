@@ -28,6 +28,7 @@ import InterviewerImage1 from "@/shared/img/interview-page/interviewer1.svg?url"
 import InterviewerImage2 from "@/shared/img/interview-page/interviewer2.svg?url";
 import InterviewerImage3 from "@/shared/img/interview-page/interviewer3.svg?url";
 import InterviewerImage4 from "@/shared/img/interview-page/interviewer4.svg?url";
+import { getVoiceGender } from "@/shared/constants/interview-page/voice-catalog";
 
 const TYPE_BY_STYLE: Record<InterviewStyleOption, CreateInterviewPersonaType> = {
   편함: "FRIENDLY",
@@ -64,10 +65,10 @@ const INTERVIEWER_PROFILE_BY_ID: Record<
   InterviewerId,
   { gender: InterviewPersonaGender; major: InterviewPersonaMajor }
 > = {
-  1: { gender: "MALE", major: "BACKEND" },
-  2: { gender: "MALE", major: "FRONTEND" },
-  3: { gender: "FEMALE", major: "FRONTEND" },
-  4: { gender: "FEMALE", major: "BACKEND" },
+  1: { gender: getVoiceGender(1), major: "BACKEND" },
+  2: { gender: getVoiceGender(2), major: "FRONTEND" },
+  3: { gender: getVoiceGender(3), major: "FRONTEND" },
+  4: { gender: getVoiceGender(4), major: "BACKEND" },
 };
 
 const DEFAULT_INTERVIEW_ROLE: InterviewPersonaRole = "TECH";
@@ -123,6 +124,7 @@ export const useInterviewSetup = () => {
       type: TYPE_BY_STYLE[selectedStyle],
       career: CAREER_BY_DIFFICULTY[selectedDifficulty],
       gender: interviewerProfile.gender,
+      voiceIndex: selectedInterviewerId,
       tone: TONE_BY_STYLE[selectedStyle],
       imageUrl: INTERVIEWER_IMAGES[selectedInterviewerId],
       description: selectedInterviewer.description,

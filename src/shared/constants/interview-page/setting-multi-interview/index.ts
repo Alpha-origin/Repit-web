@@ -2,6 +2,7 @@ import InterviewerImage1 from "@/shared/img/interview-page/interviewer1.svg?url"
 import InterviewerImage2 from "@/shared/img/interview-page/interviewer2.svg?url";
 import InterviewerImage3 from "@/shared/img/interview-page/interviewer3.svg?url";
 import InterviewerImage4 from "@/shared/img/interview-page/interviewer4.svg?url";
+import { getVoiceGender } from "@/shared/constants/interview-page/voice-catalog";
 
 import type {
   InterviewerTemplate,
@@ -30,7 +31,7 @@ export const MULTI_INTERVIEWER_TEMPLATES = [
     specialty: "백엔드 아키텍처",
     major: "BACKEND",
     career: 9,
-    gender: "FEMALE",
+    gender: getVoiceGender(1),
     image: InterviewerImage1,
     tags: ["논리적 사고", "문제 해결"],
     description: "핵심 내용을 구조적으로 정리하고 깊이 있게 확인합니다.",
@@ -44,7 +45,7 @@ export const MULTI_INTERVIEWER_TEMPLATES = [
     specialty: "프론트엔드 리드",
     major: "FRONTEND",
     career: 8,
-    gender: "FEMALE",
+    gender: getVoiceGender(2),
     image: InterviewerImage2,
     tags: ["협업", "실행력"],
     description: "경험을 바탕으로 구체적인 판단과 실행 과정을 확인합니다.",
@@ -58,7 +59,7 @@ export const MULTI_INTERVIEWER_TEMPLATES = [
     specialty: "플랫폼 엔지니어링",
     major: "BACKEND",
     career: 6,
-    gender: "MALE",
+    gender: getVoiceGender(3),
     image: InterviewerImage3,
     tags: ["분석력", "성장"],
     description: "현실적인 상황에서의 문제 해결 방식과 성장 가능성을 살펴봅니다.",
@@ -72,7 +73,7 @@ export const MULTI_INTERVIEWER_TEMPLATES = [
     specialty: "프론트엔드 개발",
     major: "FRONTEND",
     career: 8,
-    gender: "MALE",
+    gender: getVoiceGender(4),
     image: InterviewerImage4,
     tags: ["소통", "조직 적합성"],
     description: "지원자의 강점과 협업 방식을 다양한 관점에서 확인합니다.",
@@ -86,16 +87,12 @@ export const MULTI_INTERVIEWER_TEMPLATES = [
     specialty: "데이터 엔지니어링",
     major: "BACKEND",
     career: 5,
-    gender: "MALE",
+    gender: getVoiceGender(5),
     image: InterviewerImage2,
     tags: ["동기", "적응력"],
     description: "지원자의 동기와 문제를 끝까지 해결하는 태도를 확인합니다.",
   },
 ] as const satisfies readonly InterviewerTemplate[];
-
-export const getInterviewerGender = (
-  voiceIndex: InterviewerTemplate["voiceIndex"],
-) => (voiceIndex <= 2 ? "FEMALE" : "MALE");
 
 export const INTERVIEWER_COUNT_OPTIONS = [2, 3, 4] as const;
 
