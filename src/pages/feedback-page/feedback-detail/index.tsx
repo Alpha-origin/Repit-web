@@ -68,7 +68,7 @@ const FeedbackDetailPage = () => {
           <S.StateCard aria-live="polite">
             <S.StateText>
               {isAnalysisPending
-                ? "질문별 피드백을 분석 중입니다. 잠시 후 다시 확인해주세요."
+                ? feedbackErrorMessage ?? "질문별 피드백을 분석 중입니다. 완료되면 자동으로 표시됩니다."
                 : isAnalysisFailed
                   ? feedback?.errorMessage ?? "피드백 분석에 실패했습니다."
                   : feedback && !hasQuestionFeedback
