@@ -1,33 +1,15 @@
-import { useNavigate, useParams } from "react-router-dom";
+import FeedbackTabs from "@/widgets/feedback-page/feedback-tabs";
 import * as S from "../style";
 import type { FeedbackOverallTopSectionProps } from "../type";
 
 const FeedbackOverallTopSection = ({ content }: FeedbackOverallTopSectionProps) => {
-  const { evaluation, metrics, summary, tabs } = content;
-  const navigate = useNavigate();
-  const { id } = useParams();
+  const { evaluation, metrics, summary } = content;
 
   return (
     <S.SectionBlock>
       <S.HeadingRow>
         <S.PageHeading>종합 피드백</S.PageHeading>
-        <S.TabGroup aria-label="피드백 종류">
-          <S.TabButton
-            $active={tabs.activeTab === "overall"}
-            aria-current={tabs.activeTab === "overall" ? "page" : undefined}
-            type="button"
-            onClick={() => navigate(`/main/feedback/overall/${id}`)}
-          >
-            {tabs.overallLabel}
-          </S.TabButton>
-          <S.TabButton
-            $active={tabs.activeTab === "detail"}
-            type="button"
-            onClick={() => navigate(`/main/feedback/detail/${id}`)}
-          >
-            {tabs.detailLabel}
-          </S.TabButton>
-        </S.TabGroup>
+        <FeedbackTabs />
       </S.HeadingRow>
 
       <S.TopGrid>

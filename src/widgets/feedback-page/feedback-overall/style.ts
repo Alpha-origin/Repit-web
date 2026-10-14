@@ -36,29 +36,6 @@ export const PageHeading = styled.h1`
   letter-spacing: 0.025em;
 `;
 
-export const TabGroup = styled.nav`
-  display: inline-flex;
-  flex-shrink: 0;
-  padding: 0.1875rem;
-  border: 1px solid #e1e3e7;
-  border-radius: 0.25rem;
-  background: #ededed;
-`;
-
-export const TabButton = styled.button<{ $active: boolean }>`
-  min-height: 1.375rem;
-  padding: 0.25rem 0.5rem;
-  border: 0;
-  border-radius: 0.125rem;
-  background: ${({ $active, theme }) => $active ? "transparent" : theme.colors.white};
-  color: ${({ $active, theme }) => $active ? theme.colors.text.default : theme.colors.brand.blue};
-  font: inherit;
-  font-size: 0.6875rem;
-  cursor: pointer;
-
-  &:focus-visible { outline: 2px solid ${({ theme }) => theme.colors.brand.blue}; outline-offset: 2px; }
-`;
-
 export const TopGrid = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 0.44fr) minmax(0, 1fr);
