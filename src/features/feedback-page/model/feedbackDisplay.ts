@@ -18,9 +18,6 @@ import type {
 const getText = (value?: string, fallback = "내용이 아직 없습니다.") =>
   value?.trim() || fallback;
 
-const getListText = (items?: string[], fallback = "내용이 아직 없습니다.") =>
-  items && items.length > 0 ? items.join(" ") : fallback;
-
 const getReliabilityLevel = (score: number) => {
   if (score >= 80) {
     return "높음";
@@ -42,15 +39,15 @@ const getFeedbackQuestion = (
   id: index + 1,
   label: `Q${index + 1}`,
   preview: getText(item.questionContent),
-  personaLabel,
+  personaLabel: personaLabel ?? "면접관",
   question: getText(item.questionContent),
   intention: getText(item.intention),
   myAnswer: getText(answerContent, "작성된 답변이 없습니다."),
   modelAnswer: getText(item.modelAnswer),
-  followUpQuestion: getListText(
-    item.improvements,
-    "이 질문에 대한 추가 피드백이 아직 없습니다.",
-  ),
+  followUpQuestion: "예상 꼬리질문이 아직 제공되지 않았습니다.",
+  strengths: item.strengths?.length ? item.strengths : ["이 질문의 장점 분석 결과가 아직 없습니다."],
+  improvements: item.improvements?.length ? item.improvements : ["이 질문의 보완할 점이 아직 없습니다."],
+  comment: getText(item.comment, "이 질문에 대한 코멘트가 아직 없습니다."),
 });
 
 export const getFeedbackStatusLabel = (status?: string) => {
@@ -207,14 +204,14 @@ export const buildFeedbackDetailContent = (
         detailLabel: "상세피드백",
         activeTab: "detail",
       },
-      questionListTitle: "질문별 피드백",
+      questionListTitle: "상세 피드백",
       questionTitle: "질문",
       intentionTitle: "질문 의도",
       myAnswerTitle: "내 답변",
       showMyAnswerLabel: "내 답변 보기",
       hideMyAnswerLabel: "내 답변 숨기기",
       modelAnswerTitle: "모범 답변",
-      followUpTitle: "개선 포인트",
+      followUpTitle: "예상 꼬리질문",
       questions: (feedback.feedbacks ?? []).map((item, index) =>
         getFeedbackQuestion(
           item,
@@ -229,11 +226,13 @@ export const buildFeedbackDetailContent = (
     middleSection: {
       cards: [
         {
-          title: "강점",
+          title: "장점",
+          tone: "positive",
           paragraphs: feedback.strengths ?? ["강점 분석 결과가 아직 없습니다."],
         },
         {
-          title: "보완점",
+          title: "단점",
+          tone: "negative",
           paragraphs: feedback.improvements ?? ["보완점 분석 결과가 아직 없습니다."],
         },
       ],

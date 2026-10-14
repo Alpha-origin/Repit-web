@@ -205,7 +205,7 @@ export const ErrorMessage = styled.p`
   font-size: ${({ theme }) => theme.fontSize.sm};
 `;
 
-export const Header = styled(BaseHeader)<{ $compact?: boolean }>`
+export const Header = styled(BaseHeader)<{ $compact?: boolean; $detail?: boolean }>`
   ${({ $compact }) => $compact && css`
     min-height: 4.1875rem;
     grid-template-columns: auto 1fr auto;
@@ -232,6 +232,19 @@ export const Header = styled(BaseHeader)<{ $compact?: boolean }>`
       padding: 0.5rem 1rem;
       ${TopButtons} { grid-row: 2; grid-column: 1 / -1; justify-self: center; gap: 1.5rem; }
       ${StatusButtons} { grid-row: 1; grid-column: 2; }
+    }
+  `}
+  ${({ $detail }) => $detail && css`
+    min-height: 5rem;
+    padding: 0 1.5rem;
+    ${LogoImage} { height: 3.75rem; }
+    ${TopButton} { font-size: 0.875rem; }
+    ${StatusButton} { width: 4.875rem; height: 2.125rem; font-size: 0.8125rem; }
+    ${LogoutButton} { font-size: 0.875rem; }
+
+    @media (max-width: 42rem) {
+      padding: 0.5rem 1rem;
+      ${LogoImage} { height: 3rem; }
     }
   `}
 `;

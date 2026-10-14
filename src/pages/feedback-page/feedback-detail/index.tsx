@@ -1,10 +1,7 @@
 import { buildFeedbackDetailContent } from "@/features/feedback-page/model/feedbackDisplay";
 import { useFeedbackInterview } from "@/features/feedback-page/model/useFeedbackInterview";
 import { exportElementToPdf } from "@/shared/utils/exportElementToPdf";
-import FeedbackDetailBottomSection from "@/widgets/feedback-page/feedback-detail/bottom-section";
-import FeedbackDetailMiddleSection from "@/widgets/feedback-page/feedback-detail/middle-section";
-import FeedbackDetailTopSection from "@/widgets/feedback-page/feedback-detail/top-section";
-import FeedbackSummaryCard from "@/widgets/feedback-page/feedback-summary-card";
+import FeedbackDetail from "@/widgets/feedback-page/feedback-detail";
 import { useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import * as S from "./style";
@@ -52,7 +49,6 @@ const FeedbackDetailPage = () => {
 
   return (
     <S.Page>
-      <S.Panel ref={panelRef}>
         {isLoading ? (
           <S.StateCard aria-live="polite">
             <S.StateText>면접 정보를 불러오는 중입니다.</S.StateText>
@@ -80,22 +76,14 @@ const FeedbackDetailPage = () => {
             </S.RetryButton>
           </S.StateCard>
         ) : (
-          <>
-            <FeedbackSummaryCard
-              interview={interview}
-              feedbackStatus={feedback?.status}
-              style={feedback?.style}
-            />
-            <FeedbackDetailTopSection content={content.topSection} />
-            <FeedbackDetailMiddleSection content={content.middleSection} />
-            <FeedbackDetailBottomSection
-              content={content.bottomSection}
-              isDownloadingPdf={isDownloadingPdf}
-              onDownloadPdf={handleDownloadPdf}
-            />
-          </>
+          <FeedbackDetail
+            key={id}
+            ref={panelRef}
+            content={content}
+            isDownloadingPdf={isDownloadingPdf}
+            onDownloadPdf={handleDownloadPdf}
+          />
         )}
-      </S.Panel>
     </S.Page>
   );
 };
