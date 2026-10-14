@@ -44,7 +44,7 @@ export interface FrequentWord {
 }
 
 export interface QuestionFeedback {
-  questionId?: string;
+  questionId?: string | number;
   personaId?: number;
   questionContent?: string;
   intention?: string;

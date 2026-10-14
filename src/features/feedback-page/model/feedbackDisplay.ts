@@ -1,3 +1,4 @@
+import type { InterviewAnswer } from "@/features/feedback-page/api/getInterviewAnswers";
 import type {
   FeedbackData,
   InterviewSummary,
@@ -35,6 +36,7 @@ const getReliabilityLevel = (score: number) => {
 const getFeedbackQuestion = (
   item: QuestionFeedback,
   index: number,
+  answerContent?: string,
   personaLabel?: string,
 ) => ({
   id: index + 1,
@@ -43,7 +45,7 @@ const getFeedbackQuestion = (
   personaLabel,
   question: getText(item.questionContent),
   intention: getText(item.intention),
-  myAnswer: getText(item.userAnswer, "작성된 답변이 없습니다."),
+  myAnswer: getText(answerContent, "작성된 답변이 없습니다."),
   modelAnswer: getText(item.modelAnswer),
   followUpQuestion: getListText(
     item.improvements,
@@ -176,11 +178,20 @@ export const buildFeedbackOverallContent = (
 
 export const buildFeedbackDetailContent = (
   feedback: FeedbackData,
+  answers: readonly InterviewAnswer[],
 ): {
   topSection: FeedbackDetailTopSectionData;
   middleSection: FeedbackDetailMiddleSectionData;
   bottomSection: FeedbackDetailBottomSectionData;
 } => {
+  const answersByQuestionId = new Map(
+    [...answers]
+      .sort((left, right) =>
+        (Date.parse(left.createdAt) || 0) - (Date.parse(right.createdAt) || 0) ||
+        left.answerId - right.answerId,
+      )
+      .map((answer) => [answer.question, answer.content]),
+  );
   const personaRoleById = new Map(
     (feedback.personas ?? []).flatMap((persona, index) =>
       typeof persona.personaId === "number"
@@ -208,6 +219,7 @@ export const buildFeedbackDetailContent = (
         getFeedbackQuestion(
           item,
           index,
+          answersByQuestionId.get(Number(item.questionId)),
           typeof item.personaId === "number"
             ? personaRoleById.get(item.personaId) ?? "면접관"
             : undefined,

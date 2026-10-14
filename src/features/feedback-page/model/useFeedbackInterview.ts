@@ -1,4 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import {
+  getInterviewAnswers,
+  type InterviewAnswer,
+} from "@/features/feedback-page/api/getInterviewAnswers";
 
 import {
   getAllFeedbacks,
@@ -14,6 +19,8 @@ import {
 import { extractErrorMessage } from "@/shared/api/errorMessage";
 
 export const useFeedbackInterview = (id?: string, includePreviousFeedback = false) => {
+  const [answers, setAnswers] = useState<InterviewAnswer[]>([]);
+  const [answersErrorMessage, setAnswersErrorMessage] = useState<string | null>(null);
   const [interview, setInterview] = useState<InterviewSummary | null>(null);
   const [feedback, setFeedback] = useState<FeedbackData | null>(null);
   const [previousFeedback, setPreviousFeedback] = useState<FeedbackData | null>(null);
@@ -23,11 +30,17 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const requestIdRef = useRef(0);
+
   const loadInterview = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     const interviewId = Number(id);
+    setAnswers([]);
+    setAnswersErrorMessage(null);
+    setFeedback(null);
     setPreviousFeedback(null);
 
-    if (!interviewId) {
+    if (!Number.isSafeInteger(interviewId) || interviewId <= 0) {
       setInterview(null);
       setFeedback(null);
       setErrorMessage("면접 정보를 찾을 수 없습니다.");
@@ -39,11 +52,24 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
     setErrorMessage(null);
     setFeedbackErrorMessage(null);
 
-    const [interviewsResult, feedbackResult, historyResult] = await Promise.allSettled([
+    const [interviewsResult, feedbackResult, historyResult, answersResult] = await Promise.allSettled([
       getAllInterviews(),
       getFeedback(interviewId),
       includePreviousFeedback ? getAllFeedbacks() : Promise.resolve([]),
+      getInterviewAnswers(interviewId),
     ]);
+
+    if (requestId !== requestIdRef.current) {
+      return;
+    }
+
+    if (answersResult.status === "fulfilled") {
+      setAnswers(answersResult.value);
+    } else {
+      setAnswersErrorMessage(
+        extractErrorMessage(answersResult.reason, "면접 답변을 불러오지 못했습니다."),
+      );
+    }
 
     if (interviewsResult.status === "fulfilled") {
       const sortedInterviews = sortInterviewsByCreatedAt(interviewsResult.value);
@@ -108,10 +134,13 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
 
     return () => {
       window.clearTimeout(timeoutId);
+      requestIdRef.current += 1;
     };
   }, [loadInterview]);
 
   return {
+    answers,
+    answersErrorMessage,
     errorMessage,
     feedback,
     feedbackErrorMessage,

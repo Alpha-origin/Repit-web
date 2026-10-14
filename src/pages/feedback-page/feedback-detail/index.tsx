@@ -12,6 +12,8 @@ import * as S from "./style";
 const FeedbackDetailPage = () => {
   const { id } = useParams();
   const {
+    answers,
+    answersErrorMessage,
     errorMessage,
     feedback,
     feedbackErrorMessage,
@@ -25,7 +27,7 @@ const FeedbackDetailPage = () => {
   const hasQuestionFeedback = (feedback?.feedbacks?.length ?? 0) > 0;
   const content =
     feedback && !isAnalysisPending && !isAnalysisFailed && hasQuestionFeedback
-      ? buildFeedbackDetailContent(feedback)
+      ? buildFeedbackDetailContent(feedback, answers)
       : null;
   const panelRef = useRef<HTMLElement | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
@@ -55,9 +57,9 @@ const FeedbackDetailPage = () => {
           <S.StateCard aria-live="polite">
             <S.StateText>면접 정보를 불러오는 중입니다.</S.StateText>
           </S.StateCard>
-        ) : errorMessage || !interview ? (
+        ) : errorMessage || answersErrorMessage || !interview ? (
           <S.StateCard aria-live="polite">
-            <S.StateText>{errorMessage ?? "면접 정보를 찾을 수 없습니다."}</S.StateText>
+            <S.StateText>{errorMessage ?? answersErrorMessage ?? "면접 정보를 찾을 수 없습니다."}</S.StateText>
             <S.RetryButton type="button" onClick={() => void refetch()}>
               다시 시도
             </S.RetryButton>
