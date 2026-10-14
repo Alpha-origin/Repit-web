@@ -1,3 +1,4 @@
+import type { VoiceIndex } from "@/shared/constants/interview-page/voice-catalog";
 import type {
   InterviewDifficultyOption,
   InterviewStyleOption,
@@ -21,7 +22,7 @@ export interface InterviewerSlot {
 export interface InterviewerTemplate {
   key: string;
   name: string;
-  voiceIndex: 1 | 2 | 3 | 4 | 5;
+  voiceIndex: VoiceIndex;
   role: InterviewerTemplateRole;
   roleLabel: string;
   specialty: string;

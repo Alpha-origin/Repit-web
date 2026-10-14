@@ -1,3 +1,4 @@
+import type { VoiceIndex } from "@/shared/constants/interview-page/voice-catalog";
 import type {
   CreateInterviewPersonaType,
   InterviewPersonaGender,
@@ -16,6 +17,7 @@ export interface SavePersonaParams {
   level: InterviewLevel;
   career: number;
   gender: InterviewPersonaGender;
+  voiceIndex?: VoiceIndex;
   imageUrl: string;
   description: string;
 }
