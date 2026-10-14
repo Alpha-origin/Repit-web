@@ -14,9 +14,6 @@ import type {
   FeedbackDetailTopSectionData,
 } from "@/widgets/feedback-page/feedback-detail/type";
 
-const getScore = (score?: number) =>
-  typeof score === "number" && Number.isFinite(score) ? score : 0;
-
 const getText = (value?: string, fallback = "내용이 아직 없습니다.") =>
   value?.trim() || fallback;
 
@@ -70,112 +67,106 @@ export const getFeedbackStatusLabel = (status?: string) => {
   return status || "상태 확인 중";
 };
 
+const getOptionalScore = (score?: number) =>
+  typeof score === "number" && Number.isFinite(score)
+    ? Math.round(Math.min(100, Math.max(0, score)))
+    : null;
+
 export const buildFeedbackOverallContent = (
   feedback: FeedbackData,
   interview?: InterviewSummary | null,
+  previousFeedback?: FeedbackData | null,
 ): {
   topSection: FeedbackOverallTopSectionData;
   middleSection: FeedbackOverallMiddleSectionData;
   bottomSection: FeedbackOverallBottomSectionData;
 } => {
-  const totalScore = getScore(feedback.totalScore);
-  const personaCards = feedback.personas?.map((persona, index) => ({
-    title: persona.personaRole?.trim() || `면접관 ${index + 1}`,
-    highlightText: persona.comment?.trim() || undefined,
-    bars: [
-      {
-        label: "내 점수",
-        score: getScore(persona.score),
-        tone: "primary" as const,
-      },
-    ],
-  }));
-  const comparisonCards =
-    personaCards && personaCards.length > 0
-      ? personaCards
-      : [
-          {
-            title: "이번 면접",
-            bars: [
-              {
-                label: "내 점수",
-                score: totalScore,
-                tone: "primary" as const,
-              },
-            ],
-          },
-        ];
+  const totalScore = getOptionalScore(feedback.totalScore);
+  const reliabilityScore = getOptionalScore(feedback.reliabilityScore);
+  const summary = getText(feedback.summary, "아직 종합 분석이 완료되지 않았습니다.");
+  const summarySentences = summary.split(/(?<=[.!?。])\s+/);
+  const keywords = [...(feedback.frequentWords ?? [])]
+    .filter((item) => item.word.trim() && Number.isFinite(item.count) && item.count > 0)
+    .sort((left, right) => right.count - left.count)
+    .filter((item, index, items) => items.findIndex((other) => other.word === item.word) === index)
+    .slice(0, 8);
+  const keywordPositions = [
+    { size: "xl", top: "50%", left: "52%" },
+    { size: "lg", top: "24%", left: "69%" },
+    { size: "md", top: "30%", left: "23%" },
+    { size: "md", top: "72%", left: "71%" },
+    { size: "sm", top: "31%", left: "86%" },
+    { size: "sm", top: "78%", left: "35%" },
+    { size: "xs", top: "72%", left: "11%" },
+    { size: "xs", top: "15%", left: "41%" },
+  ] as const;
 
   return {
     topSection: {
       tabs: {
-        overallLabel: "종합피드백",
-        detailLabel: "상세피드백",
+        overallLabel: "종합 피드백",
+        detailLabel: "상세 피드백",
         activeTab: "overall",
       },
       summary: {
         title: "종합 점수",
         score: totalScore,
-        description: [
-          getText(feedback.summary, "아직 종합 분석이 완료되지 않았습니다."),
-        ],
+        description: summarySentences.slice(0, 2).map((sentence) => sentence.trim()),
       },
-      averageComparison: {
-        title: "점수 분석",
-        bars: [
-          {
-            label: "내 점수",
-            score: totalScore,
-            tone: "primary",
-          },
-          {
-            label: "질문 의도 적합도",
-            score: getScore(feedback.intentAlignmentScore),
-            tone: "muted",
-          },
-        ],
-      },
-      comparisonCards,
-      intentAlignmentScore: getScore(feedback.intentAlignmentScore),
+      // The current feedback API only supplies the intent score; other criteria
+      // remain unscored until dedicated analysis results are available.
+      metrics: [
+        { label: "의도 충족", score: getOptionalScore(feedback.intentAlignmentScore) },
+        { label: "깊이", score: null },
+        { label: "구체성", score: null },
+        { label: "정확성", score: null },
+      ],
+      evaluation: summary,
     },
     middleSection: {
       cards: [
         {
-          title: "강점",
-          content: getListText(feedback.strengths),
+          title: "장점",
+          tone: "positive",
+          items: feedback.strengths?.length ? feedback.strengths : ["장점 분석 결과가 아직 없습니다."],
         },
         {
-          title: "보완점",
-          content: getListText(feedback.improvements),
+          title: "단점",
+          tone: "negative",
+          items: feedback.improvements?.length ? feedback.improvements : ["보완할 점에 대한 분석 결과가 아직 없습니다."],
         },
       ],
+      comparison: {
+        previousScore: getOptionalScore(previousFeedback?.totalScore),
+        currentScore: totalScore,
+      },
       personaFeedbacks: (feedback.personas ?? []).map((persona, index) => ({
         title: persona.personaRole?.trim() || `면접관 ${index + 1}`,
         imageUrl:
           persona.imageUrl ??
           (persona.personaId === interview?.persona?.id
-            ? interview.persona?.imageUrl
+            ? interview?.persona?.imageUrl
             : undefined),
-        comment:
-          persona.comment?.trim() || "면접관 코멘트가 아직 등록되지 않았습니다.",
+        comment: persona.comment?.trim() || "면접관 코멘트가 아직 등록되지 않았습니다.",
+        score: getOptionalScore(persona.score),
+        hasNoAnswer: persona.answeredCount === 0,
       })),
     },
     bottomSection: {
+      speechMetrics: ["발화 속도", "발음 명료도", "침묵 비율", "음량 안정성"].map((label) => ({
+        label,
+        score: null,
+        description: "음성 분석 결과가 아직 없습니다.",
+      })),
       reliability: {
         title: "응답 신뢰성",
-        scoreLabel: `${getScore(feedback.reliabilityScore)}점`,
-        levelLabel: getReliabilityLevel(getScore(feedback.reliabilityScore)),
-      },
-      questionFit: {
-        title: "질문 의도 적합도",
-        content: `${getScore(feedback.intentAlignmentScore)}점 · ${feedback.answeredCount ?? 0}/${feedback.questionCount ?? 0}문항 답변`,
+        scoreLabel: reliabilityScore === null ? "—" : `${reliabilityScore}%`,
+        levelLabel: reliabilityScore === null ? "분석 대기" : getReliabilityLevel(reliabilityScore),
       },
       keywords: {
-        items: (feedback.frequentWords ?? []).slice(0, 8).map((item, index) => ({
+        items: keywords.map((item, index) => ({
           text: item.word,
-          size: index < 2 ? ("xl" as const) : index < 4 ? ("md" as const) : ("sm" as const),
-          top: ["22%", "68%", "40%", "82%", "16%", "54%", "30%", "74%"][index],
-          left: ["28%", "64%", "72%", "38%", "78%", "22%", "48%", "84%"][index],
+          ...keywordPositions[index],
         })),
       },
       pdfActionLabel: "PDF로 저장",

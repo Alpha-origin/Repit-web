@@ -1,164 +1,77 @@
 import styled, { css } from "styled-components";
-
-interface TabButtonProps {
-  $active: boolean;
-}
-
-interface BarFillProps {
-  $score: number;
-  $tone: "primary" | "muted";
-}
-
-interface BarValueProps {
-  $tone: "primary" | "muted";
-}
-
-interface KeywordWordProps {
-  $size: "xs" | "sm" | "md" | "xl";
-}
-
-interface ScoreRingProps {
-  $score: number;
-}
-
-interface ProgressFillProps {
-  $score: number;
-  $tone: "primary" | "muted";
-}
-
-interface InsightCardProps {
-  $tone: "positive" | "negative";
-}
+import type { FeedbackOverallKeywordItem } from "./type";
 
 const cardSurface = css`
-  background: rgba(255, 255, 255, 0.9);
-  border: 0.0625rem solid rgba(223, 232, 247, 0.96);
-  border-radius: 1.05rem;
-  box-shadow: 0 1.1rem 2.6rem rgba(61, 102, 171, 0.08);
+  min-width: 0;
+  background: ${({ theme }) => theme.colors.white};
+  border: 1px solid #dedfe2;
+  border-radius: 0.375rem;
 `;
 
-const keywordSizeMap = {
-  xs: css`
-    font-size: 1.16rem;
-    font-weight: 300;
-    opacity: 0.82;
-  `,
-  sm: css`
-    font-size: 1.58rem;
-    font-weight: 400;
-    opacity: 0.88;
-  `,
-  md: css`
-    font-size: 2.3rem;
-    font-weight: 500;
-    opacity: 0.94;
-  `,
-  xl: css`
-    font-size: 3.75rem;
-    font-weight: 500;
-    opacity: 1;
-  `,
-};
-
-const getBarHeight = (score: number) => {
-  const scaledHeight = score * 0.88 + 20;
-
-  return `${Math.min(100, Math.max(28, scaledHeight))}%`;
-};
+const cardShadow = css`
+  box-shadow: 0 2px 4px rgba(34, 68, 114, 0.07);
+`;
 
 export const SectionBlock = styled.section`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
+  min-width: 0;
+`;
 
-  @media (max-width: 48rem) {
-    gap: 0.8rem;
-  }
+export const HeadingRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 1.875rem;
+  margin-bottom: -0.5rem;
+  padding-left: 0.5rem;
 `;
 
 export const PageHeading = styled.h1`
-  margin: 0;
-  color: #4a4a4a;
-  font-size: 1.2rem;
+  color: #4a4d53;
+  font-size: 1.125rem;
   font-weight: 700;
-  letter-spacing: -0.04rem;
+  letter-spacing: 0.025em;
 `;
 
-export const SectionShell = styled.div`
-  padding: 1rem;
-  border-radius: 1.7rem;
-  background: linear-gradient(
-    180deg,
-    rgba(234, 242, 255, 0.72),
-    rgba(243, 247, 255, 0.82)
-  );
-  border: 0.0625rem solid rgba(217, 228, 247, 0.92);
-  box-shadow: inset 0 0.0625rem 0 rgba(255, 255, 255, 0.55);
-
-  @media (max-width: 48rem) {
-    padding: 0.8rem;
-    border-radius: 1.25rem;
-  }
-`;
-
-export const BottomSectionShell = styled(SectionShell)`
-  padding-bottom: 1.4rem;
-
-  @media (max-width: 48rem) {
-    padding-bottom: 1rem;
-  }
-`;
-
-export const TabGroup = styled.div`
-  width: fit-content;
+export const TabGroup = styled.nav`
   display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.2rem;
-  background: rgba(255, 255, 255, 0.96);
-  border-radius: 1.05rem;
-  box-shadow: 0 0.85rem 2rem rgba(60, 102, 173, 0.08);
+  flex-shrink: 0;
+  padding: 0.1875rem;
+  border: 1px solid #e1e3e7;
+  border-radius: 0.25rem;
+  background: #ededed;
 `;
 
-export const TabButton = styled.button<TabButtonProps>`
-  min-width: 13.2rem;
-  height: 2.1rem;
-  padding: 0 0.9rem;
-  border: none;
-  border-radius: 0.85rem;
-  background: ${({ $active }) =>
-    $active ? "linear-gradient(180deg, #2f75e7, #2667da)" : "transparent"};
-  color: ${({ $active }) => ($active ? "#ffffff" : "#2f75e7")};
-  font-size: 1rem;
-  font-weight: 700;
+export const TabButton = styled.button<{ $active: boolean }>`
+  min-height: 1.375rem;
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  border-radius: 0.125rem;
+  background: ${({ $active, theme }) => $active ? "transparent" : theme.colors.white};
+  color: ${({ $active, theme }) => $active ? theme.colors.text.default : theme.colors.brand.blue};
+  font: inherit;
+  font-size: 0.6875rem;
   cursor: pointer;
 
-  @media (max-width: 40rem) {
-    min-width: 9rem;
-    height: 2rem;
-    font-size: 0.94rem;
-  }
+  &:focus-visible { outline: 2px solid ${({ theme }) => theme.colors.brand.blue}; outline-offset: 2px; }
 `;
 
 export const TopGrid = styled.div`
   display: grid;
-  grid-template-columns: minmax(14rem, 0.7fr) minmax(0, 1.35fr);
-  gap: 1rem;
+  grid-template-columns: minmax(0, 0.44fr) minmax(0, 1fr);
+  gap: 0.5rem;
 
-  @media (max-width: 48rem) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-export const LeftColumn = styled.div`
-  display: grid;
-  gap: 1rem;
+  @media (max-width: 42rem) { grid-template-columns: 1fr; }
 `;
 
 export const ScoreCard = styled.article`
   ${cardSurface}
-  min-height: 15rem;
-  padding: 1.4rem;
+  ${cardShadow}
+  min-height: 16rem;
+  padding: 1.625rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -167,549 +80,490 @@ export const ScoreCard = styled.article`
   text-align: center;
 `;
 
-export const SectionLabel = styled.p`
-  margin: 0;
-  color: #111111;
-  font-size: 1.3rem;
-  font-weight: 700;
-`;
-
-export const MainScore = styled.h2`
-  margin: 0.35rem 0 0;
-  color: #2b74e3;
-  font-size: clamp(2rem, 3vw, 2.8rem);
-  font-weight: 700;
-  letter-spacing: -0.08rem;
-  line-height: 1;
-`;
-
-export const DescriptionBlock = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-`;
-
-export const DescriptionLine = styled.p`
-  margin: 0;
-  color: #222222;
-  font-size: 0.92rem;
-  font-weight: 500;
-  line-height: 1.45;
-`;
-
-export const ScoreRing = styled.div<ScoreRingProps>`
-  width: 9.6rem;
-  height: 9.6rem;
+export const ScoreRing = styled.div`
+  position: relative;
+  width: 9.375rem;
+  height: 9.375rem;
+  flex-shrink: 0;
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  background: ${({ $score }) =>
-    `conic-gradient(#2477e8 ${Math.min(100, Math.max(0, $score))}%, #d9d9d9 0)`};
-  position: relative;
+`;
 
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0.55rem;
-    border-radius: 50%;
-    background: #ffffff;
-  }
+export const ScoreRingGraphic = styled.svg`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  color: ${({ theme }) => theme.colors.brand.blue};
 `;
 
 export const ScoreRingInner = styled.div`
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0.25rem;
 `;
 
 export const ScoreRingLabel = styled.span`
-  color: #222222;
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 0.75rem;
+  color: ${({ theme }) => theme.colors.text.strong};
+`;
+
+export const MainScore = styled.h2`
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: 1;
+`;
+
+export const ScoreMaximum = styled.span`
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 0.875rem;
+`;
+
+export const DescriptionBlock = styled.div`
+  margin-top: 0.125rem;
+`;
+
+export const DescriptionLine = styled.p`
+  font-size: 0.75rem;
+  line-height: 1.4;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 `;
 
 export const MetricsCard = styled.article`
   ${cardSurface}
-  min-height: 15rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 1.8rem;
-  padding: 1.6rem 2rem;
+  gap: 1.375rem;
+  padding: 2rem;
+
+  @media (max-width: 48rem) { padding: 1.25rem; }
 `;
 
-export const MetricRow = styled.div`
+export const TextCardTitle = styled.h3`
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+`;
+
+export const SectionCaption = styled.p`
+  margin-top: 0.1875rem;
+  font-size: 0.625rem;
+  line-height: 1.4;
+`;
+
+export const MetricGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.625rem;
+
+  @media (max-width: 48rem) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+`;
+
+export const MetricCard = styled.div`
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
-`;
-
-export const MetricHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  gap: 0.375rem;
+  padding: 0.875rem 0.8125rem;
+  border: 1px solid #e1e1e1;
+  border-radius: 0.1875rem;
 `;
 
 export const MetricLabel = styled.span`
-  color: #333333;
-  font-size: 0.92rem;
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 0.75rem;
   font-weight: 500;
+  line-height: 1.2;
 `;
 
 export const MetricValue = styled.strong`
-  color: #2477e8;
-  font-size: 0.95rem;
-  font-weight: 700;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.2;
 `;
 
 export const ProgressTrack = styled.div`
   width: 100%;
-  height: 0.6rem;
+  height: 0.25rem;
   overflow: hidden;
-  border-radius: 999rem;
-  background: #e1e1e1;
+  border-radius: 1rem;
+  background: #d0e0ff;
 `;
 
-export const ProgressFill = styled.div<ProgressFillProps>`
+export const ProgressFill = styled.div<{ $score: number }>`
   width: ${({ $score }) => `${Math.min(100, Math.max(0, $score))}%`};
   height: 100%;
   border-radius: inherit;
-  background: ${({ $tone }) => ($tone === "primary" ? "#2477e8" : "#a6a6a6")};
+  background: ${({ theme }) => theme.colors.brand.blue};
 `;
 
-export const ChartCard = styled.article`
-  ${cardSurface}
-  min-height: 12.8rem;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  padding: 1rem 1.15rem 0.95rem;
-`;
-
-export const CardHeading = styled.h3`
-  margin: 0;
-  color: #121212;
-  font-size: 1.24rem;
-  font-weight: 700;
-`;
-
-export const ComparisonPanel = styled.section`
-  ${cardSurface}
-  min-height: 24rem;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  padding: 1rem;
-  background: linear-gradient(180deg, rgba(219, 228, 249, 0.88), rgba(228, 235, 251, 0.94));
-
-  @media (max-width: 48rem) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-export const ComparisonCard = styled.article`
-  ${cardSurface}
-  min-height: 20rem;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem 1.15rem 0.95rem;
-`;
-
-export const ComparisonHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.75rem;
-`;
-
-export const HighlightText = styled.p`
-  margin: 0;
-  color: #2b74e3;
-  font-size: 1.14rem;
-  font-weight: 550;
-  text-align: right;
-`;
-
-export const BarChart = styled.div`
-  position: relative;
-  width: 100%;
-  height: 11.9rem;
-  margin-top: auto;
-  display: flex;
-  align-items: end;
-  justify-content: center;
-  gap: 1.2rem;
-  padding: 0 0.45rem 0.1rem;
-  box-sizing: border-box;
-  overflow: visible;
-`;
-
-export const ComparisonBarChart = styled.div`
-  position: relative;
-  width: 100%;
-  flex: 1;
-  min-height: 15.2rem;
-  margin-top: 0.35rem;
-  display: flex;
-  align-items: end;
-  justify-content: center;
-  gap: 1.35rem;
-  padding: 0 0.45rem 0.18rem;
-  box-sizing: border-box;
-  overflow: visible;
-`;
-
-export const BarColumn = styled.div`
-  position: relative;
-  width: min(100%, 6.7rem);
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 1.35rem;
-  box-sizing: border-box;
-`;
-
-export const ComparisonBarColumn = styled.div`
-  position: relative;
-  width: min(100%, 7.2rem);
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 1.55rem;
-  box-sizing: border-box;
-`;
-
-export const BarTrack = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: end;
-`;
-
-export const BarFill = styled.div<BarFillProps>`
-  width: 100%;
-  height: ${({ $score }) => getBarHeight($score)};
-  border-radius: 0.6rem 0.6rem 0.18rem 0.18rem;
-  background: ${({ $tone }) =>
-    $tone === "primary"
-      ? "linear-gradient(180deg, #2f75e7, #2a6cdd)"
-      : "linear-gradient(180deg, rgba(228, 234, 246, 0.95), rgba(214, 223, 240, 0.98))"};
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 0.75rem;
-`;
-
-export const BarValue = styled.span<BarValueProps>`
-  color: ${({ $tone }) => ($tone === "primary" ? "#ffffff" : "#2f75e7")};
-  font-size: 1.08rem;
-  font-weight: 700;
-`;
-
-export const BarLabel = styled.p`
-  margin: 0;
-  position: absolute;
-  left: 50%;
-  bottom: 0.1rem;
-  width: 100%;
-  transform: translateX(-50%);
-  color: #2f75e7;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-align: center;
-  line-height: 1.25;
+export const TextCardBody = styled.p`
+  color: ${({ theme }) => theme.colors.text.default};
+  font-size: 0.75rem;
+  line-height: 1.3;
+  white-space: pre-line;
   word-break: keep-all;
+  overflow-wrap: anywhere;
 `;
 
 export const MiddleGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.9rem;
+  grid-template-columns: minmax(0, 2.6fr) minmax(0, 1fr);
+  gap: 0.75rem;
 
-  @media (max-width: 64rem) {
-    grid-template-columns: 1fr;
-  }
+  @media (max-width: 48rem) { grid-template-columns: 1fr; }
 `;
 
-export const InsightCard = styled.article<InsightCardProps>`
-  min-height: 10rem;
-  padding: 1.25rem 1.45rem;
-  border: 0.0625rem solid
-    ${({ $tone }) => ($tone === "positive" ? "#d4e4f7" : "#f1d4d1")};
-  border-radius: 0.35rem;
-  background: ${({ $tone }) =>
-    $tone === "positive" ? "#edf5ff" : "#fff1f0"};
+export const InsightGroup = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid #dedfe2;
+  border-radius: 0.375rem;
+
+  @media (max-width: 30rem) { grid-template-columns: 1fr; }
+`;
+
+export const InsightCard = styled.article<{ $tone: "positive" | "negative" }>`
+  min-width: 0;
+  min-height: 14.25rem;
+  padding: 1.375rem 2rem;
+  background: ${({ $tone }) => $tone === "positive" ? "#eaf2fb" : "#f7eeee"};
+  color: ${({ $tone, theme }) => $tone === "positive" ? theme.colors.brand.blue : "#ff3b21"};
+
+  & + & { border-left: 1px solid #dedfe2; }
+
+  @media (max-width: 36rem) { padding: 1.25rem; }
+  @media (max-width: 30rem) {
+    min-height: 0;
+    & + & { border-left: 0; border-top: 1px solid #dedfe2; }
+  }
 `;
 
 export const InsightHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  margin-bottom: 0.85rem;
+  gap: 0.375rem;
+  margin-bottom: 0.875rem;
 `;
 
-export const InsightIcon = styled.span`
-  color: #2477e8;
-  font-size: 1.3rem;
-  line-height: 1;
+export const InsightIcon = styled.svg`
+  width: 1.375rem;
+  height: 1.375rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
 `;
 
-export const TextCard = styled.article`
-  ${cardSurface}
-  min-height: 12.6rem;
-  padding: 1.45rem 1.45rem 1.2rem;
+export const InsightTitle = styled.h3`
+  font-size: 1rem;
+  font-weight: 600;
+`;
+
+export const InsightList = styled.ol`
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 0.7rem;
-  text-align: left;
+  gap: 0.875rem;
 `;
 
-export const TextCardTitle = styled.h3`
-  margin: 0;
-  color: #2b74e3;
-  font-size: 1.3rem;
-  font-weight: 700;
-  letter-spacing: -0.03rem;
+export const InsightItem = styled.li`
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.5rem;
 `;
 
-export const TextCardBody = styled.p`
-  margin: 0;
-  color: #1b1b1b;
-  font-size: 0.9rem;
-  font-weight: 500;
-  line-height: 1.6;
-  word-break: keep-all;
+export const InsightNumber = styled.span`
+  font-size: 1rem;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+`;
+
+export const ComparisonCard = styled.article`
+  ${cardSurface}
+  min-height: 14.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.625rem 1.5rem 1rem;
+  gap: 0.25rem;
+`;
+
+export const ComparisonTitle = styled.h3`
+  color: #555555;
+  font-size: 0.875rem;
+  line-height: 1.3;
+  text-align: center;
+`;
+
+export const ComparisonDescription = styled.div`
+  font-size: 0.8125rem;
+  white-space: nowrap;
+`;
+
+export const ComparisonHighlight = styled.strong`
+  margin-right: 0.125rem;
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 1.25rem;
+  font-weight: 600;
+`;
+
+export const BarChart = styled.div`
+  width: 100%;
+  max-width: 14rem;
+  height: 8.375rem;
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  gap: 0.875rem;
+`;
+
+export const BarColumn = styled.div`
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+`;
+
+export const BarTrack = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+`;
+
+export const BarFill = styled.div<{ $score: number; $tone: "primary" | "muted" }>`
+  width: 100%;
+  min-height: 1.25rem;
+  height: ${({ $score }) => `${Math.min(100, Math.max(0, $score))}%`};
+  border-radius: 0.3125rem;
+  background: ${({ $tone, theme }) => $tone === "primary" ? theme.colors.brand.blue : "#edf1f9"};
+  display: flex;
+  justify-content: center;
+  padding-top: 0.625rem;
+`;
+
+export const BarValue = styled.span<{ $tone: "primary" | "muted" }>`
+  color: ${({ $tone, theme }) => $tone === "primary" ? theme.colors.white : theme.colors.brand.blue};
+  font-size: 0.625rem;
+  font-weight: 600;
+`;
+
+export const BarLabel = styled.p`
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 0.5rem;
+  line-height: 1.4;
+  text-align: center;
 `;
 
 export const PersonaFeedbackList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
-  margin-top: 0.1rem;
+  gap: 0.625rem;
 `;
 
 export const PersonaFeedbackCard = styled.article`
   ${cardSurface}
-  min-height: 4.8rem;
+  ${cardShadow}
+  min-height: 5rem;
   display: flex;
   align-items: center;
-  gap: 0.9rem;
-  padding: 0.55rem 0.75rem;
-  border-radius: 0.35rem;
+  gap: 0.625rem;
+  padding: 0.5625rem 0.8125rem 0.5625rem 0.625rem;
+
+  @media (max-width: 36rem) {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.75rem;
+  }
 `;
 
 export const PersonaImage = styled.img`
-  width: 3.8rem;
-  height: 3.8rem;
+  width: 3.75rem;
+  height: 3.75rem;
   flex-shrink: 0;
   object-fit: cover;
-  border-radius: 0.2rem;
+  border-radius: 0.25rem;
   background: #e8edf5;
 `;
 
 export const PersonaFeedbackBody = styled.div`
   min-width: 0;
+  flex: 1;
+`;
+
+export const PersonaFeedbackTitle = styled.h3`
+  margin-bottom: 0.375rem;
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+`;
+
+export const PersonaFeedbackText = styled(TextCardBody)`
+  color: ${({ theme }) => theme.colors.text.strong};
+  line-height: 1.25;
+`;
+
+export const PersonaScore = styled.span`
+  min-width: 4.625rem;
+  min-height: 2.375rem;
+  padding: 0.625rem 1.125rem;
+  flex-shrink: 0;
+  border: 1px solid #c4daff;
+  border-radius: 0.1875rem;
+  background: #e8f0fe;
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+
+  @media (max-width: 36rem) { grid-column: 2; justify-self: start; }
+`;
+
+export const EmptyText = styled.p`
+  color: #687383;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-align: center;
+`;
+
+export const PersonaEmpty = styled(EmptyText)`
+  ${cardSurface}
+  padding: 1.5rem;
+`;
+
+export const SpeechCard = styled.article`
+  ${cardSurface}
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.875rem;
+  padding: 1.5rem 1.75rem;
 `;
 
-export const PersonaFeedbackTitle = styled.strong`
-  color: #2477e8;
-  font-size: 0.88rem;
-  font-weight: 700;
+export const SpeechMetricGrid = styled(MetricGrid)`
+  gap: 0.5rem;
 `;
 
-export const PersonaFeedbackText = styled.p`
-  margin: 0;
-  color: #333333;
-  font-size: 0.83rem;
-  line-height: 1.45;
+export const SpeechMetricCard = styled(MetricCard)`
+  padding: 0.875rem 0.9375rem 0.75rem;
+  gap: 0.3125rem;
+`;
+
+export const MetricHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+`;
+
+export const MetricDescription = styled.p`
+  margin-top: 0.125rem;
+  color: #666666;
+  font-size: 0.5625rem;
+  line-height: 1.4;
   word-break: keep-all;
-`;
-
-export const PersonaEmpty = styled.p`
-  ${cardSurface}
-  padding: 1.25rem;
-  color: #777777;
-  font-size: 0.9rem;
-  text-align: center;
 `;
 
 export const BottomGrid = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(14rem, 0.62fr);
-  gap: 0.9rem;
-  align-items: start;
-  padding-bottom: 0.4rem;
-  box-sizing: border-box;
+  grid-template-columns: minmax(0, 3.25fr) minmax(0, 1fr);
+  gap: 0.5rem;
 
-  @media (max-width: 48rem) {
-    grid-template-columns: 1fr;
-  }
-
-  @media (max-width: 48rem) {
-    padding-bottom: 0.2rem;
-  }
-`;
-
-export const BottomLeftColumn = styled.div`
-  display: grid;
-  gap: 0.7rem;
-  align-content: start;
-`;
-
-export const ReliabilityCard = styled.article`
-  ${cardSurface}
-  min-height: 5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.95rem 1.45rem;
-
-  @media (max-width: 40rem) {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-`;
-
-export const ReliabilityBadges = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-`;
-
-export const ReliabilityBadge = styled.div`
-  min-width: 5.2rem;
-  height: 2.7rem;
-  padding: 0 1rem;
-  border: 0.0625rem solid rgba(189, 201, 224, 0.95);
-  border-radius: 0.55rem;
-  background: rgba(255, 255, 255, 0.9);
-  font-family: ${({ theme }) => theme.fontFamily.wavvePado};
-  color: rgba(0, 0, 0, 0.72);
-  font-size: 1.05rem;
-  font-weight: 100;
-  letter-spacing: 0.03rem;
-  transform: scale(1);
-  transform-origin: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-export const QuestionCard = styled.article`
-  ${cardSurface}
-  min-height: 11.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  padding: 1.45rem 1.45rem 1.15rem;
+  @media (max-width: 42rem) { grid-template-columns: 1fr; }
 `;
 
 export const KeywordCard = styled.article`
   ${cardSurface}
-  min-height: 20rem;
-  align-self: start;
-  padding: 1.35rem 1.4rem;
+  ${cardShadow}
+  min-height: 10.625rem;
+  display: grid;
+  align-items: center;
+  padding: 0.75rem;
 `;
 
 export const KeywordCanvas = styled.div`
-  width: 100%;
-  min-height: 17rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-content: center;
-  align-items: center;
-  justify-content: center;
-  gap: 1.45rem 1.9rem;
-  padding: 1.2rem 0.5rem;
+  position: relative;
+  height: 100%;
+  min-height: 9rem;
 `;
 
-export const KeywordWord = styled.span<KeywordWordProps>`
-  font-family: ${({ theme }) => theme.fontFamily.wavvePado};
-  color: #2b74e3;
-  line-height: 1.08;
-  letter-spacing: 0;
+const keywordSizeMap = { xs: "0.625rem", sm: "0.875rem", md: "1.25rem", lg: "1.875rem", xl: "2.75rem" };
+
+export const KeywordWord = styled.span<{ $size: FeedbackOverallKeywordItem["size"] }>`
+  position: absolute;
+  transform: translate(-50%, -50%);
+  max-width: 22%;
+  color: ${({ $size, theme }) => $size === "xl" ? theme.colors.brand.blue : $size === "xs" ? "#5274a3" : "#4c8be4"};
+  font-size: ${({ $size }) => keywordSizeMap[$size]};
+  font-weight: ${({ $size }) => $size === "xs" ? 500 : 600};
+  line-height: 1.1;
+  text-align: center;
+  overflow-wrap: anywhere;
+
+  @media (max-width: 30rem) { font-size: ${({ $size }) => $size === "xl" ? "2rem" : keywordSizeMap[$size]}; }
+`;
+
+export const BottomSideColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+`;
+
+export const ReliabilityCard = styled.article`
+  ${cardSurface}
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.8125rem;
+  padding: 1.5rem 1.125rem;
+`;
+
+export const ReliabilityBadges = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+`;
+
+export const ReliabilityBadge = styled.span`
+  min-width: 0;
+  padding: 0.375rem 0.25rem;
+  border: 1px solid #dedfe2;
+  border-radius: 0.3125rem;
+  color: #555555;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
   white-space: nowrap;
-  transform: rotate(-5deg);
-  ${({ $size }) => keywordSizeMap[$size]}
-
-  &:nth-child(2n) {
-    transform: rotate(6deg) translateY(0.55rem);
-  }
-
-  &:nth-child(3n) {
-    transform: rotate(-9deg) translateY(-0.45rem);
-  }
-
-  &:nth-child(4n) {
-    transform: rotate(4deg) translateY(-0.75rem);
-  }
-
-  &:nth-child(5n) {
-    transform: rotate(-2deg) translateY(0.85rem);
-  }
-
-  @media (max-width: 48rem) {
-    transform: rotate(-3deg);
-
-    &:nth-child(2n) {
-      transform: rotate(4deg) translateY(0.35rem);
-    }
-
-    &:nth-child(3n) {
-      transform: rotate(-5deg) translateY(-0.3rem);
-    }
-
-    &:nth-child(4n) {
-      transform: rotate(3deg) translateY(-0.45rem);
-    }
-
-    &:nth-child(5n) {
-      transform: rotate(-2deg) translateY(0.5rem);
-    }
-
-    ${({ $size }) =>
-      $size === "xl" &&
-      css`
-        font-size: 2.7rem;
-      `}
-
-    ${({ $size }) =>
-      $size === "md" &&
-      css`
-        font-size: 1.9rem;
-      `}
-  }
 `;
 
 export const PdfButton = styled.button`
+  ${cardShadow}
   width: 100%;
-  height: 2.8rem;
-  border: none;
-  border-radius: 0.35rem;
-  background: #2477e8;
-  color: #ffffff;
-  font-size: 0.92rem;
-  font-weight: 600;
+  min-height: 2.5rem;
+  padding: 0.625rem 1.25rem;
+  border: 1px solid #bbd3fa;
+  border-radius: 0.5rem;
+  background: ${({ theme }) => theme.colors.brand.blue};
+  color: ${({ theme }) => theme.colors.white};
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: left;
   cursor: pointer;
 
-  &:disabled {
-    cursor: wait;
-    opacity: 0.65;
-  }
+  &:hover:not(:disabled) { filter: brightness(0.96); }
+  &:focus-visible { outline: 2px solid ${({ theme }) => theme.colors.brand.blue}; outline-offset: 3px; }
+  &:disabled { cursor: wait; opacity: 0.65; }
 `;
