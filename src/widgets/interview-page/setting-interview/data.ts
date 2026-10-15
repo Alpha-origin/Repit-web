@@ -35,7 +35,7 @@ export const SETTING_DIFFICULTY_SECTION = {
 };
 
 export const SETTING_INTERVIEWER_CARDS = MULTI_INTERVIEWER_TEMPLATES.map(
-  ({ key, name, image, tags, description }) => ({ key, name, image, tags, description }),
+  ({ key, name, image }) => ({ key, name, image }),
 );
 
 export type SettingInterviewerCard = (typeof SETTING_INTERVIEWER_CARDS)[number];

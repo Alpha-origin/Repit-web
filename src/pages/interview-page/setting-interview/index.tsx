@@ -18,22 +18,24 @@ const SettingInterviewPage = () => {
             onSelect={setup.select}
             selection={setup.selection}
           >
+            <AnswerModeOptions
+              answerMode={setup.answerMode}
+              onAnswerModeChange={setup.onAnswerModeChange}
+            />
+          </SettingOptions>
+          <S.ControlColumn>
             <PersonaOptions
               personality={setup.selection.personality}
               tone={setup.selection.tone}
               onPersonalityChange={setup.select.personality}
               onToneChange={setup.select.tone}
             />
-          </SettingOptions>
-          <InterviewerOptions
-            onSelect={setup.select.interviewer}
-            selectedValue={setup.selection.interviewerKey}
-          />
+            <InterviewerOptions
+              onSelect={setup.select.interviewer}
+              selectedValue={setup.selection.interviewerKey}
+            />
+          </S.ControlColumn>
         </S.Sections>
-        <AnswerModeOptions
-          answerMode={setup.answerMode}
-          onAnswerModeChange={setup.onAnswerModeChange}
-        />
         {setup.profileGuidance || setup.showMyPageLink || setup.onRefreshProfile ? (
           <ProfileGuidance
             message={setup.profileGuidance}
