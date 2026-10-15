@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { finishActiveInterview } from "@/features/interview-page/interview/model/activeInterviewLifecycle";
+import { useEffect, useRef, useState } from "react";
+import { clearPendingInterviewLeave, finishActiveInterview, setPendingInterviewLeave } from "@/features/interview-page/interview/model/activeInterviewLifecycle";
 import { waitForRecordingUploads } from "@/features/interview-page/interview/model/interviewRecordingStore";
 import { clearAccessToken } from "@/shared/api/accessToken";
 import { useEnsureCurrentUser } from "@/shared/model/useEnsureCurrentUser";
@@ -12,6 +12,7 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const actionRef = useRef(false);
+  const logoutPendingRef = useRef(false);
   const [isLeaving, setIsLeaving] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const pathname = location.pathname.toLowerCase().replace(/\/+$/, "") || "/";
@@ -21,6 +22,10 @@ const Header = () => {
   const name = useUserStore((state) => state.name);
   const resetUser = useUserStore((state) => state.reset);
   const displayName = nickname || name || "회원";
+
+  useEffect(() => () => {
+    if (logoutPendingRef.current) resetUser();
+  }, [resetUser]);
 
   const isInterviewPage =
     pathname === "/main" ||
@@ -38,16 +43,18 @@ const Header = () => {
     setIsLeaving(true);
     setLogoutError(null);
     try {
-      await finishActiveInterview();
+      setPendingInterviewLeave(() => handleLeave(path, logout));
+      if (!(await finishActiveInterview())) return;
+      clearPendingInterviewLeave();
       if (logout) {
         if (!(await waitForRecordingUploads())) {
           setLogoutError("업로드에 실패한 파일이 있습니다. 다시 시도하거나 파일을 폐기한 뒤 로그아웃해주세요.");
           return;
         }
         clearAccessToken();
-        resetUser();
+        logoutPendingRef.current = true;
       }
-      navigate(path);
+      await navigate(path);
     } finally {
       actionRef.current = false;
       setIsLeaving(false);

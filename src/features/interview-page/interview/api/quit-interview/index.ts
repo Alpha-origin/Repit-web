@@ -1,3 +1,4 @@
+import axios from "axios";
 import { chatInstance } from "@/shared/api/axiosInstance";
 
 import { getErrorMessage, getTrimmedString } from "../shared";
@@ -10,6 +11,7 @@ export const quitInterview = async (sessionId: string) => {
     return {
       data: null,
       errorMessage: "종료할 면접 세션 정보가 없습니다.",
+      statusCode: null,
     };
   }
 
@@ -21,11 +23,13 @@ export const quitInterview = async (sessionId: string) => {
     return {
       data: response.data,
       errorMessage: null,
+      statusCode: null,
     };
   } catch (error) {
     return {
       data: null,
       errorMessage: getErrorMessage(error, "면접 종료에 실패했습니다."),
+      statusCode: axios.isAxiosError(error) ? error.response?.status ?? null : null,
     };
   }
 };

@@ -10,7 +10,7 @@ export const browser = await chromium.launch({ headless: true, args: [
 ] });
 export const question = (id) => ({ questionId: id, parentId: 0, type: "ORIGINAL", intention: "경험", content: `질문 ${id}: 프로젝트 경험을 설명해주세요.`, personaId: 1 });
 
-export async function fixture({ multi = false, answerMode = "voice", timeout = false, denied = false, fail = false, delayUploads = false, complete = false, mimeMode, socketOnAnswer = false, preparationFailed = false, recorderFails = false, slowStop = false, audioResponses = null, holdAudio = false, fastAudioTimers = false, audioDeadline = false, playback = "native" } = {}) {
+export async function fixture({ multi = false, answerMode = "voice", timeout = false, denied = false, fail = false, delayUploads = false, complete = false, mimeMode, socketOnAnswer = false, preparationFailed = false, recorderFails = false, slowStop = false, audioResponses = null, holdAudio = false, fastAudioTimers = false, audioDeadline = false, playback = "native", recoveredSessionId = null, quitStatuses = [200] } = {}) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage();
   page.setDefaultTimeout(10_000);
@@ -106,7 +106,7 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
       static CLOSING = 2;
       static CLOSED = 3;
       readyState = 1;
-      constructor() { super(); window.__sockets.push(this); }
+      constructor(url) { super(); this.url = url; window.__sockets.push(this); }
       close() { this.readyState = 3; this.dispatchEvent(new Event("close")); }
       send() {}
     };
@@ -129,6 +129,8 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
   const uploads = [];
   const answers = [];
   const quits = [];
+  const chatRequests = [];
+  const recovery = { starts: 0, reads: 0 };
   const releases = [];
   let current = question(101);
   let shouldFail = fail;
@@ -136,6 +138,7 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
     const request = route.request();
     const requestUrl = new URL(request.url());
     const pathname = requestUrl.pathname;
+    if (pathname.startsWith("/chat/")) chatRequests.push({ path: pathname, method: request.method() });
     if (requestUrl.hostname === "tts.example.test") return route.fulfill({ contentType: "audio/wav", body: wav });
     if (pathname.includes("/elevenlabs/") || pathname.includes("/supertone/")) directTtsRequests.push(pathname);
     if (!pathname.startsWith("/api/") && !pathname.startsWith("/chat/")) return route.continue();
@@ -156,8 +159,19 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
       if (socketOnAnswer) await page.evaluate(() => window.__sockets.filter((socket) => socket.readyState === 1).forEach((socket) => socket.dispatchEvent(new MessageEvent("message", { data: JSON.stringify({ status: "COMPLETED" }) }))));
       return json({ status: complete ? "COMPLETED" : "IN_PROGRESS", question: complete ? undefined : current });
     }
-    if (pathname.endsWith("/quit")) { quits.push(pathname); return json({ status: "ABANDONED" }); }
+    if (pathname.endsWith("/quit")) {
+      const status = quitStatuses[Math.min(quits.length, quitStatuses.length - 1)];
+      quits.push(pathname);
+      return json(status === 200 ? { status: "ABANDONED" } : { message: "테스트 중단 저장 실패" }, status);
+    }
     if (pathname.endsWith("/question")) return json(current);
+    if (recoveredSessionId && pathname === "/api/interviews/42") {
+      recovery.starts++;
+      return json({ data: { interviewId: 42, sessionId: recoveredSessionId } });
+    }
+    if (recoveredSessionId && pathname === "/api/questions/tailor" && ++recovery.reads <= 3) {
+      return json({ data: { status: "NOT_REQUESTED", preparationStatus: "NOT_REQUESTED", questions: [], interviewId: 42 } });
+    }
     if (pathname === "/api/questions/tailor") return json({ data: { status: preparationFailed ? "FAILED" : "SUCCEEDED", preparationStatus: preparationFailed ? "FAILED" : "READY", errorMessage: preparationFailed ? "테스트 면접 준비 실패" : null, retryable: false, chatDelivered: !preparationFailed, questions: [current, question(102)], interviewId: 42 } });
     if (pathname.endsWith("/me")) return json({ data: { id: 7, name: "테스트", nickname: "테스트" } });
     if (pathname.endsWith("/audio")) {
@@ -201,7 +215,7 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
       throw error;
     }
   }
-  return { page, context, start, finish, uploads, answers, quits, releases, errors, audioRequests, failedRequests, directTtsRequests,
+  return { page, context, start, finish, uploads, answers, quits, releases, errors, audioRequests, failedRequests, directTtsRequests, chatRequests, recovery,
     releaseAudio: () => { for (const resolve of audioReleases.splice(0)) resolve(); },
     recover: () => { shouldFail = false; },
     release: () => { for (const resolve of releases.splice(0)) resolve(); },
