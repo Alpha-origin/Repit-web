@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -157,9 +158,16 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
 
     const controller = new AbortController();
     const deadline = Date.now() + 5 * 60_000;
+    const timeoutMessage = "피드백 분석이 지연되고 있습니다. 잠시 후 다시 확인해주세요.";
     let timeoutId: number;
 
     const pollFeedback = async () => {
+      if (controller.signal.aborted) return;
+      if (Date.now() >= deadline) {
+        setFeedbackErrorMessage(timeoutMessage);
+        return;
+      }
+
       try {
         const nextFeedback = await getFeedback(interviewId, controller.signal);
 
@@ -175,20 +183,27 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
             return;
           }
         }
-
-        if (Date.now() >= deadline) {
-          setFeedbackErrorMessage("피드백 분석이 지연되고 있습니다. 잠시 후 다시 확인해주세요.");
-          return;
-        }
-
-        timeoutId = window.setTimeout(() => void pollFeedback(), 5_000);
       } catch (error) {
-        if (!controller.signal.aborted) {
-          setFeedbackErrorMessage(
-            extractErrorMessage(error, "피드백 분석 상태를 확인하지 못했습니다."),
-          );
-        }
+        if (controller.signal.aborted) return;
+        setFeedbackErrorMessage(
+          extractErrorMessage(error, "피드백 분석 상태를 확인하지 못했습니다."),
+        );
+
+        const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+        const canRetry = axios.isAxiosError(error) && !axios.isCancel(error) && (
+          !error.response || status === 408 || status === 429 ||
+          (status !== undefined && status >= 500 && status < 600)
+        );
+        if (!canRetry) return;
       }
+
+      const remainingTime = deadline - Date.now();
+      if (remainingTime <= 0) {
+        setFeedbackErrorMessage(timeoutMessage);
+        return;
+      }
+
+      timeoutId = window.setTimeout(() => void pollFeedback(), Math.min(5_000, remainingTime));
     };
 
     timeoutId = window.setTimeout(() => void pollFeedback(), 5_000);
