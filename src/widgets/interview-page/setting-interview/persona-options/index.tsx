@@ -6,7 +6,7 @@ import type { PersonaOptionsProps } from './type';
 const PersonaOptions = ({ personality, tone, onPersonalityChange, onToneChange }: PersonaOptionsProps) => (
   <>
     <S.Section>
-      <S.Title>성격/분위기</S.Title>
+      <S.Title>면접관 성격/분위기</S.Title>
       <S.DifficultyGroup role="group" aria-label="성격">
         {PERSONALITY_OPTIONS.map((option) => (
           <S.DifficultyButton key={option.value} type="button"

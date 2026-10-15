@@ -1,4 +1,9 @@
 import { SETTING_INTERVIEWER_CARDS } from '../data';
+import {
+  IdentityButton,
+  IdentityImage,
+  IdentityRow,
+} from '@/widgets/interview-page/setting-multi-interview/style';
 import * as S from '../style';
 import type {
   InterviewerCardProps,
@@ -11,7 +16,7 @@ const InterviewerOptions = ({
 }: InterviewerOptionsProps) => (
   <S.Section>
     <S.Title>면접관 선택</S.Title>
-    <S.InterviewerGrid role="radiogroup" aria-label="면접관 선택">
+    <IdentityRow role="radiogroup" aria-label="면접관 선택">
       {SETTING_INTERVIEWER_CARDS.map((interviewer) => (
         <InterviewerCard
           key={interviewer.key}
@@ -20,7 +25,7 @@ const InterviewerOptions = ({
           onSelect={onSelect}
         />
       ))}
-    </S.InterviewerGrid>
+    </IdentityRow>
   </S.Section>
 );
 
@@ -29,27 +34,16 @@ const InterviewerCard = ({
   isSelected,
   onSelect,
 }: InterviewerCardProps) => (
-  <S.InterviewerCard
+  <IdentityButton
     $selected={isSelected}
     aria-checked={isSelected}
     onClick={() => onSelect(interviewer.key)}
     role="radio"
     type="button"
   >
-    <S.InterviewerImage src={interviewer.image} alt="" />
-    <S.InterviewerBody $selected={isSelected}>
-      {isSelected ? <S.InterviewerSelectedBadge aria-hidden="true" /> : null}
-      <S.InterviewerTitle>{interviewer.name}</S.InterviewerTitle>
-      <S.TagList>
-        {interviewer.tags.map((tag) => (
-          <S.Tag key={tag}>{tag}</S.Tag>
-        ))}
-      </S.TagList>
-      <S.InterviewerDescription>
-        {interviewer.description}
-      </S.InterviewerDescription>
-    </S.InterviewerBody>
-  </S.InterviewerCard>
+    <IdentityImage src={interviewer.image} alt="" />
+    {interviewer.name}
+  </IdentityButton>
 );
 
 export default InterviewerOptions;
