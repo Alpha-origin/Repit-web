@@ -6,6 +6,7 @@ import MultiInterviewerSettings from "@/widgets/interview-page/multi-interviewer
 import { INTERVIEWER_COUNT_OPTIONS } from "@/shared/constants/interview-page/setting-multi-interview";
 import MultiInterviewerSlots from "@/widgets/interview-page/multi-interviewer-slots";
 import SettingOptions from "@/widgets/interview-page/setting-interview/setting-options";
+import AnswerModeOptions from "@/widgets/interview-page/setting-interview/answer-mode-options";
 import * as S from "@/widgets/interview-page/setting-multi-interview/style";
 
 const SettingMultiInterviewPage = () => {
@@ -15,21 +16,22 @@ const SettingMultiInterviewPage = () => {
     <S.Container>
       <S.Content>
         <S.MainGrid>
-          <S.OptionsLock disabled={setup.isSubmitting}>
-          <SettingOptions
-            answerMode={setup.answerMode}
-            onAnswerModeChange={setup.onAnswerModeChange}
-            onSelect={{
-              difficulty: setup.select.difficulty,
-              style: setup.select.style,
-            }}
-            selection={{
-              difficulty: setup.selection.difficulty,
-              style: setup.selection.style,
-            }}
-          />
-
-          </S.OptionsLock>
+          <S.SettingsPanel disabled={setup.isSubmitting}>
+            <AnswerModeOptions
+              answerMode={setup.answerMode}
+              onAnswerModeChange={setup.onAnswerModeChange}
+            />
+            <SettingOptions
+              onSelect={{
+                difficulty: setup.select.difficulty,
+                style: setup.select.style,
+              }}
+              selection={{
+                difficulty: setup.selection.difficulty,
+                style: setup.selection.style,
+              }}
+            />
+          </S.SettingsPanel>
           <S.InterviewerColumn>
             <S.Section>
               <S.SectionTitle>면접관 수</S.SectionTitle>

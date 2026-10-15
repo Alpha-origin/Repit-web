@@ -1,6 +1,7 @@
 import PersonaOptions from "@/widgets/interview-page/setting-interview/persona-options";
 import ProfileGuidance from "@/widgets/interview-page/profile-guidance";
 import { useInterviewSetup } from "@/features/interview-page/setting-interview/model/useInterviewSetup";
+import AnswerModeOptions from "@/widgets/interview-page/setting-interview/answer-mode-options";
 import InterviewerOptions from "@/widgets/interview-page/setting-interview/interviewer-options";
 import SettingActions from "@/widgets/interview-page/setting-interview/setting-actions";
 import SettingOptions from "@/widgets/interview-page/setting-interview/setting-options";
@@ -14,8 +15,6 @@ const SettingInterviewPage = () => {
       <S.ContentWrapper>
         <S.Sections>
           <SettingOptions
-            answerMode={setup.answerMode}
-            onAnswerModeChange={setup.onAnswerModeChange}
             onSelect={setup.select}
             selection={setup.selection}
           >
@@ -31,11 +30,17 @@ const SettingInterviewPage = () => {
             selectedValue={setup.selection.interviewerKey}
           />
         </S.Sections>
-        <ProfileGuidance
-          message={setup.profileGuidance}
-          showMyPageLink={setup.showMyPageLink}
-          onRetry={setup.onRefreshProfile}
+        <AnswerModeOptions
+          answerMode={setup.answerMode}
+          onAnswerModeChange={setup.onAnswerModeChange}
         />
+        {setup.profileGuidance || setup.showMyPageLink || setup.onRefreshProfile ? (
+          <ProfileGuidance
+            message={setup.profileGuidance}
+            showMyPageLink={setup.showMyPageLink}
+            onRetry={setup.onRefreshProfile}
+          />
+        ) : null}
         {setup.errorMessage ? (
           <S.ErrorMessage role="alert">{setup.errorMessage}</S.ErrorMessage>
         ) : null}

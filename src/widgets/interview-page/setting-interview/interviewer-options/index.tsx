@@ -9,16 +9,19 @@ const InterviewerOptions = ({
   onSelect,
   selectedValue,
 }: InterviewerOptionsProps) => (
-  <S.InterviewerGrid role="radiogroup" aria-label="면접관 선택">
-    {SETTING_INTERVIEWER_CARDS.map((interviewer) => (
-      <InterviewerCard
-        key={interviewer.key}
-        interviewer={interviewer}
-        isSelected={selectedValue === interviewer.key}
-        onSelect={onSelect}
-      />
-    ))}
-  </S.InterviewerGrid>
+  <S.Section>
+    <S.Title>면접관 선택</S.Title>
+    <S.InterviewerGrid role="radiogroup" aria-label="면접관 선택">
+      {SETTING_INTERVIEWER_CARDS.map((interviewer) => (
+        <InterviewerCard
+          key={interviewer.key}
+          interviewer={interviewer}
+          isSelected={selectedValue === interviewer.key}
+          onSelect={onSelect}
+        />
+      ))}
+    </S.InterviewerGrid>
+  </S.Section>
 );
 
 const InterviewerCard = ({
