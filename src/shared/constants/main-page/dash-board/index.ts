@@ -51,3 +51,5 @@ export type MainPageInterviewModeId =
   (typeof MAIN_PAGE_INTERVIEW_MODE_CARDS)[number]["id"];
 
 export const MAIN_PAGE_COMING_SOON_LABEL = "준비중인 기능입니다";
+
+export const MAIN_PAGE_GUIDE_ROUTE = "/";
