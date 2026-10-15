@@ -1,5 +1,5 @@
 import type { LatestProfile } from "@/features/profile/api";
-import { getProfileFailureMessage } from "@/features/profile/model/profileMessages";
+import { formatProfileCompletedAt, getProfileFailureMessage } from "@/features/profile/model/profileMessages";
 import * as S from "./style";
 
 interface ProfileStatusCardProps {
@@ -12,6 +12,7 @@ interface ProfileStatusCardProps {
   onEdit: () => void;
   onReplaceFile: () => void;
   onSave: () => void;
+  onGoToInterview: () => void;
   isSaving: boolean;
 }
 
@@ -32,10 +33,12 @@ const ProfileStatusCard = ({
   onEdit,
   onReplaceFile,
   onSave,
+  onGoToInterview,
   isSaving,
 }: ProfileStatusCardProps) => {
   const hasError = !!errorMessage || profile?.status === "FAILED";
   const isComplete = !isLoading && !hasError && profile?.status === "COMPLETED";
+  const completedAt = formatProfileCompletedAt(profile?.completedAt ?? null);
   const failureReason = profile?.failureReason;
   const action = failureReason === "REPO_NOT_PUBLIC" ? onSave
     : failureReason === "INVALID_MATERIAL" ? onReplaceFile
@@ -56,6 +59,12 @@ const ProfileStatusCard = ({
             : profile?.status === "FAILED" ? getProfileFailureMessage(profile)
             : profile ? STATUS_TEXT[profile.status] : "분석 상태를 확인하지 못했어요"}
         </S.Message>
+        {isComplete ? (
+          <>
+            {completedAt ? <S.Message>{completedAt}</S.Message> : null}
+            <S.Action type="button" onClick={onGoToInterview}>면접 보러 가기</S.Action>
+          </>
+        ) : null}
         {profile?.status === "FAILED" ? (
           <S.Action type="button" disabled={isRestarting || isSaving} onClick={action}>
             {isRestarting ? "분석 요청 중…" : actionLabel}
