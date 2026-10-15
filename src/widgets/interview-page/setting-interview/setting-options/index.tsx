@@ -1,5 +1,3 @@
-import { INTERVIEW_ANSWER_MODE_OPTIONS } from "@/shared/constants/interview-page/setting-interview";
-
 import {
   SETTING_DIFFICULTY_SECTION,
   SETTING_STYLE_SECTION,
@@ -11,25 +9,8 @@ import type {
   StyleOptionsProps,
 } from './type';
 
-const SettingOptions = ({ onSelect, selection, answerMode, onAnswerModeChange }: SettingOptionsProps) => (
+const SettingOptions = ({ onSelect, selection }: SettingOptionsProps) => (
   <S.ControlColumn>
-    <S.Section>
-      <S.Title>답변 방식</S.Title>
-      <S.AnswerModeGroup role="group" aria-label="답변 방식">
-        {INTERVIEW_ANSWER_MODE_OPTIONS.map((option) => (
-          <S.AnswerModeButton key={option.value} type="button"
-            $selected={answerMode === option.value}
-            aria-pressed={answerMode === option.value}
-            onClick={() => onAnswerModeChange(option.value)}>
-            <S.StyleTextGroup>
-              <S.OptionLabel>{option.label}</S.OptionLabel>
-              <S.OptionDescription>{option.description}</S.OptionDescription>
-            </S.StyleTextGroup>
-            <S.SelectionCircle $selected={answerMode === option.value} aria-hidden="true" />
-          </S.AnswerModeButton>
-        ))}
-      </S.AnswerModeGroup>
-    </S.Section>
     <StyleOptions
       onSelect={onSelect.style}
       selectedValue={selection.style}
@@ -98,9 +79,9 @@ const DifficultyOptions = ({
             onClick={() => onSelect(option.value)}
             role="radio"
             type="button"
-                >
-                  <S.OptionLabel>{option.value}</S.OptionLabel>
-                </S.DifficultyButton>
+          >
+            <S.OptionLabel>{option.value}</S.OptionLabel>
+          </S.DifficultyButton>
         );
       })}
     </S.DifficultyGroup>
