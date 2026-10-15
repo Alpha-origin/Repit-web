@@ -1,76 +1,146 @@
-import styled from "styled-components";
+import { Link } from "react-router-dom";
+import styled, { css } from "styled-components";
 
-export const Section = styled.section`
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 108rem;
-  margin: 0 auto;
-  padding: 0 1.35rem 0;
-
-  @media (max-width: 64rem) {
-    padding: 0 1rem 0;
+const focusRing = css`
+  &:focus-visible {
+    outline: 0.1875rem solid #9ec7ff;
+    outline-offset: 0.1875rem;
   }
 `;
 
-export const BannerCard = styled.div`
+export const Section = styled.section`
   width: 100%;
-  min-height: 3.05rem;
-  padding: 0.8rem 1.35rem;
-  border-radius: 1rem;
-  background-color: rgba(255, 255, 255, 0.94);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 1.4vw, 1rem);
+`;
+
+export const BannerCard = styled.div`
+  min-height: 2.5rem;
+  padding: 0.25rem clamp(0.875rem, 1.8vw, 1.5rem);
+  border-radius: 0.375rem;
+  background: ${({ theme }) => theme.colors.white};
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: ${({ theme }) => theme.spacing.md};
 
-  @media (max-width: 48rem) {
-    padding: 0.85rem;
+  @media (max-width: 30rem) {
+    padding: 0.875rem;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: ${({ theme }) => theme.spacing.sm};
   }
 `;
 
 export const Title = styled.h2`
   margin: 0;
-  font-family: ${({ theme }) => theme.fontFamily.pretendard};
-  color: #2d73de;
-  font-size: 1.38rem;
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: clamp(0.875rem, 1.7vw, 1.125rem);
   font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.04rem;
+  line-height: 1.4;
+  word-break: keep-all;
+`;
 
-  @media (max-width: 48rem) {
-    font-size: 1.34rem;
+export const ActionLink = styled(Link)`
+  flex-shrink: 0;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid #e2e5eb;
+  border-radius: 0.375rem;
+  background: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.text.default};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.75rem, 1.35vw, 0.875rem);
+  line-height: 1.4;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+
+  &:hover { border-color: #9ec7ff; background: #eef6ff; }
+  ${focusRing}
+
+  @media (max-width: 42rem) {
+    min-height: 2.75rem;
   }
 `;
 
-export const ActionButton = styled.button`
-  min-width: 15.75rem;
-  height: 2.35rem;
-  padding: 0 1.35rem;
-  border: 0.0625rem solid rgba(0, 65, 150, 0.12);
-  border-radius: 0.875rem;
-  background-color: #ffffff;
-  color: #555555;
-  font-size: 1.02rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease;
+export const PromotionCard = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2rem);
+  padding: clamp(1.25rem, 2.6vw, 2.5rem) clamp(0.875rem, 1.4vw, 1.5rem)
+    clamp(1.25rem, 2.6vw, 2.5rem) clamp(1.5rem, 5.7vw, 4rem);
+  border-radius: 0.375rem;
+  background: ${({ theme }) => theme.colors.brand.blue};
+  color: ${({ theme }) => theme.colors.white};
 
-  && {
-    font-family: ${({ theme }) => theme.fontFamily.pretendard};
+  @media (max-width: 42rem) {
+    grid-template-columns: 1fr;
+    padding: ${({ theme }) => theme.spacing.lg};
+    gap: ${({ theme }) => theme.spacing.xl};
   }
+`;
 
-  &:hover {
-    transform: translateY(-0.0625rem);
-    border-color: rgba(45, 115, 222, 0.24);
+export const PromotionContent = styled.div`
+  min-width: 0;
+`;
+
+export const PromotionTitle = styled.h2`
+  margin: 0;
+  font-size: clamp(1.125rem, 2.35vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -0.03em;
+  word-break: keep-all;
+`;
+
+export const PromotionDescription = styled.p`
+  margin-top: 0.875rem;
+  font-size: clamp(0.75rem, 1.55vw, 1rem);
+  line-height: 1.5;
+  word-break: keep-all;
+
+  span { display: block; }
+`;
+
+export const GuideCallout = styled.div`
+  width: fit-content;
+  max-width: 100%;
+  margin-top: clamp(1.25rem, 2.8vw, 2rem);
+  padding: 0.375rem 0.5rem 0.375rem 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid #dce4ef;
+  border-radius: 0.375rem;
+  background: #f7f8fa;
+  color: #171717;
+  font-size: clamp(0.75rem, 1.5vw, 0.9375rem);
+  line-height: 1.5;
+  word-break: keep-all;
+
+  @media (max-width: 30rem) {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.75rem;
   }
+`;
 
-  @media (max-width: 48rem) {
-    min-width: 100%;
-    height: 2.45rem;
+export const GuideLink = styled(ActionLink)`
+  min-height: 1.75rem;
+  padding: 0.25rem 0.625rem;
+  color: ${({ theme }) => theme.colors.brand.blue};
+  background: transparent;
+  border-color: #cfd6df;
+  font-size: inherit;
+  font-weight: 700;
+
+  @media (max-width: 42rem) {
+    min-height: 2.75rem;
   }
 `;
