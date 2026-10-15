@@ -96,7 +96,7 @@ export const ControlColumn = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: clamp(1rem, 4vh, 3rem);
+  gap: clamp(0.5rem, 1vh, 0.75rem);
 
   @media (max-width: 52rem) {
     min-height: auto;
@@ -107,7 +107,7 @@ export const ControlColumn = styled.div`
 export const Section = styled.section`
   display: flex;
   flex-direction: column;
-  gap: clamp(0.45rem, 1.3vh, 0.9rem);
+  gap: clamp(0.4rem, 0.9vh, 0.65rem);
 `;
 
 export const Title = styled.h2`
@@ -121,8 +121,8 @@ export const Title = styled.h2`
 export const StyleOptionGroup = styled.div`
   display: grid;
   grid-template-rows: repeat(3, minmax(0, 1fr));
-  height: clamp(11rem, 30vh, 16rem);
-  gap: 0.95rem;
+  height: clamp(10rem, 18.7vh, 11rem);
+  gap: 0.6rem;
 `;
 
 export const StyleOptionButton = styled.button<SelectedProps>`
@@ -132,7 +132,7 @@ export const StyleOptionButton = styled.button<SelectedProps>`
   grid-template-columns: 2.25rem minmax(0, 1fr) 1.5rem;
   align-items: center;
   gap: 1rem;
-  padding: 0.55rem 1.25rem 0.55rem 1rem;
+  padding: 0.3rem 1.25rem 0.3rem 1rem;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
   border-radius: 0.5rem;
@@ -203,7 +203,7 @@ export const StyleTextGroup = styled.span`
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.15rem;
 `;
 
 export const OptionLabel = styled.span`
@@ -246,11 +246,13 @@ export const SelectionCircle = styled.span<SelectedProps>`
 export const DifficultyGroup = styled.div`
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  height: clamp(2.75rem, 6vh, 4rem);
+  height: clamp(2.75rem, 4.8vh, 3rem);
   gap: 0.9rem;
 
   @media (max-width: 30rem) {
+    height: auto;
     grid-template-columns: 1fr;
+    grid-auto-rows: 2.75rem;
   }
 `;
 
@@ -294,19 +296,18 @@ export const DifficultyIcon = styled.img`
 export const InterviewerGrid = styled.div`
   height: 100%;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: clamp(0.7rem, 2vh, 1.45rem);
 
-  @media (max-width: 34rem) {
+  @media (max-width: 52rem) {
     height: auto;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: none;
   }
 
-  @media (max-width: 52rem) {
-    height: auto;
-    grid-template-rows: none;
+  @media (max-width: 34rem) {
+    grid-template-columns: 1fr;
   }
 `;
 
@@ -582,7 +583,7 @@ export const AnswerModeGroup = styled.div`
 export const AnswerModeButton = styled(StyleOptionButton)`
   grid-template-columns: minmax(0, 1fr) 1.5rem;
   height: auto;
-  min-height: 5.5rem;
+  min-height: 4.5rem;
 
   @media (max-width: 30rem), (max-height: 44rem) {
     grid-template-columns: minmax(0, 1fr) 1.35rem;

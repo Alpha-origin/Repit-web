@@ -13,7 +13,6 @@ export const createSlot = (index: number): InterviewerSlot => ({
   role: index === 0 ? "TECH" : null,
   personality: "FRIENDLY",
   tone: "GENTLE",
-  major: "BACKEND",
 });
 
 export const resizeSlots = (slots: InterviewerSlot[], count: InterviewerCount) =>
@@ -41,9 +40,8 @@ export const validateSelection = (slots: InterviewerSlot[], count: InterviewerCo
   }
   if (slots.some((slot) =>
     !PERSONALITY_OPTIONS.some((option) => option.value === slot.personality) ||
-    !TONE_OPTIONS.some((option) => option.value === slot.tone) ||
-    (slot.role === "TECH" && !["BACKEND", "FRONTEND"].includes(slot.major)))) {
-    return "면접관의 성격, 말투와 전문 분야를 확인해주세요.";
+    !TONE_OPTIONS.some((option) => option.value === slot.tone))) {
+    return "면접관의 성격과 말투를 확인해주세요.";
   }
   return null;
 };
@@ -55,7 +53,6 @@ export const completeSlot = (slot: InterviewerSlot) => {
     ...slot.interviewer,
     role: slot.role,
     roleLabel,
-    major: slot.role === "TECH" ? slot.major : undefined,
     personality: slot.personality,
     tone: slot.tone,
     description: `${roleLabel}의 관점에서 지원자의 경험과 역량을 평가합니다.`,

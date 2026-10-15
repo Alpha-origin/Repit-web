@@ -1,9 +1,9 @@
 import type {
-  InterviewSettingInterviewer,
   InterviewSettingOptionSection,
   InterviewSettingSelection,
   InterviewSettingStyleMeta,
   InterviewStyleOption,
+  InterviewStylePreset,
 } from './type';
 
 export const INTERVIEW_SETTING_OPTION_SECTIONS = [
@@ -21,49 +21,36 @@ export const INTERVIEW_SETTING_OPTION_SECTIONS = [
 
 export const INTERVIEW_SETTING_STYLE_META = {
   편함: {
-    description: '친절하고 편안한 분위기',
+    description: '쉬움 · 친근한 · 부드러운',
     icon: 'smile',
   },
   일반: {
-    description: '실전과 비슷한 일반 면접 수준',
+    description: '보통 · 현실적인 · 직설적인',
     icon: 'neutral',
   },
   압박: {
-    description: '긴장감 넘치는 압박 면접',
+    description: '어려움 · 꼼꼼한 · 강압적인',
     icon: 'pressure',
   },
 } as const satisfies Record<InterviewStyleOption, InterviewSettingStyleMeta>;
 
-export const INTERVIEW_SETTING_INTERVIEWERS = [
-  {
-    id: 1,
-    name: '면접관1',
-    personaName: '면접관1',
-    tags: ['성격', '말투', '전문 분야'],
-    description: '기술적 역량과 아키텍처 설계 능력을 중점적으로 파악합니다.',
-  },
-  {
-    id: 2,
-    name: '면접관2',
-    personaName: '면접관2',
-    tags: ['성격', '말투', '전문 분야'],
-    description: '문제 해결 프로세스와 데이터 기반의 의사결정 능력을 평가합니다.',
-  },
-  {
-    id: 3,
-    name: '면접관3',
-    personaName: '면접관3',
-    tags: ['성격', '말투', '전문 분야'],
-    description: '사용자 중심의 사고방식과 시각적 커뮤니케이션 능력을 심층 질문합니다.',
-  },
-  {
-    id: 4,
-    name: '면접관4',
-    personaName: '면접관4',
-    tags: ['성격', '말투', '전문 분야'],
-    description: '협업 능력과 가치관이 팀의 문화와 얼마나 잘 부합하는지 확인합니다.',
-  },
-] as const satisfies readonly InterviewSettingInterviewer[];
+export const INTERVIEW_STYLE_PRESETS = {
+  편함: { difficulty: '쉬움', personality: 'FRIENDLY', tone: 'GENTLE' },
+  일반: { difficulty: '보통', personality: 'REALISTIC', tone: 'DIRECT' },
+  압박: { difficulty: '어려움', personality: 'METICULOUS', tone: 'PRESSURING' },
+} as const satisfies Record<InterviewStyleOption, InterviewStylePreset>;
+
+export const findStylePreset = (value: InterviewStylePreset): InterviewStyleOption | null =>
+  INTERVIEW_SETTING_OPTION_SECTIONS[0].options.find((style) => {
+    const preset = INTERVIEW_STYLE_PRESETS[style];
+    return (
+      preset.difficulty === value.difficulty &&
+      preset.personality === value.personality &&
+      preset.tone === value.tone
+    );
+  }) ?? null;
+
+export const SOLO_MAJOR_GUIDANCE = '전문 분야는 마이페이지에서 선택한 직무를 따릅니다.';
 
 export const INTERVIEW_SETTING_ACTION_LABELS = {
   back: '돌아가기',
@@ -72,15 +59,16 @@ export const INTERVIEW_SETTING_ACTION_LABELS = {
 
 export const INTERVIEW_SETTING_DEFAULT_SELECTION: InterviewSettingSelection = {
   difficulty: '쉬움',
-  interviewerId: 1,
-  style: '편함',
+  personality: 'FRIENDLY',
+  tone: 'GENTLE',
+  interviewerKey: 'interviewer-kim',
 };
 
 export type {
   InterviewDifficultyOption,
-  InterviewerId,
   InterviewSettingSelectHandlers,
   InterviewSettingSelection,
+  InterviewStylePreset,
   InterviewSettingStyleIcon,
   InterviewStyleOption,
 } from './type';
