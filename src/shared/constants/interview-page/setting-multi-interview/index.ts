@@ -2,6 +2,7 @@ import InterviewerImage1 from "@/shared/img/interview-page/interviewer1.svg?url"
 import InterviewerImage2 from "@/shared/img/interview-page/interviewer2.svg?url";
 import InterviewerImage3 from "@/shared/img/interview-page/interviewer3.svg?url";
 import InterviewerImage4 from "@/shared/img/interview-page/interviewer4.svg?url";
+import InterviewerImage5 from "@/shared/img/interview-page/interviewer5.svg?url";
 import { getVoiceGender } from "@/shared/constants/interview-page/voice-catalog";
 
 import type {
@@ -78,7 +79,7 @@ export const MULTI_INTERVIEWER_TEMPLATES = [
     roleLabel: "기술 면접관",
     career: 5,
     gender: getVoiceGender(5),
-    image: InterviewerImage2,
+    image: InterviewerImage5,
     tags: ["동기", "적응력"],
     description: "지원자의 동기와 문제를 끝까지 해결하는 태도를 확인합니다.",
   },
