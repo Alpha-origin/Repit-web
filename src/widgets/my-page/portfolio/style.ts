@@ -40,10 +40,9 @@ export const Header = styled.div`
 `;
 
 export const Title = styled.h2`
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
   color: #25324a;
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.4;
   letter-spacing: -0.025em;
 `;

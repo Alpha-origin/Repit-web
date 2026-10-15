@@ -72,12 +72,6 @@ const MyPage = () => {
 
   return (
     <S.Page>
-      <S.PageHeader>
-        <S.PageTitle>마이페이지</S.PageTitle>
-        <S.PageDescription>
-          나의 정보와 경험을 채우고, 나에게 맞는 면접을 준비하세요.
-        </S.PageDescription>
-      </S.PageHeader>
       <S.Content>
         <PersonalInfo {...personalInfo} />
         <Portfolio

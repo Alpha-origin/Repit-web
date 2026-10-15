@@ -148,7 +148,8 @@ export const SaveButton = styled.button`
   transition: background-color 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: #e3efff;
+    background: #1A73E8;
+    color: #FFFF;
   }
 
   &:focus-visible {

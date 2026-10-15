@@ -1,5 +1,4 @@
-import type { FormEvent } from "react";
-
+import type { ChangeEvent, FormEvent } from "react";
 import type { PersonalInfoDraft } from "@/features/my-page/personal-info/model/useMyInfo";
 
 import * as S from "./style";
@@ -37,10 +36,8 @@ const PersonalInfo = ({
           {(draft.nickname || draft.name || "R").slice(0, 1)}
         </S.Avatar>
         <S.ProfileName>{draft.nickname || draft.name || "회원"}님</S.ProfileName>
-        <S.ProfileCaption>나만의 면접을 준비하는 공간</S.ProfileCaption>
       </S.ProfileHeader>
       <S.Form onSubmit={handleSubmit}>
-        <S.Title id="personal-info-title">개인정보</S.Title>
 
         {isLoading ? (
           <S.StatusText>유저 정보를 불러오는 중입니다.</S.StatusText>
@@ -54,7 +51,9 @@ const PersonalInfo = ({
                 autoComplete="name"
                 value={draft.name}
                 disabled={isSaving}
-                onChange={(event) => onFieldChange("name", event.target.value)}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  onFieldChange("name", event.target.value)
+                }
               />
             </S.InfoRow>
 
@@ -66,7 +65,7 @@ const PersonalInfo = ({
                 autoComplete="nickname"
                 value={draft.nickname}
                 disabled={isSaving}
-                onChange={(event) =>
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
                   onFieldChange("nickname", event.target.value)
                 }
               />
