@@ -205,7 +205,7 @@ export const ErrorMessage = styled.p`
   font-size: ${({ theme }) => theme.fontSize.sm};
 `;
 
-export const Header = styled(BaseHeader)<{ $compact?: boolean; $detail?: boolean }>`
+export const Header = styled(BaseHeader)<{ $compact?: boolean; $detail?: boolean; $main?: boolean }>`
   ${({ $compact }) => $compact && css`
     min-height: 4.1875rem;
     grid-template-columns: auto 1fr auto;
@@ -245,6 +245,22 @@ export const Header = styled(BaseHeader)<{ $compact?: boolean; $detail?: boolean
     @media (max-width: 42rem) {
       padding: 0.5rem 1rem;
       ${LogoImage} { height: 3rem; }
+    }
+  `}
+  ${({ $main }) => $main && css`
+    min-height: clamp(3.5rem, 7.3vw, 4.5rem);
+    padding-inline: clamp(1rem, 3.65vw, 3rem);
+    gap: clamp(1.5rem, 3.5vw, 3rem);
+
+    ${LogoImage} { height: clamp(2.5rem, 5.3vw, 3.25rem); }
+    ${TopButtons} { gap: clamp(0.75rem, 2.4vw, 2rem); }
+    ${TopButton} { min-height: 2.75rem; font-family: inherit; }
+    ${LogoutButton} { min-height: 2.75rem; }
+    ${StatusButton} { max-width: 7rem; width: auto; min-width: 4.25rem; padding: 0 0.75rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; display: block; }
+
+    @media (max-width: 42rem) {
+      gap: 0.25rem 0.5rem;
+      padding: 0.5rem 1rem 0;
     }
   `}
 `;

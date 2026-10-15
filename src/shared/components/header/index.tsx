@@ -65,7 +65,8 @@ const Header = () => {
 
   return (
     <S.Header
-      $compact={pathname.startsWith("/main/feedback/overall/") || pathname.startsWith("/main/feedback/detail/")}
+      $compact={pathname === "/main" || pathname.startsWith("/main/feedback/overall/") || pathname.startsWith("/main/feedback/detail/")}
+      $main={pathname === "/main"}
       $detail={pathname.startsWith("/main/feedback/detail/")}
     >
       <S.LogoImage src={Repit} alt="Repit" onClick={() => handleNavigate("/main")} />
