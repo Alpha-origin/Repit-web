@@ -1,4 +1,4 @@
-type CloseInterview = () => Promise<void>;
+type CloseInterview = () => Promise<boolean>;
 let closeInterview: CloseInterview | null = null;
 
 export const registerInterviewLifecycle = (close: CloseInterview) => {
@@ -8,4 +8,4 @@ export const registerInterviewLifecycle = (close: CloseInterview) => {
   };
 };
 
-export const finishActiveInterview = async () => { await closeInterview?.(); };
+export const finishActiveInterview = async () => closeInterview ? closeInterview() : true;

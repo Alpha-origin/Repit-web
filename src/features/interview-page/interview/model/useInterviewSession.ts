@@ -7,6 +7,7 @@ import {
   getActiveInterviewSessionId,
   getCurrentInterviewQuestion,
   getInterviewPreparation,
+  prepareInterviewRecord,
   quitInterview,
   retryInterviewPreparation,
   setActiveInterviewSessionId,
@@ -254,9 +255,11 @@ export const useInterviewSession = (
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompletingVoice, setIsCompletingVoice] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [hasEndedSession, setHasEndedSession] = useState(false);
   const [isAwaitingNextQuestion, setIsAwaitingNextQuestion] = useState(false);
   const [preparationError, setPreparationError] = useState<string | null>(null);
   const [answerError, setAnswerError] = useState<string | null>(null);
+  const [quitError, setQuitError] = useState<string | null>(null);
   const [isWaitingForQuestions, setIsWaitingForQuestions] = useState(
     preparedInterview?.questionPreparationStatus === "WAITING",
   );
@@ -266,7 +269,7 @@ export const useInterviewSession = (
   const retryRequestRef = useRef<AbortController | null>(null);
   const isVoiceMode = mode === "voice";
   const { cameraState, cloneAudioTrack, cloneVideoTrack, micState, micStream, videoRef, releaseMedia } =
-    useInterviewMedia(isVoiceMode && !isClosing);
+    useInterviewMedia(isVoiceMode && !hasEndedSession);
   const fullRecorder = useInterviewRecorder(cloneVideoTrack, cloneAudioTrack);
   const recorder = useAnswerRecorder(cloneAudioTrack);
   const { stopRecording: stopAnswerRecording, hasPendingRecording: hasPendingAnswerRecording } = recorder;
@@ -295,13 +298,15 @@ export const useInterviewSession = (
   const questionAudio = useQuestionAudio({
     sessionId,
     questionId: currentQuestion?.questionId ?? null,
-    enabled: isChatSessionReady && currentQuestion !== null && !isClosing,
+    enabled: isChatSessionReady && currentQuestion !== null && !hasEndedSession,
     autoplay: isVoiceMode,
   });
   const controlsRef = useRef({ questionAudio, voiceAnswer });
   useEffect(() => { controlsRef.current = { questionAudio, voiceAnswer }; });
   const isSessionClosedRef = useRef(false);
   const closePromiseRef = useRef<Promise<void> | null>(null);
+  const quitPromiseRef = useRef<Promise<boolean> | null>(null);
+  const hasQuitSucceededRef = useRef(false);
   const closeReasonRef = useRef<InterviewCloseReason | null>(null);
   const hasNavigatedRef = useRef(false);
   const fullRecordingStartedRef = useRef(false);
@@ -432,12 +437,39 @@ export const useInterviewSession = (
     return pending;
   }, [clearAnswerTimeout, preparedInterview?.interviewId, stopAnswerRecording]);
 
+  const saveQuit = useCallback((activeSessionId: string | null) => {
+    if (!activeSessionId || hasQuitSucceededRef.current) {
+      hasQuitSucceededRef.current = true;
+      return Promise.resolve(true);
+    }
+    if (!quitPromiseRef.current) {
+      setIsClosing(true);
+      quitPromiseRef.current = quitInterview(activeSessionId).then(({ errorMessage, statusCode }) => {
+        if (errorMessage && statusCode !== 404) {
+          setQuitError("면접 종료를 저장하지 못했어요. 다시 시도해 주세요.");
+          return false;
+        }
+        hasQuitSucceededRef.current = true;
+        setQuitError(null);
+        return true;
+      }).finally(() => {
+        quitPromiseRef.current = null;
+        setIsClosing(false);
+      });
+    }
+    return quitPromiseRef.current;
+  }, []);
+
   const endInterviewSession = useCallback(
     async (shouldNavigate: boolean, reason: InterviewCloseReason = "quit") => {
       if (!closePromiseRef.current) {
         isSessionClosedRef.current = true;
+        setHasEndedSession(true);
         closeReasonRef.current = reason;
         setIsClosing(true);
+        retryRequestRef.current?.abort();
+        retryRequestRef.current = null;
+        setIsRetryingPreparation(false);
         clearAwaitingResponseTimeout();
         controlsRef.current.questionAudio.onStop();
         controlsRef.current.voiceAnswer.onExitVoiceMode();
@@ -458,25 +490,36 @@ export const useInterviewSession = (
                 }
               }),
             ]);
-            if (activeSessionId && reason === "quit") await quitInterview(activeSessionId);
           } finally {
             releaseMedia();
-            clearActiveInterviewSessionId();
             if (activeSessionId) disconnectInterviewSocket(activeSessionId);
           }
         })();
       }
       await closePromiseRef.current;
+      const canLeave = closeReasonRef.current !== "quit" ||
+        await saveQuit(sessionIdRef.current ?? getActiveInterviewSessionId());
+      if (!canLeave) return false;
+      clearActiveInterviewSessionId();
       if (shouldNavigate && closeReasonRef.current === reason && !hasNavigatedRef.current) {
         hasNavigatedRef.current = true;
         navigate(getInterviewExitPath(reason), {
           state: reason === "completed" ? { answeredQuestionCount: displayQuestionNumberRef.current } : undefined,
         });
       }
+      return true;
     },
     [clearAwaitingResponseTimeout, finishAnswerRecording, stopFullRecording,
-      getInterviewExitPath, navigate, preparedInterview?.interviewId, releaseMedia],
+      getInterviewExitPath, navigate, preparedInterview?.interviewId, releaseMedia, saveQuit],
   );
+
+  const handleLeaveAnyway = () => {
+    if (quitPromiseRef.current || hasNavigatedRef.current) return;
+    hasQuitSucceededRef.current = true;
+    hasNavigatedRef.current = true;
+    clearActiveInterviewSessionId();
+    navigate(getInterviewExitPath("quit"));
+  };
 
   useEffect(() => {
     if (!isVoiceMode || !canSubmitAnswer || cameraState !== "ready" || micState !== "ready" ||
@@ -503,10 +546,14 @@ export const useInterviewSession = (
   }, [clearAnswerTimeout, hasPendingFullRecording, hasPendingAnswerRecording]);
 
   const blocker = useBlocker(({ currentLocation, nextLocation }) =>
-    !isSessionClosedRef.current && currentLocation.pathname !== nextLocation.pathname);
+    (!isSessionClosedRef.current || (closeReasonRef.current === "quit" && !hasQuitSucceededRef.current)) &&
+    currentLocation.pathname !== nextLocation.pathname);
   useEffect(() => {
     if (blocker.state !== "blocked") return;
-    void endInterviewSession(false, "quit").then(() => blocker.proceed());
+    void endInterviewSession(false, "quit").then((canLeave) => {
+      if (canLeave) blocker.proceed();
+      else blocker.reset();
+    });
   }, [blocker, endInterviewSession]);
 
   const handleSocketStatusChange = useCallback(
@@ -544,7 +591,7 @@ export const useInterviewSession = (
   });
 
   useEffect(() => {
-    if (!preparedInterview || !sessionId) {
+    if (!preparedInterview || !sessionId || hasEndedSession) {
       return;
     }
 
@@ -557,6 +604,7 @@ export const useInterviewSession = (
     const abortController = new AbortController();
     let timeoutId: number | null = null;
     let lastErrorMessage: string | null = null;
+    let hasRequestedStart = false;
 
     const safetyTimeoutId = window.setTimeout(() => {
       isCancelled = true;
@@ -588,6 +636,19 @@ export const useInterviewSession = (
 
       if (data) {
         setIsWaitingForQuestions(data.status === "WAITING");
+      }
+
+      if (data?.preparationStatus === "NOT_REQUESTED" && !hasRequestedStart) {
+        hasRequestedStart = true;
+        const { errorMessage: startError } = await prepareInterviewRecord(preparedInterview.interviewId);
+        if (isCancelled || isSessionClosedRef.current) return;
+        if (startError) {
+          window.clearTimeout(safetyTimeoutId);
+          preparingSessionIdRef.current = null;
+          setPreparationError(startError);
+          setCanRetryPreparation(true);
+          return;
+        }
       }
 
       if (data?.preparationStatus === "READY") {
@@ -644,23 +705,23 @@ export const useInterviewSession = (
         preparingSessionIdRef.current = null;
       }
     };
-  }, [preparedInterview, preparationAttempt, sessionId, syncCurrentQuestion]);
+  }, [preparedInterview, preparationAttempt, sessionId, syncCurrentQuestion, hasEndedSession]);
 
   useEffect(() => () => retryRequestRef.current?.abort(), []);
 
   const handleRetryPreparation = async () => {
-    if (!preparedInterview || !canRetryPreparation || retryRequestRef.current) return;
+    if (!preparedInterview || !canRetryPreparation || retryRequestRef.current || isSessionClosedRef.current) return;
     const controller = new AbortController();
     retryRequestRef.current = controller;
     setIsRetryingPreparation(true);
-    const { errorMessage } = await retryInterviewPreparation(
+    const { errorMessage, statusCode } = await retryInterviewPreparation(
       preparedInterview.interviewId,
       controller.signal,
     );
-    if (controller.signal.aborted) return;
+    if (controller.signal.aborted || isSessionClosedRef.current) return;
     retryRequestRef.current = null;
     setIsRetryingPreparation(false);
-    if (errorMessage) {
+    if (errorMessage && statusCode !== 409) {
       setPreparationError(errorMessage);
       return;
     }
@@ -812,12 +873,13 @@ export const useInterviewSession = (
     recorder,
     recordingErrorMessage: recorder.errorMessage ?? fullRecorder.errorMessage,
     answerError,
+    quitError,
     currentQuestion,
     displayQuestionNumber,
     elapsedSeconds,
     interviewId: preparedInterview?.interviewId ?? null,
     isAwaitingNextQuestion,
-    isAwaitingResponse: isClosing || isCompletingVoice || isSubmitting || isAwaitingNextQuestion || recorder.isStopping,
+    isAwaitingResponse: hasEndedSession || isClosing || isCompletingVoice || isSubmitting || isAwaitingNextQuestion || recorder.isStopping,
     isSubmitting,
     isClosing,
     isMediaReady: cameraState === "ready" && micState === "ready" && fullRecorder.isRecording,
@@ -826,7 +888,7 @@ export const useInterviewSession = (
     isVoiceStarted: recorder.isRecording,
     mode,
     preparationError,
-    canRetryPreparation,
+    canRetryPreparation: canRetryPreparation && !hasEndedSession,
     isRetryingPreparation,
     isWaitingForQuestions,
     onRetryPreparation: handleRetryPreparation,
@@ -837,6 +899,8 @@ export const useInterviewSession = (
     onClearAnswer: voiceAnswer.onClearAnswer,
     onCompleteVoice: () => handleCompleteVoice("user"),
     onQuitInterview: handleQuitInterview,
+    onRetryQuit: handleQuitInterview,
+    onLeaveAnyway: handleLeaveAnyway,
     onStartVoice: handleStartVoice,
     onSubmitText: handleSubmitText,
     onToggleQuestionAudio: questionAudio.onToggle,

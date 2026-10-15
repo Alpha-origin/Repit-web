@@ -225,10 +225,11 @@ export const retryInterviewPreparation = async (
       undefined,
       { signal },
     );
-    return { errorMessage: null };
+    return { errorMessage: null, statusCode: null };
   } catch (error) {
     return {
       errorMessage: getErrorMessage(error, "면접 준비를 다시 요청하지 못했습니다."),
+      statusCode: axios.isAxiosError(error) ? error.response?.status ?? null : null,
     };
   }
 };

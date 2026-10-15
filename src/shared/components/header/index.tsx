@@ -38,7 +38,7 @@ const Header = () => {
     setIsLeaving(true);
     setLogoutError(null);
     try {
-      await finishActiveInterview();
+      if (!(await finishActiveInterview())) return;
       if (logout) {
         if (!(await waitForRecordingUploads())) {
           setLogoutError("업로드에 실패한 파일이 있습니다. 다시 시도하거나 파일을 폐기한 뒤 로그아웃해주세요.");
