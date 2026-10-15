@@ -26,7 +26,7 @@ import { useInterviewMedia } from "./useInterviewMedia";
 import { useInterviewRecorder } from "./useInterviewRecorder";
 import { useAnswerRecorder } from "./useAnswerRecorder";
 import { enqueueRecordingUpload, reportRecordingFailure } from "./interviewRecordingStore";
-import { registerInterviewLifecycle } from "./activeInterviewLifecycle";
+import { clearPendingInterviewLeave, registerInterviewLifecycle, resumePendingInterviewLeave } from "./activeInterviewLifecycle";
 import type { RecordingEndReason } from "../api/upload-recording";
 import { useInterviewSocket } from "./useInterviewSocket";
 import { useVoiceAnswer } from "./useVoiceAnswer";
@@ -294,7 +294,7 @@ export const useInterviewSession = (
       ? personaId
       : undefined;
   }, [currentQuestion?.personaId, preparedInterview]);
-  const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
+  const [sessionId, setSessionId] = useState(() => preparedInterview?.sessionId ?? getActiveInterviewSessionId());
   const questionAudio = useQuestionAudio({
     sessionId,
     questionId: currentQuestion?.questionId ?? null,
@@ -517,6 +517,7 @@ export const useInterviewSession = (
     if (quitPromiseRef.current || hasNavigatedRef.current) return;
     hasQuitSucceededRef.current = true;
     hasNavigatedRef.current = true;
+    clearPendingInterviewLeave();
     clearActiveInterviewSessionId();
     navigate(getInterviewExitPath("quit"));
   };
@@ -591,15 +592,17 @@ export const useInterviewSession = (
   });
 
   useEffect(() => {
-    if (!preparedInterview || !sessionId || hasEndedSession) {
+    if (!preparedInterview || !preparedInterview.sessionId || hasEndedSession) {
       return;
     }
 
-    if (preparingSessionIdRef.current === sessionId) {
+    const preparationSessionId = preparedInterview.sessionId;
+
+    if (preparingSessionIdRef.current === preparationSessionId) {
       return;
     }
 
-    preparingSessionIdRef.current = sessionId;
+    preparingSessionIdRef.current = preparationSessionId;
     let isCancelled = false;
     const abortController = new AbortController();
     let timeoutId: number | null = null;
@@ -640,7 +643,7 @@ export const useInterviewSession = (
 
       if (data?.preparationStatus === "NOT_REQUESTED" && !hasRequestedStart) {
         hasRequestedStart = true;
-        const { errorMessage: startError } = await prepareInterviewRecord(preparedInterview.interviewId);
+        const { data: startedInterview, errorMessage: startError } = await prepareInterviewRecord(preparedInterview.interviewId);
         if (isCancelled || isSessionClosedRef.current) return;
         if (startError) {
           window.clearTimeout(safetyTimeoutId);
@@ -649,13 +652,19 @@ export const useInterviewSession = (
           setCanRetryPreparation(true);
           return;
         }
+        if (startedInterview?.sessionId) {
+          sessionIdRef.current = startedInterview.sessionId;
+          setSessionId(startedInterview.sessionId);
+          setActiveInterviewSessionId(startedInterview.sessionId);
+        }
       }
 
       if (data?.preparationStatus === "READY") {
         window.clearTimeout(safetyTimeoutId);
         preparingSessionIdRef.current = null;
-        setActiveInterviewSessionId(sessionId);
-        sessionIdRef.current = sessionId;
+        const readySessionId = sessionIdRef.current ?? preparationSessionId;
+        setActiveInterviewSessionId(readySessionId);
+        sessionIdRef.current = readySessionId;
 
         const firstQuestion = data.questions[0];
 
@@ -701,11 +710,11 @@ export const useInterviewSession = (
         window.clearTimeout(timeoutId);
       }
 
-      if (preparingSessionIdRef.current === sessionId) {
+      if (preparingSessionIdRef.current === preparationSessionId) {
         preparingSessionIdRef.current = null;
       }
     };
-  }, [preparedInterview, preparationAttempt, sessionId, syncCurrentQuestion, hasEndedSession]);
+  }, [preparedInterview, preparationAttempt, syncCurrentQuestion, hasEndedSession]);
 
   useEffect(() => () => retryRequestRef.current?.abort(), []);
 
@@ -864,7 +873,10 @@ export const useInterviewSession = (
   const handleSubmitText = async () => {
     if (!isVoiceMode) await submitAnswer(voiceAnswer.answerText, currentQuestion, textAnswerStartedAtRef.current);
   };
-  const handleQuitInterview = () => endInterviewSession(true, "quit");
+  const handleQuitInterview = async () => {
+    if (!(await endInterviewSession(false, "quit"))) return;
+    if (!(await resumePendingInterviewLeave())) await endInterviewSession(true, "quit");
+  };
 
   return {
     answerStatus: isVoiceMode ? voiceAnswer.voiceStatus : INTERVIEW_STATUS_MESSAGES.text,
@@ -878,6 +890,7 @@ export const useInterviewSession = (
     displayQuestionNumber,
     elapsedSeconds,
     interviewId: preparedInterview?.interviewId ?? null,
+    sessionId,
     isAwaitingNextQuestion,
     isAwaitingResponse: hasEndedSession || isClosing || isCompletingVoice || isSubmitting || isAwaitingNextQuestion || recorder.isStopping,
     isSubmitting,

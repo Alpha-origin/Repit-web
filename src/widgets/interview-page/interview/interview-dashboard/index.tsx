@@ -27,7 +27,7 @@ const InterviewDashboard = () => {
   const interview = useInterviewSessionContext();
   const recorder = interview.recorder;
   const elapsedSeconds = interview.elapsedSeconds;
-  const sessionId = interview.preparedInterview?.sessionId;
+  const sessionId = interview.sessionId;
   const memoKey = useMemo(() => getMemoKey(sessionId), [sessionId]);
   const [memo, setMemo] = useState(() =>
     memoKey ? window.sessionStorage.getItem(memoKey) ?? "" : "",
