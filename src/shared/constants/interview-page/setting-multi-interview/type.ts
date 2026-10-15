@@ -16,7 +16,6 @@ export interface InterviewerSlot {
   role: InterviewerTemplateRole | null;
   personality: InterviewerPersonality;
   tone: InterviewerTone;
-  major: "BACKEND" | "FRONTEND";
 }
 
 export interface InterviewerTemplate {
@@ -25,8 +24,6 @@ export interface InterviewerTemplate {
   voiceIndex: VoiceIndex;
   role: InterviewerTemplateRole;
   roleLabel: string;
-  specialty: string;
-  major?: "BACKEND" | "FRONTEND";
   career: number;
   gender: "MALE" | "FEMALE";
   image: string;

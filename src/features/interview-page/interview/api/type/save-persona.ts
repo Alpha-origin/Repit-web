@@ -11,7 +11,6 @@ import type { InterviewLevel } from "./prepare-interview";
 export interface SavePersonaParams {
   personaName: string;
   role: InterviewPersonaRole;
-  major: InterviewPersonaMajor | null;
   type: CreateInterviewPersonaType;
   tone: InterviewTone;
   level: InterviewLevel;

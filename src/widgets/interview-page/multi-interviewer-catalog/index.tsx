@@ -41,7 +41,6 @@ const MultiInterviewerCatalog = ({
             <S.CandidateBody>
               <S.CandidateName>{candidate.name}</S.CandidateName>
               <S.RoleBadge>{candidate.roleLabel}</S.RoleBadge>
-              <S.CandidateSpecialty>{candidate.specialty}</S.CandidateSpecialty>
               <S.CandidateDescription>{candidate.description}</S.CandidateDescription>
             </S.CandidateBody>
           </S.CandidateCard>

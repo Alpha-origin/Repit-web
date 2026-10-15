@@ -6,7 +6,7 @@ import type { SettingInterviewerCard } from '../data';
 
 export interface InterviewerOptionsProps {
   onSelect: InterviewSettingSelectHandlers['interviewer'];
-  selectedValue: InterviewSettingSelection['interviewerId'];
+  selectedValue: InterviewSettingSelection['interviewerKey'];
 }
 
 export interface InterviewerCardProps {

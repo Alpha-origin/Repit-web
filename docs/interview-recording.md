@@ -78,7 +78,7 @@ node tests/question-audio.browser.mjs
 자동 재생이 브라우저에 차단되면 버튼으로 재생할 수 있고, 서버/파일 실패는 같은 안내 문구를 표시한다.
 응답 시간은 질문 도착이 아닌 녹음 시작 또는 텍스트 첫 입력부터 계산한다.
 
-`interview-persona.browser.mjs`는 실제 설정 화면의 SOLO/MULTI 저장 요청 번호·성별·슬롯 순서·저장 실패를 검증한다.
+`interview-persona.browser.mjs`는 실제 설정 화면의 SOLO 면접관 5명·프리셋·직접 조합, MULTI 전공 없음, 저장 요청 번호·성별·슬롯 순서·저장 실패를 검증한다.
 `question-audio.browser.mjs`는 HTTPS 가상 저장소의 무음 WAV를 실제 Audio로 재생한다.
 자동/수동 재생, 입력 중 재생 유지, 응답 시간, PENDING/QUEUED/GENERATING, 실패·404·재시도,
 180초 상한, 자동 재생 차단, 질문 전환·종료 취소, 늦은 응답·play Promise를 검증한다.

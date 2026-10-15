@@ -2,6 +2,7 @@ import InterviewerImage1 from "@/shared/img/interview-page/interviewer1.svg?url"
 import InterviewerImage2 from "@/shared/img/interview-page/interviewer2.svg?url";
 import InterviewerImage3 from "@/shared/img/interview-page/interviewer3.svg?url";
 import InterviewerImage4 from "@/shared/img/interview-page/interviewer4.svg?url";
+import InterviewerImage5 from "@/shared/img/interview-page/interviewer5.svg?url";
 import { getVoiceGender } from "@/shared/constants/interview-page/voice-catalog";
 
 import type {
@@ -28,8 +29,6 @@ export const MULTI_INTERVIEWER_TEMPLATES = [
     voiceIndex: 1,
     role: "TECH",
     roleLabel: "기술 면접관",
-    specialty: "백엔드 아키텍처",
-    major: "BACKEND",
     career: 9,
     gender: getVoiceGender(1),
     image: InterviewerImage1,
@@ -42,8 +41,6 @@ export const MULTI_INTERVIEWER_TEMPLATES = [
     voiceIndex: 2,
     role: "TECH",
     roleLabel: "기술 면접관",
-    specialty: "프론트엔드 리드",
-    major: "FRONTEND",
     career: 8,
     gender: getVoiceGender(2),
     image: InterviewerImage2,
@@ -56,8 +53,6 @@ export const MULTI_INTERVIEWER_TEMPLATES = [
     voiceIndex: 3,
     role: "TECH",
     roleLabel: "기술 면접관",
-    specialty: "플랫폼 엔지니어링",
-    major: "BACKEND",
     career: 6,
     gender: getVoiceGender(3),
     image: InterviewerImage3,
@@ -70,8 +65,6 @@ export const MULTI_INTERVIEWER_TEMPLATES = [
     voiceIndex: 4,
     role: "TECH",
     roleLabel: "기술 면접관",
-    specialty: "프론트엔드 개발",
-    major: "FRONTEND",
     career: 8,
     gender: getVoiceGender(4),
     image: InterviewerImage4,
@@ -84,11 +77,9 @@ export const MULTI_INTERVIEWER_TEMPLATES = [
     voiceIndex: 5,
     role: "TECH",
     roleLabel: "기술 면접관",
-    specialty: "데이터 엔지니어링",
-    major: "BACKEND",
     career: 5,
     gender: getVoiceGender(5),
-    image: InterviewerImage2,
+    image: InterviewerImage5,
     tags: ["동기", "적응력"],
     description: "지원자의 동기와 문제를 끝까지 해결하는 태도를 확인합니다.",
   },

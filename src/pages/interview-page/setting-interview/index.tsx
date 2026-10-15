@@ -1,3 +1,4 @@
+import PersonaOptions from "@/widgets/interview-page/setting-interview/persona-options";
 import ProfileGuidance from "@/widgets/interview-page/profile-guidance";
 import { useInterviewSetup } from "@/features/interview-page/setting-interview/model/useInterviewSetup";
 import InterviewerOptions from "@/widgets/interview-page/setting-interview/interviewer-options";
@@ -17,10 +18,17 @@ const SettingInterviewPage = () => {
             onAnswerModeChange={setup.onAnswerModeChange}
             onSelect={setup.select}
             selection={setup.selection}
-          />
+          >
+            <PersonaOptions
+              personality={setup.selection.personality}
+              tone={setup.selection.tone}
+              onPersonalityChange={setup.select.personality}
+              onToneChange={setup.select.tone}
+            />
+          </SettingOptions>
           <InterviewerOptions
             onSelect={setup.select.interviewer}
-            selectedValue={setup.selection.interviewerId}
+            selectedValue={setup.selection.interviewerKey}
           />
         </S.Sections>
         <ProfileGuidance

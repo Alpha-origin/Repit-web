@@ -12,9 +12,9 @@ const InterviewerOptions = ({
   <S.InterviewerGrid role="radiogroup" aria-label="면접관 선택">
     {SETTING_INTERVIEWER_CARDS.map((interviewer) => (
       <InterviewerCard
-        key={interviewer.id}
+        key={interviewer.key}
         interviewer={interviewer}
-        isSelected={selectedValue === interviewer.id}
+        isSelected={selectedValue === interviewer.key}
         onSelect={onSelect}
       />
     ))}
@@ -29,7 +29,7 @@ const InterviewerCard = ({
   <S.InterviewerCard
     $selected={isSelected}
     aria-checked={isSelected}
-    onClick={() => onSelect(interviewer.id)}
+    onClick={() => onSelect(interviewer.key)}
     role="radio"
     type="button"
   >
