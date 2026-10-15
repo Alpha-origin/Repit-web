@@ -15,15 +15,16 @@ const FeedbackOverallPage = () => {
     feedback,
     feedbackErrorMessage,
     interview,
+    previousFeedback,
     isLoading,
     refetch,
-  } = useFeedbackInterview(id);
+  } = useFeedbackInterview(id, true);
   const isAnalysisPending =
     feedback?.status === "PENDING" || feedback?.status === "IN_PROGRESS";
   const isAnalysisFailed = feedback?.status === "FAILED";
   const content =
     feedback && !isAnalysisPending && !isAnalysisFailed
-      ? buildFeedbackOverallContent(feedback, interview)
+      ? buildFeedbackOverallContent(feedback, interview, previousFeedback)
       : null;
   const panelRef = useRef<HTMLElement | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
@@ -64,7 +65,7 @@ const FeedbackOverallPage = () => {
           <S.StateCard aria-live="polite">
             <S.StateText>
               {isAnalysisPending
-                ? "피드백을 분석 중입니다. 잠시 후 다시 확인해주세요."
+                ? feedbackErrorMessage ?? "피드백을 분석 중입니다. 완료되면 자동으로 표시됩니다."
                 : isAnalysisFailed
                   ? feedback?.errorMessage ?? "피드백 분석에 실패했습니다."
                   : feedbackErrorMessage ?? "피드백 분석 결과를 불러오지 못했습니다."}

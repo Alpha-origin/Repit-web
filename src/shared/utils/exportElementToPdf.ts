@@ -16,8 +16,16 @@ export const exportElementToPdf = async (
     backgroundColor: "#ffffff",
     scale: Math.min(window.devicePixelRatio || 1, 2),
     useCORS: true,
-    windowWidth: element.scrollWidth,
-    windowHeight: element.scrollHeight,
+    windowWidth: Math.max(document.documentElement.clientWidth, element.scrollWidth),
+    windowHeight: Math.max(document.documentElement.clientHeight, element.scrollHeight),
+    onclone: (_document, clonedElement) => {
+      // 스크롤 영역 안의 피드백도 화면 너비를 유지한 채 끝까지 내보낸다.
+      let parent = clonedElement.parentElement;
+      while (parent) {
+        parent.style.overflow = "visible";
+        parent = parent.parentElement;
+      }
+    },
   });
 
   const imageData = canvas.toDataURL("image/png");

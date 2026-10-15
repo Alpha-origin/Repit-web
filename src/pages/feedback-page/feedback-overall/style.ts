@@ -6,7 +6,8 @@ export const Page = styled.section`
   align-items: flex-start;
   justify-content: center;
   min-height: 100%;
-  padding: 1.2rem 2rem 2rem;
+  padding: 0.625rem clamp(1rem, 3.87vw, 3.5rem) 4.375rem;
+  color: ${({ theme }) => theme.colors.text.default};
   box-sizing: border-box;
 
   @media (max-width: 48rem) {
@@ -15,15 +16,14 @@ export const Page = styled.section`
 `;
 
 export const Panel = styled.section`
-  width: min(100%, 90rem);
+  width: min(100%, 75rem);
   display: flex;
   flex-direction: column;
-  gap: 1.3rem;
+  gap: 0.75rem;
   box-sizing: border-box;
 
   @media (max-width: 48rem) {
-    gap: 1rem;
-    padding: 0.8rem 0.2rem 1.2rem;
+    gap: 0.75rem;
   }
 `;
 
