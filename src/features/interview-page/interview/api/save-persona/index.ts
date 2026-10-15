@@ -32,7 +32,7 @@ const normalizeSavedPersona = (
       fallbackData.role,
     major:
       (getTrimmedString(sourceRecord?.major) as SavedPersonaData["major"] | null) ??
-      fallbackData.major,
+      null,
     type:
       (getTrimmedString(sourceRecord?.type) as SavedPersonaData["type"] | null) ??
       fallbackData.type,

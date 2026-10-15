@@ -17,7 +17,7 @@ export type InterviewLifecycleStatus =
 
 export interface CreateSoloInterviewParams {
   personaName: string;
-  major: InterviewPersonaMajor;
+  major?: InterviewPersonaMajor;
   type: CreateInterviewPersonaType;
   career: number;
   gender: InterviewPersonaGender;

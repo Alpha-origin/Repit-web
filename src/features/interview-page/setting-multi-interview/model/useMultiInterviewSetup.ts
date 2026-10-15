@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useInterviewEligibility } from "@/features/profile/model/useInterviewEligibility";
-import { createInterview, prepareInterviewRecord, savePersona, setActiveInterviewSessionId, type SavePersonaParams } from "@/features/interview-page/interview/api";
+import { createInterview, prepareInterviewRecord, savePersona, setActiveInterviewSessionId, type SavedPersonaData, type SavePersonaParams } from "@/features/interview-page/interview/api";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
 import {
   LEVEL_BY_DIFFICULTY,
@@ -19,7 +19,7 @@ export const useMultiInterviewSetup = () => {
   const [answerMode, setAnswerMode] = useState<"voice" | "text">("voice");
   const eligibility = useInterviewEligibility();
   const [requiresMaterials, setRequiresMaterials] = useState(false);
-  const [style, setStyle] = useState<InterviewStyleOption>(INTERVIEW_SETTING_DEFAULT_SELECTION.style);
+  const [style, setStyle] = useState<InterviewStyleOption>("편함");
   const [difficulty, setDifficulty] = useState<InterviewDifficultyOption>(INTERVIEW_SETTING_DEFAULT_SELECTION.difficulty);
   const [activeSlot, setActiveSlot] = useState<SlotIndex>(0);
   const [slots, setSlots] = useState<InterviewerSlot[]>(() => Array.from({ length: 3 }, (_, i) => createSlot(i)));
@@ -72,6 +72,7 @@ export const useMultiInterviewSetup = () => {
       setIsSubmitting(true);
       submittingRef.current = true;
 
+      const savedPersonas: SavedPersonaData[] = [];
       const savedPersonaIds: number[] = [];
       const savedPersonaLabels: string[] = [];
 
@@ -79,12 +80,12 @@ export const useMultiInterviewSetup = () => {
         const personaPayload: SavePersonaParams = {
           personaName: buildPersonaName(template),
           role: template.role,
-          major: template.role === "TECH" ? template.major ?? null : null,
           type: template.personality,
           tone: template.tone,
           level: LEVEL_BY_DIFFICULTY[difficulty],
           career: template.career,
           gender: template.gender,
+          voiceIndex: template.voiceIndex,
           imageUrl: template.image,
           description: template.description,
         };
@@ -108,6 +109,7 @@ export const useMultiInterviewSetup = () => {
         if (!Number.isInteger(savedPersona.personaId) || savedPersona.personaId <= 0 || savedPersonaIds.includes(savedPersona.personaId)) {
           throw new Error("면접관 저장 응답이 올바르지 않습니다.");
         }
+        savedPersonas.push(savedPersona);
         savedPersonaIds.push(savedPersona.personaId);
         savedPersonaLabels.push(template.roleLabel);
       }
@@ -149,7 +151,7 @@ export const useMultiInterviewSetup = () => {
             personaId: savedPersonaIds[0],
             personaName: representative.name,
             role: representative.role,
-            major: representative.major ?? null,
+            major: savedPersonas[0].major ?? null,
             type: representative.personality,
             personaType: representative.personality,
             level: LEVEL_BY_DIFFICULTY[difficulty],

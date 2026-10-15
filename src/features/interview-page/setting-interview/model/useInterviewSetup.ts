@@ -8,38 +8,23 @@ import {
   prepareInterviewRecord,
   savePersona,
   setActiveInterviewSessionId,
-  type CreateInterviewPersonaType,
   type InterviewLevel,
-  type InterviewPersonaGender,
-  type InterviewPersonaMajor,
   type InterviewPersonaRole,
-  type InterviewTone,
   type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
 import {
   INTERVIEW_SETTING_DEFAULT_SELECTION,
-  INTERVIEW_SETTING_INTERVIEWERS,
+  INTERVIEW_STYLE_PRESETS,
+  findStylePreset,
   type InterviewDifficultyOption,
-  type InterviewerId,
   type InterviewSettingSelectHandlers,
-  type InterviewStyleOption,
 } from "@/shared/constants/interview-page/setting-interview";
-import InterviewerImage1 from "@/shared/img/interview-page/interviewer1.svg?url";
-import InterviewerImage2 from "@/shared/img/interview-page/interviewer2.svg?url";
-import InterviewerImage3 from "@/shared/img/interview-page/interviewer3.svg?url";
-import InterviewerImage4 from "@/shared/img/interview-page/interviewer4.svg?url";
-
-const TYPE_BY_STYLE: Record<InterviewStyleOption, CreateInterviewPersonaType> = {
-  편함: "FRIENDLY",
-  일반: "REALISTIC",
-  압박: "METICULOUS",
-};
-
-const TONE_BY_STYLE: Record<InterviewStyleOption, InterviewTone> = {
-  편함: "GENTLE",
-  일반: "DIRECT",
-  압박: "PRESSURING",
-};
+import {
+  MULTI_INTERVIEWER_TEMPLATES,
+  type InterviewerPersonality,
+  type InterviewerTone,
+} from "@/shared/constants/interview-page/setting-multi-interview";
+import { getVoiceGender } from "@/shared/constants/interview-page/voice-catalog";
 
 const CAREER_BY_DIFFICULTY: Record<InterviewDifficultyOption, number> = {
   쉬움: 0,
@@ -53,23 +38,6 @@ const LEVEL_BY_DIFFICULTY: Record<InterviewDifficultyOption, InterviewLevel> = {
   어려움: "HARD",
 };
 
-const INTERVIEWER_IMAGES: Record<InterviewerId, string> = {
-  1: InterviewerImage1,
-  2: InterviewerImage2,
-  3: InterviewerImage3,
-  4: InterviewerImage4,
-};
-
-const INTERVIEWER_PROFILE_BY_ID: Record<
-  InterviewerId,
-  { gender: InterviewPersonaGender; major: InterviewPersonaMajor }
-> = {
-  1: { gender: "MALE", major: "BACKEND" },
-  2: { gender: "MALE", major: "FRONTEND" },
-  3: { gender: "FEMALE", major: "FRONTEND" },
-  4: { gender: "FEMALE", major: "BACKEND" },
-};
-
 const DEFAULT_INTERVIEW_ROLE: InterviewPersonaRole = "TECH";
 
 const buildUniquePersonaName = (personaName: string) =>
@@ -81,15 +49,23 @@ export const useInterviewSetup = () => {
   const eligibility = useInterviewEligibility();
   const [requiresMaterials, setRequiresMaterials] = useState(false);
 
-  const [selectedStyle, setSelectedStyle] = useState(
-    INTERVIEW_SETTING_DEFAULT_SELECTION.style,
-  );
   const [selectedDifficulty, setSelectedDifficulty] = useState(
     INTERVIEW_SETTING_DEFAULT_SELECTION.difficulty,
   );
-  const [selectedInterviewerId, setSelectedInterviewerId] = useState<InterviewerId>(
-    INTERVIEW_SETTING_DEFAULT_SELECTION.interviewerId,
+  const [personality, setPersonality] = useState<InterviewerPersonality>(
+    INTERVIEW_SETTING_DEFAULT_SELECTION.personality,
   );
+  const [tone, setTone] = useState<InterviewerTone>(
+    INTERVIEW_SETTING_DEFAULT_SELECTION.tone,
+  );
+  const [interviewerKey, setInterviewerKey] = useState(
+    INTERVIEW_SETTING_DEFAULT_SELECTION.interviewerKey,
+  );
+  const selectedStyle = findStylePreset({
+    difficulty: selectedDifficulty,
+    personality,
+    tone,
+  });
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -104,8 +80,8 @@ export const useInterviewSetup = () => {
     setRequiresMaterials(false);
     setIsSubmitting(true);
 
-    const selectedInterviewer = INTERVIEW_SETTING_INTERVIEWERS.find(
-      (interviewer) => interviewer.id === selectedInterviewerId,
+    const selectedInterviewer = MULTI_INTERVIEWER_TEMPLATES.find(
+      (interviewer) => interviewer.key === interviewerKey,
     );
 
     if (!selectedInterviewer) {
@@ -114,17 +90,16 @@ export const useInterviewSetup = () => {
       return;
     }
 
-    const interviewerProfile = INTERVIEWER_PROFILE_BY_ID[selectedInterviewerId];
     const personaPayload: SavePersonaParams = {
-      personaName: buildUniquePersonaName(selectedInterviewer.personaName),
+      personaName: buildUniquePersonaName(selectedInterviewer.name),
       role: DEFAULT_INTERVIEW_ROLE,
       level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
-      major: interviewerProfile.major,
-      type: TYPE_BY_STYLE[selectedStyle],
+      type: personality,
       career: CAREER_BY_DIFFICULTY[selectedDifficulty],
-      gender: interviewerProfile.gender,
-      tone: TONE_BY_STYLE[selectedStyle],
-      imageUrl: INTERVIEWER_IMAGES[selectedInterviewerId],
+      gender: getVoiceGender(selectedInterviewer.voiceIndex),
+      voiceIndex: selectedInterviewer.voiceIndex,
+      tone,
+      imageUrl: selectedInterviewer.image,
       description: selectedInterviewer.description,
     };
 
@@ -141,7 +116,6 @@ export const useInterviewSetup = () => {
 
     const { data, errorMessage: createErrorMessage } = await createInterview({
       personaName: personaPayload.personaName,
-      major: personaPayload.major,
       type: personaPayload.type,
       career: personaPayload.career,
       gender: personaPayload.gender,
@@ -186,7 +160,7 @@ export const useInterviewSetup = () => {
           personaId,
           personaName: personaPayload.personaName,
           role: personaPayload.role,
-          major: personaPayload.major,
+          major: savedPersona.major,
           type: personaPayload.type,
           personaType: personaPayload.type,
           level: personaPayload.level,
@@ -206,19 +180,14 @@ export const useInterviewSetup = () => {
               personaId,
               name: selectedInterviewer.name,
               roleLabel: "기술 면접관",
-              image: INTERVIEWER_IMAGES[selectedInterviewerId],
+              image: selectedInterviewer.image,
               gender: personaPayload.gender,
-              voiceIndex: selectedInterviewerId,
+              voiceIndex: selectedInterviewer.voiceIndex,
               personaType: personaPayload.type,
               tone: personaPayload.tone,
               level: personaPayload.level,
             },
           ],
-        },
-        interviewSetting: {
-          style: selectedStyle,
-          difficulty: selectedDifficulty,
-          interviewerId: selectedInterviewerId,
         },
       },
     });
@@ -226,8 +195,15 @@ export const useInterviewSetup = () => {
 
   const select: InterviewSettingSelectHandlers = {
     difficulty: setSelectedDifficulty,
-    interviewer: setSelectedInterviewerId,
-    style: setSelectedStyle,
+    interviewer: setInterviewerKey,
+    personality: setPersonality,
+    tone: setTone,
+    style: (value) => {
+      const preset = INTERVIEW_STYLE_PRESETS[value];
+      setSelectedDifficulty(preset.difficulty);
+      setPersonality(preset.personality);
+      setTone(preset.tone);
+    },
   };
 
   return {
@@ -245,7 +221,9 @@ export const useInterviewSetup = () => {
     select,
     selection: {
       difficulty: selectedDifficulty,
-      interviewerId: selectedInterviewerId,
+      interviewerKey,
+      personality,
+      tone,
       style: selectedStyle,
     },
   };

@@ -1,435 +1,351 @@
 import styled, { css } from "styled-components";
 
-interface TabButtonProps {
-  $active: boolean;
-}
-
-interface QuestionItemButtonProps {
-  $active: boolean;
-}
-
 const cardSurface = css`
-  background: rgba(255, 255, 255, 0.92);
-  border: 0.0625rem solid rgba(220, 230, 246, 0.96);
-  border-radius: 0.8rem;
-  box-shadow: 0 1rem 2.2rem rgba(60, 101, 168, 0.07);
+  min-width: 0;
+  border: 1px solid #dcdde0;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.7);
 `;
 
-export const SectionBlock = styled.section`
+export const DetailLayout = styled.div`
+  display: grid;
+  grid-template-columns: 12.5rem minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+
+  @media (max-width: 44rem) {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+`;
+
+export const Sidebar = styled.aside`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-`;
+  gap: 0.75rem;
+  min-height: 0;
+  padding: 1.25rem;
+  border-right: 1px solid #c9cbd0;
+  background: #f8f9ff;
 
-export const SectionShell = styled.div`
-  padding: 1rem;
-  border-radius: 1.25rem;
-  background: linear-gradient(
-    180deg,
-    rgba(234, 242, 255, 0.72),
-    rgba(243, 247, 255, 0.82)
-  );
-  border: 0.0625rem solid rgba(217, 228, 247, 0.92);
-  box-shadow: inset 0 0.0625rem 0 rgba(255, 255, 255, 0.55);
-
-  @media (max-width: 48rem) {
-    padding: 0.8rem;
-    border-radius: 0.95rem;
+  @media (max-width: 44rem) {
+    flex-shrink: 0;
+    padding: 1rem;
+    border-right: 0;
+    border-bottom: 1px solid #dcdde0;
   }
 `;
 
-export const TabGroup = styled.div`
-  width: fit-content;
-  max-width: 100%;
-  display: inline-flex;
+export const SideTitle = styled.h1`
+  display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.2rem;
-  background: rgba(255, 255, 255, 0.96);
-  border-radius: 0.8rem;
-  box-shadow: 0 0.85rem 2rem rgba(60, 102, 173, 0.08);
-`;
-
-export const TabButton = styled.button<TabButtonProps>`
-  min-width: 13.2rem;
-  height: 2.1rem;
-  padding: 0 0.9rem;
-  border: none;
-  border-radius: 0.62rem;
-  background: ${({ $active }) =>
-    $active ? "linear-gradient(180deg, #2f75e7, #2667da)" : "transparent"};
-  color: ${({ $active }) => ($active ? "#ffffff" : "#2f75e7")};
+  min-height: 2.375rem;
+  margin: 0;
+  padding: 0.5rem 1.375rem;
+  border-radius: 0.25rem;
+  background: ${({ theme }) => theme.colors.brand.blue};
+  color: ${({ theme }) => theme.colors.white};
   font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-
-  @media (max-width: 40rem) {
-    min-width: 9rem;
-    height: 2rem;
-    font-size: 0.94rem;
-  }
-`;
-
-export const TopGrid = styled.div`
-  display: grid;
-  grid-template-columns: minmax(20rem, 23rem) minmax(0, 1fr);
-  gap: 1rem;
-
-  @media (max-width: 72rem) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-export const QuestionListCard = styled.article`
-  ${cardSurface}
-  border-radius: 0.95rem;
-  padding: 1rem;
-`;
-
-export const SideTitle = styled.h3`
-  margin: 0 0 0.9rem;
-  color: #2b74e3;
-  font-size: 1.28rem;
-  font-weight: 700;
+  font-weight: 500;
 `;
 
 export const QuestionList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.75rem;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+
+  @media (max-width: 44rem) {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 2px 2px 0.25rem;
+  }
 `;
 
-export const QuestionItemButton = styled.button<QuestionItemButtonProps>`
+export const QuestionItemButton = styled.button<{ $active: boolean }>`
+  flex-shrink: 0;
   width: 100%;
-  min-height: 5.45rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.8rem;
-  padding: 1rem 0.95rem;
-  border-radius: 0.72rem;
-  border: ${({ $active }) =>
-    $active
-      ? "0.125rem solid rgba(47, 117, 231, 0.92)"
-      : "0.0625rem solid rgba(194, 214, 241, 0.95)"};
-  background: #ffffff;
-  box-shadow: ${({ $active }) =>
-    $active ? "0 0.7rem 1.4rem rgba(47, 117, 231, 0.08)" : "none"};
+  padding: 0.625rem 0.875rem;
+  border: 1px solid ${({ $active }) => $active ? "#6fa2ff" : "#d0ddf5"};
+  border-radius: 0.375rem;
+  background: ${({ $active, theme }) => $active ? theme.colors.white : "transparent"};
+  color: ${({ $active, theme }) => $active ? theme.colors.brand.blue : theme.colors.text.default};
   text-align: left;
   cursor: pointer;
+
+  &:focus-visible { outline: 2px solid ${({ theme }) => theme.colors.brand.blue}; outline-offset: -2px; }
+
+  @media (max-width: 44rem) { width: 10rem; }
+`;
+
+export const QuestionItemHeading = styled.span`
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-bottom: 0.375rem;
+  color: ${({ theme }) => theme.colors.brand.blue};
 `;
 
 export const QuestionNumber = styled.span`
-  min-width: 2.4rem;
-  color: #2b74e3;
-  font-size: 1.15rem;
-  font-weight: 800;
-  line-height: 1.5;
+  font-size: 0.875rem;
+  font-weight: 600;
+`;
+
+export const QuestionPersona = styled.span`
+  font-size: 0.6875rem;
+  font-weight: 500;
 `;
 
 export const QuestionPreview = styled.span`
   display: -webkit-box;
-  color: #1c1c1c;
-  font-size: 1.08rem;
-  font-weight: 500;
-  line-height: 1.55;
-  word-break: keep-all;
   overflow: hidden;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 `;
 
-export const QuestionPersona = styled.span`
-  display: block;
-  width: fit-content;
-  margin: 0 0 0.32rem;
-  color: #2b74e3;
-  font-size: 0.82rem;
-  font-weight: 700;
-`;
+export const SideActions = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1rem;
 
-export const DetailColumn = styled.div`
-  display: grid;
-  grid-template-rows: auto auto auto minmax(8.5rem, 1fr);
-  gap: 0.95rem;
-  height: 100%;
-  align-self: stretch;
-  align-content: stretch;
-
-  @media (max-width: 72rem) {
-    grid-template-rows: none;
-    height: auto;
-    align-self: start;
-    align-content: start;
+  @media (max-width: 44rem) {
+    flex-direction: row;
+    padding-top: 0;
+    > button { flex: 1; }
   }
 `;
 
-export const QuestionContent = styled.div`
+const actionButton = css`
+  min-height: 2.5rem;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+`;
+
+export const ReplayButton = styled.button`
+  ${actionButton}
+  border: 1px solid #d6e3ff;
+  background: ${({ theme }) => theme.colors.white};
+  color: #555555;
+  cursor: not-allowed;
+`;
+
+export const PdfButton = styled.button`
+  ${actionButton}
+  border: 1px solid #a2c6ff;
+  background: ${({ theme }) => theme.colors.brand.blue};
+  color: ${({ theme }) => theme.colors.white};
+  box-shadow: 0 2px 4px rgba(34, 68, 114, 0.15);
+  cursor: pointer;
+  &:disabled { opacity: 0.65; cursor: wait; }
+  &:focus-visible { outline: 2px solid ${({ theme }) => theme.colors.brand.blue}; outline-offset: 2px; }
+`;
+
+export const DetailScrollArea = styled.div`
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.75rem 2.375rem 1.5rem 1.375rem;
+
+  @media (max-width: 60rem) { padding: 0.75rem 1.25rem 1.5rem; }
+  @media (max-width: 44rem) { flex-shrink: 0; overflow: visible; padding: 0.75rem 1rem 1.5rem; }
+`;
+
+export const DetailContent = styled.section`
   display: flex;
   flex-direction: column;
-  width: 100%;
-  align-items: flex-start;
-  gap: 0.7rem;
-  margin-top: 0.58rem;
+  gap: 0.5rem;
+  width: min(100%, 80rem);
+  min-width: 0;
+  margin: 0 auto;
+`;
+
+export const HeadingRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.125rem;
+  margin-bottom: 0.25rem;
+
+  @media (max-width: 54rem) { flex-wrap: wrap; gap: 0.5rem; }
+`;
+
+export const Breadcrumb = styled.p`
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  font-weight: 500;
+  span { color: ${({ theme }) => theme.colors.brand.blue}; }
+
+  @media (max-width: 54rem) { width: 100%; }
+`;
+
+export const SectionBlock = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+`;
+
+export const DetailCard = styled.article`
+  ${cardSurface}
+  min-height: 6.5rem;
+  padding: 1.125rem 1.375rem;
+`;
+
+export const DetailCardTitle = styled.h2`
+  margin: 0 0 0.5rem;
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.3;
+`;
+
+export const DetailCardText = styled.p`
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.3;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+`;
+
+export const QuestionCard = styled(DetailCard)`
+  min-height: 11.75rem;
+  padding: 1.375rem 2rem 1.75rem;
+  border-radius: 0.75rem;
+  background: ${({ theme }) => theme.colors.white};
+
+  @media (max-width: 44rem) { padding: 1.25rem; }
+`;
+
+export const QuestionText = styled(DetailCardText)`
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 500;
 `;
 
 export const IntentSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.78rem;
-  margin-top: 2.2rem;
-`;
-
-export const DetailCard = styled.article`
-  ${cardSurface}
-  padding: 1.25rem 1.35rem;
-`;
-
-export const AnswerCard = styled(DetailCard)`
-  display: flex;
-  flex-direction: column;
-  gap: 0.62rem;
-  min-height: 0;
-  padding-top: 0.85rem;
-  padding-bottom: 0.85rem;
-`;
-
-export const DetailCardTitle = styled.h3`
-  margin: 0;
-  color: #2b74e3;
-  font-size: 1.34rem;
-  font-weight: 700;
-`;
-
-export const DetailCardText = styled.p`
-  margin: 0;
-  color: #191919;
-  font-size: 1.14rem;
-  font-weight: 500;
-  line-height: 1.7;
-  word-break: keep-all;
+  gap: 0.625rem;
+  margin-top: 1.5rem;
 `;
 
 export const IntentBadge = styled.span`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: fit-content;
-  padding: 0.5rem 1rem;
-  border-radius: 0.32rem;
-  background: linear-gradient(180deg, #2f75e7, #2667da);
-  color: #ffffff;
-  font-size: 1rem;
-  font-weight: 700;
+  padding: 0.25rem 1rem;
+  border-radius: 0.25rem;
+  background: ${({ theme }) => theme.colors.brand.blue};
+  color: ${({ theme }) => theme.colors.white};
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.3;
 `;
 
-export const AnswerHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+export const AnswerGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.025fr);
+  grid-template-rows: repeat(2, minmax(6.5rem, auto));
+  gap: 0.625rem 0.5rem;
 
-  @media (max-width: 36rem) {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  @media (max-width: 44rem) { grid-template-columns: 1fr; grid-template-rows: auto; }
 `;
 
-export const AnswerToggleButton = styled.button`
-  min-width: 8.8rem;
-  height: 2.5rem;
-  padding: 0 1rem;
-  flex-shrink: 0;
-  border-radius: 0.42rem;
-  border: 0.0625rem solid rgba(213, 223, 239, 0.96);
-  background: #ffffff;
-  color: #5b5b5b;
-  font-size: 1rem;
-  font-weight: 700;
-  white-space: nowrap;
-  cursor: pointer;
+export const ModelAnswerCard = styled(DetailCard)`
+  grid-column: 2;
+  grid-row: 1 / 3;
+  padding: 1.625rem;
+  @media (max-width: 44rem) { grid-column: auto; grid-row: auto; padding: 1.125rem 1.375rem; }
 `;
 
-export const SummaryShell = styled.section`
-  padding: 1rem;
-  border-radius: 1.15rem;
-  background: linear-gradient(
-    180deg,
-    rgba(209, 222, 247, 0.92),
-    rgba(223, 232, 250, 0.96)
-  );
-`;
-
-export const SummaryGrid = styled.div`
+export const SummaryGrid = styled.section`
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-
-  @media (max-width: 56rem) {
-    grid-template-columns: 1fr;
-  }
+  overflow: hidden;
+  border: 1px solid #dcdde0;
+  border-radius: 0.75rem;
+  @media (max-width: 44rem) { grid-template-columns: 1fr; }
 `;
 
-export const SummaryCard = styled.article`
-  ${cardSurface}
-  padding: 1.25rem 1.35rem;
+export const SummaryCard = styled.article<{ $tone: "positive" | "negative" }>`
+  min-width: 0;
+  min-height: 9.125rem;
+  padding: 1.625rem 1.75rem;
+  background: ${({ $tone }) => $tone === "positive" ? "#eaf2fa" : "#f7eeee"};
+  & + & { border-left: 1px solid #dcdde0; }
+  @media (max-width: 44rem) { & + & { border-left: 0; border-top: 1px solid #dcdde0; } }
 `;
 
-export const SummaryTitle = styled.h3`
-  margin: 0 0 0.9rem;
-  color: #2b74e3;
-  font-size: 1.32rem;
-  font-weight: 700;
-`;
-
-export const SummaryText = styled.p`
-  margin: 0;
-  color: #1d1d1d;
-  font-size: 1.12rem;
-  font-weight: 500;
-  line-height: 1.7;
-  word-break: keep-all;
-
-  & + & {
-    margin-top: 0.7rem;
-  }
-`;
-
-export const BottomBlock = styled.section`
+export const SummaryTitle = styled.h2<{ $tone: "positive" | "negative" }>`
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  color: ${({ $tone, theme }) => $tone === "positive" ? theme.colors.brand.blue : "#ff482b"};
+  font-size: 1.125rem;
+  font-weight: 600;
+`;
+
+export const FaceIcon = styled.svg`
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke: currentColor;
+  stroke-width: 1.3;
+  stroke-linecap: round;
+`;
+
+export const SummaryText = styled(DetailCardText)`
+  color: ${({ theme }) => theme.colors.text.default};
+  & + & { margin-top: 0.5rem; }
 `;
 
 export const CoachCard = styled.article`
+  ${cardSurface}
   display: flex;
-  align-items: flex-end;
-  gap: 1.55rem;
-  min-height: 11.6rem;
-  padding: 1.75rem 1.8rem 1.35rem;
-  border-radius: 0.75rem;
-  background: #dcebfe;
-
-  @media (max-width: 48rem) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.8rem;
-    min-height: auto;
-    padding: 1rem 1rem 1.15rem;
-  }
+  align-items: center;
+  gap: 1.625rem;
+  min-height: 7.25rem;
+  margin-top: 0.375rem;
+  padding: 1.375rem 2rem;
+  border-color: #cccccc;
+  background: ${({ theme }) => theme.colors.white};
+  @media (max-width: 44rem) { gap: 1rem; padding: 1.25rem; }
 `;
 
 export const CoachIllustration = styled.div`
-  width: clamp(3.4rem, 6vw, 4.5rem);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  width: 4rem;
   flex-shrink: 0;
-  margin-bottom: 0.15rem;
+  @media (max-width: 44rem) { width: 3rem; }
 `;
 
 export const RobotImage = styled.img`
+  display: block;
   width: 100%;
   height: auto;
-  display: block;
-`;
-
-export const CoachBubble = styled.div`
-  position: relative;
-  flex: 1;
-  min-height: 9.3rem;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 2rem 4rem;
-  border-radius: 0.85rem;
-  background: rgba(255, 255, 255, 0.98);
-
-  @media (max-width: 48rem) {
-    width: 100%;
-    min-height: 7.8rem;
-    padding: 0.7rem 0.95rem 0.85rem;
-  }
-`;
-
-export const CoachBubbleImage = styled.img`
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: fill;
-  z-index: 0;
-  pointer-events: none;
-  user-select: none;
-`;
-
-export const CoachTextBox = styled.div`
-  flex: 1;
-  position: relative;
-  z-index: 1;
-  width: min(100%, 85%);
-  text-align: left;
-  @media (max-width: 48rem) {
-    width: min(100%, 92%);
-  }
 `;
 
 export const CoachText = styled.p`
+  min-width: 0;
   margin: 0;
-  color: #171717;
-  max-width: 100%;
-  font-size: 1.2rem;
-  font-weight: 550;
-  line-height: 1.58;
-`;
-
-export const ActionRow = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding-top: 0.35rem;
-
-  @media (max-width: 40rem) {
-    flex-direction: column;
-  }
-`;
-
-const actionButton = css`
-  min-width: 12.2rem;
-  height: 3.1rem;
-  padding: 0 1.35rem;
-  border-radius: 0.62rem;
+  color: ${({ theme }) => theme.colors.brand.blue};
   font-size: 1rem;
-  font-weight: 800;
-  cursor: pointer;
-
-  @media (max-width: 40rem) {
-    width: 100%;
-  }
-`;
-
-export const SecondaryActionButton = styled.button`
-  ${actionButton}
-  border: 0.0625rem solid rgba(214, 224, 240, 0.96);
-  background: #ffffff;
-  color: #2b74e3;
-
-  &:disabled {
-    cursor: wait;
-    opacity: 0.72;
-  }
-`;
-
-export const PrimaryActionButton = styled.button`
-  ${actionButton}
-  border: none;
-  background: linear-gradient(180deg, #2f75e7, #2667da);
-  color: #ffffff;
-
-  &:disabled {
-    cursor: not-allowed;
-    filter: grayscale(0.35);
-    opacity: 0.62;
-  }
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 `;

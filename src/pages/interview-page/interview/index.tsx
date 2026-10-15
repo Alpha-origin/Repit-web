@@ -7,13 +7,13 @@ import {
 } from "@/features/interview-page/interview/model/interviewSessionContext";
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
 import { INTERVIEW_DEVICE_STATUS_LABELS } from "@/shared/constants/interview-page/interview";
-import type { InterviewStyleOption } from "@/shared/constants/interview-page/setting-interview";
 import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
 import MicIcon from "@/shared/img/interview-page/mike.svg?url";
 import Loading from "@/shared/components/loading";
 import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
 import InterviewContentView from "@/widgets/interview-page/interview/interview-content";
 import InterviewDashboard from "@/widgets/interview-page/interview/interview-dashboard";
+import InterviewQuitError from "@/widgets/interview-page/interview/quit-error";
 import * as S from "@/widgets/interview-page/interview/style";
 
 const getPreparedInterviewFromState = (state: unknown) => {
@@ -30,26 +30,6 @@ const getPreparedInterviewFromState = (state: unknown) => {
   return preparedInterview as PreparedInterviewData;
 };
 
-const getInterviewStyleFromState = (
-  state: unknown,
-): InterviewStyleOption | undefined => {
-  if (!state || typeof state !== "object" || !("interviewSetting" in state)) {
-    return undefined;
-  }
-
-  const interviewSetting = (state as { interviewSetting?: unknown }).interviewSetting;
-
-  if (!interviewSetting || typeof interviewSetting !== "object") {
-    return undefined;
-  }
-
-  const style = (interviewSetting as { style?: unknown }).style;
-
-  return style === "편함" || style === "일반" || style === "압박"
-    ? style
-    : undefined;
-};
-
 const formatElapsedTime = (elapsedSeconds: number) => {
   const minutes = Math.floor(elapsedSeconds / 60);
   const seconds = elapsedSeconds % 60;
@@ -63,18 +43,11 @@ const InterviewPage = () => {
     () => getPreparedInterviewFromState(location.state),
     [location.state],
   );
-  const interviewStyle = useMemo(
-    () => getInterviewStyleFromState(location.state),
-    [location.state],
-  );
-  const ttsProvider = "elevenlabs" as const;
 
   return (
     <InterviewSessionProvider
       key={preparedInterview?.sessionId ?? location.pathname}
-      interviewStyle={interviewStyle}
       preparedInterview={preparedInterview}
-      ttsProvider={ttsProvider}
     >
       <InterviewPageContent />
     </InterviewSessionProvider>
@@ -104,9 +77,10 @@ const InterviewPageContent = () => {
 
   const handleQuitInterview = interviewSession.onQuitInterview;
 
-  if (interviewSession.preparationError) {
+  if (interviewSession.preparationError || (interviewSession.quitError && interviewSession.isPreparingInterview)) {
     return (
       <S.PreparationErrorScreen role="alert">
+        <InterviewQuitError />
         <S.PreparationErrorMessage>
           {interviewSession.preparationError}
         </S.PreparationErrorMessage>
@@ -121,7 +95,7 @@ const InterviewPageContent = () => {
         ) : null}
         <S.PreparationErrorAction
           type="button"
-          disabled={interviewSession.isRetryingPreparation}
+          disabled={interviewSession.isRetryingPreparation || interviewSession.isClosing}
           onClick={() => void handleQuitInterview()}
         >
           메인으로 돌아가기
@@ -182,6 +156,7 @@ const InterviewPageContent = () => {
         {interviewSession.answerError ? (
           <S.PreparationMessage role="alert">{interviewSession.answerError}</S.PreparationMessage>
         ) : null}
+        <InterviewQuitError />
         {isVoiceMode && (interviewSession.cameraState === "blocked" || interviewSession.micState === "blocked") ? (
           <S.PreparationMessage role="alert">카메라와 마이크 권한을 허용해주세요. 텍스트 면접은 사전설정에서 선택할 수 있습니다.</S.PreparationMessage>
         ) : null}

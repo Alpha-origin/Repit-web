@@ -49,7 +49,9 @@ export const useInterviewEligibility = () => {
   const status = profileStatus.profile?.status;
   const isChecking = profileStatus.isLoading || (status === "NONE" && isMetaDataLoading);
   const loadError = profileStatus.errorMessage || (status === "NONE" ? metaDataError : "");
-  const hasMaterials = Boolean(metaData?.fileUrl?.trim() || metaData?.gitUrls?.some((url) => url.trim()));
+  const hasPortfolio = Boolean(metaData?.fileUrl?.trim());
+  const hasGithub = Boolean(metaData?.gitUrls?.some((url) => url.trim()));
+  const hasMaterials = hasPortfolio && hasGithub;
   const canStart = !isChecking && !loadError &&
     (status === "COMPLETED" || (status === "NONE" && hasMaterials));
   let guidance = "";
@@ -59,6 +61,8 @@ export const useInterviewEligibility = () => {
   else if (status === "FAILED" && profileStatus.profile) guidance = getProfileFailureMessage(profileStatus.profile);
   else if (status === "NONE") guidance = hasMaterials
     ? "첫 면접은 준비에 몇 분 걸릴 수 있어요"
+    : hasPortfolio ? "GitHub 저장소를 등록해야 면접을 시작할 수 있어요"
+    : hasGithub ? "포트폴리오 PDF를 등록해야 면접을 시작할 수 있어요"
     : "마이페이지에서 자료를 등록해 주세요";
 
   return {

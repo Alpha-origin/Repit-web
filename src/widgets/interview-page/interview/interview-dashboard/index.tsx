@@ -7,6 +7,8 @@ import { useInterviewSessionContext } from "@/features/interview-page/interview/
 import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
 import MicIcon from "@/shared/img/interview-page/mike.svg?url";
 import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
+import QuestionAudioControl, { QuestionAudioError } from "../question-audio-control";
+import InterviewQuitError from "../quit-error";
 import * as S from "./style";
 
 const TEXT_ANSWER_MAX_LENGTH = 10_000;
@@ -25,7 +27,7 @@ const InterviewDashboard = () => {
   const interview = useInterviewSessionContext();
   const recorder = interview.recorder;
   const elapsedSeconds = interview.elapsedSeconds;
-  const sessionId = interview.preparedInterview?.sessionId;
+  const sessionId = interview.sessionId;
   const memoKey = useMemo(() => getMemoKey(sessionId), [sessionId]);
   const [memo, setMemo] = useState(() =>
     memoKey ? window.sessionStorage.getItem(memoKey) ?? "" : "",
@@ -89,18 +91,7 @@ const InterviewDashboard = () => {
                     ? `Question ${questionLabel} / ${interview.totalQuestionCount}`
                     : `Question ${questionLabel}${interview.totalQuestionCount > 0 ? ` · 기본 질문 ${interview.totalQuestionCount}개` : ""}`}
                 </S.QuestionTag>
-                <S.QuestionAudioButton
-                  type="button"
-                  disabled={isQuestionLoading || interview.questionAudioStatus === "loading"}
-                  aria-pressed={interview.questionAudioStatus === "playing"}
-                  onClick={() => interview.onToggleQuestionAudio()}
-                >
-                  {interview.questionAudioStatus === "loading"
-                    ? "음성 생성 중..."
-                    : interview.questionAudioStatus === "playing"
-                      ? "질문 멈추기"
-                      : "질문 듣기"}
-                </S.QuestionAudioButton>
+                <QuestionAudioControl />
               </S.QuestionMetaRow>
               {activeInterviewer && !isMultiInterview ? (
                 <S.QuestionSpeaker>
@@ -110,11 +101,7 @@ const InterviewDashboard = () => {
               <S.QuestionText>
                 {interview.currentQuestion?.content ?? "질문을 불러오는 중입니다."}
               </S.QuestionText>
-              {interview.questionAudioErrorMessage ? (
-                <S.QuestionAudioError role="status">
-                  {interview.questionAudioErrorMessage}
-                </S.QuestionAudioError>
-              ) : null}
+              <QuestionAudioError />
             </S.QuestionPanel>
 
             <S.AnswerPanel $multi={isMultiInterview}>
@@ -161,6 +148,7 @@ const InterviewDashboard = () => {
               ) : null}
 
               {interview.answerError ? <S.QuestionAudioError role="alert">{interview.answerError}</S.QuestionAudioError> : null}
+              <InterviewQuitError />
               {isVoiceMode && (interview.cameraState === "blocked" || interview.micState === "blocked") ? (
                 <S.QuestionAudioError role="alert">카메라와 마이크 권한을 허용해주세요. 텍스트 면접은 사전설정에서 선택할 수 있습니다.</S.QuestionAudioError>
               ) : null}

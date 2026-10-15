@@ -8,6 +8,9 @@ export interface FeedbackDetailQuestionItem {
   myAnswer: string;
   modelAnswer: string;
   followUpQuestion: string;
+  strengths: readonly string[];
+  improvements: readonly string[];
+  comment: string;
 }
 
 export interface FeedbackDetailTopSectionData {
@@ -30,6 +33,7 @@ export interface FeedbackDetailTopSectionData {
 export interface FeedbackDetailMiddleSectionData {
   cards: readonly {
     title: string;
+    tone: "positive" | "negative";
     paragraphs: readonly string[];
   }[];
 }
@@ -42,14 +46,24 @@ export interface FeedbackDetailBottomSectionData {
 
 export interface FeedbackDetailTopSectionProps {
   content: FeedbackDetailTopSectionData;
+  question: FeedbackDetailQuestionItem;
 }
 
 export interface FeedbackDetailMiddleSectionProps {
   content: FeedbackDetailMiddleSectionData;
+  question: FeedbackDetailQuestionItem;
 }
 
 export interface FeedbackDetailBottomSectionProps {
   content: FeedbackDetailBottomSectionData;
+}
+
+export interface FeedbackDetailProps {
+  content: {
+    topSection: FeedbackDetailTopSectionData;
+    middleSection: FeedbackDetailMiddleSectionData;
+    bottomSection: FeedbackDetailBottomSectionData;
+  };
   isDownloadingPdf: boolean;
   onDownloadPdf: () => Promise<void> | void;
 }

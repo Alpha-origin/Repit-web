@@ -1,3 +1,4 @@
+import { SOLO_MAJOR_GUIDANCE } from "@/shared/constants/interview-page/setting-interview";
 import {
   MULTI_INTERVIEWER_TEMPLATES, PERSONALITY_OPTIONS, TONE_OPTIONS, ROLE_OPTIONS,
   type InterviewerSlot,
@@ -35,26 +36,23 @@ const MultiInterviewerSettings = ({ slot, otherSlots, technical, disabled, onCha
     </S.Section>
     <S.Section>
       <S.SectionTitle>{technical ? "전문 분야" : "역할"}</S.SectionTitle>
-      <S.ChoiceRow $columns={technical ? 2 : 4} role="group" aria-label={technical ? "전문 분야" : "역할"}>
-        {technical ? ([{ value: "BACKEND", label: "백엔드" }, { value: "FRONTEND", label: "프론트엔드" }] as const).map((option) => (
-          <S.ChoiceButton key={option.value} type="button" $selected={slot.major === option.value}
-            aria-pressed={slot.major === option.value} onClick={() => onChange({ major: option.value })}>
-            {option.label}
-          </S.ChoiceButton>
-        )) : ROLE_OPTIONS.map((option) => {
-          const alreadySelected = otherSlots.some((other) => other.role === option.value);
+      {technical ? <S.CatalogHint>{SOLO_MAJOR_GUIDANCE}</S.CatalogHint> : (
+        <S.ChoiceRow $columns={4} role="group" aria-label="역할">
+          {ROLE_OPTIONS.map((option) => {
+            const alreadySelected = otherSlots.some((other) => other.role === option.value);
 
-          return (
-            <S.ChoiceButton key={option.value} type="button" $selected={slot.role === option.value}
-              $unavailable={alreadySelected} disabled={disabled || alreadySelected}
-              title={alreadySelected ? "다른 슬롯에서 선택한 역할입니다." : undefined}
-              aria-pressed={slot.role === option.value} onClick={() => onChange({ role: option.value })}>
-              {option.label}
-              {alreadySelected ? <S.SelectedLabel>선택됨</S.SelectedLabel> : null}
-            </S.ChoiceButton>
-          );
-        })}
-      </S.ChoiceRow>
+            return (
+              <S.ChoiceButton key={option.value} type="button" $selected={slot.role === option.value}
+                $unavailable={alreadySelected} disabled={disabled || alreadySelected}
+                title={alreadySelected ? "다른 슬롯에서 선택한 역할입니다." : undefined}
+                aria-pressed={slot.role === option.value} onClick={() => onChange({ role: option.value })}>
+                {option.label}
+                {alreadySelected ? <S.SelectedLabel>선택됨</S.SelectedLabel> : null}
+              </S.ChoiceButton>
+            );
+          })}
+        </S.ChoiceRow>
+      )}
     </S.Section>
     <S.Section>
       <S.SectionTitle>면접관</S.SectionTitle>

@@ -325,13 +325,6 @@ export const RoleBadge = styled.span`
   font-weight: 800;
 `;
 
-export const CandidateSpecialty = styled.p`
-  margin: 0;
-  color: #596273;
-  font-size: 0.72rem;
-  font-weight: 700;
-`;
-
 export const CandidateDescription = styled.p`
   display: -webkit-box;
   overflow: hidden;

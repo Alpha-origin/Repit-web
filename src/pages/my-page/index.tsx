@@ -93,6 +93,7 @@ const MyPage = () => {
             onEdit={() => portfolioForm.gitInputRef.current?.focus()}
             onReplaceFile={portfolioForm.onPortfolioUploadClick}
             onSave={() => void portfolioForm.onPortfolioSave()}
+            onGoToInterview={() => navigate("/main")}
             isSaving={portfolioForm.isSaving}
           />
         </Portfolio>

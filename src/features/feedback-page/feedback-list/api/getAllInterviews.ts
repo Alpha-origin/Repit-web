@@ -1,7 +1,9 @@
+import axios from "axios";
 import {
   apiInstance,
   ensureAccessToken,
 } from "@/shared/api/axiosInstance";
+import { extractErrorMessage } from "@/shared/api/errorMessage";
 
 export interface InterviewPersona {
   id?: number;
@@ -44,7 +46,7 @@ export interface FrequentWord {
 }
 
 export interface QuestionFeedback {
-  questionId?: string;
+  questionId?: string | number;
   personaId?: number;
   questionContent?: string;
   intention?: string;
@@ -92,6 +94,15 @@ interface FeedbackApiResponse {
   success: boolean;
   data?: FeedbackData;
 }
+
+interface FeedbackAcceptedResponse {
+  jobId?: string;
+  sessionId?: string;
+  status?: string;
+  message?: string;
+}
+
+const feedbackRequests = new Map<number, Promise<FeedbackData>>();
 
 const isFeedbackApiResponse = (
   payload: FeedbackData | FeedbackApiResponse,
@@ -153,20 +164,71 @@ export const getAllFeedbacks = async () => {
   return normalizeFeedbacks(response.data);
 };
 
-export const getFeedback = async (interviewId: number) => {
+export const getFeedback = async (interviewId: number, signal?: AbortSignal) => {
   if (!Number.isInteger(interviewId) || interviewId <= 0) {
     throw new Error("피드백을 조회할 interviewId가 없습니다.");
   }
 
   const authorizationHeader = await ensureAccessToken();
-  const response = await apiInstance.get<
-    FeedbackData | FeedbackApiResponse
-  >(GET_FEEDBACK_URL, {
-    params: { interviewId },
-    headers: {
-      Authorization: authorizationHeader,
-    },
+  try {
+    const response = await apiInstance.get<
+      FeedbackData | FeedbackApiResponse
+    >(GET_FEEDBACK_URL, {
+      params: { interviewId },
+      headers: {
+        Authorization: authorizationHeader,
+      },
+      signal,
+    });
+
+    return normalizeFeedback(response.data);
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return null;
+    }
+
+    throw error;
+  }
+};
+
+export const getOrRequestFeedback = (interviewId: number) => {
+  const existingRequest = feedbackRequests.get(interviewId);
+
+  if (existingRequest) {
+    return existingRequest;
+  }
+
+  const request = (async (): Promise<FeedbackData> => {
+    const feedback = await getFeedback(interviewId);
+
+    if (feedback) {
+      return feedback;
+    }
+
+    const response = await apiInstance.post<ApiResponse<FeedbackAcceptedResponse>>(
+      GET_FEEDBACK_URL,
+      undefined,
+      { params: { interviewId } },
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(
+        extractErrorMessage(response.data, "피드백 생성을 요청하지 못했습니다."),
+      );
+    }
+
+    return {
+      interviewId,
+      sessionId: response.data.data.sessionId,
+      status: response.data.data.status === "FAILED" ? "FAILED" : "PENDING",
+      errorMessage: response.data.data.status === "FAILED"
+        ? response.data.data.message
+        : undefined,
+    };
+  })().finally(() => {
+    feedbackRequests.delete(interviewId);
   });
 
-  return normalizeFeedback(response.data);
+  feedbackRequests.set(interviewId, request);
+  return request;
 };
