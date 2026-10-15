@@ -37,9 +37,9 @@ export const Container = styled.div`
   min-height: 100%;
   display: flex;
   justify-content: center;
-  padding: ${({ theme }) => theme.spacing.lg}
+  padding: ${({ theme }) => theme.spacing.md}
     clamp(1.5rem, 6.8vw, 6.125rem)
-    ${({ theme }) => theme.spacing.xl};
+    ${({ theme }) => theme.spacing.lg};
   box-sizing: border-box;
 
   @media (max-width: 64rem) {
@@ -49,16 +49,16 @@ export const Container = styled.div`
   @media (max-width: 34rem) {
     padding: ${({ theme }) => theme.spacing.md}
       ${({ theme }) => theme.spacing.md}
-      ${({ theme }) => theme.spacing.xl};
+      ${({ theme }) => theme.spacing.lg};
   }
 `;
 
 export const ContentWrapper = styled.div`
-  width: min(100%, 70rem);
+  width: min(100%, 66rem);
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xl};
+  gap: ${({ theme }) => theme.spacing.lg};
   box-sizing: border-box;
 `;
 
@@ -71,7 +71,7 @@ export const Sections = styled.div`
 
   @media (max-width: 60rem) {
     grid-template-columns: 1fr;
-    gap: ${({ theme }) => theme.spacing.xl};
+    gap: ${({ theme }) => theme.spacing.lg};
   }
 `;
 
@@ -79,10 +79,10 @@ export const ControlColumn = styled.div`
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xxl};
+  gap: ${({ theme }) => theme.spacing.xl};
 
   @media (max-width: 60rem) {
-    gap: ${({ theme }) => theme.spacing.xl};
+    gap: ${({ theme }) => theme.spacing.lg};
   }
 `;
 
@@ -96,26 +96,26 @@ export const Section = styled.section`
 export const Title = styled.h2`
   margin: 0;
   color: #4d5570;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
   line-height: 1.4;
 `;
 
 export const StyleOptionGroup = styled.div`
   display: grid;
-  grid-auto-rows: minmax(5rem, auto);
+  grid-auto-rows: minmax(4.5rem, auto);
   gap: 0.75rem;
 `;
 
 export const StyleOptionButton = styled.button<SelectedProps>`
   width: 100%;
   min-width: 0;
-  min-height: 5rem;
+  min-height: 4.5rem;
   display: grid;
   grid-template-columns: 2rem minmax(0, 1fr) 1.5rem;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
   border-radius: 0.5rem;
@@ -236,7 +236,7 @@ export const DifficultyGroup = styled.div`
 
 export const DifficultyButton = styled.button<SelectedProps>`
   min-width: 0;
-  min-height: 3.25rem;
+  min-height: 3rem;
   padding: 0.75rem 0.5rem;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
@@ -277,7 +277,7 @@ export const DifficultyIcon = styled.img`
 export const InterviewerGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.25rem;
+  gap: ${({ theme }) => theme.spacing.md};
 
   @media (max-width: 34rem) {
     grid-template-columns: 1fr;
@@ -318,7 +318,7 @@ export const InterviewerCard = styled.button<SelectedProps>`
 
 export const InterviewerImage = styled.img`
   width: 100%;
-  aspect-ratio: 20 / 9;
+  aspect-ratio: 5 / 2;
   flex: 0 0 auto;
   display: block;
   object-fit: cover;
@@ -330,15 +330,15 @@ export const InterviewerBody = styled.div<SelectedProps>`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.sm};
-  padding: ${({ theme }) => theme.spacing.md};
+  padding: 0.75rem ${({ theme }) => theme.spacing.md};
   background: ${({ $selected, theme }) =>
     $selected ? theme.colors.surface.blueLight : theme.colors.white};
 `;
 
 export const InterviewerSelectedBadge = styled.span`
   position: absolute;
-  top: 1.15rem;
-  right: 1.15rem;
+  top: 0.875rem;
+  right: 0.875rem;
   width: 1.45rem;
   height: 1.45rem;
   border-radius: 50%;
@@ -419,7 +419,7 @@ export const ErrorMessage = styled.p`
 `;
 
 const baseButton = styled.button<ActionButtonProps>`
-  width: min(100%, 9.5rem);
+  width: min(100%, 8.5rem);
   min-height: 3rem;
   display: inline-flex;
   align-items: center;
@@ -526,5 +526,5 @@ export const AnswerModeGroup = styled.div`
 
 export const AnswerModeButton = styled(StyleOptionButton)`
   grid-template-columns: minmax(0, 1fr) 1.5rem;
-  min-height: 5.5rem;
+  min-height: 5rem;
 `;
