@@ -1,18 +1,13 @@
 import styled from "styled-components";
 
+import { pageLayout } from "@/shared/styles/pageLayout";
+
 export const Page = styled.div`
-  width: min(calc(100% - 4rem), 70rem);
-  margin: 0 auto;
-  padding: 1.75rem 0 3rem;
+  ${pageLayout}
   color: ${({ theme }) => theme.colors.text.default};
 
   button, input {
     font-family: inherit;
-  }
-
-  @media (max-width: 56rem) {
-    width: min(calc(100% - 2rem), 42rem);
-    padding-top: 1rem;
   }
 `;
 
