@@ -17,7 +17,9 @@ const FeedbackOverallPage = () => {
     interview,
     previousFeedback,
     isLoading,
+    isRetryingFeedback,
     refetch,
+    retryFeedback,
   } = useFeedbackInterview(id, true);
   const isAnalysisPending =
     feedback?.status === "PENDING" || feedback?.status === "IN_PROGRESS";
@@ -67,11 +69,15 @@ const FeedbackOverallPage = () => {
               {isAnalysisPending
                 ? feedbackErrorMessage ?? "피드백을 분석 중입니다. 완료되면 자동으로 표시됩니다."
                 : isAnalysisFailed
-                  ? feedback?.errorMessage ?? "피드백 분석에 실패했습니다."
+                  ? feedbackErrorMessage ?? feedback?.errorMessage ?? "피드백 분석에 실패했습니다."
                   : feedbackErrorMessage ?? "피드백 분석 결과를 불러오지 못했습니다."}
             </S.StateText>
-            <S.RetryButton type="button" onClick={() => void refetch()}>
-              다시 시도
+            <S.RetryButton
+              type="button"
+              onClick={() => void (isAnalysisFailed ? retryFeedback() : refetch())}
+              disabled={isAnalysisFailed && isRetryingFeedback}
+            >
+              {isAnalysisFailed && isRetryingFeedback ? "요청 중…" : "다시 시도"}
             </S.RetryButton>
           </S.StateCard>
         ) : (
