@@ -1,6 +1,7 @@
+import type { JobRoleCode } from "@/shared/constants/job/jobRoles";
 import type { PrepareInterviewQuestion } from "./prepare-interview";
 
-export type InterviewPersonaMajor = "BACKEND" | "FRONTEND";
+export type InterviewPersonaMajor = JobRoleCode;
 export type InterviewPersonality =
   | "FRIENDLY"
   | "REALISTIC"

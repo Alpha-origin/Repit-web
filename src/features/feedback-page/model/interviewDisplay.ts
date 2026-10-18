@@ -1,17 +1,8 @@
+import { getJobRoleLabel } from "@/shared/constants/job/jobRoles";
 import type { InterviewSummary } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
 
 export const getInterviewId = (interview: InterviewSummary) =>
   interview.interviewId ?? interview.id ?? 0;
-
-const MAJOR_LABELS: Record<string, string> = {
-  BACKEND: "백엔드",
-  FRONTEND: "프론트엔드",
-  FULLSTACK: "풀스택",
-  MOBILE: "모바일",
-  DEVOPS: "데브옵스",
-  DATA: "데이터",
-  AI: "AI",
-};
 
 const PERSONA_TYPE_LABELS: Record<string, string> = {
   FRIENDLY: "친근한",
@@ -67,7 +58,7 @@ export const getInterviewMajorLabel = (major?: string) => {
     return "미제공";
   }
 
-  return MAJOR_LABELS[major] ?? major;
+  return getJobRoleLabel(major);
 };
 
 export const getInterviewTitle = (major?: string) =>

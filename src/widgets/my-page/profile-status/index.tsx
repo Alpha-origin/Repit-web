@@ -41,10 +41,10 @@ const ProfileStatusCard = ({
   const completedAt = formatProfileCompletedAt(profile?.completedAt ?? null);
   const failureReason = profile?.failureReason;
   const action = failureReason === "REPO_NOT_PUBLIC" ? onSave
-    : failureReason === "INVALID_MATERIAL" ? onReplaceFile
+    : failureReason === "INVALID_MATERIAL" || failureReason === "UNREADABLE_DOCUMENT" ? onReplaceFile
     : failureReason === "INSUFFICIENT_EVIDENCE" ? onEdit : onReanalyze;
   const actionLabel = failureReason === "REPO_NOT_PUBLIC" ? "다시 저장"
-    : failureReason === "INVALID_MATERIAL" ? "파일 교체"
+    : failureReason === "INVALID_MATERIAL" || failureReason === "UNREADABLE_DOCUMENT" ? "파일 교체"
     : failureReason === "INSUFFICIENT_EVIDENCE" ? "자료 보강" : "다시 분석";
 
   return (
