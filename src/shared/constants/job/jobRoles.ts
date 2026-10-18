@@ -22,7 +22,8 @@ export interface JobRole {
   hasSupplement: boolean;
 }
 
-const dev = (code: string, label: string) =>
+// code를 리터럴로 유지해야 JobRoleCode가 9개 코드 유니온이 된다.
+const dev = <const C extends string>(code: C, label: string) =>
   ({
     code, label, category: "DEVELOPMENT", family: "개발", github: "REQUIRED",
     requiredDocuments: ["PORTFOLIO"], optionalDocuments: [], hasSupplement: false,
