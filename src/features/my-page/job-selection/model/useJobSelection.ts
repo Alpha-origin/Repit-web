@@ -1,9 +1,9 @@
 import { useState } from "react";
 
 import {
-  JOB_OPTIONS,
+  getJobRolesByCategory,
   type JobCategory,
-} from "@/shared/constants/my-page/job";
+} from "@/shared/constants/job/jobRoles";
 
 export const useJobSelection = () => {
   const [category, setCategory] = useState<JobCategory>("DEVELOPMENT");
@@ -16,7 +16,7 @@ export const useJobSelection = () => {
   };
 
   const handleJobChange = (nextJob: string) => {
-    if (JOB_OPTIONS[category].some((option) => option.value === nextJob)) {
+    if (getJobRolesByCategory(category).some((role) => role.code === nextJob)) {
       setJob(nextJob);
     }
   };

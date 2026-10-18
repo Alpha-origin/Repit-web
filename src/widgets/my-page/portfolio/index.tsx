@@ -1,11 +1,14 @@
 import type { ChangeEvent, KeyboardEvent, RefObject, ReactNode } from "react";
 
+import type { GithubRule } from "@/shared/constants/job/jobRoles";
+
 import * as S from "./style";
 
 interface PortfolioProps {
   children?: ReactNode;
   jobSelection: ReactNode;
   gitInputRef: RefObject<HTMLInputElement | null>;
+  githubRule: GithubRule;
   isSaveDisabled: boolean;
   isAnalyzing: boolean;
   fileError: string;
@@ -49,6 +52,7 @@ const Portfolio = ({
   children,
   jobSelection,
   gitInputRef,
+  githubRule,
   isSaveDisabled,
   isAnalyzing,
   fileError,
@@ -121,16 +125,19 @@ const Portfolio = ({
         <S.FieldHint>경험을 구체적으로 담을수록 더 알맞은 질문을 받을 수 있어요.</S.FieldHint>
       </S.Section>
 
+      {githubRule !== "HIDDEN" && (
       <S.Section aria-labelledby="github-section-title">
         <S.SectionHeading>
           <S.SectionNumber aria-hidden="true">03</S.SectionNumber>
           <S.SectionTitle id="github-section-title">
             <S.Label htmlFor="my-page-git">GitHub</S.Label>
           </S.SectionTitle>
-          <S.RequiredBadge>필수</S.RequiredBadge>
+          {githubRule === "REQUIRED" && <S.RequiredBadge>필수</S.RequiredBadge>}
         </S.SectionHeading>
         <S.Description id="my-page-git-hint">
-          나의 개발 경험을 보여줄 GitHub 주소를 추가해 주세요.
+          {githubRule === "REQUIRED"
+            ? "나의 개발 경험을 보여줄 GitHub 주소를 추가해 주세요."
+            : "(선택) 데이터·코드 저장소가 있으면 추가해 주세요."}
         </S.Description>
 
         <S.GitInputWrapper>
@@ -175,6 +182,7 @@ const Portfolio = ({
           </S.GitUrlList>
         )}
       </S.Section>
+      )}
 
       {children && <S.AnalysisStatus>{children}</S.AnalysisStatus>}
 

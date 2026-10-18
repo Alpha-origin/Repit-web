@@ -31,6 +31,7 @@ const MyPage = () => {
   );
   const portfolioForm = usePortfolioForm({
     initialGitUrls,
+    jobRole: jobSelection.job,
     isSaveBlocked: profileStatus.isLoading || isAnalyzing || profileStatus.isRestarting,
     requiresChangeConfirmation: profileStatus.profile?.status === "COMPLETED",
     onAnalysisStarted: profileStatus.markPending,

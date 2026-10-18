@@ -7,9 +7,11 @@ import {
   type MyPageMetaData,
 } from "@/features/my-page/api/getMyPageData";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
+import { getGithubRule } from "@/shared/constants/job/jobRoles";
 
 interface UsePortfolioFormOptions {
   initialGitUrls?: string[];
+  jobRole?: string;
   isSaveBlocked?: boolean;
   requiresChangeConfirmation?: boolean;
   onAnalysisStarted?: (jobId: string | null) => void;
@@ -31,6 +33,7 @@ export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const isGitListEditedRef = useRef(false);
+  const githubRule = getGithubRule(options.jobRole);
 
   useEffect(() => {
     if (!options.initialGitUrls?.length || isGitListEditedRef.current) {
@@ -126,7 +129,7 @@ export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
       isValid = false;
     }
 
-    if (gitUrls.length === 0) {
+    if (githubRule === "REQUIRED" && gitUrls.length === 0) {
       setSaveError("Git 주소를 하나 이상 추가해주세요.");
       isValid = false;
     }
@@ -151,7 +154,7 @@ export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
     try {
       const uploadedMetaData = await uploadMyPageMetaData({
         file: portfolioFile,
-        gitUrls,
+        gitUrls: githubRule === "HIDDEN" ? [] : gitUrls,
       });
       options.onAnalysisStarted?.(uploadedMetaData.jobId);
       // 업로드는 성공했으므로 재조회가 실패하면 입력값으로 대신 갱신한다.
@@ -194,6 +197,7 @@ export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
     fileError: portfolioFileError,
     fileInputRef,
     gitInputRef,
+    githubRule,
     isSaveDisabled: isSaving || Boolean(options.isSaveBlocked),
     gitInput,
     gitUrls,
