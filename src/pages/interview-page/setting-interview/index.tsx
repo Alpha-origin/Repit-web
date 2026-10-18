@@ -1,3 +1,8 @@
+import { Navigate, useLocation } from "react-router-dom";
+import { COMPANY_SETTING_PATH } from "@/features/interview-page/setting-company/model/draft";
+import { loadSetupDraft } from "@/features/interview-page/setting-company/model/draftStore";
+import { useUserStore } from "@/shared/store/userStore";
+import Loading from "@/shared/components/loading";
 import PersonaOptions from "@/widgets/interview-page/setting-interview/persona-options";
 import ProfileGuidance from "@/widgets/interview-page/profile-guidance";
 import { useInterviewSetup } from "@/features/interview-page/setting-interview/model/useInterviewSetup";
@@ -47,6 +52,7 @@ const SettingInterviewPage = () => {
           isBusy={false}
           isNextDisabled={setup.isNextDisabled}
           isPortfolioAnalyzing={setup.isPortfolioAnalyzing}
+          nextLabel="다음: 기업 선택"
           onBack={setup.onBack}
           onNext={setup.onNext}
         />
@@ -55,4 +61,12 @@ const SettingInterviewPage = () => {
   );
 };
 
-export default SettingInterviewPage;
+const AuthenticatedSettings = () => {
+  const { isLoaded, id } = useUserStore();
+  const location = useLocation();
+  const saved = isLoaded ? loadSetupDraft(new URLSearchParams(location.search).get("draftId")) : null;
+  if (saved?.submission) return <Navigate to={`${COMPANY_SETTING_PATH}?draftId=${saved.draftId}`} replace />;
+  return isLoaded ? <SettingInterviewPage key={id} /> : <Loading message="로그인 정보를 확인하고 있어요" />;
+};
+
+export default AuthenticatedSettings;

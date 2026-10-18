@@ -1,3 +1,5 @@
+import axios from "axios";
+import { readCompanyBadge } from "@/features/interview-page/company/model/type";
 import { apiInstance } from "@/shared/api/axiosInstance";
 
 import {
@@ -38,7 +40,7 @@ const getPersonaIds = (value: unknown) => {
   return value.reduce<number[]>((personaIds, item) => {
     const personaId = getNumericValue(item);
 
-    if (personaId !== null && personaId > 0 && !personaIds.includes(personaId)) {
+    if (personaId !== null && Number.isSafeInteger(personaId) && personaId > 0 && !personaIds.includes(personaId)) {
       personaIds.push(personaId);
     }
 
@@ -120,9 +122,9 @@ const normalizeCreatedInterview = (
 
   if (
     !sessionId ||
-    interviewId === null ||
-    userId === null ||
-    (mode === "SOLO" && personaId === null) ||
+    interviewId === null || !Number.isSafeInteger(interviewId) || interviewId <= 0 ||
+    userId === null || !Number.isSafeInteger(userId) || userId <= 0 ||
+    (mode === "SOLO" && (personaId === null || !Number.isSafeInteger(personaId) || personaId <= 0)) ||
     (mode === "MULTI" && personaIds.length === 0)
   ) {
     return null;
@@ -135,6 +137,7 @@ const normalizeCreatedInterview = (
 
   return {
     interviewId,
+    company: readCompanyBadge(sourceRecord?.company),
     userId,
     personaId,
     personaIds: normalizedPersonaIds,
@@ -155,14 +158,20 @@ const normalizeCreatedInterview = (
   } satisfies CreatedInterviewData;
 };
 
-export const createInterview = async (params: CreateInterviewParams) => {
+export const createInterview = async (params: CreateInterviewParams, idempotencyKey: string) => {
   try {
-    const response = await apiInstance.post(CREATE_INTERVIEW_URL, params);
+    const response = await apiInstance.post(CREATE_INTERVIEW_URL, params, {
+      headers: { "Idempotency-Key": idempotencyKey },
+      timeout: 30_000,
+    });
     const responseRecord = getRecord(response.data);
 
     if (responseRecord?.success === false) {
       return {
         data: null,
+        statusCode: null,
+        code: null,
+        definitive: false,
         errorMessage: "면접 시작에 실패했습니다.",
       };
     }
@@ -172,23 +181,46 @@ export const createInterview = async (params: CreateInterviewParams) => {
     if (!createdInterview) {
       return {
         data: null,
+        statusCode: null,
+        code: null,
+        definitive: false,
         errorMessage: "면접 세션 정보를 받지 못했습니다.",
       };
     }
 
     return {
       data: createdInterview,
+      statusCode: null,
+      code: null,
+      definitive: false,
       errorMessage: null,
     };
   } catch (error) {
     const errorMessage = getErrorMessage(error, "면접 시작에 실패했습니다.");
 
+    const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+    const payload = axios.isAxiosError(error) ? getRecord(error.response?.data) : null;
+    const code = getTrimmedString(payload?.code);
     return {
       data: null,
+      code,
+      statusCode: status ?? null,
+      definitive: status !== undefined && [400, 404, 422].includes(status),
       errorMessage:
         errorMessage === "Internal Server Error"
           ? "면접 시작 서버에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
           : errorMessage,
     };
   }
+};
+
+export const getCreatedInterview = async (interviewId: number, params: CreateInterviewParams, signal?: AbortSignal) => {
+  const response = await apiInstance.get("/api/interviews/get", { params: { interviewId }, signal, timeout: 15_000 });
+  const data = normalizeCreatedInterview(response.data, params);
+  if (!data || data.interviewId !== interviewId) throw new Error("면접 정보를 확인하지 못했습니다.");
+  if ("personaIds" in params && (params.personaIds.length !== data.personaIds.length ||
+    params.personaIds.some((id, index) => data.personaIds[index] !== id))) {
+    throw new Error("생성된 면접관 정보가 선택한 설정과 일치하지 않습니다.");
+  }
+  return data;
 };

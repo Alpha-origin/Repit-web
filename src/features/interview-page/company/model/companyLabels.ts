@@ -28,6 +28,6 @@ export const COMPANY_DISCLAIMER =
   "공개 자료를 바탕으로 한 연습용 면접이며, 해당 기업과 무관합니다. 실제 채용 전형이나 기출 문제가 아닙니다.";
 
 export const formatDataAsOf = (dataAsOf: string) => {
-  const [year, month] = dataAsOf.split("-").map(Number);
-  return year && month ? `${year}년 ${month}월 기준` : "";
+  const [year, month, day] = dataAsOf.split("-").map(Number);
+  return year && month && day ? `${year}년 ${month}월 ${day}일 기준` : "";
 };

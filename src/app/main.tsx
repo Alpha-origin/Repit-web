@@ -1,3 +1,4 @@
+import "@/features/interview-page/setting-company/model/draftStore";
 import { createRoot } from "react-dom/client";
 import { ThemeProvider } from "styled-components";
 import { RouterProvider } from "react-router-dom";

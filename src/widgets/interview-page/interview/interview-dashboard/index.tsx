@@ -1,3 +1,4 @@
+import CompanyBadge from "@/widgets/interview-page/company-badge";
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { INTERVIEW_DEVICE_STATUS_LABELS } from "@/shared/constants/interview-page/interview";
@@ -77,6 +78,7 @@ const InterviewDashboard = () => {
   return (
     <S.Page $multi={isMultiInterview}>
       <S.Content $multi={isMultiInterview}>
+        <CompanyBadge />
         <S.Timer aria-label={`경과 시간 ${formatTime(elapsedSeconds)}`}>
           <S.TimerDot aria-hidden="true" />
           {formatTime(elapsedSeconds)}

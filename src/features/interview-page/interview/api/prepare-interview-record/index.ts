@@ -83,7 +83,7 @@ const getRetryAfterMs = (payload: unknown) => {
   return retryAfterMs !== null && retryAfterMs >= 0 ? retryAfterMs : null;
 };
 
-export const prepareInterviewRecord = async (interviewId: number) => {
+export const prepareInterviewRecord = async (interviewId: number, signal?: AbortSignal) => {
   const requestUrl = `${PREPARE_INTERVIEW_RECORD_URL}/${encodeURIComponent(
     interviewId,
   )}`;
@@ -99,6 +99,7 @@ export const prepareInterviewRecord = async (interviewId: number) => {
     const response = await apiInstance.post(
       requestUrl,
       PREPARE_INTERVIEW_RECORD_BODY,
+      { signal, timeout: 15_000 },
     );
     const responseInterviewId = getInterviewId(response.data);
     const responseRecord = getRecord(response.data);
@@ -156,6 +157,7 @@ export const getInterviewPreparation = async (
     const response = await apiInstance.get("/api/questions/tailor", {
       params: { interviewId },
       signal,
+      timeout: 15_000,
     });
     const responseRecord = getRecord(response.data);
     const sourceRecord = getRecord(responseRecord?.data) ?? responseRecord;
