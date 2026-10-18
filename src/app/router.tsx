@@ -31,6 +31,9 @@ const SettingInterview = lazy(
 const SettingMultiInterview = lazy(
   () => import("@/pages/interview-page/setting-multi-interview")
 );
+const SettingCompany = lazy(
+  () => import("@/pages/interview-page/setting-company")
+);
 
 // Feedback
 const FeedbackListPage = lazy(
@@ -112,6 +115,10 @@ const router = createBrowserRouter([
       {
         path: "setting/interview/multi",
         element: <SettingMultiInterview />,
+      },
+      {
+        path: "setting/interview/company",
+        element: <SettingCompany />,
       },
     ],
   },
