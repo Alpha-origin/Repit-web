@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChangeEvent, KeyboardEvent } from "react";
 
 import {
+  EMPTY_MATERIALS,
   getMaterialErrors,
   getMaterials,
   putMaterials,
@@ -135,6 +137,9 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   const documentSectionRef = useRef<HTMLElement | null>(null);
   const attachingRowIdRef = useRef<string | null>(null);
   const savingRef = useRef(false);
+  const loadRequestRef = useRef<AbortController | null>(null);
+  // 저장 요청 중에 고친 내용이 있는지 알기 위해 수정할 때마다 올린다.
+  const editVersionRef = useRef(0);
 
   const [server, setServer] = useState<Materials | null>(null);
   const [syncedServer, setSyncedServer] = useState<Materials | null>(null);
@@ -151,8 +156,12 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   const [saveStatus, setSaveStatus] = useState<SaveStatus | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isChangeConfirmationOpen, setIsChangeConfirmationOpen] = useState(false);
+  const [isMaterialsLoading, setIsMaterialsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   const jobRole = getJobRole(job);
+  // 저장은 문서·GitHub·보완 입력 전체를 바꾸므로 저장된 값을 읽기 전에는 보내지 않는다.
+  const isLoadBlocked = isMaterialsLoading || Boolean(loadError);
   const githubRule = getGithubRule(job);
   const hasSupplements = Boolean(jobRole?.hasSupplement);
 
@@ -174,32 +183,58 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
     if (!isEdited) applySnapshot(snapshot);
   }
 
-  const applyServer = (materials: Materials) => {
+  // 화면은 그대로 두고 저장된 값만 바꾼다.
+  const rememberServer = (materials: Materials) => {
     const snapshot = toSnapshot(materials);
     setServer(materials);
     setSyncedServer(materials);
     setSavedSnapshot(snapshot);
-    applySnapshot(snapshot);
+    return snapshot;
+  };
+
+  const applyServer = (materials: Materials) => {
+    applySnapshot(rememberServer(materials));
     setIsEdited(false);
   };
 
-  useEffect(() => {
+  // replaceEdits: 다시 불러오기는 조회 실패 중에 고친 내용 대신 저장된 값으로 화면을 채운다.
+  const loadMaterials = useCallback(async (replaceEdits: boolean) => {
+    loadRequestRef.current?.abort();
     const controller = new AbortController();
+    loadRequestRef.current = controller;
+    setIsMaterialsLoading(true);
+    setLoadError("");
 
-    const fetchMaterials = async () => {
-      try {
-        const materials = await getMaterials(controller.signal);
-        if (!controller.signal.aborted) setServer(materials);
-      } catch {
-        // 조회 실패는 빈 화면으로 두고 저장 흐름을 막지 않는다.
+    let materials: Materials;
+    try {
+      materials = await getMaterials(controller.signal);
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        materials = EMPTY_MATERIALS;
+      } else {
+        setLoadError(MATERIAL_MESSAGES.LOAD_FAILED);
+        setIsMaterialsLoading(false);
+        return;
       }
-    };
-
-    void fetchMaterials();
-    return () => controller.abort();
+    }
+    if (controller.signal.aborted) return;
+    if (replaceEdits) {
+      applySnapshot(rememberServer(materials));
+      setIsEdited(false);
+    } else {
+      setServer(materials);
+    }
+    setIsMaterialsLoading(false);
   }, []);
 
+  useEffect(() => {
+    void loadMaterials(false);
+    return () => loadRequestRef.current?.abort();
+  }, [loadMaterials]);
+
   const markEdited = () => {
+    editVersionRef.current += 1;
     setIsEdited(true);
     setSaveStatus(null);
   };
@@ -438,7 +473,7 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   };
 
   const submit = async () => {
-    if (savingRef.current || options.isSaveBlocked || !jobRole) return;
+    if (savingRef.current || options.isSaveBlocked || isLoadBlocked || !jobRole) return;
 
     const filledDocuments = documents.filter(isFilledDocument);
     const files: Record<string, File> = {};
@@ -467,6 +502,7 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
     savingRef.current = true;
     setIsSaving(true);
     setSaveStatus(null);
+    const sentEditVersion = editVersionRef.current;
 
     try {
       const result = await putMaterials({
@@ -480,7 +516,9 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
       });
 
       // 저장 뒤에는 다시 조회하지 않고 응답 값으로 화면과 서버 값을 바꾼다(Web 수정 사항 2.3).
-      applyServer(result.materials);
+      // 요청 중에 고친 내용이 있으면 화면은 두고 저장된 값만 바꿔, 다음 저장에서 보내게 한다.
+      if (editVersionRef.current === sentEditVersion) applyServer(result.materials);
+      else rememberServer(result.materials);
       if (!result.analysis) {
         setSaveStatus({ tone: "info", text: "변경된 내용이 없어요" });
       } else if (result.analysis.status === "accepted") {
@@ -514,7 +552,7 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   };
 
   const handleSave = async () => {
-    if (savingRef.current || options.isSaveBlocked) return;
+    if (savingRef.current || options.isSaveBlocked || isLoadBlocked) return;
     setSaveStatus(null);
     const nextErrors = validate();
     setErrors(nextErrors);
@@ -583,7 +621,9 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
     saveStatus,
     isSaving,
     isEdited,
-    isSaveDisabled: isSaving || Boolean(options.isSaveBlocked),
+    isSaveDisabled: isSaving || isLoadBlocked || Boolean(options.isSaveBlocked),
+    loadError,
+    onRetryLoad: () => void loadMaterials(true),
     onSave: handleSave,
     onCancelEdit: handleCancelEdit,
     isChangeConfirmationOpen,

@@ -47,6 +47,8 @@ interface PortfolioProps {
   isEdited: boolean;
   isSaving: boolean;
   isSaveDisabled: boolean;
+  loadError: string;
+  onRetryLoad: () => void;
   onSave: () => void;
   onCancelEdit: () => void;
   onReanalyze: () => void;
@@ -85,6 +87,8 @@ const Portfolio = ({
   isEdited,
   isSaving,
   isSaveDisabled,
+  loadError,
+  onRetryLoad,
   onSave,
   onCancelEdit,
   onReanalyze,
@@ -102,6 +106,13 @@ const Portfolio = ({
           직무에 맞는 자료를 바탕으로 나에게 맞는 면접 질문을 준비해요.
         </S.Description>
       </S.Header>
+
+      {loadError && (
+        <S.SaveStatus role="alert" $tone="error">
+          <span>{loadError}</span>
+          <S.InlineButton type="button" onClick={onRetryLoad}>다시 불러오기</S.InlineButton>
+        </S.SaveStatus>
+      )}
 
       {jobSelection}
       {errors.job && <S.FieldError role="alert">{errors.job}</S.FieldError>}

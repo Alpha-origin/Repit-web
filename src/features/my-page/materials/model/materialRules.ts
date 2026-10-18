@@ -49,6 +49,7 @@ export const MATERIAL_MESSAGES = {
   SUPPLEMENT_INVALID: "보완 입력 내용을 확인해 주세요",
   NOT_PDF_FILE: "PDF 파일만 업로드할 수 있습니다.",
   SAVE_FAILED: "자료를 저장하지 못했습니다.",
+  LOAD_FAILED: "저장된 자료를 불러오지 못했어요. 다시 불러와야 저장할 수 있어요",
 } as const;
 
 export const getRequiredDocumentMessage = (typeCodes: readonly string[]) =>
