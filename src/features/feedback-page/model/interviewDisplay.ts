@@ -4,6 +4,15 @@ import type { InterviewSummary } from "@/features/feedback-page/feedback-list/ap
 export const getInterviewId = (interview: InterviewSummary) =>
   interview.interviewId ?? interview.id ?? 0;
 
+// 서버가 더는 보내지 않지만 이미 저장된 면접에 남아 있는 옛 전공 코드
+const LEGACY_MAJOR_LABELS: Record<string, string> = {
+  FULLSTACK: "풀스택",
+  MOBILE: "모바일",
+  DEVOPS: "데브옵스",
+  DATA: "데이터",
+  AI: "AI",
+};
+
 const PERSONA_TYPE_LABELS: Record<string, string> = {
   FRIENDLY: "친근한",
   REALISTIC: "현실적인",
@@ -58,7 +67,7 @@ export const getInterviewMajorLabel = (major?: string) => {
     return "미제공";
   }
 
-  return getJobRoleLabel(major);
+  return LEGACY_MAJOR_LABELS[major] ?? getJobRoleLabel(major);
 };
 
 export const getInterviewTitle = (major?: string) =>

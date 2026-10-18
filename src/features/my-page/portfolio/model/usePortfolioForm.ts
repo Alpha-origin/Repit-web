@@ -154,7 +154,7 @@ export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
     try {
       const uploadedMetaData = await uploadMyPageMetaData({
         file: portfolioFile,
-        gitUrls,
+        gitUrls: githubRule === "HIDDEN" ? [] : gitUrls,
       });
       options.onAnalysisStarted?.(uploadedMetaData.jobId);
       // 업로드는 성공했으므로 재조회가 실패하면 입력값으로 대신 갱신한다.
