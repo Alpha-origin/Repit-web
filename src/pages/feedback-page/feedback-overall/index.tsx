@@ -1,3 +1,4 @@
+import CompanyFeedback from "@/widgets/feedback-page/company-feedback";
 import { buildFeedbackOverallContent } from "@/features/feedback-page/model/feedbackDisplay";
 import { useFeedbackInterview } from "@/features/feedback-page/model/useFeedbackInterview";
 import FeedbackOverallBottomSection from "@/widgets/feedback-page/feedback-overall/bottom-section";
@@ -78,6 +79,7 @@ const FeedbackOverallPage = () => {
           <>
             <FeedbackOverallTopSection content={content.topSection} />
             <FeedbackOverallMiddleSection content={content.middleSection} />
+            <CompanyFeedback feedback={feedback!} interview={interview} />
             <FeedbackOverallBottomSection
               content={content.bottomSection}
               isDownloadingPdf={isDownloadingPdf}

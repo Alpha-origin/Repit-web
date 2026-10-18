@@ -37,12 +37,13 @@ const getFeedbackQuestion = (
   personaLabel?: string,
 ) => ({
   id: index + 1,
+  questionId: item.questionId === undefined ? undefined : String(item.questionId),
   label: `Q${index + 1}`,
   preview: getText(item.questionContent),
   personaLabel: personaLabel ?? "면접관",
   question: getText(item.questionContent),
   intention: getText(item.intention),
-  myAnswer: getText(answerContent, "작성된 답변이 없습니다."),
+  myAnswer: getText(item.userAnswer?.trim() || answerContent, "작성된 답변이 없습니다."),
   modelAnswer: getText(item.modelAnswer),
   followUpQuestion: "예상 꼬리질문이 아직 제공되지 않았습니다.",
   strengths: item.strengths?.length ? item.strengths : ["이 질문의 장점 분석 결과가 아직 없습니다."],
@@ -187,7 +188,7 @@ export const buildFeedbackDetailContent = (
         (Date.parse(left.createdAt) || 0) - (Date.parse(right.createdAt) || 0) ||
         left.answerId - right.answerId,
       )
-      .map((answer) => [answer.question, answer.content]),
+      .map((answer) => [String(answer.question), answer.content]),
   );
   const personaRoleById = new Map(
     (feedback.personas ?? []).flatMap((persona, index) =>
@@ -216,7 +217,7 @@ export const buildFeedbackDetailContent = (
         getFeedbackQuestion(
           item,
           index,
-          answersByQuestionId.get(Number(item.questionId)),
+          answersByQuestionId.get(String(item.questionId)),
           typeof item.personaId === "number"
             ? personaRoleById.get(item.personaId) ?? "면접관"
             : undefined,

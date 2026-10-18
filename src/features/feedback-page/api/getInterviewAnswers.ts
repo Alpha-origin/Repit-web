@@ -4,7 +4,7 @@ import { extractErrorMessage } from "@/shared/api/errorMessage";
 export interface InterviewAnswer {
   answerId: number;
   interview: number;
-  question: number;
+  question: string | number;
   userId: number;
   responseTime: number;
   content: string;

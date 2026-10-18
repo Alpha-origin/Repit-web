@@ -1,4 +1,5 @@
 export interface FeedbackListItem {
+  companyName?: string;
   id: number;
   date: string;
   imageUrl: string;
