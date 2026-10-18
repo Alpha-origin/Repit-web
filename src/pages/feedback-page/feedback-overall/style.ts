@@ -1,22 +1,18 @@
 import styled from "styled-components";
 
+import { pageLayout } from "@/shared/styles/pageLayout";
+
 export const Page = styled.section`
-  width: 100%;
+  ${pageLayout}
   display: flex;
   align-items: flex-start;
   justify-content: center;
   min-height: 100%;
-  padding: 0.625rem clamp(1rem, 3.87vw, 3.5rem) 4.375rem;
   color: ${({ theme }) => theme.colors.text.default};
-  box-sizing: border-box;
-
-  @media (max-width: 48rem) {
-    padding: 0.8rem 0.9rem 1.1rem;
-  }
 `;
 
 export const Panel = styled.section`
-  width: min(100%, 75rem);
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
