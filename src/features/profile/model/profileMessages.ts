@@ -1,6 +1,7 @@
 import { getDocumentTypeLabel } from "@/shared/constants/job/documentTypes";
 import { getJobRole, type JobRole } from "@/shared/constants/job/jobRoles";
 import type { LatestProfile, ProfileFailureReason } from "../api";
+import { getRequiredDocuments } from "./materialsRequirement";
 
 export const PROFILE_FAILURE_MESSAGES: Record<ProfileFailureReason, string> = {
   REPO_NOT_PUBLIC: "GitHub 저장소가 비공개라 읽을 수 없어요. public으로 바꾼 뒤 다시 저장해 주세요",
@@ -14,6 +15,19 @@ const getNonDevInsufficientMessage = (job: JobRole) => {
   const documents = [...job.requiredDocuments, ...job.optionalDocuments]
     .map(getDocumentTypeLabel).join(", ");
   return `자료에서 질문 근거를 충분히 찾지 못했어요. ${documents}처럼 직접 한 일이 드러나는 문서를 더 올려 주세요`;
+};
+
+const withObjectParticle = (word: string) => {
+  const syllable = word.charCodeAt(word.length - 1) - 0xac00;
+  const hasFinalConsonant = syllable >= 0 && syllable <= 11171 && syllable % 28 !== 0;
+  return `${word}${hasFinalConsonant ? "을" : "를"}`;
+};
+
+export const getRequiredDocumentGuidance = (jobRole: string | null | undefined) => {
+  const labels = getRequiredDocuments(jobRole).map(getDocumentTypeLabel);
+  return labels.length === 1
+    ? `${withObjectParticle(labels[0])} 등록해야 면접을 시작할 수 있어요`
+    : `${labels.join("·")} 중 1개 이상 등록해야 면접을 시작할 수 있어요`;
 };
 
 export const getProfileFailureMessage = (profile: LatestProfile, jobRole?: string | null) => {

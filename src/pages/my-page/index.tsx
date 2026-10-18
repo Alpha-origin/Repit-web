@@ -1,10 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import {
-  getMyPageMetaData,
-  type MyPageMetaData,
-} from "@/features/my-page/api/getMyPageData";
+import { getMaterials, type Materials } from "@/features/my-page/api/materials";
 import { useMyInfo } from "@/features/my-page/personal-info/model/useMyInfo";
 import { useJobSelection } from "@/features/my-page/job-selection/model/useJobSelection";
 import { usePortfolioForm } from "@/features/my-page/portfolio/model/usePortfolioForm";
@@ -19,48 +16,47 @@ import * as S from "./style";
 
 const MyPage = () => {
   const navigate = useNavigate();
-  const [metaData, setMetaData] = useState<MyPageMetaData | null>(null);
+  const [materials, setMaterials] = useState<Materials | null>(null);
+  // 저장한 뒤 올려서 저장된 자료를 다시 불러온다.
+  const [materialsVersion, setMaterialsVersion] = useState(0);
   const personalInfo = useMyInfo();
-  const jobSelection = useJobSelection();
+  const jobSelection = useJobSelection(materials?.jobRole);
   const profileStatus = useProfileStatus();
   const isAnalyzing = profileStatus.profile?.status === "PENDING";
 
   const initialGitUrls = useMemo(
-    () => metaData?.gitUrls ?? [],
-    [metaData?.gitUrls],
+    () => materials?.gitUrls ?? [],
+    [materials?.gitUrls],
   );
+
   const portfolioForm = usePortfolioForm({
     initialGitUrls,
     jobRole: jobSelection.job,
     isSaveBlocked: profileStatus.isLoading || isAnalyzing || profileStatus.isRestarting,
     requiresChangeConfirmation: profileStatus.profile?.status === "COMPLETED",
     onAnalysisStarted: profileStatus.markPending,
-    onUploadSuccess: setMetaData,
+    onUploadSuccess: () => setMaterialsVersion((version) => version + 1),
   });
 
   useEffect(() => {
-    let isActive = true;
+    const controller = new AbortController();
 
-    const fetchMetaData = async () => {
+    const fetchMaterials = async () => {
       try {
-        const nextMetaData = await getMyPageMetaData();
+        const nextMaterials = await getMaterials(controller.signal);
 
-        if (isActive) {
-          setMetaData(nextMetaData);
+        if (!controller.signal.aborted) {
+          setMaterials(nextMaterials);
         }
       } catch {
-        if (isActive) {
-          setMetaData(null);
-        }
+        // 실패하면 이전 값을 그대로 둔다. 저장 직후 다시 불러올 때 화면이 비지 않게 하기 위함이다.
       }
     };
 
-    void fetchMetaData();
+    void fetchMaterials();
 
-    return () => {
-      isActive = false;
-    };
-  }, []);
+    return () => controller.abort();
+  }, [materialsVersion]);
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -84,6 +80,7 @@ const MyPage = () => {
         <Portfolio
           {...portfolioForm}
           isAnalyzing={isAnalyzing}
+          savedDocuments={materials?.documents ?? []}
           onBack={handleBack}
           jobSelection={<JobSelection {...jobSelection} />}
         >
@@ -96,6 +93,7 @@ const MyPage = () => {
             onSave={() => void portfolioForm.onPortfolioSave()}
             onGoToInterview={() => navigate("/main")}
             isSaving={portfolioForm.isSaving}
+            jobRole={materials?.jobRole}
           />
         </Portfolio>
       </S.Content>

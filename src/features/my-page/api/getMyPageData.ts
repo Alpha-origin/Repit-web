@@ -8,10 +8,6 @@ export interface MyPageMetaData {
   fileUrl: string;
 }
 
-interface MetaDataResponse {
-  data?: MyPageMetaData;
-}
-
 interface MetaDataUploadResponse {
   job_id?: string;
   jobId?: string;
@@ -20,24 +16,9 @@ interface MetaDataUploadResponse {
   data?: MetaDataUploadResponse;
 }
 
-const META_DATA_URL = "/api/v1/metaData/getMetaData";
 const META_DATA_UPLOAD_URL = "/api/v1/metaData/dataUpload";
 
 export { getLatestProfile } from "@/features/profile/api";
-
-export const getMyPageMetaData = async (signal?: AbortSignal) => {
-  const response = await apiInstance.get<MyPageMetaData | MetaDataResponse>(
-    META_DATA_URL,
-    { signal, timeout: 15_000 },
-  );
-  const payload = response.data;
-
-  if ("data" in payload && payload.data) {
-    return payload.data;
-  }
-
-  return payload as MyPageMetaData;
-};
 
 interface UploadMyPageMetaDataParams {
   file: File;

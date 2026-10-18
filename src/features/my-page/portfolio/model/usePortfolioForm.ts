@@ -1,11 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, KeyboardEvent } from "react";
 
-import {
-  getMyPageMetaData,
-  uploadMyPageMetaData,
-  type MyPageMetaData,
-} from "@/features/my-page/api/getMyPageData";
+import { uploadMyPageMetaData } from "@/features/my-page/api/getMyPageData";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
 import { getGithubRule } from "@/shared/constants/job/jobRoles";
 
@@ -15,7 +11,7 @@ interface UsePortfolioFormOptions {
   isSaveBlocked?: boolean;
   requiresChangeConfirmation?: boolean;
   onAnalysisStarted?: (jobId: string | null) => void;
-  onUploadSuccess?: (metaData: MyPageMetaData) => void;
+  onUploadSuccess?: () => void;
 }
 
 const normalizeGitUrl = (value: string) => value.trim();
@@ -157,12 +153,7 @@ export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
         gitUrls: githubRule === "HIDDEN" ? [] : gitUrls,
       });
       options.onAnalysisStarted?.(uploadedMetaData.jobId);
-      // 업로드는 성공했으므로 재조회가 실패하면 입력값으로 대신 갱신한다.
-      const nextMetaData = await getMyPageMetaData().catch(
-        () => uploadedMetaData,
-      );
-
-      options.onUploadSuccess?.(nextMetaData);
+      options.onUploadSuccess?.();
       setSaveMessage("");
     } catch (error) {
       setSaveError(
