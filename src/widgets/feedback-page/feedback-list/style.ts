@@ -1,5 +1,7 @@
 import styled, { css } from "styled-components";
 
+import { pageLayout } from "@/shared/styles/pageLayout";
+
 interface StatusBadgeProps {
   $complete: boolean;
 }
@@ -12,21 +14,15 @@ const focusRing = css`
 `;
 
 export const Page = styled.div`
-  width: 100%;
+  ${pageLayout}
   min-height: 100%;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 2rem clamp(1.5rem, 5vw, 5rem) 4rem;
-  box-sizing: border-box;
-
-  @media (max-width: 56rem) {
-    padding: 1.25rem 1rem 2rem;
-  }
 `;
 
 export const Panel = styled.section`
-  width: min(100%, 80rem);
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: stretch;
