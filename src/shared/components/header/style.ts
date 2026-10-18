@@ -205,62 +205,62 @@ export const ErrorMessage = styled.p`
   font-size: ${({ theme }) => theme.fontSize.sm};
 `;
 
-export const Header = styled(BaseHeader)<{ $compact?: boolean; $detail?: boolean; $main?: boolean }>`
+export const Header = styled(BaseHeader)<{ $compact?: boolean }>`
   ${({ $compact }) => $compact && css`
-    min-height: 4.1875rem;
+    min-height: clamp(4.5rem, 8vw, 5.25rem);
     grid-template-columns: auto 1fr auto;
-    gap: 2rem;
-    padding: 0 2rem;
+    padding: 0 clamp(1rem, 3.65vw, 3rem);
+    gap: clamp(1.5rem, 3.5vw, 3rem);
     border-bottom: 1px solid #dfe5ef;
 
-    ${LogoImage} { height: 3rem; margin-left: -0.25rem; justify-self: start; }
-    ${TopButtons} { justify-self: start; width: auto; gap: 2rem; margin: 0; }
+    ${LogoImage} {
+      height: clamp(3rem, 6vw, 3.75rem);
+      margin-left: -0.25rem;
+      justify-self: start;
+    }
+    ${TopButtons} {
+      justify-self: start;
+      width: auto;
+      gap: clamp(0.75rem, 2.4vw, 2rem);
+      margin: 0;
+    }
     ${TopButton} {
       min-width: 0;
+      min-height: 3rem;
       flex: none;
-      padding: 0.75rem;
-      font-size: 0.8125rem;
+      padding: 0.875rem;
+      font-family: inherit;
+      font-size: 1rem;
       &::after { display: none; }
     }
     ${StatusButtons} { justify-self: end; gap: 0.75rem; }
-    ${StatusButton} { width: 4.25rem; height: 1.875rem; font-size: 0.75rem; border-radius: 0.375rem; }
-    ${LogoutButton} { width: auto; height: 1.875rem; padding: 0 0.375rem; font-size: 0.8125rem; }
-
-    @media (max-width: 42rem) {
-      grid-template-columns: auto 1fr;
-      gap: 0.25rem 0.5rem;
-      padding: 0.5rem 1rem;
-      ${TopButtons} { grid-row: 2; grid-column: 1 / -1; justify-self: center; gap: 1.5rem; }
-      ${StatusButtons} { grid-row: 1; grid-column: 2; }
+    ${StatusButton} {
+      max-width: 8rem;
+      width: auto;
+      min-width: 5rem;
+      height: 2.5rem;
+      padding: 0 0.875rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      display: block;
     }
-  `}
-  ${({ $detail }) => $detail && css`
-    min-height: 5rem;
-    padding: 0 1.5rem;
-    ${LogoImage} { height: 3.75rem; }
-    ${TopButton} { font-size: 0.875rem; }
-    ${StatusButton} { width: 4.875rem; height: 2.125rem; font-size: 0.8125rem; }
-    ${LogoutButton} { font-size: 0.875rem; }
-
-    @media (max-width: 42rem) {
-      padding: 0.5rem 1rem;
-      ${LogoImage} { height: 3rem; }
+    ${LogoutButton} {
+      width: auto;
+      min-height: 3rem;
+      padding: 0 0.5rem;
+      font-size: 1rem;
     }
-  `}
-  ${({ $main }) => $main && css`
-    min-height: clamp(3.5rem, 7.3vw, 4.5rem);
-    padding-inline: clamp(1rem, 3.65vw, 3rem);
-    gap: clamp(1.5rem, 3.5vw, 3rem);
-
-    ${LogoImage} { height: clamp(2.5rem, 5.3vw, 3.25rem); }
-    ${TopButtons} { gap: clamp(0.75rem, 2.4vw, 2rem); }
-    ${TopButton} { min-height: 2.75rem; font-family: inherit; }
-    ${LogoutButton} { min-height: 2.75rem; }
-    ${StatusButton} { max-width: 7rem; width: auto; min-width: 4.25rem; padding: 0 0.75rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; display: block; }
 
     @media (max-width: 42rem) {
+      grid-template-columns: auto minmax(0, 1fr);
       gap: 0.25rem 0.5rem;
       padding: 0.5rem 1rem 0;
+      ${TopButtons} { grid-row: 2; grid-column: 1 / -1; justify-self: center; gap: 1rem; }
+      ${StatusButtons} { grid-row: 1; grid-column: 2; gap: 0.5rem; min-width: 0; }
+      ${StatusButton} { max-width: 7rem; }
     }
   `}
 `;
