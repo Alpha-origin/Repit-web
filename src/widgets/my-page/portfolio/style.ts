@@ -100,79 +100,8 @@ export const RequiredBadge = styled.span`
   line-height: 1.4;
 `;
 
-export const UploadBox = styled.div<{ $hasFile: boolean; $hasError: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.md};
-  margin-top: ${({ theme }) => theme.spacing.md};
-  padding: 1.5rem 1.25rem;
-  border: 1px ${({ $hasFile }) => ($hasFile ? "solid" : "dashed")}
-    ${({ $hasError, $hasFile }) => $hasError ? "#d77a7a" : $hasFile ? "#b8d3f6" : "#ccd8e8"};
-  border-radius: ${({ theme }) => theme.radius.md};
-  background: #f8faff;
-
-  @media (max-width: 64rem) and (min-width: 56.01rem), (max-width: 36rem) {
-    flex-wrap: wrap;
-    padding: 1.125rem;
-  }
-`;
-
-export const FileIcon = styled.div`
-  display: grid;
-  place-items: center;
-  flex: 0 0 2.75rem;
-  height: 2.75rem;
-  border: 1px solid #e2eaf6;
-  border-radius: ${({ theme }) => theme.radius.sm};
-  background: ${({ theme }) => theme.colors.white};
-  color: ${({ theme }) => theme.colors.brand.blue};
-`;
-
-export const UploadContent = styled.div`
-  flex: 1;
-  min-width: 0;
-`;
-
-export const UploadTitle = styled.p`
-  overflow: hidden;
-  color: #42516b;
-  font-size: ${({ theme }) => theme.fontSize.sm};
-  font-weight: 600;
-  line-height: 1.5;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-export const UploadText = styled.p`
-  margin-top: 0.375rem;
-  color: #748095;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  line-height: 1.6;
-  word-break: keep-all;
-`;
-
 export const HiddenFileInput = styled.input`
   display: none;
-`;
-
-export const UploadButton = styled.button`
-  ${buttonStyle}
-  flex-shrink: 0;
-  min-height: 2.5rem;
-  padding: 0 0.875rem;
-  background: ${({ theme }) => theme.colors.white};
-  color: #465b79;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-
-  &:hover {
-    border-color: ${({ theme }) => theme.colors.brand.blueLight};
-    background: ${({ theme }) => theme.colors.surface.blueLight};
-  }
-
-  @media (max-width: 64rem) and (min-width: 56.01rem), (max-width: 36rem) {
-    width: 100%;
-    min-height: 2.75rem;
-  }
 `;
 
 export const FieldHint = styled.p`
@@ -248,7 +177,7 @@ export const GitUrlList = styled.ul`
   margin-top: 0.75rem;
 `;
 
-export const GitUrlRow = styled.li`
+export const GitUrlRow = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -292,12 +221,68 @@ export const GitRemoveButton = styled.button`
   }
 `;
 
-export const SaveStatus = styled.p<{ $isError: boolean }>`
+const SAVE_STATUS_COLORS = {
+  info: "#596a82",
+  success: "#1877f2",
+  warning: "#a15c07",
+  error: "#c24141",
+} as const;
+
+export const SaveStatus = styled.p<{ $tone: keyof typeof SAVE_STATUS_COLORS }>`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
   margin-top: ${({ theme }) => theme.spacing.md};
-  color: ${({ $isError, theme }) => $isError ? "#c24141" : theme.colors.brand.blue};
+  color: ${({ $tone }) => SAVE_STATUS_COLORS[$tone]};
   font-size: ${({ theme }) => theme.fontSize.sm};
   line-height: 1.6;
   overflow-wrap: anywhere;
+`;
+
+export const InlineButton = styled.button`
+  ${buttonStyle}
+  min-height: 2.25rem;
+  padding: 0 0.875rem;
+  background: ${({ theme }) => theme.colors.white};
+  color: #465b79;
+  font-size: ${({ theme }) => theme.fontSize.xs};
+
+  &:hover { background: ${({ theme }) => theme.colors.surface.muted}; }
+`;
+
+export const Notice = styled.p`
+  margin-top: 1.75rem;
+  padding: 1rem;
+  border-radius: ${({ theme }) => theme.radius.sm};
+  background: ${({ theme }) => theme.colors.surface.muted};
+  color: #748095;
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  text-align: center;
+`;
+
+export const Guide = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: #748095;
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  line-height: 1.6;
+  word-break: keep-all;
+`;
+
+export const RequiredLine = styled.p`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0.25rem 0;
+  color: #596a82;
+  font-weight: 600;
+`;
+
+export const GitUrlItem = styled.li`
+  list-style: none;
 `;
 
 export const AnalysisStatus = styled.div`
