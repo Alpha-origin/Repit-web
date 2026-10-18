@@ -3,6 +3,7 @@ import { MAX_DOCUMENTS } from "@/features/my-page/materials/model/materialRules"
 import { getDocumentTypeLabel } from "@/shared/constants/job/documentTypes";
 import type { JobRole } from "@/shared/constants/job/jobRoles";
 
+import { TrashIcon } from "../icons";
 import * as S from "./style";
 
 const COMMON_DOCUMENT_TYPES = ["RESUME", "CAREER_DESCRIPTION"];
@@ -16,12 +17,6 @@ interface DocumentListProps {
   onTypeChange: (rowId: string, type: string) => void;
   onAttachClick: (rowId: string) => void;
 }
-
-const TrashIcon = () => (
-  <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6" />
-  </svg>
-);
 
 const formatFileSize = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 

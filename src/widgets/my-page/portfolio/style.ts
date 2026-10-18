@@ -261,6 +261,12 @@ export const Notice = styled.p`
   text-align: center;
 `;
 
+export const NoticeDetail = styled.span`
+  display: block;
+  margin-top: 0.25rem;
+  font-size: ${({ theme }) => theme.fontSize.xs};
+`;
+
 export const Guide = styled.div`
   display: flex;
   flex-direction: column;

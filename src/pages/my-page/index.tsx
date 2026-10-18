@@ -55,7 +55,6 @@ const MyPage = () => {
             onReanalyze={() => void profileStatus.reanalyze()}
             onEdit={focusDocuments}
             onReplaceFile={focusDocuments}
-            onSave={() => void materialsForm.onSave()}
             onGoToInterview={() => navigate("/main")}
             isSaving={materialsForm.isSaving}
             jobRole={materials?.jobRole}

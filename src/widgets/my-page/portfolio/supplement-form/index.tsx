@@ -10,6 +10,7 @@ import {
 } from "@/features/my-page/materials/model/materialRules";
 import { getDocumentTypeLabel } from "@/shared/constants/job/documentTypes";
 
+import { TrashIcon } from "../icons";
 import * as S from "./style";
 
 // 상세 기획 §5 안내 문구.
@@ -28,12 +29,6 @@ interface SupplementFormProps {
   onRemove: (rowId: string) => void;
   onChange: (rowId: string, field: SupplementField | "documentId", value: string) => void;
 }
-
-const TrashIcon = () => (
-  <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6" />
-  </svg>
-);
 
 const SupplementForm = ({
   supplements,

@@ -519,7 +519,8 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
     const nextErrors = validate();
     setErrors(nextErrors);
     if (hasErrors(nextErrors)) return;
-    if (options.requiresChangeConfirmation) {
+    // 고친 것이 없으면 질문이 사라진다는 경고 없이 보내고, 서버의 "변경 없음" 응답을 그대로 보여 준다.
+    if (options.requiresChangeConfirmation && isEdited) {
       setIsChangeConfirmationOpen(true);
       return;
     }
