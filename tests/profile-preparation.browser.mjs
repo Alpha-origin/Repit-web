@@ -214,6 +214,8 @@ try {
       }
     }
     await next.click();
+    // 사전설정 다음에 기업 선택 단계가 있고, 면접 생성은 거기서 "면접 시작"으로 한다.
+    await f.page.getByRole("button", { name: "면접 시작", exact: true }).click();
     await f.page.getByText("포트폴리오 분석을 먼저 진행해주세요", { exact: true }).waitFor();
     assert.equal(await f.page.getByRole("link", { name: "마이페이지로 이동", exact: true }).count(), 1);
     await f.close();
