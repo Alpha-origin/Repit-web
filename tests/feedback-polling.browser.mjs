@@ -120,6 +120,23 @@ try {
     report(`retry conflict reloads actual ${status} state`);
   }
 
+  for (const view of ["overall", "detail"]) {
+    const conflictMissing = await fixture({ status: "FAILED", view, postSteps: [{ code: 409 }], steps: [{ code: 404 }] });
+    await conflictMissing.page.getByRole("button", { name: "다시 시도", exact: true }).click();
+    await conflictMissing.page.getByText("피드백 상태를 확인하지 못했습니다. 잠시 후 다시 시도해주세요.", { exact: true }).waitFor();
+    assert.equal(await conflictMissing.page.getByRole("button", { name: "다시 시도", exact: true }).isEnabled(), true);
+    assert.equal(conflictMissing.state.posts, 1);
+    assert.equal(conflictMissing.state.reads, 2);
+    await expectNoMoreRequests(conflictMissing, 1);
+    await conflictMissing.page.getByRole("button", { name: "다시 시도", exact: true }).click();
+    await conflictMissing.page.getByText(pendingMessage(view), { exact: true }).waitFor();
+    assert.equal(conflictMissing.state.posts, 2);
+    await conflictMissing.page.clock.runFor(5_000);
+    await conflictMissing.page.getByText("회복 확인 코멘트", { exact: true }).first().waitFor();
+    await conflictMissing.close();
+    report(`${view}: retry conflict with missing feedback keeps FAILED and retries with POST`);
+  }
+
   const rejected = await fixture({ status: "FAILED", postSteps: [{ code: 500, message: "재채점 접수 실패" }] });
   await rejected.page.getByRole("button", { name: "다시 시도", exact: true }).click();
   await rejected.page.getByText("재채점 접수 실패", { exact: true }).waitFor();

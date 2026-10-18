@@ -162,7 +162,14 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
         }
 
         if (axios.isAxiosError(error) && error.response?.status === 409) {
-          return getFeedback(interviewId);
+          // 다른 재채점의 새 결과가 아직 조회되지 않으면 FAILED를 유지한다.
+          return getFeedback(interviewId).then((currentFeedback) => {
+            if (!currentFeedback) {
+              throw new Error("피드백 상태를 확인하지 못했습니다. 잠시 후 다시 시도해주세요.");
+            }
+
+            return currentFeedback;
+          });
         }
 
         throw error;
