@@ -11,6 +11,7 @@ import {
   getAllInterviews,
   getFeedback,
   getOrRequestFeedback,
+  requestFeedback,
   type FeedbackData,
   type InterviewSummary,
 } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
@@ -30,12 +31,16 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
     null,
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [isRetryingFeedback, setIsRetryingFeedback] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const requestIdRef = useRef(0);
+  const isRetryingFeedbackRef = useRef(false);
 
   const loadInterview = useCallback(async () => {
     const requestId = ++requestIdRef.current;
     const interviewId = Number(id);
+    isRetryingFeedbackRef.current = false;
+    setIsRetryingFeedback(false);
     setAnswers([]);
     setAnswersErrorMessage(null);
     setFeedback(null);
@@ -135,6 +140,58 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
     setIsLoading(false);
   }, [id, includePreviousFeedback]);
 
+  const retryFeedback = useCallback(async () => {
+    if (feedback?.status !== "FAILED") {
+      return loadInterview();
+    }
+
+    if (isRetryingFeedbackRef.current) {
+      return;
+    }
+
+    const requestId = requestIdRef.current;
+    const interviewId = Number(id);
+    isRetryingFeedbackRef.current = true;
+    setIsRetryingFeedback(true);
+    setFeedbackErrorMessage(null);
+
+    try {
+      const nextFeedback = await requestFeedback(interviewId).catch((error: unknown) => {
+        if (requestId !== requestIdRef.current) {
+          return null;
+        }
+
+        if (axios.isAxiosError(error) && error.response?.status === 409) {
+          // 다른 재채점의 새 결과가 아직 조회되지 않으면 FAILED를 유지한다.
+          return getFeedback(interviewId).then((currentFeedback) => {
+            if (!currentFeedback) {
+              throw new Error("피드백 상태를 확인하지 못했습니다. 잠시 후 다시 시도해주세요.");
+            }
+
+            return currentFeedback;
+          });
+        }
+
+        throw error;
+      });
+
+      if (requestId === requestIdRef.current) {
+        setFeedback(nextFeedback);
+      }
+    } catch (error) {
+      if (requestId === requestIdRef.current) {
+        setFeedbackErrorMessage(
+          extractErrorMessage(error, "피드백 생성을 다시 요청하지 못했습니다."),
+        );
+      }
+    } finally {
+      if (requestId === requestIdRef.current) {
+        isRetryingFeedbackRef.current = false;
+        setIsRetryingFeedback(false);
+      }
+    }
+  }, [feedback?.status, id, loadInterview]);
+
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       void loadInterview();
@@ -223,6 +280,8 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
     interview,
     previousFeedback,
     isLoading,
+    isRetryingFeedback,
     refetch: loadInterview,
+    retryFeedback,
   };
 };

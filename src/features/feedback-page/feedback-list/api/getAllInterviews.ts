@@ -103,6 +103,7 @@ interface FeedbackAcceptedResponse {
 }
 
 const feedbackRequests = new Map<number, Promise<FeedbackData>>();
+const feedbackLookups = new Map<number, Promise<FeedbackData>>();
 
 const isFeedbackApiResponse = (
   payload: FeedbackData | FeedbackApiResponse,
@@ -191,7 +192,7 @@ export const getFeedback = async (interviewId: number, signal?: AbortSignal) => 
   }
 };
 
-export const getOrRequestFeedback = (interviewId: number) => {
+export const requestFeedback = (interviewId: number): Promise<FeedbackData> => {
   const existingRequest = feedbackRequests.get(interviewId);
 
   if (existingRequest) {
@@ -199,12 +200,6 @@ export const getOrRequestFeedback = (interviewId: number) => {
   }
 
   const request = (async (): Promise<FeedbackData> => {
-    const feedback = await getFeedback(interviewId);
-
-    if (feedback) {
-      return feedback;
-    }
-
     const response = await apiInstance.post<ApiResponse<FeedbackAcceptedResponse>>(
       GET_FEEDBACK_URL,
       undefined,
@@ -230,5 +225,23 @@ export const getOrRequestFeedback = (interviewId: number) => {
   });
 
   feedbackRequests.set(interviewId, request);
+  return request;
+};
+
+export const getOrRequestFeedback = (interviewId: number) => {
+  const existingRequest = feedbackRequests.get(interviewId) ?? feedbackLookups.get(interviewId);
+
+  if (existingRequest) {
+    return existingRequest;
+  }
+
+  const request = (async () => {
+    const feedback = await getFeedback(interviewId);
+    return feedback ?? requestFeedback(interviewId);
+  })().finally(() => {
+    feedbackLookups.delete(interviewId);
+  });
+
+  feedbackLookups.set(interviewId, request);
   return request;
 };
