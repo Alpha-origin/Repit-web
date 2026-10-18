@@ -14,6 +14,8 @@ interface ProfileStatusCardProps {
   onSave: () => void;
   onGoToInterview: () => void;
   isSaving: boolean;
+  // 분석 실패 문구를 직무에 맞추는 데 쓴다. 저장된 직무다.
+  jobRole?: string | null;
 }
 
 const STATUS_TEXT = {
@@ -35,6 +37,7 @@ const ProfileStatusCard = ({
   onSave,
   onGoToInterview,
   isSaving,
+  jobRole,
 }: ProfileStatusCardProps) => {
   const hasError = !!errorMessage || profile?.status === "FAILED";
   const isComplete = !isLoading && !hasError && profile?.status === "COMPLETED";
@@ -56,7 +59,7 @@ const ProfileStatusCard = ({
         <S.Title>자료 분석 상태</S.Title>
         <S.Message>
           {isLoading ? "분석 상태를 확인하고 있어요"
-            : profile?.status === "FAILED" ? getProfileFailureMessage(profile)
+            : profile?.status === "FAILED" ? getProfileFailureMessage(profile, jobRole)
             : profile ? STATUS_TEXT[profile.status] : "분석 상태를 확인하지 못했어요"}
         </S.Message>
         {isComplete ? (
