@@ -6,7 +6,7 @@ import {
   type JobCategory,
 } from "@/shared/constants/job/jobRoles";
 
-// savedJob: 서버에 저장된 직무. 사용자가 직접 고르기 전까지만 화면 값으로 채운다.
+// savedJob: 서버에 저장된 직무. 사용자가 세부 직무를 직접 고르기 전까지만 화면 값으로 채운다.
 export const useJobSelection = (savedJob?: string | null) => {
   const [category, setCategory] = useState<JobCategory>("DEVELOPMENT");
   const [job, setJob] = useState("");
@@ -22,7 +22,6 @@ export const useJobSelection = (savedJob?: string | null) => {
 
   const handleCategoryChange = (nextCategory: JobCategory) => {
     if (category === nextCategory) return;
-    setIsEdited(true);
     setCategory(nextCategory);
     setJob("");
   };

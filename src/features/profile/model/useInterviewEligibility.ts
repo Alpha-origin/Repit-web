@@ -72,9 +72,8 @@ export const useInterviewEligibility = () => {
       ? jobRole ? "마이페이지에서 자료를 등록해 주세요" : "마이페이지에서 직무와 자료를 등록해 주세요"
     : !requirement.hasRequiredDocument ? getRequiredDocumentGuidance(jobRole)
     : "GitHub 저장소를 등록해야 면접을 시작할 수 있어요";
-  if (needsJobSelection) {
-    guidance = guidance ? `${guidance}. ${JOB_SELECTION_GUIDANCE}` : JOB_SELECTION_GUIDANCE;
-  }
+  // 다른 안내가 있으면 그 문장을 두고, 마이페이지 이동 링크로 직무 선택을 이끈다.
+  if (needsJobSelection && !guidance) guidance = JOB_SELECTION_GUIDANCE;
 
   return {
     canStart,

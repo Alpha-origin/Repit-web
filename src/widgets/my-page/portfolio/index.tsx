@@ -45,7 +45,9 @@ const getSavedDocumentsText = (documents: MaterialDocument[]) => {
   const totalPages = pageCounts.every((count) => count !== null)
     ? pageCounts.reduce<number>((sum, count) => sum + (count ?? 0), 0)
     : null;
-  return totalPages ? `저장된 자료 · 총 ${totalPages}쪽` : "저장된 자료";
+  // 지금 저장 경로는 새 PDF가 있어야 저장되므로 그 조건을 함께 알린다.
+  const summary = totalPages ? `저장된 자료 · 총 ${totalPages}쪽` : "저장된 자료";
+  return `${summary} · 다시 저장하려면 새 PDF를 첨부해 주세요`;
 };
 
 const DocumentIcon = () => (
