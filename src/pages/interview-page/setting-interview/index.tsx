@@ -43,23 +43,14 @@ const SettingInterviewPage = () => {
             onRetry={setup.onRefreshProfile}
           />
         ) : null}
-        {setup.errorMessage ? (
-          <S.ErrorMessage role="alert">{setup.errorMessage}</S.ErrorMessage>
-        ) : null}
         <SettingActions
-          isBusy={setup.isSubmitting}
+          isBusy={false}
           isNextDisabled={setup.isNextDisabled}
           isPortfolioAnalyzing={setup.isPortfolioAnalyzing}
           onBack={setup.onBack}
           onNext={setup.onNext}
         />
       </S.ContentWrapper>
-      {setup.isSubmitting ? (
-        <S.LoadingOverlay role="status" aria-live="polite">
-          <S.LoadingSpinner aria-hidden="true" />
-          <S.LoadingMessage>면접을 준비하고 있어요</S.LoadingMessage>
-        </S.LoadingOverlay>
-      ) : null}
     </S.Container>
   );
 };

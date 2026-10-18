@@ -16,7 +16,7 @@ const SettingMultiInterviewPage = () => {
     <S.Container>
       <S.Content>
         <S.MainGrid>
-          <S.SettingsPanel disabled={setup.isSubmitting}>
+          <S.SettingsPanel>
             <AnswerModeOptions
               answerMode={setup.answerMode}
               onAnswerModeChange={setup.onAnswerModeChange}
@@ -37,7 +37,7 @@ const SettingMultiInterviewPage = () => {
               <S.SectionTitle>면접관 수</S.SectionTitle>
               <S.ChoiceRow $columns={3} role="group" aria-label="면접관 수">
                 {INTERVIEWER_COUNT_OPTIONS.map((count) => (
-                  <S.ChoiceButton key={count} type="button" disabled={setup.isSubmitting}
+                  <S.ChoiceButton key={count} type="button"
                     $selected={setup.selection.interviewerCount === count}
                     aria-pressed={setup.selection.interviewerCount === count}
                     onClick={() => setup.select.count(count)}>{count}명</S.ChoiceButton>
@@ -45,7 +45,6 @@ const SettingMultiInterviewPage = () => {
               </S.ChoiceRow>
             </S.Section>
             <MultiInterviewerSlots
-              disabled={setup.isSubmitting}
               activeSlot={setup.selection.activeSlot}
               slots={setup.selection.slots}
               onSelectSlot={setup.select.slot}
@@ -54,7 +53,7 @@ const SettingMultiInterviewPage = () => {
               slot={setup.selection.slots[setup.selection.activeSlot]}
               otherSlots={setup.selection.slots.filter((_, index) => index !== setup.selection.activeSlot)}
               technical={setup.selection.activeSlot === 0}
-              disabled={setup.isSubmitting}
+              disabled={false}
               onChange={setup.updateSlot}
             />
           </S.InterviewerColumn>
@@ -70,7 +69,7 @@ const SettingMultiInterviewPage = () => {
         ) : null}
 
         <S.ActionRow>
-          <S.BackButton disabled={setup.isSubmitting} type="button" onClick={setup.onBack}>
+          <S.BackButton type="button" onClick={setup.onBack}>
             돌아가기
           </S.BackButton>
           <S.NextButton
@@ -79,25 +78,16 @@ const SettingMultiInterviewPage = () => {
             type="button"
             onClick={setup.onNext}
           >
-            {setup.isSubmitting
-              ? "시작 중..."
-              : setup.isPortfolioAnalyzing
-                ? (
-                  <>
-                    분석 중<S.LoadingDots aria-hidden="true" />
-                  </>
-                )
-                : "다음"}
+            {setup.isPortfolioAnalyzing
+              ? (
+                <>
+                  분석 중<S.LoadingDots aria-hidden="true" />
+                </>
+              )
+              : "다음"}
           </S.NextButton>
         </S.ActionRow>
       </S.Content>
-
-      {setup.isSubmitting ? (
-        <S.LoadingOverlay role="status" aria-live="polite">
-          <S.LoadingSpinner aria-hidden="true" />
-          <S.LoadingText>면접을 준비하고 있어요</S.LoadingText>
-        </S.LoadingOverlay>
-      ) : null}
     </S.Container>
   );
 };
