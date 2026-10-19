@@ -7,16 +7,39 @@ import {
   type InterviewerCount,
   type InterviewerSlot,
 } from "@/shared/constants/interview-page/setting-multi-interview";
+import {
+  findStylePreset,
+  INTERVIEW_SETTING_DEFAULT_SELECTION,
+  INTERVIEW_STYLE_PRESETS,
+  type InterviewDifficultyOption,
+  type InterviewStylePreset,
+} from "@/shared/constants/interview-page/setting-interview";
 
-export const createSlot = (index: number): InterviewerSlot => ({
+export const createSlot = (
+  index: number,
+  preset: InterviewStylePreset = INTERVIEW_SETTING_DEFAULT_SELECTION,
+): InterviewerSlot => ({
   interviewer: null,
   role: index === 0 ? "TECH" : null,
-  personality: "FRIENDLY",
-  tone: "GENTLE",
+  personality: preset.personality,
+  tone: preset.tone,
 });
 
-export const resizeSlots = (slots: InterviewerSlot[], count: InterviewerCount) =>
-  Array.from({ length: count }, (_, index) => slots[index] ?? createSlot(index));
+export const findMultiStylePreset = (slots: InterviewerSlot[], difficulty: InterviewDifficultyOption) => {
+  if (slots.length === 0) return null;
+  const style = findStylePreset({ ...slots[0], difficulty });
+  return style && slots.every((slot) => findStylePreset({ ...slot, difficulty }) === style) ? style : null;
+};
+
+export const resizeSlots = (
+  slots: InterviewerSlot[],
+  count: InterviewerCount,
+  difficulty: InterviewDifficultyOption,
+) => {
+  const style = findMultiStylePreset(slots, difficulty);
+  const preset = style ? INTERVIEW_STYLE_PRESETS[style] : INTERVIEW_SETTING_DEFAULT_SELECTION;
+  return Array.from({ length: count }, (_, index) => slots[index] ?? createSlot(index, preset));
+};
 
 export const validateSelection = (slots: InterviewerSlot[], count: InterviewerCount) => {
   if (!INTERVIEWER_COUNT_OPTIONS.includes(count) || slots.length !== count) {

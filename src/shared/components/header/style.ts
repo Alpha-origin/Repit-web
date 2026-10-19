@@ -1,56 +1,47 @@
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 
 interface TopButtonProps {
   $active: boolean;
 }
 
-const BaseHeader = styled.header`
+export const Header = styled.header`
   position: relative;
   z-index: 1;
 
   width: 100%;
-  min-height: 5rem;
+  min-height: clamp(4.5rem, 8vw, 5.25rem);
 
   box-sizing: border-box;
 
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: auto 1fr auto;
   align-items: center;
+  gap: clamp(1.5rem, 3.5vw, 3rem);
 
-  padding: 0 2.5rem;
+  padding: 0 clamp(1rem, 3.65vw, 3rem);
+  border-bottom: 1px solid #dfe5ef;
 
   background-color: transparent;
 
-  @media (max-width: 72rem) {
-    padding: 0 1.5rem;
-  }
-
-  @media (max-width: 56rem) {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
+  @media (max-width: 42rem) {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.25rem 0.5rem;
+    padding: 0.5rem 1rem 0;
   }
 `;
 
 export const LogoImage = styled.img`
   width: auto;
-  height: 3.75rem;
+  height: clamp(3rem, 6vw, 3.75rem);
 
   display: block;
   flex-shrink: 0;
 
   justify-self: start;
 
-  margin-left: -1rem;
+  margin-left: -0.25rem;
 
   cursor: pointer;
-
-  @media (max-width: 56rem) {
-    height: 3.1rem;
-    justify-self: center;
-    margin-left: 0;
-  }
 `;
 
 export const TopButtons = styled.nav`
@@ -58,16 +49,15 @@ export const TopButtons = styled.nav`
   align-items: center;
   justify-content: center;
 
-  gap: 2.5rem;
+  gap: clamp(0.75rem, 2.4vw, 2rem);
 
-  justify-self: center;
+  justify-self: start;
 
-  margin-top: 0.2rem;
-
-  @media (max-width: 56rem) {
-    gap: 0.5rem;
-    width: 100%;
-    margin-top: 0;
+  @media (max-width: 42rem) {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    justify-self: center;
+    gap: 1rem;
   }
 `;
 
@@ -79,50 +69,23 @@ export const TopButton = styled.button<TopButtonProps>`
 
   color: ${({ $active }) => ($active ? "#0061E0" : "#000000")};
 
-  font-size: 1.1rem;
+  font-family: inherit;
+  font-size: ${({ theme }) => theme.fontSize.md};
   font-weight: ${({ $active }) => ($active ? 600 : 500)};
 
   cursor: pointer;
 
-  padding: 1rem 1.25rem 1rem;
+  min-width: 0;
+  min-height: 3rem;
+  flex: none;
+  padding: 0.875rem;
 
   transition:
     color 0.25s ease,
     font-weight 0.25s ease;
 
-  &::after {
-    content: "";
-
-    position: absolute;
-
-    left: 50%;
-    bottom: 0.35rem;
-
-    width: ${({ $active }) => ($active ? "3.2rem" : "0")};
-    height: 3px;
-
-    border-radius: 999px;
-
-    background-color: #0061e0;
-
-    transform: translateX(-50%);
-
-    transition: width 0.25s ease;
-  }
-
   &:hover {
     color: #0061e0;
-  }
-
-  @media (max-width: 56rem) {
-    flex: 1;
-    padding: 0.8rem 0.5rem 0.9rem;
-    font-size: 0.95rem;
-  }
-
-  @media (max-width: 36rem) {
-    min-width: 5rem;
-    font-size: 0.9rem;
   }
 `;
 
@@ -131,47 +94,53 @@ export const StatusButtons = styled.div`
   align-items: center;
   justify-content: center;
 
-  gap: 0.5rem;
+  gap: 0.75rem;
 
   justify-self: end;
 
-  @media (max-width: 56rem) {
-    justify-self: center;
-    gap: 0.75rem;
+  @media (max-width: 42rem) {
+    grid-row: 1;
+    grid-column: 2;
+    gap: 0.5rem;
+    min-width: 0;
   }
 `;
 
 export const StatusButton = styled.button`
   border: none;
 
-  width: 5.5rem;
+  width: auto;
+  min-width: 5rem;
+  max-width: 8rem;
   height: 2.5rem;
+  padding: 0 0.875rem;
 
   border-radius: 0.5rem;
 
   background-color: #3388f7;
   color: #ffffff;
 
-  font-size: 1rem;
+  font-size: ${({ theme }) => theme.fontSize.sm};
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 
   cursor: default;
 
-  @media (max-width: 56rem) {
-    width: 6rem;
-    height: 2.8rem;
-    font-size: 0.95rem;
+  @media (max-width: 42rem) {
+    max-width: 7rem;
   }
 `;
 
 export const LogoutButton = styled.button`
   border: none;
 
-  width: 6.5rem;
-  height: 3rem;
+  width: auto;
+  height: 1.875rem;
+  min-height: 3rem;
+  padding: 0 0.5rem;
 
   border-radius: 1rem;
 
@@ -179,7 +148,7 @@ export const LogoutButton = styled.button`
 
   color: #1a73e8;
 
-  font-size: 1rem;
+  font-size: ${({ theme }) => theme.fontSize.md};
 
   cursor: pointer;
 
@@ -191,76 +160,10 @@ export const LogoutButton = styled.button`
     color: #c90505;
     background-color: rgba(201, 5, 5, 0.05);
   }
-
-  @media (max-width: 56rem) {
-    width: 6rem;
-    height: 2.8rem;
-    font-size: 0.95rem;
-  }
 `;
 export const ErrorMessage = styled.p`
   grid-column: 1 / -1;
   margin: ${({ theme }) => theme.spacing.sm} 0;
   color: ${({ theme }) => theme.colors.text.default};
   font-size: ${({ theme }) => theme.fontSize.sm};
-`;
-
-export const Header = styled(BaseHeader)<{ $compact?: boolean }>`
-  ${({ $compact }) => $compact && css`
-    min-height: clamp(4.5rem, 8vw, 5.25rem);
-    grid-template-columns: auto 1fr auto;
-    padding: 0 clamp(1rem, 3.65vw, 3rem);
-    gap: clamp(1.5rem, 3.5vw, 3rem);
-    border-bottom: 1px solid #dfe5ef;
-
-    ${LogoImage} {
-      height: clamp(3rem, 6vw, 3.75rem);
-      margin-left: -0.25rem;
-      justify-self: start;
-    }
-    ${TopButtons} {
-      justify-self: start;
-      width: auto;
-      gap: clamp(0.75rem, 2.4vw, 2rem);
-      margin: 0;
-    }
-    ${TopButton} {
-      min-width: 0;
-      min-height: 3rem;
-      flex: none;
-      padding: 0.875rem;
-      font-family: inherit;
-      font-size: 1rem;
-      &::after { display: none; }
-    }
-    ${StatusButtons} { justify-self: end; gap: 0.75rem; }
-    ${StatusButton} {
-      max-width: 8rem;
-      width: auto;
-      min-width: 5rem;
-      height: 2.5rem;
-      padding: 0 0.875rem;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      display: block;
-    }
-    ${LogoutButton} {
-      width: auto;
-      min-height: 3rem;
-      padding: 0 0.5rem;
-      font-size: 1rem;
-    }
-
-    @media (max-width: 42rem) {
-      grid-template-columns: auto minmax(0, 1fr);
-      gap: 0.25rem 0.5rem;
-      padding: 0.5rem 1rem 0;
-      ${TopButtons} { grid-row: 2; grid-column: 1 / -1; justify-self: center; gap: 1rem; }
-      ${StatusButtons} { grid-row: 1; grid-column: 2; gap: 0.5rem; min-width: 0; }
-      ${StatusButton} { max-width: 7rem; }
-    }
-  `}
 `;

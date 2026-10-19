@@ -268,14 +268,15 @@ export const useInterviewSession = (
   const [preparationAttempt, setPreparationAttempt] = useState(0);
   const retryRequestRef = useRef<AbortController | null>(null);
   const isVoiceMode = mode === "voice";
-  const { cameraState, cloneAudioTrack, cloneVideoTrack, micState, micStream, videoRef, releaseMedia } =
+  const { cameraState, cloneAudioTrack, cloneVideoTrack, micState, micStream, videoRef, releaseMedia,
+    isCameraEnabled, isMicEnabled, toggleCamera, toggleMicrophone } =
     useInterviewMedia(isVoiceMode && !hasEndedSession);
   const fullRecorder = useInterviewRecorder(cloneVideoTrack, cloneAudioTrack);
   const recorder = useAnswerRecorder(cloneAudioTrack);
   const { stopRecording: stopAnswerRecording, hasPendingRecording: hasPendingAnswerRecording } = recorder;
   const { startRecording: startFullRecording, stopRecording: stopFullRecording,
     hasPendingRecording: hasPendingFullRecording } = fullRecorder;
-  const voiceLevel = useVoiceLevel(micStream);
+  const voiceLevel = useVoiceLevel(isMicEnabled ? micStream : null);
   const voiceAnswer = useVoiceAnswer();
   const speakingPersonaId = useMemo(() => {
     const personaId = currentQuestion?.personaId;
@@ -744,7 +745,7 @@ export const useInterviewSession = (
   const handleStartVoice = async () => {
     if (!isVoiceMode || isSessionClosedRef.current || isCompletingVoiceRef.current ||
       submittingRef.current || isAwaitingNextQuestion || !canSubmitAnswer ||
-      cameraState !== "ready" || micState !== "ready" || !fullRecorder.isRecording) return false;
+      cameraState !== "ready" || micState !== "ready" || !isMicEnabled || !fullRecorder.isRecording) return false;
     questionAudio.onStop();
     if (!recorder.startRecording()) return false;
     answerRecordingRef.current = { question: currentQuestion, startedAt: Date.now() };
@@ -875,13 +876,22 @@ export const useInterviewSession = (
   const handleSubmitText = async () => {
     if (!isVoiceMode) await submitAnswer(voiceAnswer.answerText, currentQuestion, textAnswerStartedAtRef.current);
   };
+  const handleToggleMicrophone = () => {
+    if (isSessionClosedRef.current || isCompletingVoiceRef.current || recorder.isStopping) return;
+    const nextEnabled = toggleMicrophone();
+    if (nextEnabled === false) voiceAnswer.onPauseVoice();
+    else if (nextEnabled === true) voiceAnswer.onResumeVoice();
+  };
+  const handleToggleCamera = () => {
+    if (!isSessionClosedRef.current && !isCompletingVoiceRef.current && !recorder.isStopping) toggleCamera();
+  };
   const handleQuitInterview = async () => {
     if (!(await endInterviewSession(false, "quit"))) return;
     if (!(await resumePendingInterviewLeave())) await endInterviewSession(true, "quit");
   };
 
   return {
-    answerStatus: isVoiceMode ? voiceAnswer.voiceStatus : INTERVIEW_STATUS_MESSAGES.text,
+    answerStatus: isVoiceMode ? (isMicEnabled ? voiceAnswer.voiceStatus : "마이크가 꺼져 있어요.") : INTERVIEW_STATUS_MESSAGES.text,
     answerText: voiceAnswer.answerText,
     cameraState,
     recorder,
@@ -897,7 +907,12 @@ export const useInterviewSession = (
     isAwaitingResponse: hasEndedSession || isClosing || isCompletingVoice || isSubmitting || isAwaitingNextQuestion || recorder.isStopping,
     isSubmitting,
     isClosing,
-    isMediaReady: cameraState === "ready" && micState === "ready" && fullRecorder.isRecording,
+    isMediaReady: cameraState === "ready" && micState === "ready" && isMicEnabled && fullRecorder.isRecording,
+    isCameraEnabled,
+    isMicEnabled,
+    isMediaToggleDisabled: hasEndedSession || isClosing || isCompletingVoice || recorder.isStopping,
+    onToggleCamera: handleToggleCamera,
+    onToggleMicrophone: handleToggleMicrophone,
     isInterviewReady: isChatSessionReady,
     isPreparingInterview: Boolean(preparedInterview) && !isChatSessionReady,
     isVoiceStarted: recorder.isRecording,

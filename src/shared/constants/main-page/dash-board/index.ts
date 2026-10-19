@@ -3,7 +3,7 @@ export const MAIN_PAGE_INTERVIEW_MODE_CARDS = [
     id: "one-to-one",
     badge: "도전하기",
     title: "1:1 면접하기",
-    aiBadge: "Ai",
+    aiBadge: "AI",
     description: "돌발 상황에도 유연하게 대응하고 싶은 취업 준비생",
     features: [
       {
@@ -26,7 +26,7 @@ export const MAIN_PAGE_INTERVIEW_MODE_CARDS = [
     id: "n-to-one",
     badge: "실전체험",
     title: "N:1 면접하기",
-    aiBadge: "Ai",
+    aiBadge: "AI",
     description: "실제 면접 분위기와 가장 유사한 실전형 면접",
     features: [
       {
@@ -52,4 +52,4 @@ export type MainPageInterviewModeId =
 
 export const MAIN_PAGE_COMING_SOON_LABEL = "준비중인 기능입니다";
 
-export const MAIN_PAGE_GUIDE_ROUTE = "/";
+export const MAIN_PAGE_GUIDE_ROUTE = "/interview-guide";

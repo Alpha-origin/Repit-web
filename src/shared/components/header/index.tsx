@@ -36,7 +36,6 @@ const Header = () => {
     pathname.startsWith("/main/feedback/detail/") ||
     pathname.startsWith("/main/feedback/overall/");
   const isMypage = pathname === "/main/mypage";
-  const isWorkspacePage = pathname === "/main" || isFeedbackPage || isMypage;
 
   const handleLeave = async (path: string, logout = false) => {
     if (actionRef.current) return;
@@ -65,7 +64,7 @@ const Header = () => {
   const handleLogout = () => { void handleLeave("/login", true); };
 
   return (
-    <S.Header $compact={isWorkspacePage}>
+    <S.Header>
       <S.LogoImage src={Repit} alt="Repit" onClick={() => handleNavigate("/main")} />
 
       <S.TopButtons>

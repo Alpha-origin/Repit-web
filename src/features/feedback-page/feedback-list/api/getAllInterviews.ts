@@ -5,6 +5,7 @@ import {
   ensureAccessToken,
 } from "@/shared/api/axiosInstance";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
+import { getInterviewStatus } from "@/features/feedback-page/api/getInterviewStatus";
 
 export interface InterviewPersona {
   id?: number;
@@ -214,6 +215,14 @@ export const requestFeedback = (interviewId: number): Promise<FeedbackData> => {
   }
 
   const request = (async (): Promise<FeedbackData> => {
+    // 목록에 남아 있는 이전 상태로 중단된 면접의 생성·재생성을 요청하지 않는다.
+    const status = await getInterviewStatus(interviewId, { timeout: 15_000 });
+    if (status !== "COMPLETED") {
+      throw new Error(status === "ABANDONED"
+        ? "중단된 면접은 피드백을 생성하지 않습니다."
+        : "면접이 완료된 것을 확인한 뒤 피드백을 생성할 수 있습니다.");
+    }
+
     const response = await apiInstance.post<ApiResponse<FeedbackAcceptedResponse>>(
       GET_FEEDBACK_URL,
       undefined,

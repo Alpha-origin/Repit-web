@@ -39,6 +39,7 @@ async function fixture({ status = "PENDING", view = "overall", steps = [], postS
     if (pathname.endsWith("/refresh")) return json({ accessToken: "test-only-token" });
     if (pathname.endsWith("/me")) return json({ data: { id: 7, name: "테스트", nickname: "테스트", email: "test@example.com" } });
     if (pathname === "/api/interviews/getAll") return json({ success: true, data: interviewIds.map((id) => ({ id, status: "COMPLETED", createdAt: "2026-10-15T00:00:00Z" })) });
+    if (pathname === "/api/interviews/get") return json({ success: true, data: { status: "COMPLETED" } });
     if (pathname === "/api/feedbacks/getAll") return json({ success: true, data: [] });
     if (pathname === "/api/answer/getAll") return json({ success: true, data: [{ answerId: 1, interview: 42, question: 101, content: "테스트 답변", createdAt: "2026-10-15T00:00:00Z" }] });
     if (pathname === "/api/feedbacks") {

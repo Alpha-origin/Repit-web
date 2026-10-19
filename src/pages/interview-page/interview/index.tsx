@@ -91,8 +91,8 @@ const InterviewPageContent = () => {
     !interviewSession.isMediaReady ||
     isQuestionLoading ||
     isAwaitingResponse;
-  const isCameraReady = interviewSession.cameraState === "ready";
-  const isMicReady = interviewSession.micState === "ready";
+  const isCameraReady = interviewSession.cameraState === "ready" && interviewSession.isCameraEnabled;
+  const isMicReady = interviewSession.micState === "ready" && interviewSession.isMicEnabled;
   const micLevel = isMicReady ? interviewSession.voiceLevel : 0;
 
   const handleQuitInterview = interviewSession.onQuitInterview;
@@ -193,9 +193,12 @@ const InterviewPageContent = () => {
           {isVoiceMode ? (
             <>
               <S.IconActionButton
-                role="img"
+                type="button"
                 $active={isCameraReady}
-                aria-label={INTERVIEW_DEVICE_STATUS_LABELS.camera[interviewSession.cameraState]}
+                aria-label={interviewSession.cameraState === "ready" ? (isCameraReady ? "카메라 끄기" : "카메라 켜기") : INTERVIEW_DEVICE_STATUS_LABELS.camera[interviewSession.cameraState]}
+                aria-pressed={isCameraReady}
+                disabled={interviewSession.isMediaToggleDisabled || interviewSession.cameraState !== "ready"}
+                onClick={interviewSession.onToggleCamera}
               >
                 <S.ActionIconImage
                   src={CameraIcon}
@@ -206,9 +209,12 @@ const InterviewPageContent = () => {
                 />
               </S.IconActionButton>
               <S.IconActionButton
-                role="img"
+                type="button"
                 $active={isMicReady}
-                aria-label={INTERVIEW_DEVICE_STATUS_LABELS.mic[interviewSession.micState]}
+                aria-label={interviewSession.micState === "ready" ? (isMicReady ? "마이크 끄기" : "마이크 켜기") : INTERVIEW_DEVICE_STATUS_LABELS.mic[interviewSession.micState]}
+                aria-pressed={isMicReady}
+                disabled={interviewSession.isMediaToggleDisabled || interviewSession.micState !== "ready"}
+                onClick={interviewSession.onToggleMicrophone}
               >
                 <S.IconActionLevelFill aria-hidden="true" $level={micLevel} />
                 <S.ActionIconImage
@@ -237,7 +243,8 @@ const InterviewPageContent = () => {
                   aria-disabled={isStartActionDisabled}
                   aria-busy={interviewSession.isPreparingInterview || isAwaitingResponse}
                   title={
-                    isStartActionDisabled && !isAwaitingResponse
+                    !interviewSession.isMicEnabled ? "마이크를 켜면 답변을 시작할 수 있어요."
+                      : isStartActionDisabled && !isAwaitingResponse
                       ? "포트폴리오를 등록하고 잠시 기다려주세요."
                       : undefined
                   }

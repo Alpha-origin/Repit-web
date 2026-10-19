@@ -109,30 +109,33 @@ export const useVoiceAnswer = () => {
   const [isListening, setIsListening] = useState(false);
   const [isMicrophoneAvailable, setIsMicrophoneAvailable] = useState(true);
   const latestTranscriptTextRef = useRef("");
+  const transcriptPrefixRef = useRef("");
+  const activeAnswerRef = useRef(false);
+  const isPausedRef = useRef(false);
   const stopResolveRef = useRef<(() => void) | null>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const recognitionConstructor = useMemo(() => getSpeechRecognitionConstructor(), []);
   const browserSupportsSpeechRecognition = recognitionConstructor !== null;
 
-  useEffect(() => {
-    if (!recognitionConstructor) {
-      return;
-    }
-
+  const createRecognition = () => {
+    if (!recognitionConstructor) return null;
     const recognition = new recognitionConstructor();
 
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = VOICE_LANGUAGE;
     recognition.onstart = () => {
+      if (recognitionRef.current !== recognition) return;
       setIsListening(true);
     };
     recognition.onend = () => {
+      if (recognitionRef.current !== recognition) return;
       setIsListening(false);
       stopResolveRef.current?.();
       stopResolveRef.current = null;
     };
     recognition.onerror = (event) => {
+      if (recognitionRef.current !== recognition) return;
       if (event.error === "not-allowed" || event.error === "service-not-allowed") {
         setIsMicrophoneAvailable(false);
       }
@@ -142,19 +145,26 @@ export const useVoiceAnswer = () => {
       }
     };
     recognition.onresult = (event) => {
-      latestTranscriptTextRef.current = getTranscriptText(event.results);
+      if (recognitionRef.current !== recognition || isPausedRef.current) return;
+      latestTranscriptTextRef.current = [transcriptPrefixRef.current, getTranscriptText(event.results)]
+        .filter(Boolean).join(" ");
       setAnswerText(latestTranscriptTextRef.current);
     };
 
     recognitionRef.current = recognition;
+    return recognition;
+  };
 
+  useEffect(() => {
     return () => {
+      activeAnswerRef.current = false;
       stopResolveRef.current?.();
       stopResolveRef.current = null;
-      recognition.abort();
+      const recognition = recognitionRef.current;
       recognitionRef.current = null;
+      recognition?.abort();
     };
-  }, [recognitionConstructor]);
+  }, []);
 
   const saveCurrentTranscript = () => {
     const nextAnswerText = latestTranscriptTextRef.current.trim();
@@ -183,7 +193,7 @@ export const useVoiceAnswer = () => {
     });
 
   const handleStartVoice = async () => {
-    const recognition = recognitionRef.current;
+    const recognition = createRecognition();
 
     if (!recognition) {
       setIsVoiceStarted(false);
@@ -191,6 +201,9 @@ export const useVoiceAnswer = () => {
     }
 
     latestTranscriptTextRef.current = "";
+    transcriptPrefixRef.current = "";
+    activeAnswerRef.current = true;
+    isPausedRef.current = false;
     setAnswerText("");
     setIsMicrophoneAvailable(true);
 
@@ -198,11 +211,33 @@ export const useVoiceAnswer = () => {
       recognition.start();
       setIsVoiceStarted(true);
     } catch {
+      activeAnswerRef.current = false;
       setIsVoiceStarted(false);
     }
   };
 
+  const handlePauseVoice = () => {
+    isPausedRef.current = true;
+    transcriptPrefixRef.current = latestTranscriptTextRef.current;
+    const recognition = recognitionRef.current;
+    recognitionRef.current = null;
+    recognition?.abort();
+    setIsListening(false);
+  };
+
+  const handleResumeVoice = () => {
+    if (!activeAnswerRef.current || !isPausedRef.current) return;
+    isPausedRef.current = false;
+    const recognition = createRecognition();
+    try {
+      recognition?.start();
+    } catch {
+      setIsListening(false);
+    }
+  };
+
   const handleCompleteVoice = async () => {
+    activeAnswerRef.current = false;
     const recognition = recognitionRef.current;
     const currentAnswerText = saveCurrentTranscript();
 
@@ -223,11 +258,16 @@ export const useVoiceAnswer = () => {
     await wait(200);
 
     const nextAnswerText = saveCurrentTranscript() || currentAnswerText;
+    if (recognitionRef.current === recognition) recognitionRef.current = null;
     return nextAnswerText;
   };
 
   const handleExitVoiceMode = () => {
-    recognitionRef.current?.abort();
+    activeAnswerRef.current = false;
+    const recognition = recognitionRef.current;
+    recognitionRef.current = null;
+    recognition?.abort();
+    setIsListening(false);
     saveCurrentTranscript();
     setIsVoiceStarted(false);
   };
@@ -238,6 +278,7 @@ export const useVoiceAnswer = () => {
 
   const handleClearAnswer = () => {
     latestTranscriptTextRef.current = "";
+    transcriptPrefixRef.current = "";
     setAnswerText("");
   };
 
@@ -249,6 +290,8 @@ export const useVoiceAnswer = () => {
     onCompleteVoice: handleCompleteVoice,
     onExitVoiceMode: handleExitVoiceMode,
     onStartVoice: handleStartVoice,
+    onPauseVoice: handlePauseVoice,
+    onResumeVoice: handleResumeVoice,
     voiceStatus: getVoiceStatus({
       browserSupportsSpeechRecognition,
       isMicrophoneAvailable,

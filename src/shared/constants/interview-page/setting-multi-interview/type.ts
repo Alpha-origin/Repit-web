@@ -32,7 +32,7 @@ export interface InterviewerTemplate {
 }
 
 export interface MultiInterviewSelection {
-  style: InterviewStyleOption;
+  style: InterviewStyleOption | null;
   difficulty: InterviewDifficultyOption;
   activeSlot: SlotIndex;
   interviewerCount: InterviewerCount;

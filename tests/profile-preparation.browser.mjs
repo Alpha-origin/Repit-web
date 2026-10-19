@@ -26,6 +26,7 @@ async function fixture(options = {}) {
   page.on("pageerror", (error) => errors.push(error.message));
   const state = {
     profile: profile("COMPLETED"), profileError: false, materials: true, materialsError: false, holdProfile: false, holdSave: false,
+    analysisStatus: "accepted", analysisJobId: "profile-job", staleLatest: false, analysisRequestError: false,
     preparation: preparation("READY"), retryError: false, start404: false, createdPersonaIds: [1], ...options,
     profileReads: 0, uploads: 0, savedPayloads: [], retries: 0, analysisRequests: 0, personaCount: 0, preparationReads: [],
   };
@@ -64,7 +65,9 @@ async function fixture(options = {}) {
       state.savedPayloads.push(payload);
       if (state.holdSave) await new Promise((resolve) => releases.push(resolve));
       state.profileError = false;
-      state.profile = profile("PENDING");
+      if (state.analysisStatus === "accepted" && !state.staleLatest) {
+        state.profile = { ...profile("PENDING"), jobId: state.analysisJobId };
+      }
       return json({
         materials: {
           jobRole: payload.jobRole,
@@ -74,7 +77,7 @@ async function fixture(options = {}) {
           gitUrls: payload.gitUrls,
           supplements: payload.supplements,
         },
-        analysis: { jobId: "profile-job", status: "accepted" },
+        analysis: state.analysisStatus === null ? null : { jobId: state.analysisJobId, status: state.analysisStatus },
       });
     }
     if (pathname.endsWith("/metaData/materials")) return state.materialsError ? json({ message: "테스트 자료 조회 실패" }, 503) : json({
@@ -93,8 +96,9 @@ async function fixture(options = {}) {
     }
     if (pathname.endsWith("/ai/generate")) {
       state.analysisRequests++;
-      state.profile = profile("PENDING");
-      return json({ success: true, data: { jobId: "profile-job" } });
+      if (state.analysisRequestError) return json({ message: "테스트 분석 요청 실패" }, 503);
+      if (!state.staleLatest) state.profile = { ...profile("PENDING"), jobId: state.analysisJobId };
+      return json({ success: true, data: { jobId: state.analysisJobId } });
     }
     if (pathname === "/api/questions/tailor") {
       state.preparationReads.push(Date.now());
@@ -145,7 +149,7 @@ async function fixture(options = {}) {
   };
   return { page, state, navigate, interview, close, release: () => { state.holdProfile = false; state.holdSave = false; releases.splice(0).forEach((resolve) => resolve()); } };
 }
-const saveButton = (page) => page.getByRole("button", { name: "저장하고 분석하기", exact: true });
+const saveButton = (page) => page.getByLabel("나의 면접 자료").getByRole("button", { name: "저장", exact: true });
 async function addGitUrl(page, url = "https://github.com/example/new-project") {
   await page.getByRole("textbox", { name: "GitHub", exact: true }).fill(url);
   await page.getByRole("button", { name: "Git 주소 추가", exact: true }).click();
@@ -169,20 +173,25 @@ try {
   await expectEnabled(saveButton(failed.page), true);
   await fillPortfolio(failed.page);
   await saveButton(failed.page).click();
-  await failed.page.getByText("자료를 분석하고 있어요. 잠시만 기다려 주세요", { exact: true }).waitFor();
+  await failed.page.getByText("분석이 끝난 뒤에 자료 변경이 가능합니다.", { exact: true }).waitFor();
   assert.equal(failed.state.uploads, 1);
-  assert.equal(await failed.page.getByRole("button", { name: "분석 중…", exact: true }).isDisabled(), true);
+  assert.equal(await saveButton(failed.page).isDisabled(), true);
+  assert.equal(await failed.page.getByRole("progressbar").count(), 1);
+  assert.equal(await failed.page.getByRole("button", { name: "면접 보러가기", exact: true }).count(), 0);
   failed.state.profile = profile("COMPLETED");
-  await failed.page.getByText("자료 분석이 완료됐어요. 면접을 시작할 수 있어요", { exact: true }).waitFor();
+  await failed.page.getByRole("heading", { name: "분석 완료!", exact: true }).waitFor();
   await expectEnabled(saveButton(failed.page), true);
   assert.equal(await failed.page.getByText("테스트 상태 조회 실패", { exact: true }).count(), 0);
   await failed.page.screenshot({ path: "/tmp/repit-profile-recovered.png", fullPage: true });
+  assert.equal(await failed.page.getByRole("progressbar").count(), 0);
+  await failed.page.getByRole("button", { name: "면접 보러가기", exact: true }).click();
+  await failed.page.waitForURL(`${origin}/main`);
   await failed.close();
   report("initial loading blocks save; query failure permits authenticated upload and analysis recovery");
 
   const completed = await fixture();
   await completed.navigate("/main/mypage");
-  await completed.page.getByText("자료 분석이 완료됐어요. 면접을 시작할 수 있어요", { exact: true }).waitFor();
+  await completed.page.getByRole("heading", { name: "분석 완료!", exact: true }).waitFor();
   await fillPortfolio(completed.page);
   await saveButton(completed.page).click();
   await completed.page.getByRole("dialog").waitFor();
@@ -191,20 +200,53 @@ try {
   assert.equal(completed.state.uploads, 0);
   await saveButton(completed.page).click();
   await completed.page.getByRole("button", { name: "변경하고 분석하기", exact: true }).click();
-  await completed.page.getByRole("button", { name: "분석 중…", exact: true }).waitFor();
+  await completed.page.getByText("분석이 끝난 뒤에 자료 변경이 가능합니다.", { exact: true }).waitFor();
   assert.equal(completed.state.uploads, 1);
   const reads = completed.state.profileReads;
   completed.state.profileError = true;
   await completed.page.getByText("테스트 상태 조회 실패", { exact: true }).waitFor();
   assert.ok(completed.state.profileReads > reads);
-  assert.equal(await completed.page.getByRole("button", { name: "분석 중…", exact: true }).isDisabled(), true);
+  assert.equal(await saveButton(completed.page).isDisabled(), true);
   await completed.close();
   report("completed material changes require confirmation; known PENDING stays blocked on polling errors");
+
+  for (const analysisStatus of ["failed", "skipped", null]) {
+    const f = await fixture({ analysisStatus, analysisJobId: "new-profile-job", staleLatest: true });
+    await f.navigate("/main/mypage");
+    await f.page.getByRole("heading", { name: "분석 완료!", exact: true }).waitFor();
+    await saveButton(f.page).click();
+    const message = analysisStatus === "failed" ? "자료는 저장했지만 분석을 시작하지 못했어요. 다시 분석해 주세요"
+      : analysisStatus === "skipped" ? "저장했어요. 이 직무의 자료 분석은 준비 중이에요" : "변경된 내용이 없어요";
+    await f.page.getByText(message, { exact: true }).waitFor();
+    assert.equal(await f.page.getByRole("button", { name: "면접 보러가기", exact: true }).count(), analysisStatus === null ? 1 : 0);
+    assert.equal(await f.page.getByRole("heading", { name: "분석 완료!", exact: true }).count(), analysisStatus === null ? 1 : 0);
+    if (analysisStatus === "failed") {
+      f.state.analysisRequestError = true;
+      await f.page.getByRole("button", { name: "다시 분석", exact: true }).click();
+      await f.page.getByText("테스트 분석 요청 실패", { exact: true }).waitFor();
+      assert.equal(await f.page.getByRole("button", { name: "면접 보러가기", exact: true }).count(), 0);
+      f.state.analysisRequestError = false;
+      await f.page.getByRole("button", { name: "다시 분석", exact: true }).click();
+      await f.page.getByRole("progressbar").waitFor();
+      await f.page.getByText(message, { exact: true }).waitFor({ state: "hidden" });
+      const reads = f.state.profileReads;
+      for (let attempts = 0; attempts < 40 && f.state.profileReads < reads + 2; attempts++) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      assert.ok(f.state.profileReads >= reads + 2);
+      assert.equal(await f.page.getByRole("button", { name: "면접 보러가기", exact: true }).count(), 0);
+      f.state.profile = { ...profile("COMPLETED"), jobId: "new-profile-job" };
+      await f.page.getByRole("heading", { name: "분석 완료!", exact: true }).waitFor();
+      assert.equal(await f.page.getByText(message, { exact: true }).count(), 0);
+    }
+    await f.close();
+    report(`save analysis ${analysisStatus}: completed state matches current materials; retry ignores old results`);
+  }
 
   const loadFailed = await fixture({ materialsError: true });
   await loadFailed.navigate("/main/mypage");
   await loadFailed.page.getByText("저장된 자료를 불러오지 못했어요. 다시 불러와야 저장할 수 있어요", { exact: true }).waitFor();
-  await loadFailed.page.getByText("자료 분석이 완료됐어요. 면접을 시작할 수 있어요", { exact: true }).waitFor();
+  await loadFailed.page.getByRole("heading", { name: "분석 완료!", exact: true }).waitFor();
   await loadFailed.page.getByRole("combobox", { name: "세부 직무", exact: true }).selectOption("FRONTEND");
   await addGitUrl(loadFailed.page);
   assert.equal(await saveButton(loadFailed.page).isDisabled(), true);
@@ -226,10 +268,10 @@ try {
   await slowSave.page.getByRole("button", { name: "저장 중...", exact: true }).waitFor();
   await addGitUrl(slowSave.page, "https://github.com/example/during-save");
   slowSave.release();
-  await slowSave.page.getByText("저장했어요. 자료 분석을 시작해요", { exact: true }).waitFor();
+  await slowSave.page.getByRole("heading", { name: "자료를 분석하고 있어요…", exact: true }).waitFor();
   assert.deepEqual(slowSave.state.savedPayloads[0].gitUrls, ["https://github.com/example/project", "https://github.com/example/new-project"]);
   assert.equal(await slowSave.page.getByText("https://github.com/example/during-save", { exact: true }).count(), 1);
-  assert.equal(await slowSave.page.getByLabel("나의 면접 자료").getByRole("button", { name: "취소", exact: true }).isEnabled(), true);
+  assert.equal(await slowSave.page.getByLabel("나의 면접 자료").getByRole("button", { name: "돌아가기", exact: true }).isEnabled(), true);
   await slowSave.close();
   report("edits made while saving stay on screen after the save response");
 
@@ -240,7 +282,7 @@ try {
     await expectEnabled(saveButton(f.page), true);
     if (reason === "INTERNAL") {
       await f.page.getByRole("button", { name: action, exact: true }).click();
-      await f.page.getByText("자료를 분석하고 있어요. 잠시만 기다려 주세요", { exact: true }).waitFor();
+      await f.page.getByText("분석이 끝난 뒤에 자료 변경이 가능합니다.", { exact: true }).waitFor();
       assert.equal(f.state.analysisRequests, 1);
     }
     await f.close();

@@ -22,7 +22,7 @@ const Panel = styled.section`
   box-shadow: 0 1rem 2.5rem rgba(112, 143, 206, 0.12);
   text-align: center;
 `;
-//레핏 배포
+//래핏 배포
 const Title = styled.h1`
   margin: 0 0 0.85rem;
   color: #1f2f4d;

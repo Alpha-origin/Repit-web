@@ -17,6 +17,7 @@ try {
     await waitUntil(() => recovered.answers.length === 1);
     await recovered.page.getByRole("button", { name: "그만두기", exact: true }).click();
     await recovered.page.waitForURL("**/main");
+    assert.equal(recovered.feedbackRequests.length, 0, "quit must not generate feedback");
     assert.ok(recovered.chatRequests.some((request) => request.path.endsWith("/audio")));
     assert.ok(recovered.chatRequests.every((request) => request.path.startsWith("/chat/interviews/recovered-session/")));
     const sockets = await recovered.page.evaluate(() => window.__sockets.map((socket) => socket.url).filter((url) => new URL(url).pathname === "/ws/chat/interviews"));
@@ -34,6 +35,7 @@ try {
       await retry(f.page).click();
       await f.page.waitForURL((url) => url.pathname === path);
       assert.equal(f.quits.length, 2);
+      assert.equal(f.feedbackRequests.length, 0, "quit retry and navigation must not generate feedback");
       if (button === "로그아웃") {
         assert.equal(await f.page.evaluate(async () => (await import("/src/shared/api/accessToken.ts")).getAccessToken()), null);
         await waitUntil(async () => !(await f.page.evaluate(async () => (await import("/src/shared/store/userStore.ts")).useUserStore.getState().isLoaded)));
@@ -51,6 +53,7 @@ try {
     await forceLeave.page.waitForURL("**/main");
     assert.equal(await forceLeave.page.evaluate(async () => (await import("/src/shared/api/accessToken.ts")).getAccessToken()), "Bearer test-only-token");
     assert.equal(forceLeave.quits.length, 1);
+    assert.equal(forceLeave.feedbackRequests.length, 0, "forced leave must not generate feedback");
     assert.deepEqual(forceLeave.errors, []);
     await forceLeave.context.close();
     report(`${label}: explicit leave discards pending logout`);

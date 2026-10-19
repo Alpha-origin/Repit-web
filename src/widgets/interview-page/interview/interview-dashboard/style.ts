@@ -212,8 +212,11 @@ export const AnswerPanel = styled.section<MultiLayoutProps>`
 `;
 
 export const AnswerTabs = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.8rem;
+  line-height: 1.5;
   border-bottom: 0.0625rem solid #dce3ee;
 `;
 
@@ -271,7 +274,21 @@ export const VideoControls = styled.div`
   z-index: 2;
 `;
 
-export const StatusIndicator = styled.div<{ $active: boolean }>`
+export const StatusIndicator = styled.button<{ $active: boolean }>`
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  &:disabled { cursor: not-allowed; }
+  &:focus-visible { outline: 2px solid #1684ef; outline-offset: 3px; }
+  &[aria-pressed="false"]::after {
+    content: "";
+    position: absolute;
+    width: 1.6rem;
+    height: 2px;
+    background: #667085;
+    transform: rotate(-45deg);
+    z-index: 2;
+  }
   position: relative;
   width: 2.8rem;
   height: 2.8rem;
