@@ -52,4 +52,4 @@ export type MainPageInterviewModeId =
 
 export const MAIN_PAGE_COMING_SOON_LABEL = "준비중인 기능입니다";
 
-export const MAIN_PAGE_GUIDE_ROUTE = "/";
+export const MAIN_PAGE_GUIDE_ROUTE = "/interview-guide";
