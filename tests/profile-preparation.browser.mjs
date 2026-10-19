@@ -56,7 +56,12 @@ async function fixture(options = {}) {
       if (state.holdProfile) await new Promise((resolve) => releases.push(resolve));
       return state.profileError ? json({ message: "테스트 상태 조회 실패" }, 503) : json({ success: true, data: state.profile });
     }
-    if (pathname.endsWith("/getMetaData")) return json({ data: { fileUrl: state.materials ? "/portfolio.pdf" : "", gitUrls: state.materials ? ["https://github.com/example/project"] : [] } });
+    if (pathname.endsWith("/metaData/materials")) return json({
+      jobRole: "FRONTEND",
+      documents: state.materials ? [{ index: 0, type: "PORTFOLIO", fileUrl: "/portfolio.pdf", fileName: "portfolio.pdf", pageCount: 1 }] : [],
+      gitUrls: state.materials ? ["https://github.com/example/project"] : [],
+      supplements: [],
+    });
     if (pathname.endsWith("/dataUpload")) {
       assert.match(request.headers()["content-type"], /multipart\/form-data; boundary=/);
       assert.match(request.headers().authorization, /^Bearer /);
@@ -214,6 +219,8 @@ try {
       }
     }
     await next.click();
+    // 사전설정 다음에 기업 선택 단계가 있고, 면접 생성은 거기서 "면접 시작"으로 한다.
+    await f.page.getByRole("button", { name: "면접 시작", exact: true }).click();
     await f.page.getByText("포트폴리오 분석을 먼저 진행해주세요", { exact: true }).waitFor();
     assert.equal(await f.page.getByRole("link", { name: "마이페이지로 이동", exact: true }).count(), 1);
     await f.close();

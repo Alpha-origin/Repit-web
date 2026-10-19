@@ -1,11 +1,16 @@
 import type { ChangeEvent, KeyboardEvent, RefObject, ReactNode } from "react";
 
+import type { MaterialDocument } from "@/features/my-page/api/materials";
+import { getDocumentTypeLabel } from "@/shared/constants/job/documentTypes";
+import type { GithubRule } from "@/shared/constants/job/jobRoles";
+
 import * as S from "./style";
 
 interface PortfolioProps {
   children?: ReactNode;
   jobSelection: ReactNode;
   gitInputRef: RefObject<HTMLInputElement | null>;
+  githubRule: GithubRule;
   isSaveDisabled: boolean;
   isAnalyzing: boolean;
   fileError: string;
@@ -23,8 +28,27 @@ interface PortfolioProps {
   onPortfolioUploadClick: () => void;
   saveError: string;
   saveMessage: string;
+  savedDocuments: MaterialDocument[];
   selectedPortfolioFile: File | null;
 }
+
+// 옛 업로드로 저장한 문서는 파일명이 없어 종류 이름으로 보여 준다.
+const getSavedDocumentsTitle = (documents: MaterialDocument[]) => {
+  const [first] = documents;
+  if (!first) return "";
+  const name = first.fileName ?? getDocumentTypeLabel(first.type);
+  return documents.length > 1 ? `${name} 외 ${documents.length - 1}개` : name;
+};
+
+const getSavedDocumentsText = (documents: MaterialDocument[]) => {
+  const pageCounts = documents.map((document) => document.pageCount);
+  const totalPages = pageCounts.every((count) => count !== null)
+    ? pageCounts.reduce<number>((sum, count) => sum + (count ?? 0), 0)
+    : null;
+  // 지금 저장 경로는 새 PDF가 있어야 저장되므로 그 조건을 함께 알린다.
+  const summary = totalPages ? `저장된 자료 · 총 ${totalPages}쪽` : "저장된 자료";
+  return `${summary} · 다시 저장하려면 새 PDF를 첨부해 주세요`;
+};
 
 const DocumentIcon = () => (
   <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -49,6 +73,7 @@ const Portfolio = ({
   children,
   jobSelection,
   gitInputRef,
+  githubRule,
   isSaveDisabled,
   isAnalyzing,
   fileError,
@@ -66,9 +91,12 @@ const Portfolio = ({
   onPortfolioUploadClick,
   saveError,
   saveMessage,
+  savedDocuments,
   selectedPortfolioFile,
 }: PortfolioProps) => {
   const isGitAddDisabled = !gitInput.trim();
+  const hasSavedDocuments = !selectedPortfolioFile && savedDocuments.length > 0;
+  const hasFile = !!selectedPortfolioFile || hasSavedDocuments;
 
   return (
     <S.PortfolioWrapper aria-labelledby="portfolio-title">
@@ -91,23 +119,35 @@ const Portfolio = ({
           프로젝트와 경험이 담긴 PDF 파일을 첨부해 주세요.
         </S.Description>
 
-        <S.UploadBox $hasFile={!!selectedPortfolioFile} $hasError={!!fileError}>
+        <S.UploadBox $hasFile={hasFile} $hasError={!!fileError}>
           <S.FileIcon><DocumentIcon /></S.FileIcon>
           <S.UploadContent>
-            <S.UploadTitle title={selectedPortfolioFile?.name}>
-              {selectedPortfolioFile?.name || "포트폴리오 파일 선택"}
-            </S.UploadTitle>
-            <S.UploadText>
-              {selectedPortfolioFile ? "PDF · 저장하면 자료 분석이 시작돼요" : "PDF 형식의 파일 1개를 등록할 수 있어요"}
-            </S.UploadText>
+            {selectedPortfolioFile ? (
+              <>
+                <S.UploadTitle title={selectedPortfolioFile.name}>{selectedPortfolioFile.name}</S.UploadTitle>
+                <S.UploadText>PDF · 저장하면 자료 분석이 시작돼요</S.UploadText>
+              </>
+            ) : hasSavedDocuments ? (
+              <>
+                <S.UploadTitle title={getSavedDocumentsTitle(savedDocuments)}>
+                  {getSavedDocumentsTitle(savedDocuments)}
+                </S.UploadTitle>
+                <S.UploadText>{getSavedDocumentsText(savedDocuments)}</S.UploadText>
+              </>
+            ) : (
+              <>
+                <S.UploadTitle>포트폴리오 파일 선택</S.UploadTitle>
+                <S.UploadText>PDF 형식의 파일 1개를 등록할 수 있어요</S.UploadText>
+              </>
+            )}
           </S.UploadContent>
           <S.UploadButton
             type="button"
             onClick={onPortfolioUploadClick}
-            aria-label={selectedPortfolioFile ? "포트폴리오 PDF 교체" : "포트폴리오 PDF 첨부"}
+            aria-label={hasFile ? "포트폴리오 PDF 교체" : "포트폴리오 PDF 첨부"}
             aria-describedby={fileError ? "portfolio-file-error" : "portfolio-file-hint"}
           >
-            {selectedPortfolioFile ? "파일 변경" : "+ 파일 첨부"}
+            {hasFile ? "파일 변경" : "+ 파일 첨부"}
           </S.UploadButton>
         </S.UploadBox>
         <S.HiddenFileInput
@@ -121,16 +161,19 @@ const Portfolio = ({
         <S.FieldHint>경험을 구체적으로 담을수록 더 알맞은 질문을 받을 수 있어요.</S.FieldHint>
       </S.Section>
 
+      {githubRule !== "HIDDEN" && (
       <S.Section aria-labelledby="github-section-title">
         <S.SectionHeading>
           <S.SectionNumber aria-hidden="true">03</S.SectionNumber>
           <S.SectionTitle id="github-section-title">
             <S.Label htmlFor="my-page-git">GitHub</S.Label>
           </S.SectionTitle>
-          <S.RequiredBadge>필수</S.RequiredBadge>
+          {githubRule === "REQUIRED" && <S.RequiredBadge>필수</S.RequiredBadge>}
         </S.SectionHeading>
         <S.Description id="my-page-git-hint">
-          나의 개발 경험을 보여줄 GitHub 주소를 추가해 주세요.
+          {githubRule === "REQUIRED"
+            ? "나의 개발 경험을 보여줄 GitHub 주소를 추가해 주세요."
+            : "(선택) 데이터·코드 저장소가 있으면 추가해 주세요."}
         </S.Description>
 
         <S.GitInputWrapper>
@@ -175,6 +218,7 @@ const Portfolio = ({
           </S.GitUrlList>
         )}
       </S.Section>
+      )}
 
       {children && <S.AnalysisStatus>{children}</S.AnalysisStatus>}
 

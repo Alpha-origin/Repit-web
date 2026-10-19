@@ -1,8 +1,9 @@
 import {
   JOB_CATEGORIES,
-  JOB_OPTIONS,
+  NON_DEVELOPMENT_FAMILIES,
+  getJobRolesByCategory,
   type JobCategory,
-} from "@/shared/constants/my-page/job";
+} from "@/shared/constants/job/jobRoles";
 
 import * as S from "./style";
 
@@ -49,9 +50,19 @@ const JobSelection = ({
           onChange={(event) => onJobChange(event.target.value)}
         >
           <option value="" disabled>본인의 직무를 선택해 주세요</option>
-          {JOB_OPTIONS[category].map((option) => (
-            <option key={option.value} value={option.value}>{option.label}</option>
-          ))}
+          {category === "DEVELOPMENT"
+            ? getJobRolesByCategory(category).map((role) => (
+              <option key={role.code} value={role.code}>{role.label}</option>
+            ))
+            : NON_DEVELOPMENT_FAMILIES.map((family) => (
+              <optgroup key={family} label={family}>
+                {getJobRolesByCategory(category)
+                  .filter((role) => role.family === family)
+                  .map((role) => (
+                    <option key={role.code} value={role.code}>{role.label}</option>
+                  ))}
+              </optgroup>
+            ))}
         </S.Select>
         <S.Chevron aria-hidden="true" viewBox="0 0 24 24" fill="none">
           <path d="m6 9 6 6 6-6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
