@@ -4,6 +4,8 @@ import type { QuestionAudioStatus } from "@/widgets/interview-page/interview/typ
 
 const AUDIO_WAIT_MS = 180_000;
 const RETRY_DELAYS_MS = [1_000, 2_000, 4_000];
+// 서버가 long-poll 없이 PENDING을 바로 돌려줘도 요청이 몰리지 않게 하는 최소 간격
+const PENDING_MIN_INTERVAL_MS = 1_000;
 const FAILURE_MESSAGE = "음성 재생에 실패했습니다.";
 
 interface UseQuestionAudioParams {
@@ -81,8 +83,13 @@ export const useQuestionAudio = ({ sessionId, questionId, enabled, autoplay }: U
       await Promise.resolve();
       updateStatus(operation, "loading");
       let errorCount = 0;
+      const wait = (delay: number) => new Promise<void>((resolve) => {
+        releaseRetry = resolve;
+        retryTimer = window.setTimeout(resolve, delay);
+      });
       while (isCurrent(operation)) {
         if (Date.now() - startedAt >= AUDIO_WAIT_MS) { fail(); return; }
+        const requestedAt = Date.now();
         const result = await getQuestionAudio({ sessionId, questionId, signal: controller.signal });
         if (!isCurrent(operation) || ("aborted" in result)) return;
         if (Date.now() - startedAt >= AUDIO_WAIT_MS) { fail(); return; }
@@ -95,14 +102,16 @@ export const useQuestionAudio = ({ sessionId, questionId, enabled, autoplay }: U
           console.warn("질문 음성 조회 실패", result.errorMessage);
           const delay = RETRY_DELAYS_MS[errorCount++];
           if (delay === undefined) { fail(); return; }
-          await new Promise<void>((resolve) => {
-            releaseRetry = resolve;
-            retryTimer = window.setTimeout(resolve, delay);
-          });
+          await wait(delay);
           continue;
         }
         const data = result.data;
-        if (data.status === "PENDING") { errorCount = 0; continue; }
+        if (data.status === "PENDING") {
+          errorCount = 0;
+          const remaining = PENDING_MIN_INTERVAL_MS - (Date.now() - requestedAt);
+          if (remaining > 0) await wait(remaining);
+          continue;
+        }
         window.clearTimeout(deadline);
         if (data.status === "FAILED") {
           console.warn("질문 음성 생성 실패", data.errorCode);

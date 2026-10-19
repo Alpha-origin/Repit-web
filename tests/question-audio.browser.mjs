@@ -88,6 +88,9 @@ try {
     const f = await fixture({ audioResponses: statuses });
     await stop(f.page).waitFor();
     assert.equal(f.audioRequests.length, 3);
+    for (let i = 1; i < f.audioRequests.length; i++) {
+      assert.ok(f.audioRequests[i].at - f.audioRequests[i - 1].at >= 900, "PENDING 직후 재요청은 최소 간격을 둔다");
+    }
     assert.equal(await plays(f.page), 1);
     await close(f, `${statuses.join(" -> ")}: polling reaches native playback`);
   }
