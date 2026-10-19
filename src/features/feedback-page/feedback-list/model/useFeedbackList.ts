@@ -45,57 +45,56 @@ const getInterviewerImageUrl = (
   return INTERVIEWER_IMAGES[(interviewId - 1) % INTERVIEWER_IMAGES.length];
 };
 
-const getListItems = (
+export const getListItems = (
   items: Awaited<ReturnType<typeof getAllInterviews>>,
   feedbackByInterviewId: Map<number, FeedbackData>,
   feedbackBySessionId: Map<string, FeedbackData>,
 ): FeedbackListItem[] =>
-  sortInterviewsByCreatedAt(items).map<FeedbackListItem>((interview) => {
-    const interviewerName = getInterviewerName(interview);
-    const interviewId = getInterviewId(interview);
-    const feedback =
-      feedbackByInterviewId.get(interviewId) ??
-      (interview.sessionId
-        ? feedbackBySessionId.get(interview.sessionId)
-        : undefined);
-    const feedbackInterviewId = feedback?.interviewId;
-    const targetInterviewId =
-      typeof feedbackInterviewId === "number" &&
-      Number.isInteger(feedbackInterviewId) &&
-      feedbackInterviewId > 0
-        ? feedbackInterviewId
-        : interviewId;
+  sortInterviewsByCreatedAt(items.filter((interview) => interview.status === "COMPLETED"))
+    .map<FeedbackListItem>((interview) => {
+      const interviewerName = getInterviewerName(interview);
+      const interviewId = getInterviewId(interview);
+      const feedback =
+        feedbackByInterviewId.get(interviewId) ??
+        (interview.sessionId
+          ? feedbackBySessionId.get(interview.sessionId)
+          : undefined);
+      const feedbackInterviewId = feedback?.interviewId;
+      const targetInterviewId =
+        typeof feedbackInterviewId === "number" &&
+        Number.isInteger(feedbackInterviewId) &&
+        feedbackInterviewId > 0
+          ? feedbackInterviewId
+          : interviewId;
 
-    return {
-      id: targetInterviewId,
-      companyName: readCompanyBadge(interview.company)?.displayName,
-      date: getFormattedDate(interview.createdAt),
-      createdAt: interview.createdAt,
-      imageUrl:
-        interview.persona?.imageUrl ??
-        getInterviewerImageUrl(
-          targetInterviewId,
-          interviewerName,
-          interview.persona?.id,
+      return {
+        id: targetInterviewId,
+        companyName: readCompanyBadge(interview.company)?.displayName,
+        date: getFormattedDate(interview.createdAt),
+        createdAt: interview.createdAt,
+        imageUrl:
+          interview.persona?.imageUrl ??
+          getInterviewerImageUrl(
+            targetInterviewId,
+            interviewerName,
+            interview.persona?.id,
+          ),
+        title: getInterviewModeLabel(interview),
+        styleLabel: getInterviewStyleLabel(
+          feedback?.style ?? interview.persona?.type,
         ),
-      title: getInterviewModeLabel(interview),
-      styleLabel: getInterviewStyleLabel(
-        feedback?.style ?? interview.persona?.type,
-      ),
-      levelLabel: getLevelLabel(feedback?.level ?? interview.persona?.level),
-      interviewerName,
-      statusLabel: feedback
-        ? getInterviewStatusLabel(feedback.status)
-        : interview.status === "COMPLETED"
-          ? "분석 대기"
-          : getInterviewStatusLabel(interview.status),
-      sessionId: interview.sessionId,
-      totalScore: feedback?.totalScore,
-      summary: feedback?.summary,
-      answeredCount: feedback?.answeredCount,
-      questionCount: feedback?.questionCount,
-    };
-  });
+        levelLabel: getLevelLabel(feedback?.level ?? interview.persona?.level),
+        interviewerName,
+        statusLabel: feedback
+          ? getInterviewStatusLabel(feedback.status)
+          : "분석 대기",
+        sessionId: interview.sessionId,
+        totalScore: feedback?.totalScore,
+        summary: feedback?.summary,
+        answeredCount: feedback?.answeredCount,
+        questionCount: feedback?.questionCount,
+      };
+    });
 
 export const useFeedbackList = () => {
   const [items, setItems] = useState<FeedbackListItem[]>([]);

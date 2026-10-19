@@ -11,8 +11,8 @@ import {
   type InterviewerCount, type InterviewerSlot, type MultiInterviewSelection,
   type SlotIndex,
 } from "@/shared/constants/interview-page/setting-multi-interview";
-import { INTERVIEW_SETTING_DEFAULT_SELECTION, type InterviewDifficultyOption, type InterviewStyleOption } from "@/shared/constants/interview-page/setting-interview";
-import { createSlot, resizeSlots, validateSelection } from "./selection";
+import { INTERVIEW_SETTING_DEFAULT_SELECTION, INTERVIEW_STYLE_PRESETS, type InterviewDifficultyOption, type InterviewStyleOption } from "@/shared/constants/interview-page/setting-interview";
+import { createSlot, findMultiStylePreset, resizeSlots, validateSelection } from "./selection";
 
 export const useMultiInterviewSetup = () => {
   const navigate = useNavigate();
@@ -24,11 +24,11 @@ export const useMultiInterviewSetup = () => {
   });
   const [answerMode, setAnswerMode] = useState<"voice" | "text">(initialDraft?.answerMode ?? "voice");
   const eligibility = useInterviewEligibility();
-  const [style, setStyle] = useState<InterviewStyleOption>(initialDraft?.style ?? "편함");
   const [difficulty, setDifficulty] = useState<InterviewDifficultyOption>(initialDraft?.difficulty ?? INTERVIEW_SETTING_DEFAULT_SELECTION.difficulty);
   const [activeSlot, setActiveSlot] = useState<SlotIndex>(0);
   const [slots, setSlots] = useState<InterviewerSlot[]>(() => initialDraft?.slots ?? Array.from({ length: 3 }, (_, i) => createSlot(i)));
   const interviewerCount = slots.length as InterviewerCount;
+  const style = findMultiStylePreset(slots, difficulty);
   const [errorMessage, setErrorMessage] = useState("");
 
   const updateSlot = (patch: Partial<InterviewerSlot>) => {
@@ -46,15 +46,18 @@ export const useMultiInterviewSetup = () => {
   };
 
   const changeCount = (count: InterviewerCount) => {
-    setSlots((previous) => resizeSlots(previous, count));
+    setSlots((previous) => resizeSlots(previous, count, difficulty));
     setActiveSlot((previous) => Math.min(previous, count - 1) as SlotIndex);
     setErrorMessage("");
   };
 
-  // 면접 스타일은 난이도와 같은 독립 설정값이다.
-  // 면접관별 성격·말투는 슬롯이 직접 들고 있으므로 여기서 건드리지 않는다.
+  // 1:1과 같은 프리셋을 모든 면접관에게 적용하고, 개별 설정 시 선택값을 다시 계산한다.
   const changeStyle = (next: InterviewStyleOption) => {
-    setStyle(next);
+    const preset = INTERVIEW_STYLE_PRESETS[next];
+    setDifficulty(preset.difficulty);
+    setSlots((previous) => previous.map((slot) => ({
+      ...slot, personality: preset.personality, tone: preset.tone,
+    })));
     setErrorMessage("");
   };
 

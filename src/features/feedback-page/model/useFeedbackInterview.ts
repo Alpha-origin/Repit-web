@@ -198,7 +198,9 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
           extractErrorMessage(saveCheckError, "면접 상태를 확인하지 못했습니다."),
         );
       } else if (nextInterview.status !== "COMPLETED") {
-        setFeedbackErrorMessage("아직 완료되지 않은 면접입니다. 면접을 마친 뒤 피드백을 확인해주세요.");
+        setFeedbackErrorMessage(nextInterview.status === "ABANDONED"
+          ? "중단된 면접은 피드백을 생성하지 않습니다."
+          : "아직 완료되지 않은 면접입니다. 면접을 마친 뒤 피드백을 확인해주세요.");
       } else {
         try {
           const nextFeedback = await getOrRequestFeedback(interviewId);
