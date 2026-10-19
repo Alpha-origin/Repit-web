@@ -1,6 +1,6 @@
 export const SECOND_SECTION_SUBTITLE = "Main Servece";
 
-export const SECOND_SECTION_TITLE = "레핏에서 모의 면접 보고\n원하는 기업의 면접에 합격하세요";
+export const SECOND_SECTION_TITLE = "래핏에서 모의 면접 보고\n원하는 기업의 면접에 합격하세요";
 
 export const SECOND_SECTION_SERVICE_ITEMS = [
   {
@@ -25,8 +25,8 @@ export const SECOND_SECTION_SERVICE_ITEMS = [
   },
   {
     title: "성장 추적",
-    heading: "~~~~~~~~~~~~",
-    description: "~~~~~~~~~~~~~~~",
+    heading: "쌓여가는 면접 기록으로 나의 성장 과정을 한눈에 확인해요",
+    description: "회차별 점수와 피드백을 비교하고, 달라진 강점과 앞으로 보완할 점을 확인해보세요.",
     align: "right",
   },
 ] as const;

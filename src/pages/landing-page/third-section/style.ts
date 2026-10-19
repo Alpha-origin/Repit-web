@@ -36,12 +36,67 @@ export const Content = styled.div`
 
 export const Footer = styled.footer`
   width: 100%;
-  height: 7.5rem;
+  padding: 2rem clamp(1.5rem, 7vw, 7rem);
+  background: #d1e2f8;
+  color: #53617a;
+  font-size: 0.875rem;
+  line-height: 1.6;
+`;
+
+export const FooterInner = styled.div`
+  display: grid;
+  gap: 0.75rem;
+  width: min(100%, 80rem);
+  margin: 0 auto;
+`;
+
+export const FooterTop = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: #D1E2F8;
-  font-size: 2rem;
-  font-weight: 700;
-  color: black;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+
+  @media (max-width: 56.25rem) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+`;
+
+export const FooterBrand = styled.strong`
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 1.125rem;
+  white-space: nowrap;
+`;
+
+export const FooterLinks = styled.nav`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+`;
+
+export const FooterLinkItem = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+export const FooterSeparator = styled.span`
+  color: #8b98ae;
+`;
+
+export const FooterNotice = styled.p`
+  margin: 0;
+`;
+
+export const FooterMeta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid rgb(83 97 122 / 18%);
+`;
+
+export const FooterCopyright = styled.span`
+  white-space: nowrap;
 `;
