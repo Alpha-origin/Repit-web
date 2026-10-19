@@ -504,7 +504,9 @@ export const useInterviewSession = (
       if (shouldNavigate && closeReasonRef.current === reason && !hasNavigatedRef.current) {
         hasNavigatedRef.current = true;
         navigate(getInterviewExitPath(reason), {
-          state: reason === "completed" ? { answeredQuestionCount: displayQuestionNumberRef.current } : undefined,
+          state: reason === "completed"
+            ? { answeredQuestionCount: displayQuestionNumberRef.current, interviewId: preparedInterview?.interviewId ?? null }
+            : undefined,
         });
       }
       return true;

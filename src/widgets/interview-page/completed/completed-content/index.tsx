@@ -15,10 +15,35 @@ const getAnsweredQuestionCount = (state: unknown) => {
     : null;
 };
 
+const getCompletedInterviewId = (state: unknown) => {
+  if (!state || typeof state !== "object") {
+    return null;
+  }
+
+  const { interviewId } = state as { interviewId?: unknown };
+  return typeof interviewId === "number" &&
+    Number.isSafeInteger(interviewId) &&
+    interviewId > 0
+    ? interviewId
+    : null;
+};
+
 const InterviewCompletedContent = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const answeredQuestionCount = getAnsweredQuestionCount(location.state);
+  const interviewId = getCompletedInterviewId(location.state);
+
+  const handleOpenFeedback = () => {
+    if (interviewId === null) {
+      navigate("/main/feedback/list");
+      return;
+    }
+
+    navigate(`/main/feedback/overall/${interviewId}`, {
+      state: { fromCompletion: true },
+    });
+  };
 
   return (
     <S.Card>
@@ -36,7 +61,7 @@ const InterviewCompletedContent = () => {
         </S.SecondaryButton>
         <S.PrimaryButton
           type="button"
-          onClick={() => navigate("/main/feedback/list")}
+          onClick={handleOpenFeedback}
         >
           피드백 보러가기
         </S.PrimaryButton>

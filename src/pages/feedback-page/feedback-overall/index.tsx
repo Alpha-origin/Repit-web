@@ -19,6 +19,7 @@ const FeedbackOverallPage = () => {
     previousFeedback,
     isLoading,
     isRetryingFeedback,
+    isSavingInterview,
     refetch,
     retryFeedback,
   } = useFeedbackInterview(id, true);
@@ -55,7 +56,9 @@ const FeedbackOverallPage = () => {
       <S.Panel ref={panelRef}>
         {isLoading ? (
           <S.StateCard aria-live="polite">
-            <S.StateText>면접 정보를 불러오는 중입니다.</S.StateText>
+            <S.StateText>
+              {isSavingInterview ? "면접 기록을 저장하고 있어요" : "면접 정보를 불러오는 중입니다."}
+            </S.StateText>
           </S.StateCard>
         ) : errorMessage || !interview ? (
           <S.StateCard aria-live="polite">
