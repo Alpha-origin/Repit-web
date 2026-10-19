@@ -131,6 +131,7 @@ export const getInterviewEvent = (value: unknown) => {
   const statusValue = sourceRecord?.status ?? responseRecord?.status;
 
   return {
+    type: getTrimmedString(sourceRecord?.type ?? responseRecord?.type),
     status: isInterviewProgressStatus(statusValue) ? statusValue : null,
     question: getInterviewQuestion(sourceRecord?.question ?? sourceRecord),
     message: getTrimmedString(

@@ -7,6 +7,7 @@ export const useFeedbackAudioAnalysis = (
   interviewId: number | undefined,
   answerMode: "TEXT" | "VOICE" | null | undefined,
   enabled: boolean,
+  onPolicyError?: (error: unknown) => Promise<boolean>,
 ) => {
   const [attempt, setAttempt] = useState(0);
   const [result, setResult] = useState<{ key: string; view: FeedbackSpeechAnalysis } | null>(null);
@@ -32,13 +33,14 @@ export const useFeedbackAudioAnalysis = (
         if (controller.signal.aborted) return;
         update(buildSpeechAnalysis(data, answerMode));
         if (data.status === "PENDING") timer = window.setTimeout(() => void poll(), Math.min(5_000, Math.max(0, deadline - Date.now())));
-      } catch {
+      } catch (error) {
+        if (controller.signal.aborted || await onPolicyError?.(error)) return;
         update({ visible: true, message: "음성 분석 정보를 확인하지 못했습니다.", canRetry: true });
       }
     };
     timer = window.setTimeout(() => void poll(), 0);
     return () => { controller.abort(); window.clearTimeout(timer); };
-  }, [interviewId, answerMode, key, shouldLoad]);
+  }, [interviewId, answerMode, key, shouldLoad, onPolicyError]);
 
   return {
     view: !shouldLoad ? HIDDEN_SPEECH : result?.key === key ? result.view : LOADING_SPEECH,

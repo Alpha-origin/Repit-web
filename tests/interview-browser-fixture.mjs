@@ -10,7 +10,7 @@ export const browser = await chromium.launch({ headless: true, args: [
 ] });
 export const question = (id) => ({ questionId: id, parentId: 0, type: "ORIGINAL", intention: "경험", content: `질문 ${id}: 프로젝트 경험을 설명해주세요.`, personaId: 1 });
 
-export async function fixture({ multi = false, answerMode = "voice", timeout = false, denied = false, fail = false, delayUploads = false, complete = false, mimeMode, socketOnAnswer = false, preparationFailed = false, recorderFails = false, slowStop = false, audioResponses = null, holdAudio = false, fastAudioTimers = false, audioDeadline = false, playback = "native", recoveredSessionId = null, quitStatuses = [200], preparationQuestions = null, manualSpeech = false } = {}) {
+export async function fixture({ multi = false, answerMode = "voice", timeout = false, denied = false, fail = false, delayUploads = false, complete = false, mimeMode, socketOnAnswer = false, preparationFailed = false, recorderFails = false, slowStop = false, audioResponses = null, holdAudio = false, fastAudioTimers = false, audioDeadline = false, playback = "native", recoveredSessionId = null, quitStatuses = [200], quitResult = "ABANDONED", storedStatus = "IN_PROGRESS", socketAnswerStatus = "COMPLETED", delayAnswers = false, delayQuit = false, preparationQuestions = null, manualSpeech = false } = {}) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage();
   page.setDefaultTimeout(10_000);
@@ -134,6 +134,9 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
   const quits = [];
   const feedbackRequests = [];
   const chatRequests = [];
+  const statusReads = [];
+  const answerReleases = [];
+  const quitReleases = [];
   const recovery = { starts: 0, reads: 0 };
   const releases = [];
   let current = question(101);
@@ -161,13 +164,19 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
     if (pathname.endsWith("/answers")) {
       answers.push(request.postDataJSON());
       current = question(102);
-      if (socketOnAnswer) await page.evaluate(() => window.__sockets.filter((socket) => socket.readyState === 1).forEach((socket) => socket.dispatchEvent(new MessageEvent("message", { data: JSON.stringify({ status: "COMPLETED" }) }))));
+      if (socketOnAnswer) await page.evaluate((socketAnswerStatus) => window.__sockets.filter((socket) => socket.readyState === 1).forEach((socket) => socket.dispatchEvent(new MessageEvent("message", { data: JSON.stringify({ type: "END", status: socketAnswerStatus }) }))), socketAnswerStatus);
+      if (delayAnswers) await new Promise((resolve) => answerReleases.push(resolve));
       return json({ status: complete ? "COMPLETED" : "IN_PROGRESS", question: complete ? undefined : current });
     }
     if (pathname.endsWith("/quit")) {
       const status = quitStatuses[Math.min(quits.length, quitStatuses.length - 1)];
       quits.push(pathname);
-      return json(status === 200 ? { status: "ABANDONED" } : { message: "테스트 중단 저장 실패" }, status);
+      if (delayQuit) await new Promise((resolve) => quitReleases.push(resolve));
+      return json(status === 200 ? { status: quitResult } : { message: "테스트 중단 저장 실패" }, status);
+    }
+    if (pathname === "/api/interviews/get") {
+      statusReads.push(pathname);
+      return json({ data: { interviewId: 42, status: storedStatus } });
     }
     if (pathname.endsWith("/question")) return json(current);
     if (recoveredSessionId && pathname === "/api/interviews/42") {
@@ -220,7 +229,9 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
       throw error;
     }
   }
-  return { page, context, start, finish, uploads, answers, quits, feedbackRequests, releases, errors, audioRequests, failedRequests, directTtsRequests, chatRequests, recovery,
+  return { page, context, start, finish, statusReads,
+    releaseAnswers: () => { for (const resolve of answerReleases.splice(0)) resolve(); },
+    releaseQuit: () => { for (const resolve of quitReleases.splice(0)) resolve(); }, uploads, answers, quits, feedbackRequests, releases, errors, audioRequests, failedRequests, directTtsRequests, chatRequests, recovery,
     releaseAudio: () => { for (const resolve of audioReleases.splice(0)) resolve(); },
     recover: () => { shouldFail = false; },
     release: () => { for (const resolve of releases.splice(0)) resolve(); },

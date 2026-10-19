@@ -190,6 +190,7 @@ try {
     const voiceChoice = f.page.getByRole("button", { name: "영상/음성 답변", exact: false });
     const labelBox = await voiceChoice.locator("span").first().boundingBox();
     assert.ok(labelBox.width > 200, "answer mode text has enough width");
+    await waitUntil(async () => await textChoice.getAttribute("aria-pressed") === "true");
     assert.equal(await textChoice.getAttribute("aria-pressed"), "true");
     await f.page.screenshot({ path: `/tmp/repit-${path.endsWith("multi") ? "multi" : "solo"}-setup.png`, fullPage: true });
   }

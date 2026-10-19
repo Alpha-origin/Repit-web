@@ -13,6 +13,7 @@ interface UseInterviewSocketParams {
   sessionId?: string | null;
   onQuestionReceived?: (question: CurrentInterviewQuestion) => void;
   onStatusChange?: (params: {
+    type?: string | null;
     message: string | null;
     question: CurrentInterviewQuestion | null;
     status: InterviewProgressStatus | null;
@@ -55,7 +56,7 @@ export const useInterviewSocket = ({
         onQuestionReceived?.(nextEvent.question);
       }
 
-      if (nextEvent.status || nextEvent.message) {
+      if (nextEvent.status || nextEvent.message || nextEvent.type === "END") {
         onStatusChange?.(nextEvent);
       }
     };

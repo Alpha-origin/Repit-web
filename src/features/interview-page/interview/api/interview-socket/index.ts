@@ -69,6 +69,7 @@ export const connectInterviewSocket = (sessionId: string) => {
 export const parseInterviewSocketMessage = (data: unknown) => {
   if (typeof data !== "string") {
     return {
+      type: null,
       status: null,
       question: null,
       message: null,
