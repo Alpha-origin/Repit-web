@@ -23,11 +23,11 @@ async function scenario(name, callback) {
   try { await callback(); passed++; console.log(`PASS ${name}`); }
   catch (error) { console.error(`FAIL ${name}`); throw error; }
 }
-async function fixture({ mode = "SOLO", width = 1440, initialList = companies } = {}) {
+async function fixture({ mode = "SOLO", width = 1440, initialList = companies, listFail = false, landing = "company", companyId = null } = {}) {
   const context = await browser.newContext({ viewport: { width, height: 1000 } });
   const page = await context.newPage();
   page.setDefaultTimeout(10_000);
-  const state = { list: initialList, listFail: false, createFailure: null, createAbort: false, createDelay: 0,
+  const state = { list: initialList, listFail, start404: false, createFailure: null, createAbort: false, createDelay: 0,
     preparation: "PREPARING", chatDelivered: false, lifecycle: "IN_PROGRESS", userId: 7,
     creates: [], personas: [], queries: [], starts: 0, retries: 0, reads: 0, company: null, delayedQueries: false };
   const errors = [];
@@ -75,7 +75,7 @@ async function fixture({ mode = "SOLO", width = 1440, initialList = companies } 
     }
     if (path === "/api/interviews/get") { state.reads++; return json({ data: interview() }); }
     if (path === "/api/interviews/42/preparation/retry") { state.retries++; state.preparation = "READY"; state.chatDelivered = true; return json({ data: {} }); }
-    if (path === "/api/interviews/42") { state.starts++; return json({ data: { interviewId: 42, sessionId: "company-session" } }); }
+    if (path === "/api/interviews/42") { state.starts++; return state.start404 ? json({ message: "포트폴리오 분석을 먼저 진행해주세요" }, 404) : json({ data: { interviewId: 42, sessionId: "company-session" } }); }
     if (path === "/api/questions/tailor") return json({ data: { interviewId: 42, preparationStatus: state.preparation,
       status: state.preparation === "READY" ? "SUCCEEDED" : state.preparation === "FAILED" ? "FAILED" : "PENDING",
       chatDelivered: state.chatDelivered, retryable: true, retryAfterMs: 1000,
@@ -91,21 +91,29 @@ async function fixture({ mode = "SOLO", width = 1440, initialList = companies } 
   });
   await page.goto(origin);
   await page.getByRole("button", { name: "면접 시작하기", exact: true }).first().waitFor();
-  const draftId = await page.evaluate(async ({ mode }) => {
+  const draftId = await page.evaluate(async ({ mode, landing, companyId }) => {
     const { setAccessToken } = await import("/src/shared/api/accessToken.ts"); setAccessToken("test-only-token");
     const { useUserStore } = await import("/src/shared/store/userStore.ts"); useUserStore.getState().setUser({ id: 7 });
     const { upsertSettingsDraft } = await import("/src/features/interview-page/setting-company/model/draftStore.ts");
     const { MULTI_INTERVIEWER_TEMPLATES: templates } = await import("/src/shared/constants/interview-page/setting-multi-interview/index.ts");
     const settings = mode === "SOLO" ? { mode, difficulty: "보통", personality: "REALISTIC", tone: "DIRECT", interviewerKey: templates[0].key, answerMode: "text" }
       : { mode, difficulty: "어려움", style: "압박", answerMode: "text", slots: templates.slice(0, 3).map((interviewer, index) => ({ interviewer, role: ["TECH", "HR", "PM"][index], personality: "METICULOUS", tone: "PRESSURING" })) };
-    const draft = upsertSettingsDraft(settings, null);
+    let draft = upsertSettingsDraft(settings, null);
+    if (companyId) {
+      const { saveSetupDraft } = await import("/src/features/interview-page/setting-company/model/draftStore.ts");
+      draft = saveSetupDraft({ ...draft, companyId });
+    }
     const routerUrl = performance.getEntriesByType("resource").map((entry) => entry.name).find((url) => new URL(url).pathname === "/src/app/router.tsx");
     const { default: router } = await import(routerUrl); window.__router = router;
-    await router.navigate(`/main/setting/interview/company?draftId=${draft.draftId}`);
+    const settingsPath = `/main/setting/interview${mode === "MULTI" ? "/multi" : ""}`;
+    await router.navigate(`${landing === "company" ? "/main/setting/interview/company" : settingsPath}?draftId=${draft.draftId}`);
     return draft.draftId;
-  }, { mode });
-  await page.getByRole("heading", { name: "기업 선택 (선택)" }).waitFor();
-  await page.getByText("기업 목록을 불러오고 있어요", { exact: true }).waitFor({ state: "hidden" });
+  }, { mode, landing, companyId });
+  // 공개 기업이 없으면 기업 선택 화면 없이 바로 준비한다(05-web §3-3). 그때는 선택 화면을 기다리지 않는다.
+  if (landing === "company" && (initialList.length > 0 || listFail || companyId)) {
+    await page.getByRole("heading", { name: "기업 선택 (선택)" }).waitFor();
+    await page.getByText("기업 목록을 불러오고 있어요", { exact: true }).waitFor({ state: "hidden" });
+  }
   return { page, context, state, errors, draftId,
     draft: () => page.evaluate((id) => JSON.parse(sessionStorage.getItem(`repit:interview-setup:7:${id}`)), draftId),
     navigate: (path) => page.evaluate(async (path) => { const routerUrl = performance.getEntriesByType("resource").map((entry) => entry.name).find((url) => new URL(url).pathname === "/src/app/router.tsx");
@@ -210,17 +218,65 @@ try {
     assert.deepEqual(f.errors, []); await f.context.close();
   });
 
-  await scenario("empty all, empty filter, failed listing each allow explicit general start", async () => {
-    const f = await fixture({ initialList: [] });
-    await f.page.getByText("현재 등록된 기업이 없습니다. 기업 없이 면접을 시작할 수 있어요.").waitFor();
-    await f.page.getByRole("button", { name: "핀테크", exact: true }).click();
+  await scenario("filtered empty and failed listing each allow explicit general start", async () => {
+    const f = await fixture();
+    await f.page.getByRole("searchbox").fill("없는기업");
     await f.page.getByText("검색 결과가 없어요", { exact: true }).waitFor();
     f.state.listFail = true;
-    await f.page.getByRole("button", { name: "전체", exact: true }).click();
+    await f.page.getByRole("searchbox").fill("");
     await f.page.getByRole("button", { name: "기업 목록 다시 불러오기", exact: true }).waitFor();
     await f.page.getByRole("button", { name: "기업 없이 면접 시작", exact: true }).click();
     await f.page.getByText("면접을 준비하고 있어요. 준비가 끝나면 면접 화면으로 이동합니다.").waitFor();
     assert.equal(f.state.creates[0].body.companyId, undefined); await f.context.close();
+  });
+
+  for (const mode of ["SOLO", "MULTI"]) {
+    await scenario(`${mode} zero companies: start label, no picker, single automatic general start`, async () => {
+      const f = await fixture({ mode, initialList: [], landing: "settings" });
+      await f.page.getByRole("button", { name: "면접 시작", exact: true }).click();
+      await f.page.getByText("면접을 준비하고 있어요. 준비가 끝나면 면접 화면으로 이동합니다.").waitFor();
+      assert.equal(await f.page.getByRole("heading", { name: "기업 선택 (선택)" }).count(), 0);
+      assert.equal(await f.page.getByRole("searchbox").count(), 0);
+      assert.equal(await f.page.getByRole("radio").count(), 0);
+      assert.equal(f.state.creates.length, 1);
+      assert.equal(f.state.creates[0].body.companyId, undefined);
+      f.state.preparation = "READY"; f.state.chatDelivered = true;
+      await f.page.waitForURL(/\/main\/interview\/42/);
+      assert.equal(f.state.creates.length, 1);
+      assert.deepEqual(f.errors, []); await f.context.close();
+    });
+  }
+
+  await scenario("zero companies: UNKNOWN refresh replays the same body/key once without a second automatic start", async () => {
+    const f = await fixture({ initialList: [] }); f.state.createAbort = true;
+    await f.page.getByRole("button", { name: "같은 요청으로 결과 확인", exact: true }).waitFor();
+    assert.equal(f.state.creates.length, 1);
+    f.state.createAbort = false;
+    await f.page.reload();
+    await f.page.getByText("면접을 준비하고 있어요. 준비가 끝나면 면접 화면으로 이동합니다.").waitFor();
+    await f.page.waitForTimeout(300);
+    assert.equal(f.state.creates.length, 2); assert.deepEqual(f.state.creates[0], f.state.creates[1]);
+    assert.equal(await f.page.getByRole("searchbox").count(), 0);
+    await f.context.close();
+  });
+
+  await scenario("zero companies: missing materials 404 shows the my page link", async () => {
+    const f = await fixture({ initialList: [] });
+    f.state.preparation = "NOT_REQUESTED"; f.state.start404 = true;
+    await f.page.getByText("포트폴리오 분석을 먼저 진행해주세요", { exact: true }).waitFor();
+    assert.equal(await f.page.getByRole("link", { name: "마이페이지로 이동", exact: true }).count(), 1);
+    await f.context.close();
+  });
+
+  await scenario("zero companies: failed listing or a previously chosen company keeps the picker", async () => {
+    const failed = await fixture({ initialList: [], listFail: true });
+    await failed.page.getByRole("button", { name: "기업 없이 면접 시작", exact: true }).waitFor();
+    await failed.page.waitForTimeout(300);
+    assert.equal(failed.state.creates.length, 0); await failed.context.close();
+    const chosen = await fixture({ initialList: [], companyId: 12 });
+    await chosen.page.getByText("현재 등록된 기업이 없습니다. 기업 없이 면접을 시작할 수 있어요.").waitFor();
+    await chosen.page.waitForTimeout(300);
+    assert.equal(chosen.state.creates.length, 0); await chosen.context.close();
   });
 
   await scenario("debounce, single character omission and late responses", async () => {
