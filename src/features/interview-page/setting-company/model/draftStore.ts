@@ -33,10 +33,12 @@ export const currentOwnerKey = () => {
 const validBody = (body: unknown, draft: SetupDraft): body is CreateInterviewParams => {
   if (!record(body) || (draft.companyId === null && "companyId" in body) || (body.companyId !== undefined && body.companyId !== draft.companyId) ||
     (draft.companyId !== null && body.companyId !== draft.companyId)) return false;
-  if (draft.mode === "MULTI") return Object.keys(body).every((key) => ["personaIds", "companyId"].includes(key)) &&
+  if (body.answerMode !== undefined && body.answerMode !== null &&
+    body.answerMode !== (draft.settings.answerMode === "text" ? "TEXT" : "VOICE")) return false;
+  if (draft.mode === "MULTI") return Object.keys(body).every((key) => ["personaIds", "companyId", "answerMode"].includes(key)) &&
     Array.isArray(body.personaIds) && body.personaIds.length === (draft.settings.mode === "MULTI" ? draft.settings.slots.length : 0) &&
     body.personaIds.every(positiveId) && new Set(body.personaIds).size === body.personaIds.length;
-  return Object.keys(body).every((key) => ["personaName", "major", "type", "career", "gender", "companyId"].includes(key)) &&
+  return Object.keys(body).every((key) => ["personaName", "major", "type", "career", "gender", "companyId", "answerMode"].includes(key)) &&
     typeof body.personaName === "string" && body.personaName.length > 0 && body.personaName.length < 200 &&
     ["FRIENDLY", "REALISTIC", "METICULOUS"].includes(String(body.type)) &&
     typeof body.career === "number" && Number.isFinite(body.career) && body.career >= 0 &&

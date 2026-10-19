@@ -3,30 +3,22 @@ import type { FeedbackOverallBottomSectionProps } from "../type";
 
 const FeedbackOverallBottomSection = ({
   content,
+  speechAnalysis,
+  onRetrySpeechAnalysis,
   isDownloadingPdf = false,
   onDownloadPdf,
 }: FeedbackOverallBottomSectionProps) => {
-  const { keywords, reliability, speechMetrics } = content;
+  const { keywords, reliability } = content;
 
   return (
     <S.SectionBlock>
-      <S.SpeechCard>
-        <S.TextCardTitle>음성 분석 결과</S.TextCardTitle>
-        <S.SpeechMetricGrid>
-          {speechMetrics.map((metric) => (
-            <S.SpeechMetricCard key={metric.label}>
-              <S.MetricHeader>
-                <S.MetricLabel>{metric.label}</S.MetricLabel>
-                <S.MetricValue>{metric.score === null ? "분석 대기" : `${metric.score}점`}</S.MetricValue>
-              </S.MetricHeader>
-              <S.ProgressTrack aria-hidden="true">
-                <S.ProgressFill $score={metric.score ?? 0} />
-              </S.ProgressTrack>
-              <S.MetricDescription>{metric.description}</S.MetricDescription>
-            </S.SpeechMetricCard>
-          ))}
-        </S.SpeechMetricGrid>
-      </S.SpeechCard>
+      {speechAnalysis.visible ? (
+        <S.SpeechCard aria-label="음성 분석 결과" aria-live="polite">
+          <S.TextCardTitle>음성 분석 결과</S.TextCardTitle>
+          <S.MetricDescription>{speechAnalysis.message}</S.MetricDescription>
+          {speechAnalysis.canRetry ? <S.SpeechRetryButton type="button" onClick={onRetrySpeechAnalysis} data-html2canvas-ignore="true">음성 정보 다시 확인</S.SpeechRetryButton> : null}
+        </S.SpeechCard>
+      ) : null}
 
       <S.BottomGrid>
         <S.KeywordCard aria-label="자주 사용한 단어">

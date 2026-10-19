@@ -1,3 +1,4 @@
+import { useFeedbackAudioAnalysis } from "@/features/feedback-page/model/useFeedbackAudioAnalysis";
 import CompanyFeedback from "@/widgets/feedback-page/company-feedback";
 import { buildFeedbackOverallContent } from "@/features/feedback-page/model/feedbackDisplay";
 import { useFeedbackInterview } from "@/features/feedback-page/model/useFeedbackInterview";
@@ -29,6 +30,7 @@ const FeedbackOverallPage = () => {
     feedback && !isAnalysisPending && !isAnalysisFailed
       ? buildFeedbackOverallContent(feedback, interview, previousFeedback)
       : null;
+  const audio = useFeedbackAudioAnalysis(interview?.interviewId ?? interview?.id, interview?.answerMode, content !== null);
   const panelRef = useRef<HTMLElement | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
@@ -88,6 +90,8 @@ const FeedbackOverallPage = () => {
             <CompanyFeedback feedback={feedback!} interview={interview} />
             <FeedbackOverallBottomSection
               content={content.bottomSection}
+              speechAnalysis={audio.view}
+              onRetrySpeechAnalysis={audio.retry}
               isDownloadingPdf={isDownloadingPdf}
               onDownloadPdf={handleDownloadPdf}
             />
