@@ -1,10 +1,12 @@
 import axios from "axios";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 import {
   getInterviewAnswers,
   type InterviewAnswer,
 } from "@/features/feedback-page/api/getInterviewAnswers";
+import { getInterviewStatus } from "@/features/feedback-page/api/getInterviewStatus";
 
 import {
   getAllFeedbacks,
@@ -21,7 +23,69 @@ import {
 } from "@/features/feedback-page/model/interviewDisplay";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
 
+const INTERVIEW_SAVE_CHECK_INTERVAL_MS = 3_000;
+const INTERVIEW_SAVE_CHECK_TIMEOUT_MS = 60_000;
+const INTERVIEW_SAVE_REQUEST_TIMEOUT_MS = 15_000;
+
+const isFromCompletion = (state: unknown) =>
+  !!state && typeof state === "object" &&
+  (state as { fromCompletion?: unknown }).fromCompletion === true;
+
+const isRetryableError = (error: unknown) => {
+  if (!axios.isAxiosError(error) || axios.isCancel(error)) return false;
+  const status = error.response?.status;
+  return !error.response || status === 408 || status === 429 ||
+    (status !== undefined && status >= 500 && status < 600);
+};
+
+const waitFor = (ms: number, signal: AbortSignal) => new Promise<void>((resolve) => {
+  const handleAbort = () => {
+    window.clearTimeout(timeoutId);
+    resolve();
+  };
+  const timeoutId = window.setTimeout(() => {
+    signal.removeEventListener("abort", handleAbort);
+    resolve();
+  }, ms);
+  signal.addEventListener("abort", handleAbort, { once: true });
+});
+
+// 완료 직후에는 Chat → API 저장이 끝나기 전이라 IN_PROGRESS일 수 있어 정해진 시간만 다시 조회한다.
+const waitForInterviewCompletion = async (interviewId: number, signal: AbortSignal) => {
+  const deadline = Date.now() + INTERVIEW_SAVE_CHECK_TIMEOUT_MS;
+  let status = "IN_PROGRESS";
+  let error: unknown = null;
+
+  while (!signal.aborted) {
+    const remainingTime = deadline - Date.now();
+    if (remainingTime <= 0) break;
+
+    await waitFor(Math.min(INTERVIEW_SAVE_CHECK_INTERVAL_MS, remainingTime), signal);
+    if (signal.aborted) break;
+
+    try {
+      // 응답이 멈춰도 60초 기한을 크게 넘기지 않도록 요청마다 시간 제한을 둔다.
+      const requestTimeout = Math.min(
+        INTERVIEW_SAVE_REQUEST_TIMEOUT_MS,
+        Math.max(deadline - Date.now(), 1_000),
+      );
+      status = (await getInterviewStatus(interviewId, { signal, timeout: requestTimeout })) ?? status;
+      if (status !== "IN_PROGRESS") break;
+    } catch (requestError) {
+      if (signal.aborted) break;
+      if (!isRetryableError(requestError)) {
+        error = requestError;
+        break;
+      }
+    }
+  }
+
+  return { status, error };
+};
+
 export const useFeedbackInterview = (id?: string, includePreviousFeedback = false) => {
+  const location = useLocation();
+  const fromCompletion = isFromCompletion(location.state);
   const [answers, setAnswers] = useState<InterviewAnswer[]>([]);
   const [answersErrorMessage, setAnswersErrorMessage] = useState<string | null>(null);
   const [interview, setInterview] = useState<InterviewSummary | null>(null);
@@ -32,15 +96,20 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
   );
   const [isLoading, setIsLoading] = useState(true);
   const [isRetryingFeedback, setIsRetryingFeedback] = useState(false);
+  const [isSavingInterview, setIsSavingInterview] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const requestIdRef = useRef(0);
   const isRetryingFeedbackRef = useRef(false);
+  const saveCheckControllerRef = useRef<AbortController | null>(null);
 
   const loadInterview = useCallback(async () => {
     const requestId = ++requestIdRef.current;
     const interviewId = Number(id);
+    saveCheckControllerRef.current?.abort();
+    saveCheckControllerRef.current = null;
     isRetryingFeedbackRef.current = false;
     setIsRetryingFeedback(false);
+    setIsSavingInterview(false);
     setAnswers([]);
     setAnswersErrorMessage(null);
     setFeedback(null);
@@ -78,11 +147,29 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
 
     if (interviewsResult.status === "fulfilled") {
       const sortedInterviews = sortInterviewsByCreatedAt(interviewsResult.value);
-      const nextInterview =
+      let nextInterview =
         sortedInterviews.find((item) => getInterviewId(item) === interviewId) ??
         null;
 
       setInterview(nextInterview);
+      let saveCheckError: unknown = null;
+
+      if (fromCompletion && nextInterview?.status === "IN_PROGRESS") {
+        const controller = new AbortController();
+        saveCheckControllerRef.current = controller;
+        setIsSavingInterview(true);
+        const result = await waitForInterviewCompletion(interviewId, controller.signal);
+
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+
+        saveCheckControllerRef.current = null;
+        setIsSavingInterview(false);
+        nextInterview = { ...nextInterview, status: result.status };
+        saveCheckError = result.error;
+        setInterview(nextInterview);
+      }
 
       if (nextInterview?.createdAt && historyResult.status === "fulfilled") {
         const currentTime = new Date(nextInterview.createdAt).getTime();
@@ -106,6 +193,10 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
 
       if (!nextInterview) {
         setErrorMessage("면접 정보를 찾을 수 없습니다.");
+      } else if (saveCheckError) {
+        setFeedbackErrorMessage(
+          extractErrorMessage(saveCheckError, "면접 상태를 확인하지 못했습니다."),
+        );
       } else if (nextInterview.status !== "COMPLETED") {
         setFeedbackErrorMessage("아직 완료되지 않은 면접입니다. 면접을 마친 뒤 피드백을 확인해주세요.");
       } else {
@@ -138,7 +229,7 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
     }
 
     setIsLoading(false);
-  }, [id, includePreviousFeedback]);
+  }, [fromCompletion, id, includePreviousFeedback]);
 
   const retryFeedback = useCallback(async () => {
     if (feedback?.status !== "FAILED") {
@@ -200,6 +291,8 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
     return () => {
       window.clearTimeout(timeoutId);
       requestIdRef.current += 1;
+      saveCheckControllerRef.current?.abort();
+      saveCheckControllerRef.current = null;
     };
   }, [loadInterview]);
 
@@ -281,6 +374,7 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
     previousFeedback,
     isLoading,
     isRetryingFeedback,
+    isSavingInterview,
     refetch: loadInterview,
     retryFeedback,
   };
