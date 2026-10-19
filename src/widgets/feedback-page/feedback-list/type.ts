@@ -1,6 +1,8 @@
 export interface FeedbackListItem {
+  companyName?: string;
   id: number;
   date: string;
+  createdAt?: string;
   imageUrl: string;
   title: string;
   styleLabel: string;

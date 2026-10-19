@@ -1,29 +1,25 @@
 import styled from "styled-components";
 
+import { pageLayout } from "@/shared/styles/pageLayout";
+
 export const Page = styled.section`
-  width: 100%;
+  ${pageLayout}
   display: flex;
   align-items: flex-start;
   justify-content: center;
   min-height: 100%;
-  padding: 1.2rem 2rem 2rem;
-  box-sizing: border-box;
-
-  @media (max-width: 48rem) {
-    padding: 0.8rem 0.9rem 1.1rem;
-  }
+  color: ${({ theme }) => theme.colors.text.default};
 `;
 
 export const Panel = styled.section`
-  width: min(100%, 90rem);
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.3rem;
+  gap: 0.75rem;
   box-sizing: border-box;
 
   @media (max-width: 48rem) {
-    gap: 1rem;
-    padding: 0.8rem 0.2rem 1.2rem;
+    gap: 0.75rem;
   }
 `;
 

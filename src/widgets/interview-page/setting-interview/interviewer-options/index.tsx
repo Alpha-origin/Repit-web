@@ -1,81 +1,49 @@
-import { SETTING_INTERVIEWER_SECTION } from '../data';
+import { SETTING_INTERVIEWER_CARDS } from '../data';
+import {
+  IdentityButton,
+  IdentityImage,
+  IdentityRow,
+} from '@/widgets/interview-page/setting-multi-interview/style';
 import * as S from '../style';
 import type {
+  InterviewerCardProps,
   InterviewerOptionsProps,
-  InterviewerSettingGroupProps,
 } from './type';
 
 const InterviewerOptions = ({
   onSelect,
-  selection,
-}: InterviewerOptionsProps) => {
-  const [personalityGroup, toneGroup, majorGroup] =
-    SETTING_INTERVIEWER_SECTION.groups;
-
-  return (
-    <S.InterviewerSettingSection
-      aria-labelledby="interviewer-setting-title"
-    >
-      <S.Title id="interviewer-setting-title">
-        {SETTING_INTERVIEWER_SECTION.title}
-      </S.Title>
-      <S.InterviewerSettingPanel>
-        <InterviewerSettingGroup
-          label={personalityGroup.title}
-          onSelect={onSelect.personality}
-          options={personalityGroup.options}
-          selectedValue={selection.personality}
-        />
-        <InterviewerSettingGroup
-          label={toneGroup.title}
-          onSelect={onSelect.tone}
-          options={toneGroup.options}
-          selectedValue={selection.tone}
-        />
-        <InterviewerSettingGroup
-          label={majorGroup.title}
-          onSelect={onSelect.major}
-          options={majorGroup.options}
-          selectedValue={selection.major}
-        />
-      </S.InterviewerSettingPanel>
-    </S.InterviewerSettingSection>
-  );
-};
-
-const InterviewerSettingGroup = <Option extends string,>({
-  label,
-  onSelect,
-  options,
   selectedValue,
-}: InterviewerSettingGroupProps<Option>) => {
-  return (
-    <S.InterviewerSettingGroup>
-      <S.InterviewerSettingLabel>{label}</S.InterviewerSettingLabel>
-      <S.InterviewerOptionGrid
-        $columns={options.length === 2 ? 2 : 3}
-        aria-label={label}
-        role="radiogroup"
-      >
-        {options.map((option) => {
-          const isSelected = selectedValue === option;
+}: InterviewerOptionsProps) => (
+  <S.Section>
+    <S.Title>면접관 선택</S.Title>
+    <IdentityRow role="radiogroup" aria-label="면접관 선택">
+      {SETTING_INTERVIEWER_CARDS.map((interviewer) => (
+        <InterviewerCard
+          key={interviewer.key}
+          interviewer={interviewer}
+          isSelected={selectedValue === interviewer.key}
+          onSelect={onSelect}
+        />
+      ))}
+    </IdentityRow>
+  </S.Section>
+);
 
-          return (
-            <S.InterviewerOptionButton
-              key={option}
-              $selected={isSelected}
-              aria-checked={isSelected}
-              onClick={() => onSelect(option)}
-              role="radio"
-              type="button"
-            >
-              {option}
-            </S.InterviewerOptionButton>
-          );
-        })}
-      </S.InterviewerOptionGrid>
-    </S.InterviewerSettingGroup>
-  );
-};
+const InterviewerCard = ({
+  interviewer,
+  isSelected,
+  onSelect,
+}: InterviewerCardProps) => (
+  <IdentityButton
+    $selected={isSelected}
+    aria-checked={isSelected}
+    onClick={() => onSelect(interviewer.key)}
+    role="radio"
+    type="button"
+  >
+    <IdentityImage src={interviewer.image} alt="" />
+    {interviewer.name}
+  </IdentityButton>
+);
 
 export default InterviewerOptions;

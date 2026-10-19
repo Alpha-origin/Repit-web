@@ -1,247 +1,110 @@
+import { loadSetupDraft, upsertSettingsDraft } from "@/features/interview-page/setting-company/model/draftStore";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+
+import { useInterviewEligibility } from "@/features/profile/model/useInterviewEligibility";
 
 import {
-  createInterview,
-  prepareInterviewRecord,
-  savePersona,
-  setActiveInterviewSessionId,
-  type CreateInterviewPersonaType,
-  type InterviewPersonaGender,
-  type InterviewLevel,
-  type InterviewPersonaMajor,
-  type InterviewPersonaRole,
-  type InterviewTone,
-  type SavePersonaParams,
-} from "@/features/interview-page/interview/api";
+  COMPANY_SETTING_PATH,
+  type SoloInterviewDraft,
+} from "@/features/interview-page/setting-company/model/draft";
 import {
   INTERVIEW_SETTING_DEFAULT_SELECTION,
-  type InterviewMajorOption,
-  type InterviewDifficultyOption,
-  type InterviewerPersonalityOption,
-  type InterviewerToneOption,
+  INTERVIEW_STYLE_PRESETS,
+  findStylePreset,
   type InterviewSettingSelectHandlers,
 } from "@/shared/constants/interview-page/setting-interview";
-import InterviewerBackendImage from "@/shared/img/interview-page/interviewer1.svg?url";
-import InterviewerFrontendImage from "@/shared/img/interview-page/interviewer2.svg?url";
-
-const TONE_BY_OPTION: Record<
-  InterviewerToneOption,
-  InterviewTone
-> = {
-  부드러운: "GENTLE",
-  직설적인: "DIRECT",
-  압박하는: "PRESSURING",
-};
-
-const TYPE_BY_PERSONALITY: Record<
-  InterviewerPersonalityOption,
-  CreateInterviewPersonaType
-> = {
-  친근한: "FRIENDLY",
-  현실적인: "REALISTIC",
-  꼼꼼한: "METICULOUS",
-};
-
-const CAREER_BY_DIFFICULTY: Record<InterviewDifficultyOption, number> = {
-  쉬움: 0,
-  보통: 3,
-  어려움: 5,
-};
-
-const LEVEL_BY_DIFFICULTY: Record<InterviewDifficultyOption, InterviewLevel> = {
-  쉬움: "EASY",
-  보통: "NORMAL",
-  어려움: "HARD",
-};
-
-const MAJOR_BY_OPTION: Record<InterviewMajorOption, InterviewPersonaMajor> = {
-  프론트엔드: "FRONTEND",
-  백엔드: "BACKEND",
-};
-
-// 면접관 카드 선택이 사라지면서, 이미지와 소개 문구는 전문 분야에서 파생한다.
-const INTERVIEWER_IMAGE_BY_MAJOR: Record<InterviewMajorOption, string> = {
-  프론트엔드: InterviewerFrontendImage,
-  백엔드: InterviewerBackendImage,
-};
-
-const INTERVIEWER_DESCRIPTION_BY_MAJOR: Record<InterviewMajorOption, string> = {
-  프론트엔드:
-    "사용자 중심의 사고방식과 시각적 커뮤니케이션 능력을 심층 질문합니다.",
-  백엔드: "기술적 역량과 아키텍처 설계 능력을 중점적으로 파악합니다.",
-};
-
-const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "FEMALE";
-const DEFAULT_INTERVIEW_ROLE: InterviewPersonaRole = "TECH";
-
-const buildUniquePersonaName = () =>
-  `맞춤 면접관-${Date.now().toString(36)}`;
+import type {
+  InterviewerPersonality,
+  InterviewerTone,
+} from "@/shared/constants/interview-page/setting-multi-interview";
 
 export const useInterviewSetup = () => {
   const navigate = useNavigate();
-
-  const [selectedStyle, setSelectedStyle] = useState(
-    INTERVIEW_SETTING_DEFAULT_SELECTION.style,
+  const location = useLocation();
+  // 기업 선택에서 돌아오면 히스토리 state에 남겨 둔 설정값으로 다시 채운다.
+  const [initialDraft] = useState(() => {
+    const draft = loadSetupDraft(new URLSearchParams(location.search).get("draftId"))?.settings;
+    return draft?.mode === "SOLO" ? draft : null;
+  });
+  const [answerMode, setAnswerMode] = useState<"voice" | "text">(
+    initialDraft?.answerMode ?? "voice",
   );
+  const eligibility = useInterviewEligibility();
 
   const [selectedDifficulty, setSelectedDifficulty] = useState(
-    INTERVIEW_SETTING_DEFAULT_SELECTION.difficulty,
+    initialDraft?.difficulty ?? INTERVIEW_SETTING_DEFAULT_SELECTION.difficulty,
   );
-
-  const [selectedPersonality, setSelectedPersonality] = useState(
-    INTERVIEW_SETTING_DEFAULT_SELECTION.personality,
+  const [personality, setPersonality] = useState<InterviewerPersonality>(
+    initialDraft?.personality ?? INTERVIEW_SETTING_DEFAULT_SELECTION.personality,
   );
-
-  const [selectedTone, setSelectedTone] = useState(
-    INTERVIEW_SETTING_DEFAULT_SELECTION.tone,
+  const [tone, setTone] = useState<InterviewerTone>(
+    initialDraft?.tone ?? INTERVIEW_SETTING_DEFAULT_SELECTION.tone,
   );
-
-  const [selectedMajor, setSelectedMajor] = useState(
-    INTERVIEW_SETTING_DEFAULT_SELECTION.major,
+  const [interviewerKey, setInterviewerKey] = useState(
+    initialDraft?.interviewerKey ?? INTERVIEW_SETTING_DEFAULT_SELECTION.interviewerKey,
   );
-
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const selectedStyle = findStylePreset({
+    difficulty: selectedDifficulty,
+    personality,
+    tone,
+  });
 
   const handleBack = () => navigate(-1);
 
-  const handleNext = async () => {
-    if (isSubmitting) {
+  // 면접 생성은 다음 단계(기업 선택)의 "면접 시작"에서 한다.
+  const handleNext = () => {
+    if (!eligibility.canStart) {
       return;
     }
 
-    setErrorMessage("");
-    setIsSubmitting(true);
-
-    const personaPayload: SavePersonaParams = {
-      personaName: buildUniquePersonaName(),
-      role: DEFAULT_INTERVIEW_ROLE,
-      level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
-      major: MAJOR_BY_OPTION[selectedMajor],
-      type: TYPE_BY_PERSONALITY[selectedPersonality],
-      career: CAREER_BY_DIFFICULTY[selectedDifficulty],
-      gender: DEFAULT_INTERVIEW_GENDER,
-      tone: TONE_BY_OPTION[selectedTone],
-      imageUrl: INTERVIEWER_IMAGE_BY_MAJOR[selectedMajor],
-      description: INTERVIEWER_DESCRIPTION_BY_MAJOR[selectedMajor],
+    const draft: SoloInterviewDraft = {
+      mode: "SOLO",
+      difficulty: selectedDifficulty,
+      personality,
+      tone,
+      interviewerKey,
+      answerMode,
     };
-
-    const { data: savedPersona, errorMessage: savePersonaErrorMessage } =
-      await savePersona(personaPayload);
-
-    if (savePersonaErrorMessage || !savedPersona) {
-      setIsSubmitting(false);
-      setErrorMessage(
-        savePersonaErrorMessage ?? "페르소나 저장에 실패했습니다.",
-      );
-      return;
+    try {
+      const saved = upsertSettingsDraft(draft, new URLSearchParams(location.search).get("draftId"));
+      void Promise.resolve(navigate(`${location.pathname}?draftId=${saved.draftId}`, { replace: true }))
+        .then(() => navigate(`${COMPANY_SETTING_PATH}?draftId=${saved.draftId}`));
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "설정을 저장하지 못했습니다.");
     }
-
-    const interviewPayload = {
-      personaName: personaPayload.personaName,
-      major: MAJOR_BY_OPTION[selectedMajor],
-      type: personaPayload.type,
-      career: personaPayload.career,
-      gender: personaPayload.gender,
-    };
-    //repit-dp
-
-    const { data, errorMessage: createErrorMessage } =
-      await createInterview(interviewPayload);
-
-    if (createErrorMessage || !data) {
-      setIsSubmitting(false);
-      setErrorMessage(createErrorMessage ?? "면접 시작에 실패했습니다.");
-      return;
-    }
-
-    const {
-      data: preparedInterviewRecord,
-      errorMessage: prepareInterviewErrorMessage,
-    } = await prepareInterviewRecord(data.interviewId);
-
-    if (prepareInterviewErrorMessage || !preparedInterviewRecord) {
-      setIsSubmitting(false);
-      setErrorMessage(
-        prepareInterviewErrorMessage ?? "면접 준비에 실패했습니다.",
-      );
-      return;
-    }
-
-    const interviewSessionId =
-      preparedInterviewRecord.sessionId ?? data.sessionId;
-    const personaId =
-      data.personaId !== null && data.personaId > 0
-        ? data.personaId
-        : savedPersona.personaId;
-    setActiveInterviewSessionId(interviewSessionId);
-
-    setIsSubmitting(false);
-
-    navigate(`/main/interview/${data.interviewId}`, {
-      state: {
-        preparedInterview: {
-          sessionId: interviewSessionId,
-          interviewId: preparedInterviewRecord.interviewId,
-          userId: data.userId,
-          personaId,
-          personaName: personaPayload.personaName,
-          role: personaPayload.role,
-          major: personaPayload.major,
-          type: personaPayload.type,
-          personaType: personaPayload.type,
-          level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
-          career: personaPayload.career,
-          gender: personaPayload.gender,
-          tone: personaPayload.tone,
-          jobId: preparedInterviewRecord.jobId ?? "",
-          status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
-          currentQuestionIndex: data.currentQuestionIndex,
-          questions: [],
-          mode: "SOLO",
-          interviewers: [
-            {
-              personaId,
-              name: personaPayload.personaName,
-              roleLabel: "기술 면접관",
-              image: personaPayload.imageUrl,
-            },
-          ],
-        },
-        interviewSetting: {
-          style: selectedStyle,
-          difficulty: selectedDifficulty,
-          major: selectedMajor,
-          personality: selectedPersonality,
-          tone: selectedTone,
-        },
-      },
-    });
   };
 
   const select: InterviewSettingSelectHandlers = {
     difficulty: setSelectedDifficulty,
-    major: setSelectedMajor,
-    personality: setSelectedPersonality,
-    style: setSelectedStyle,
-    tone: setSelectedTone,
+    interviewer: setInterviewerKey,
+    personality: setPersonality,
+    tone: setTone,
+    style: (value) => {
+      const preset = INTERVIEW_STYLE_PRESETS[value];
+      setSelectedDifficulty(preset.difficulty);
+      setPersonality(preset.personality);
+      setTone(preset.tone);
+    },
   };
 
   return {
-    errorMessage,
-    isNextDisabled: isSubmitting,
-    isPortfolioAnalyzing: false,
-    isSubmitting,
+    answerMode,
+    onAnswerModeChange: setAnswerMode,
+    isNextDisabled: !eligibility.canStart,
+    isPortfolioAnalyzing: eligibility.isPortfolioAnalyzing,
+    profileGuidance: eligibility.guidance,
+    showMyPageLink: eligibility.showMyPageLink,
+    onRefreshProfile: eligibility.hasLoadError ? eligibility.refetch : undefined,
     onBack: handleBack,
     onNext: handleNext,
     select,
     selection: {
       difficulty: selectedDifficulty,
-      major: selectedMajor,
-      personality: selectedPersonality,
+      interviewerKey,
+      personality,
+      tone,
       style: selectedStyle,
-      tone: selectedTone,
     },
   };
 };

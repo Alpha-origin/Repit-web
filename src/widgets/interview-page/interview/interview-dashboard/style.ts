@@ -171,28 +171,6 @@ export const QuestionTag = styled.span`
   font-weight: 800;
 `;
 
-export const QuestionAudioButton = styled.button`
-  flex: 0 0 auto;
-  min-height: 2rem;
-  padding: 0.25rem 0.65rem;
-  border: 0.0625rem solid #9ac5ff;
-  border-radius: 999rem;
-  background: #f5f9ff;
-  color: #2179ed;
-  font-size: 0.74rem;
-  font-weight: 800;
-  cursor: pointer;
-
-  &:disabled {
-    cursor: wait;
-    opacity: 0.58;
-  }
-
-  &:hover:not(:disabled) {
-    background: #eaf3ff;
-  }
-`;
-
 export const QuestionSpeaker = styled.span`
   color: #4f6b91;
   font-size: 0.78rem;

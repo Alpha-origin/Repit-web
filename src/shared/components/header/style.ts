@@ -1,10 +1,10 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 interface TopButtonProps {
   $active: boolean;
 }
 
-export const Header = styled.header`
+const BaseHeader = styled.header`
   position: relative;
   z-index: 1;
 
@@ -197,4 +197,70 @@ export const LogoutButton = styled.button`
     height: 2.8rem;
     font-size: 0.95rem;
   }
+`;
+export const ErrorMessage = styled.p`
+  grid-column: 1 / -1;
+  margin: ${({ theme }) => theme.spacing.sm} 0;
+  color: ${({ theme }) => theme.colors.text.default};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+`;
+
+export const Header = styled(BaseHeader)<{ $compact?: boolean }>`
+  ${({ $compact }) => $compact && css`
+    min-height: clamp(4.5rem, 8vw, 5.25rem);
+    grid-template-columns: auto 1fr auto;
+    padding: 0 clamp(1rem, 3.65vw, 3rem);
+    gap: clamp(1.5rem, 3.5vw, 3rem);
+    border-bottom: 1px solid #dfe5ef;
+
+    ${LogoImage} {
+      height: clamp(3rem, 6vw, 3.75rem);
+      margin-left: -0.25rem;
+      justify-self: start;
+    }
+    ${TopButtons} {
+      justify-self: start;
+      width: auto;
+      gap: clamp(0.75rem, 2.4vw, 2rem);
+      margin: 0;
+    }
+    ${TopButton} {
+      min-width: 0;
+      min-height: 3rem;
+      flex: none;
+      padding: 0.875rem;
+      font-family: inherit;
+      font-size: 1rem;
+      &::after { display: none; }
+    }
+    ${StatusButtons} { justify-self: end; gap: 0.75rem; }
+    ${StatusButton} {
+      max-width: 8rem;
+      width: auto;
+      min-width: 5rem;
+      height: 2.5rem;
+      padding: 0 0.875rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      display: block;
+    }
+    ${LogoutButton} {
+      width: auto;
+      min-height: 3rem;
+      padding: 0 0.5rem;
+      font-size: 1rem;
+    }
+
+    @media (max-width: 42rem) {
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 0.25rem 0.5rem;
+      padding: 0.5rem 1rem 0;
+      ${TopButtons} { grid-row: 2; grid-column: 1 / -1; justify-self: center; gap: 1rem; }
+      ${StatusButtons} { grid-row: 1; grid-column: 2; gap: 0.5rem; min-width: 0; }
+      ${StatusButton} { max-width: 7rem; }
+    }
+  `}
 `;

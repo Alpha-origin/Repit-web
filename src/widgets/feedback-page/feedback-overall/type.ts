@@ -1,24 +1,21 @@
-export interface FeedbackOverallBarItem {
+export interface FeedbackOverallMetric {
   label: string;
-  score: number;
-  tone: "primary" | "muted";
-}
-
-export interface FeedbackOverallComparisonCard {
-  title: string;
-  highlightText?: string;
-  bars: readonly FeedbackOverallBarItem[];
+  score: number | null;
+  description?: string;
+  emptyLabel?: "해당 없음" | "미제공";
 }
 
 export interface FeedbackOverallPersonaFeedback {
   title: string;
   comment: string;
   imageUrl?: string;
+  score: number | null;
+  hasNoAnswer: boolean;
 }
 
 export interface FeedbackOverallKeywordItem {
   text: string;
-  size: "xs" | "sm" | "md" | "xl";
+  size: "xs" | "sm" | "md" | "lg" | "xl";
   top: string;
   left: string;
 }
@@ -31,22 +28,24 @@ export interface FeedbackOverallTopSectionData {
   };
   summary: {
     title: string;
-    score: number;
+    score: number | null;
     description: readonly string[];
   };
-  averageComparison: {
-    title: string;
-    bars: readonly FeedbackOverallBarItem[];
-  };
-  comparisonCards: readonly FeedbackOverallComparisonCard[];
-  intentAlignmentScore: number;
+  metrics: readonly FeedbackOverallMetric[];
+  evaluation: string;
 }
 
 export interface FeedbackOverallMiddleSectionData {
   cards: readonly {
     title: string;
-    content: string;
+    tone: "positive" | "negative";
+    items: readonly string[];
   }[];
+  comparison: {
+    previousScore: number | null;
+    currentScore: number | null;
+  };
+  showPersonaFeedback: boolean;
   personaFeedbacks: readonly FeedbackOverallPersonaFeedback[];
 }
 
@@ -55,10 +54,6 @@ export interface FeedbackOverallBottomSectionData {
     title: string;
     scoreLabel: string;
     levelLabel: string;
-  };
-  questionFit: {
-    title: string;
-    content: string;
   };
   keywords: {
     items: readonly FeedbackOverallKeywordItem[];
@@ -74,7 +69,15 @@ export interface FeedbackOverallMiddleSectionProps {
   content: FeedbackOverallMiddleSectionData;
 }
 
+export interface FeedbackSpeechAnalysis {
+  visible: boolean;
+  message: string;
+  canRetry: boolean;
+}
+
 export interface FeedbackOverallBottomSectionProps {
+  speechAnalysis: FeedbackSpeechAnalysis;
+  onRetrySpeechAnalysis: () => void;
   content: FeedbackOverallBottomSectionData;
   isDownloadingPdf?: boolean;
   onDownloadPdf?: () => void;

@@ -1,11 +1,14 @@
 import BackGroundPage from "@/widgets/main-page/background-page";
 import Header from "@/shared/components/header/index";
+import { useSessionCheck } from "@/shared/model/useSessionCheck";
 import { Outlet, useLocation } from "react-router-dom";
 import * as S from "./style";
 
 const MainLayout = () => {
   const { pathname } = useLocation();
+  useSessionCheck();
   const normalizedPathname = pathname.toLowerCase().replace(/\/+$/, "");
+  const isFeedbackDetailRoute = normalizedPathname.startsWith("/main/feedback/detail/");
   const isInterviewRoute =
     normalizedPathname === "/main/interview" ||
     normalizedPathname.startsWith("/main/interview/");
@@ -13,9 +16,9 @@ const MainLayout = () => {
   return (
     <S.Page>
       <BackGroundPage />
-      <S.Content $isInterviewRoute={isInterviewRoute}>
+      <S.Content $isInterviewRoute={isInterviewRoute} $isFeedbackDetailRoute={isFeedbackDetailRoute}>
         <Header />
-        <S.OutletArea $isInterviewRoute={isInterviewRoute}>
+        <S.OutletArea $isInterviewRoute={isInterviewRoute} $isFeedbackDetailRoute={isFeedbackDetailRoute}>
           <Outlet />
         </S.OutletArea>
       </S.Content>

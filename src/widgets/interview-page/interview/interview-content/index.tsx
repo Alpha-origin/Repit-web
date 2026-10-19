@@ -1,12 +1,11 @@
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
 import InterviewVisualizerIcon from "@/shared/img/interview-page/Repit-Interview.svg?url";
-import type { InterviewMode } from "../type";
 import * as S from "../style";
+import QuestionAudioControl, { QuestionAudioError } from "../question-audio-control";
 
 const TEXT_ANSWER_MAX_LENGTH = 10000;
 const TEXT_ANSWER_PLACEHOLDER =
   "이곳에 답변을 입력해주세요. 자신의 경험과 성과를 구체적인 수치와 함께 작성하면 좋은 평가를 받을 수 있습니다.";
-const FALLBACK_TOTAL_QUESTION_COUNT = 10;
 
 const formatQuestionLabel = ({
   currentQuestionNumber,
@@ -29,17 +28,13 @@ const formatQuestionLabel = ({
       ? questionNumber
       : `${questionNumber}-${followUpQuestionNumber}`;
 
-  return `Question ${questionLabel} / ${String(totalQuestionCount).padStart(
-    2,
-    "0",
-  )}`;
+  const totalLabel =
+    totalQuestionCount > 0 ? String(totalQuestionCount).padStart(2, "0") : "--";
+
+  return `Question ${questionLabel} / ${totalLabel}`;
 };
 
-interface InterviewContentViewProps {
-  onModeChange: (mode: InterviewMode) => void;
-}
-
-const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
+const InterviewContentView = () => {
   const {
     answerText,
     currentQuestion,
@@ -53,14 +48,13 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
     onAnswerTextChange,
     onSubmitText,
     preparedInterview,
+    totalQuestionCount,
     voiceLevel,
   } = useInterviewSessionContext();
   const isVoiceMode = mode === "voice";
   const isTextMode = mode === "text";
   const visualizerLevel = isVoiceStarted ? voiceLevel : 0.22;
   const isQuestionLoading = currentQuestion === null;
-  const totalQuestionCount =
-    preparedInterview?.questions.length || FALLBACK_TOTAL_QUESTION_COUNT;
   const currentQuestionNumber = Math.max(displayQuestionNumber, 1);
   const activeInterviewer = preparedInterview?.interviewers?.find(
     (interviewer) => interviewer.personaId === currentQuestion?.personaId,
@@ -83,12 +77,14 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
         <S.QuestionBody>
           <S.QuestionContentStack>
             <S.QuestionLabel>{question.id}</S.QuestionLabel>
+            <QuestionAudioControl />
             {activeInterviewer ? (
               <S.QuestionSpeaker>
                 현재 면접관 · {activeInterviewer.name} ({activeInterviewer.roleLabel})
               </S.QuestionSpeaker>
             ) : null}
             <S.QuestionText>{question.text}</S.QuestionText>
+            <QuestionAudioError />
 
             {isVoiceMode ? (
               <S.InlineVisualizerWrap aria-hidden="true" $voiceLevel={visualizerLevel}>
@@ -107,26 +103,8 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
       {mode === "text" ? (
         <S.TextAnswerCard>
           <S.TextAnswerHeader>
-            <S.TextModeControl>
-              <S.TextModeButton
-                type="button"
-                $active
-                aria-pressed="true"
-                disabled={isAwaitingResponse}
-                onClick={() => onModeChange("text")}
-              >
-                텍스트
-              </S.TextModeButton>
-              <S.TextModeButton
-                type="button"
-                $active={false}
-                aria-pressed="false"
-                disabled={isAwaitingResponse}
-                onClick={() => onModeChange("voice")}
-              >
-                음성
-              </S.TextModeButton>
-            </S.TextModeControl>
+            <span>텍스트 답변</span>
+
 
             <S.TextSubmitButton
               type="button"

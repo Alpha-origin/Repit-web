@@ -1,3 +1,4 @@
+import axios from "axios";
 import { apiInstance } from "@/shared/api/axiosInstance";
 
 import {
@@ -9,15 +10,23 @@ import {
 } from "../shared";
 import type { CurrentInterviewQuestion } from "../type";
 
-
 const PREPARE_INTERVIEW_RECORD_URL = "/api/interviews";
 const PREPARE_INTERVIEW_RECORD_BODY = 0;
-const PREPARATION_STATUS_VALUES = [
+const TAILOR_STATUS_VALUES = [
   "NOT_REQUESTED",
+  "WAITING",
   "PENDING",
   "SUCCEEDED",
   "FAILED",
 ] as const;
+const PREPARATION_STATUS_VALUES = [
+  "NOT_REQUESTED",
+  "PREPARING",
+  "READY",
+  "FAILED",
+] as const;
+
+export type InterviewTailorStatus = (typeof TAILOR_STATUS_VALUES)[number];
 
 export type InterviewPreparationStatus =
   (typeof PREPARATION_STATUS_VALUES)[number];
@@ -29,7 +38,10 @@ export interface InterviewPreparationData {
   jobId: string | null;
   questions: CurrentInterviewQuestion[];
   retryAfterMs: number | null;
-  status: InterviewPreparationStatus;
+  status: InterviewTailorStatus | null;
+  preparationStatus: InterviewPreparationStatus;
+  failureStage: "QUESTION_GENERATION" | "CHAT_DELIVERY" | null;
+  retryable: boolean;
 }
 
 const getInterviewId = (payload: unknown) => {
@@ -71,7 +83,7 @@ const getRetryAfterMs = (payload: unknown) => {
   return retryAfterMs !== null && retryAfterMs >= 0 ? retryAfterMs : null;
 };
 
-export const prepareInterviewRecord = async (interviewId: number) => {
+export const prepareInterviewRecord = async (interviewId: number, signal?: AbortSignal) => {
   const requestUrl = `${PREPARE_INTERVIEW_RECORD_URL}/${encodeURIComponent(
     interviewId,
   )}`;
@@ -87,8 +99,11 @@ export const prepareInterviewRecord = async (interviewId: number) => {
     const response = await apiInstance.post(
       requestUrl,
       PREPARE_INTERVIEW_RECORD_BODY,
+      { signal, timeout: 15_000 },
     );
     const responseInterviewId = getInterviewId(response.data);
+    const responseRecord = getRecord(response.data);
+    const sourceRecord = getRecord(responseRecord?.data) ?? responseRecord;
 
     if (responseInterviewId === null || responseInterviewId <= 0) {
       return {
@@ -102,6 +117,8 @@ export const prepareInterviewRecord = async (interviewId: number) => {
         interviewId: responseInterviewId,
         jobId: getJobId(response.data) ?? undefined,
         sessionId: getSessionId(response.data) ?? undefined,
+        analysisJobId: getTrimmedString(sourceRecord?.analysisJobId) ?? undefined,
+        status: getTrimmedString(sourceRecord?.status),
       },
       errorMessage: null,
     };
@@ -114,6 +131,7 @@ export const prepareInterviewRecord = async (interviewId: number) => {
     return {
       data: null,
       errorMessage,
+      statusCode: axios.isAxiosError(error) ? error.response?.status ?? null : null,
     };
   }
 };
@@ -124,7 +142,10 @@ const isInterviewPreparationStatus = (
   value !== null &&
   PREPARATION_STATUS_VALUES.includes(value as InterviewPreparationStatus);
 
-export const getInterviewPreparation = async (interviewId: number) => {
+export const getInterviewPreparation = async (
+  interviewId: number,
+  signal?: AbortSignal,
+) => {
   if (!Number.isInteger(interviewId) || interviewId <= 0) {
     return {
       data: null,
@@ -135,12 +156,16 @@ export const getInterviewPreparation = async (interviewId: number) => {
   try {
     const response = await apiInstance.get("/api/questions/tailor", {
       params: { interviewId },
+      signal,
+      timeout: 15_000,
     });
     const responseRecord = getRecord(response.data);
     const sourceRecord = getRecord(responseRecord?.data) ?? responseRecord;
     const status = getTrimmedString(sourceRecord?.status)?.toUpperCase() ?? null;
+    const preparationStatus =
+      getTrimmedString(sourceRecord?.preparationStatus)?.toUpperCase() ?? null;
 
-    if (!isInterviewPreparationStatus(status)) {
+    if (!isInterviewPreparationStatus(preparationStatus)) {
       return {
         data: null,
         errorMessage: "면접 준비 상태를 확인하지 못했습니다.",
@@ -171,7 +196,16 @@ export const getInterviewPreparation = async (interviewId: number) => {
         jobId: getTrimmedString(sourceRecord?.jobId),
         questions,
         retryAfterMs: getRetryAfterMs(sourceRecord?.retryAfterMs),
-        status,
+        status: TAILOR_STATUS_VALUES.includes(status as InterviewTailorStatus)
+          ? (status as InterviewTailorStatus)
+          : null,
+        preparationStatus,
+        failureStage:
+          sourceRecord?.failureStage === "QUESTION_GENERATION" ||
+          sourceRecord?.failureStage === "CHAT_DELIVERY"
+            ? sourceRecord.failureStage
+            : null,
+        retryable: sourceRecord?.retryable === true,
       } satisfies InterviewPreparationData,
       errorMessage: null,
     };
@@ -179,6 +213,25 @@ export const getInterviewPreparation = async (interviewId: number) => {
     return {
       data: null,
       errorMessage: getErrorMessage(error, "면접 준비 상태를 확인하지 못했습니다."),
+    };
+  }
+};
+
+export const retryInterviewPreparation = async (
+  interviewId: number,
+  signal?: AbortSignal,
+) => {
+  try {
+    await apiInstance.post(
+      `/api/interviews/${encodeURIComponent(interviewId)}/preparation/retry`,
+      undefined,
+      { signal },
+    );
+    return { errorMessage: null, statusCode: null };
+  } catch (error) {
+    return {
+      errorMessage: getErrorMessage(error, "면접 준비를 다시 요청하지 못했습니다."),
+      statusCode: axios.isAxiosError(error) ? error.response?.status ?? null : null,
     };
   }
 };

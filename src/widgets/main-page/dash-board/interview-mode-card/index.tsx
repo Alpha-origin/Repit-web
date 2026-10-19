@@ -19,7 +19,7 @@ const InterviewModeCard = ({
   const isStartEnabled = !isComingSoon && Boolean(onStart);
 
   return (
-    <S.Card>
+    <S.Card aria-label={title}>
       <S.CardInner>
         <S.Banner $isReversed={isReversed}>
           <S.BannerImage src={image} alt="" aria-hidden="true" />
@@ -65,6 +65,7 @@ const InterviewModeCard = ({
 
           <S.StartButton
             type="button"
+            aria-label={`${title} 시작하기`}
             $variant={variant}
             disabled={!isStartEnabled}
             title={isComingSoon ? MAIN_PAGE_COMING_SOON_LABEL : undefined}

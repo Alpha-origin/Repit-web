@@ -1,11 +1,11 @@
+import { getJobRoleLabel } from "@/shared/constants/job/jobRoles";
 import type { InterviewSummary } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
 
 export const getInterviewId = (interview: InterviewSummary) =>
   interview.interviewId ?? interview.id ?? 0;
 
-const MAJOR_LABELS: Record<string, string> = {
-  BACKEND: "백엔드",
-  FRONTEND: "프론트엔드",
+// 서버가 더는 보내지 않지만 이미 저장된 면접에 남아 있는 옛 전공 코드
+const LEGACY_MAJOR_LABELS: Record<string, string> = {
   FULLSTACK: "풀스택",
   MOBILE: "모바일",
   DEVOPS: "데브옵스",
@@ -28,6 +28,7 @@ const STATUS_LABELS: Record<string, string> = {
   READY: "대기중",
   PENDING: "분석중",
   FAILED: "분석실패",
+  ABANDONED: "중단됨",
 };
 
 const getSafeDate = (value?: string) => {
@@ -67,7 +68,7 @@ export const getInterviewMajorLabel = (major?: string) => {
     return "미제공";
   }
 
-  return MAJOR_LABELS[major] ?? major;
+  return LEGACY_MAJOR_LABELS[major] ?? getJobRoleLabel(major);
 };
 
 export const getInterviewTitle = (major?: string) =>
@@ -95,27 +96,31 @@ export const getInterviewStyleLabel = (type?: string) => {
   return PERSONA_TYPE_LABELS[type] ?? "성향 미정";
 };
 
-export const getCareerLabel = (career?: number) => {
-  if (career === undefined || career === null) {
-    return "미제공";
-  }
-
-  if (career <= 1) {
-    return "쉬움";
-  }
-
-  if (career <= 3) {
-    return "보통";
-  }
-
-  return "어려움";
+const LEVEL_LABELS: Record<string, string> = {
+  EASY: "쉬움",
+  NORMAL: "보통",
+  HARD: "어려움",
 };
 
-export const getInterviewerName = (interview: InterviewSummary) =>
-  interview.persona?.personaName?.trim() ||
-  (getInterviewerCount(interview) > 0
-    ? `면접관 ${getInterviewerCount(interview)}명`
-    : "면접관 정보 없음");
+export const getLevelLabel = (level?: string | null) =>
+  (level ? LEVEL_LABELS[level] : undefined) ?? "미제공";
+
+// SOLO 페르소나 이름은 유일성을 위해 끝에 -{uuid}가 붙어 저장된다.
+const PERSONA_NAME_UUID_SUFFIX =
+  /-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export const getPersonaDisplayName = (personaName?: string | null) =>
+  personaName?.trim().replace(PERSONA_NAME_UUID_SUFFIX, "").trim() ?? "";
+
+export const getInterviewerName = (interview: InterviewSummary) => {
+  const count = getInterviewerCount(interview);
+  const personaName =
+    interview.mode === "MULTI"
+      ? ""
+      : getPersonaDisplayName(interview.persona?.personaName);
+
+  return personaName || (count > 0 ? `면접관 ${count}명` : "면접관 정보 없음");
+};
 
 export const getInterviewStatusLabel = (status?: string) => {
   if (!status) {

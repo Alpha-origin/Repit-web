@@ -3,6 +3,7 @@ import type {
   InterviewSettingSelection,
   InterviewSettingStyleMeta,
   InterviewStyleOption,
+  InterviewStylePreset,
 } from './type';
 
 export const INTERVIEW_SETTING_OPTION_SECTIONS = [
@@ -20,34 +21,36 @@ export const INTERVIEW_SETTING_OPTION_SECTIONS = [
 
 export const INTERVIEW_SETTING_STYLE_META = {
   편함: {
-    description: '친절하고 편안한 분위기',
+    description: '쉬움 · 친근한 · 부드러운',
     icon: 'smile',
   },
   일반: {
-    description: '실전과 비슷한 일반 면접 수준',
+    description: '보통 · 현실적인 · 직설적인',
     icon: 'neutral',
   },
   압박: {
-    description: '긴장감 넘치는 압박 면접',
+    description: '어려움 · 꼼꼼한 · 강압적인',
     icon: 'pressure',
   },
 } as const satisfies Record<InterviewStyleOption, InterviewSettingStyleMeta>;
 
-export const INTERVIEW_SETTING_INTERVIEWER_SECTION_TITLE = '면접관 설정';
+export const INTERVIEW_STYLE_PRESETS = {
+  편함: { difficulty: '쉬움', personality: 'FRIENDLY', tone: 'GENTLE' },
+  일반: { difficulty: '보통', personality: 'REALISTIC', tone: 'DIRECT' },
+  압박: { difficulty: '어려움', personality: 'METICULOUS', tone: 'PRESSURING' },
+} as const satisfies Record<InterviewStyleOption, InterviewStylePreset>;
 
-export const INTERVIEW_SETTING_PERSONALITY_OPTIONS = [
-  '친근한',
-  '현실적인',
-  '꼼꼼한',
-] as const;
+export const findStylePreset = (value: InterviewStylePreset): InterviewStyleOption | null =>
+  INTERVIEW_SETTING_OPTION_SECTIONS[0].options.find((style) => {
+    const preset = INTERVIEW_STYLE_PRESETS[style];
+    return (
+      preset.difficulty === value.difficulty &&
+      preset.personality === value.personality &&
+      preset.tone === value.tone
+    );
+  }) ?? null;
 
-export const INTERVIEW_SETTING_TONE_OPTIONS = [
-  '부드러운',
-  '직설적인',
-  '압박하는',
-] as const;
-
-export const INTERVIEW_SETTING_MAJOR_OPTIONS = ['프론트엔드', '백엔드'] as const;
+export const SOLO_MAJOR_GUIDANCE = '전문 분야는 마이페이지에서 선택한 직무를 따릅니다.';
 
 export const INTERVIEW_SETTING_ACTION_LABELS = {
   back: '돌아가기',
@@ -56,19 +59,21 @@ export const INTERVIEW_SETTING_ACTION_LABELS = {
 
 export const INTERVIEW_SETTING_DEFAULT_SELECTION: InterviewSettingSelection = {
   difficulty: '쉬움',
-  major: '프론트엔드',
-  personality: '친근한',
-  style: '편함',
-  tone: '부드러운',
+  personality: 'FRIENDLY',
+  tone: 'GENTLE',
+  interviewerKey: 'interviewer-kim',
 };
 
 export type {
-  InterviewMajorOption,
   InterviewDifficultyOption,
-  InterviewerPersonalityOption,
-  InterviewerToneOption,
   InterviewSettingSelectHandlers,
   InterviewSettingSelection,
+  InterviewStylePreset,
   InterviewSettingStyleIcon,
   InterviewStyleOption,
 } from './type';
+
+export const INTERVIEW_ANSWER_MODE_OPTIONS = [
+  { value: "voice", label: "영상/음성 답변", description: "카메라와 마이크로 답변합니다. 전체 영상과 답변 음성이 저장됩니다. 답변은 210초에 자동 완료됩니다." },
+  { value: "text", label: "텍스트 답변", description: "장치 권한 없이 글로 답변합니다. 영상과 음성은 녹화하지 않습니다." },
+] as const;

@@ -1,3 +1,4 @@
+import type { CompanyBadge } from "@/features/interview-page/company/model/type";
 import type {
   CreateInterviewPersonaType,
   InterviewPersonaGender,
@@ -57,6 +58,9 @@ export interface PrepareInterviewParams {
 }
 
 export interface PreparedInterviewData {
+  company?: CompanyBadge | null;
+  analysisJobId?: string;
+  questionPreparationStatus?: string | null;
   sessionId: string;
   interviewId: number;
   userId: number;
@@ -75,5 +79,6 @@ export interface PreparedInterviewData {
   currentQuestionIndex: number;
   questions: PrepareInterviewQuestion[];
   mode: PreparedInterviewMode;
+  answerMode?: "voice" | "text";
   interviewers?: PreparedInterviewer[];
 }

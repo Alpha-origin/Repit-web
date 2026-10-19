@@ -9,7 +9,7 @@ import type {
   StyleOptionsProps,
 } from './type';
 
-const SettingOptions = ({ onSelect, selection }: SettingOptionsProps) => (
+const SettingOptions = ({ onSelect, selection, children }: SettingOptionsProps) => (
   <S.ControlColumn>
     <StyleOptions
       onSelect={onSelect.style}
@@ -19,6 +19,7 @@ const SettingOptions = ({ onSelect, selection }: SettingOptionsProps) => (
       onSelect={onSelect.difficulty}
       selectedValue={selection.difficulty}
     />
+    {children}
   </S.ControlColumn>
 );
 
@@ -54,6 +55,7 @@ const StyleOptions = ({ onSelect, selectedValue }: StyleOptionsProps) => (
         );
       })}
     </S.StyleOptionGroup>
+    {selectedValue === null ? <S.OptionDescription>직접 설정 중이에요</S.OptionDescription> : null}
   </S.Section>
 );
 
@@ -79,9 +81,9 @@ const DifficultyOptions = ({
             onClick={() => onSelect(option.value)}
             role="radio"
             type="button"
-                >
-                  <S.OptionLabel>{option.value}</S.OptionLabel>
-                </S.DifficultyButton>
+          >
+            <S.OptionLabel>{option.value}</S.OptionLabel>
+          </S.DifficultyButton>
         );
       })}
     </S.DifficultyGroup>

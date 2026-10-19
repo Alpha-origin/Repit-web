@@ -1,6 +1,6 @@
+import CompanyBadge from "@/widgets/interview-page/company-badge";
 import type { ChangeEvent } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { uploadRecordingInBackground } from "@/features/interview-page/interview/model/uploadRecordingInBackground";
+import { useEffect, useMemo, useState } from "react";
 import { INTERVIEW_DEVICE_STATUS_LABELS } from "@/shared/constants/interview-page/interview";
 import { PERSONALITY_OPTIONS } from "@/shared/constants/interview-page/setting-multi-interview";
 
@@ -8,6 +8,8 @@ import { useInterviewSessionContext } from "@/features/interview-page/interview/
 import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
 import MicIcon from "@/shared/img/interview-page/mike.svg?url";
 import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
+import QuestionAudioControl, { QuestionAudioError } from "../question-audio-control";
+import InterviewQuitError from "../quit-error";
 import * as S from "./style";
 
 const TEXT_ANSWER_MAX_LENGTH = 10_000;
@@ -25,9 +27,8 @@ const getMemoKey = (sessionId?: string) =>
 const InterviewDashboard = () => {
   const interview = useInterviewSessionContext();
   const recorder = interview.recorder;
-  const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
   const elapsedSeconds = interview.elapsedSeconds;
-  const sessionId = interview.preparedInterview?.sessionId;
+  const sessionId = interview.sessionId;
   const memoKey = useMemo(() => getMemoKey(sessionId), [sessionId]);
   const [memo, setMemo] = useState(() =>
     memoKey ? window.sessionStorage.getItem(memoKey) ?? "" : "",
@@ -37,10 +38,10 @@ const InterviewDashboard = () => {
   const isQuestionLoading = interview.currentQuestion === null;
   const isQuestionSpeaking = interview.questionAudioStatus === "playing";
   const speakingPersonaId = interview.speakingPersonaId;
-  const lastSpeakingPersonaIdRef = useRef<number | undefined>(undefined);
+  const [lastSpeakingPersonaId, setLastSpeakingPersonaId] = useState<number | undefined>(undefined);
   // 질문이 도착한 뒤 다음 질문이 올 때까지 같은 면접관을 강조한다.
   // 질문 로딩 구간에는 personaId가 비므로 직전 발화자를 유지해 강조가 끊기지 않게 한다.
-  const activePersonaId = speakingPersonaId ?? lastSpeakingPersonaIdRef.current;
+  const activePersonaId = speakingPersonaId ?? lastSpeakingPersonaId;
   const interviewers = interview.preparedInterview?.interviewers ?? [];
   const activeInterviewer = interviewers.find(
     (interviewer) => interviewer.personaId === activePersonaId,
@@ -55,24 +56,14 @@ const InterviewDashboard = () => {
       : `${questionNumber}-${interview.followUpQuestionNumber}`;
   const isAnswerDisabled =
     !interview.isInterviewReady || isQuestionLoading || isAwaitingResponse ||
-    recorder.isStarting || recorder.isStopping;
+    recorder.isStarting || recorder.isStopping || (isVoiceMode && !interview.isMediaReady);
   const isCameraReady = interview.cameraState === "ready";
   const isMicReady = interview.micState === "ready";
   const micLevel = isMicReady ? interview.voiceLevel : 0;
 
-  useEffect(() => {
-    lastSpeakingPersonaIdRef.current = undefined;
-  }, [sessionId]);
-
-  useEffect(() => {
-    if (speakingPersonaId !== undefined) {
-      lastSpeakingPersonaIdRef.current = speakingPersonaId;
-    }
-  }, [speakingPersonaId]);
-
-  useEffect(() => {
-    setMemo(memoKey ? window.sessionStorage.getItem(memoKey) ?? "" : "");
-  }, [memoKey]);
+  if (speakingPersonaId !== undefined && speakingPersonaId !== lastSpeakingPersonaId) {
+    setLastSpeakingPersonaId(speakingPersonaId);
+  }
 
   useEffect(() => {
     if (memoKey) {
@@ -80,59 +71,14 @@ const InterviewDashboard = () => {
     }
   }, [memo, memoKey]);
 
-  const handleModeChange = (mode: typeof interview.mode) => {
-    if (mode === "text") {
-      void recorder.stopRecording();
-      setIsVoiceAnswering(false);
-    }
-
-    interview.onModeChange(mode);
-  };
-
-  const handleStartVoice = async () => {
-    if (isAwaitingResponse) {
-      return;
-    }
-
-    if (!(await interview.onStartVoice())) return;
-    setIsVoiceAnswering(true);
-  };
-
-  const handleCompleteVoice = async () => {
-    if (isAwaitingResponse) {
-      return;
-    }
-
-    // onCompleteVoice 이후에는 다음 질문으로 바뀔 수 있으므로 먼저 저장한다.
-    const answeredQuestionId = interview.currentQuestion?.questionId;
-
-    try {
-      const file = await recorder.stopRecording();
-      uploadRecordingInBackground({
-        file,
-        interviewId: interview.interviewId,
-        questionId: answeredQuestionId,
-      });
-      await interview.onCompleteVoice();
-    } finally {
-      setIsVoiceAnswering(false);
-    }
-  };
-
-  const handleQuitInterview = async () => {
-    const answeredQuestionId = interview.currentQuestion?.questionId;
-    const file = await recorder.stopRecording();
-    uploadRecordingInBackground({
-      file,
-      interviewId: interview.interviewId,
-      questionId: answeredQuestionId,
-    });
-    await interview.onQuitInterview();
-  };
+  const handleStartVoice = interview.onStartVoice;
+  const handleCompleteVoice = interview.onCompleteVoice;
+  const handleQuitInterview = interview.onQuitInterview;
 
   return (
     <S.Page $multi={isMultiInterview}>
       <S.Content $multi={isMultiInterview}>
+        <CompanyBadge />
         <S.Timer aria-label={`경과 시간 ${formatTime(elapsedSeconds)}`}>
           <S.TimerDot aria-hidden="true" />
           {formatTime(elapsedSeconds)}
@@ -147,18 +93,7 @@ const InterviewDashboard = () => {
                     ? `Question ${questionLabel} / ${interview.totalQuestionCount}`
                     : `Question ${questionLabel}${interview.totalQuestionCount > 0 ? ` · 기본 질문 ${interview.totalQuestionCount}개` : ""}`}
                 </S.QuestionTag>
-                <S.QuestionAudioButton
-                  type="button"
-                  disabled={isQuestionLoading || interview.questionAudioStatus === "loading"}
-                  aria-pressed={interview.questionAudioStatus === "playing"}
-                  onClick={() => interview.onToggleQuestionAudio()}
-                >
-                  {interview.questionAudioStatus === "loading"
-                    ? "음성 생성 중..."
-                    : interview.questionAudioStatus === "playing"
-                      ? "질문 멈추기"
-                      : "질문 듣기"}
-                </S.QuestionAudioButton>
+                <QuestionAudioControl />
               </S.QuestionMetaRow>
               {activeInterviewer && !isMultiInterview ? (
                 <S.QuestionSpeaker>
@@ -168,34 +103,11 @@ const InterviewDashboard = () => {
               <S.QuestionText>
                 {interview.currentQuestion?.content ?? "질문을 불러오는 중입니다."}
               </S.QuestionText>
-              {interview.questionAudioErrorMessage ? (
-                <S.QuestionAudioError role="status">
-                  {interview.questionAudioErrorMessage}
-                </S.QuestionAudioError>
-              ) : null}
+              <QuestionAudioError />
             </S.QuestionPanel>
 
             <S.AnswerPanel $multi={isMultiInterview}>
-              <S.AnswerTabs>
-                <S.Tab
-                  type="button"
-                  $active={isVoiceMode}
-                  aria-pressed={isVoiceMode}
-                  disabled={isAwaitingResponse}
-                  onClick={() => handleModeChange("voice")}
-                >
-                  영상/음성 답변
-                </S.Tab>
-                <S.Tab
-                  type="button"
-                  $active={!isVoiceMode}
-                  aria-pressed={!isVoiceMode}
-                  disabled={isAwaitingResponse}
-                  onClick={() => handleModeChange("text")}
-                >
-                  텍스트 답변
-                </S.Tab>
-              </S.AnswerTabs>
+              <S.AnswerTabs><S.Count>{isVoiceMode ? "음성/영상 답변 · 210초 자동 완료" : "텍스트 답변"}</S.Count></S.AnswerTabs>
 
               {isVoiceMode ? (
                 <S.VideoArea>
@@ -231,26 +143,30 @@ const InterviewDashboard = () => {
                 />
               )}
 
-              {recorder.errorMessage ? (
+              {interview.recordingErrorMessage ? (
                 <S.QuestionAudioError role="alert">
-                  {recorder.errorMessage}
+                  {interview.recordingErrorMessage}
                 </S.QuestionAudioError>
               ) : null}
 
+              {interview.answerError ? <S.QuestionAudioError role="alert">{interview.answerError}</S.QuestionAudioError> : null}
+              <InterviewQuitError />
+              {isVoiceMode && (interview.cameraState === "blocked" || interview.micState === "blocked") ? (
+                <S.QuestionAudioError role="alert">카메라와 마이크 권한을 허용해주세요. 텍스트 면접은 사전설정에서 선택할 수 있습니다.</S.QuestionAudioError>
+              ) : null}
               <S.BottomRow>
                 <S.Count>글자 수 {interview.answerText.length} / {TEXT_ANSWER_MAX_LENGTH}</S.Count>
                 <S.Actions>
-                  {!isMultiInterview ? (
-                    <S.Button
+                  <S.Button
                       type="button"
                       $secondary
+                      disabled={interview.isClosing}
                       onClick={() => void handleQuitInterview()}
                     >
                       그만두기
-                    </S.Button>
-                  ) : null}
+                  </S.Button>
                   {isVoiceMode ? (
-                    isVoiceAnswering || interview.isVoiceStarted ? (
+                    interview.isVoiceStarted ? (
                       <S.Button
                         type="button"
                         disabled={isAwaitingResponse}

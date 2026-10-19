@@ -1,11 +1,15 @@
-import { useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useInterviewEntry } from "@/features/interview-page/setting-company/model/useInterviewEntry";
+import { useUserStore } from "@/shared/store/userStore";
+import { loadSetupDraft } from "@/features/interview-page/setting-company/model/draftStore";
+import { COMPANY_SETTING_PATH } from "@/features/interview-page/setting-company/model/draft";
+import CompanyBadge from "@/widgets/interview-page/company-badge";
+import { useMemo } from "react";
+import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 
 import type { PreparedInterviewData } from "@/features/interview-page/interview/api";
 import {
   InterviewSessionProvider,
 } from "@/features/interview-page/interview/model/interviewSessionContext";
-import { uploadRecordingInBackground } from "@/features/interview-page/interview/model/uploadRecordingInBackground";
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
 import { INTERVIEW_DEVICE_STATUS_LABELS } from "@/shared/constants/interview-page/interview";
 import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
@@ -14,6 +18,7 @@ import Loading from "@/shared/components/loading";
 import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
 import InterviewContentView from "@/widgets/interview-page/interview/interview-content";
 import InterviewDashboard from "@/widgets/interview-page/interview/interview-dashboard";
+import InterviewQuitError from "@/widgets/interview-page/interview/quit-error";
 import * as S from "@/widgets/interview-page/interview/style";
 
 const getPreparedInterviewFromState = (state: unknown) => {
@@ -39,16 +44,30 @@ const formatElapsedTime = (elapsedSeconds: number) => {
 
 const InterviewPage = () => {
   const location = useLocation();
+  const { id } = useParams();
+  const user = useUserStore();
   const preparedInterview = useMemo(
     () => getPreparedInterviewFromState(location.state),
     [location.state],
   );
-  const ttsProvider = "elevenlabs" as const;
+
+  const draftId = new URLSearchParams(location.search).get("draftId");
+  const entry = useInterviewEntry(preparedInterview, draftId, user.id, user.isLoaded);
+
+  if (!user.isLoaded) return <Loading message="로그인 정보를 확인하고 있어요" />;
+  if (!preparedInterview || preparedInterview.interviewId !== Number(id) || preparedInterview.userId !== user.id) {
+    const draft = loadSetupDraft(draftId);
+    if (draft?.submission?.interviewId === Number(id)) return <Navigate to={`${COMPANY_SETTING_PATH}?draftId=${draft.draftId}`} replace />;
+    return <S.PreparationErrorScreen role="alert">면접 정보를 복구할 수 없습니다. 사전 설정에서 다시 시작해주세요.<Link to="/main">메인으로 돌아가기</Link></S.PreparationErrorScreen>;
+  }
+
+  if (entry.error) return <S.PreparationErrorScreen role="alert">{entry.error}<Link to="/main">메인으로 돌아가기</Link></S.PreparationErrorScreen>;
+  if (entry.isChecking || !entry.prepared) return <Loading message="면접 정보를 확인하고 있어요" />;
 
   return (
     <InterviewSessionProvider
-      preparedInterview={preparedInterview}
-      ttsProvider={ttsProvider}
+      key={preparedInterview?.sessionId ?? location.pathname}
+      preparedInterview={entry.prepared}
     >
       <InterviewPageContent />
     </InterviewSessionProvider>
@@ -58,43 +77,45 @@ const InterviewPage = () => {
 const InterviewPageContent = () => {
   const interviewSession = useInterviewSessionContext();
   const interviewRecorder = interviewSession.recorder;
-  const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
   const elapsedSeconds = interviewSession.elapsedSeconds;
   const isMultiInterview = interviewSession.preparedInterview?.mode === "MULTI";
   const isVoiceMode = interviewSession.mode === "voice";
   const isTextMode = interviewSession.mode === "text";
-  const isVoiceActionStarted = isVoiceAnswering || interviewSession.isVoiceStarted;
+  const isVoiceActionStarted = interviewSession.isVoiceStarted;
   const isQuestionLoading = interviewSession.currentQuestion === null;
   const isAwaitingResponse = interviewSession.isAwaitingResponse;
   const isStartActionDisabled =
     interviewRecorder.isStarting ||
     interviewRecorder.isStopping ||
     !interviewSession.isInterviewReady ||
+    !interviewSession.isMediaReady ||
     isQuestionLoading ||
     isAwaitingResponse;
   const isCameraReady = interviewSession.cameraState === "ready";
   const isMicReady = interviewSession.micState === "ready";
   const micLevel = isMicReady ? interviewSession.voiceLevel : 0;
 
-  const handleQuitInterview = async () => {
-    const answeredQuestionId = interviewSession.currentQuestion?.questionId;
-    const file = await interviewRecorder.stopRecording();
-    uploadRecordingInBackground({
-      file,
-      interviewId: interviewSession.interviewId,
-      questionId: answeredQuestionId,
-    });
-    await interviewSession.onQuitInterview();
-  };
+  const handleQuitInterview = interviewSession.onQuitInterview;
 
-  if (interviewSession.preparationError) {
+  if (interviewSession.preparationError || (interviewSession.quitError && interviewSession.isPreparingInterview)) {
     return (
       <S.PreparationErrorScreen role="alert">
+        <InterviewQuitError />
         <S.PreparationErrorMessage>
           {interviewSession.preparationError}
         </S.PreparationErrorMessage>
+        {interviewSession.canRetryPreparation ? (
+          <S.PreparationErrorAction
+            type="button"
+            disabled={interviewSession.isRetryingPreparation}
+            onClick={() => void interviewSession.onRetryPreparation()}
+          >
+            {interviewSession.isRetryingPreparation ? "다시 요청 중…" : "다시 시도"}
+          </S.PreparationErrorAction>
+        ) : null}
         <S.PreparationErrorAction
           type="button"
+          disabled={interviewSession.isRetryingPreparation || interviewSession.isClosing}
           onClick={() => void handleQuitInterview()}
         >
           메인으로 돌아가기
@@ -104,55 +125,22 @@ const InterviewPageContent = () => {
   }
 
   if (interviewSession.isPreparingInterview) {
-    return <Loading message="포트폴리오 분석 및 면접 준비 중입니다..." />;
+    return <Loading message={interviewSession.isWaitingForQuestions
+      ? "새 질문을 준비하고 있어요. 길게는 몇 분 걸릴 수 있어요"
+      : "면접을 준비하고 있어요"} />;
   }
 
   if (isMultiInterview) {
     return <InterviewDashboard />;
   }
 
-  const handleStartVoice = async () => {
-    if (isAwaitingResponse) {
-      return;
-    }
-
-    if (!(await interviewSession.onStartVoice())) return;
-    setIsVoiceAnswering(true);
-  };
-
-  const handleCompleteVoice = async () => {
-    if (isAwaitingResponse) {
-      return;
-    }
-
-    // onCompleteVoice 이후에는 다음 질문으로 바뀔 수 있으므로 먼저 저장한다.
-    const answeredQuestionId = interviewSession.currentQuestion?.questionId;
-
-    try {
-      const file = await interviewRecorder.stopRecording();
-      uploadRecordingInBackground({
-        file,
-        interviewId: interviewSession.interviewId,
-        questionId: answeredQuestionId,
-      });
-      await interviewSession.onCompleteVoice();
-    } finally {
-      setIsVoiceAnswering(false);
-    }
-  };
-
-  const handleModeChange = (nextMode: typeof interviewSession.mode) => {
-    if (nextMode === "text") {
-      void interviewRecorder.stopRecording();
-      setIsVoiceAnswering(false);
-    }
-
-    interviewSession.onModeChange(nextMode);
-  };
+  const handleStartVoice = interviewSession.onStartVoice;
+  const handleCompleteVoice = interviewSession.onCompleteVoice;
 
   return (
     <S.Container $textMode={isTextMode} $voiceMode={isVoiceMode}>
       <S.Content $textMode={isTextMode} $voiceMode={isVoiceMode}>
+        <CompanyBadge />
         {isVoiceMode ? (
           <S.TopControlBar>
             <S.TopControls>
@@ -161,32 +149,13 @@ const InterviewPageContent = () => {
                 {formatElapsedTime(elapsedSeconds)}
               </S.TimerPill>
 
-              <S.ModeControl>
-                <S.ModeButton
-                  type="button"
-                  $active={interviewSession.mode === "text"}
-                  aria-pressed={interviewSession.mode === "text"}
-                  disabled={isAwaitingResponse}
-                  onClick={() => handleModeChange("text")}
-                >
-                  텍스트
-                </S.ModeButton>
-                <S.ModeButton
-                  type="button"
-                  $active={interviewSession.mode === "voice"}
-                  aria-pressed={interviewSession.mode === "voice"}
-                  disabled={isAwaitingResponse}
-                  onClick={() => handleModeChange("voice")}
-                >
-                  음성
-                </S.ModeButton>
-              </S.ModeControl>
+
             </S.TopControls>
           </S.TopControlBar>
         ) : null}
 
         <S.InterviewStage $textMode={isTextMode} $voiceMode={isVoiceMode}>
-          <InterviewContentView onModeChange={handleModeChange} />
+          <InterviewContentView />
 
           {isVoiceMode && (
             <InterviewCameraView />
@@ -199,15 +168,23 @@ const InterviewPageContent = () => {
           </S.PreparationMessage>
         ) : null}
 
-        {interviewRecorder.errorMessage ? (
+        {interviewSession.recordingErrorMessage ? (
           <S.PreparationMessage role="alert">
-            {interviewRecorder.errorMessage}
+            {interviewSession.recordingErrorMessage}
           </S.PreparationMessage>
         ) : null}
 
+        {interviewSession.answerError ? (
+          <S.PreparationMessage role="alert">{interviewSession.answerError}</S.PreparationMessage>
+        ) : null}
+        <InterviewQuitError />
+        {isVoiceMode && (interviewSession.cameraState === "blocked" || interviewSession.micState === "blocked") ? (
+          <S.PreparationMessage role="alert">카메라와 마이크 권한을 허용해주세요. 텍스트 면접은 사전설정에서 선택할 수 있습니다.</S.PreparationMessage>
+        ) : null}
         <S.ActionRow>
           <S.SecondaryAction
             type="button"
+            disabled={interviewSession.isClosing}
             onClick={() => void handleQuitInterview()}
           >
             그만두기

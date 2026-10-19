@@ -3,7 +3,7 @@
 
     const GET_MY_INFO_URL = "/api/v1/users/me";
 
-    interface RawUserRecord {
+    export interface RawUserRecord {
     id?: number;
     name?: string;
     username?: string;
@@ -11,7 +11,7 @@
     email?: string;
     }
 
-    interface RawUserResponse {
+    export interface RawUserResponse {
     success?: boolean;
     message?: string | null;
     data?: RawUserRecord;
@@ -38,7 +38,7 @@
     return payload as RawUserRecord;
     };
 
-    const normalizeUserMe = (
+    export const normalizeUserMe = (
     payload: RawUserRecord | RawUserResponse | null | undefined,
     ): UserMeData => {
     const record = getRecord(payload);

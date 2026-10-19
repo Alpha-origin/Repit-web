@@ -4,6 +4,7 @@ import type {
   CurrentInterviewQuestion,
   InterviewProgressStatus,
   PersonaType,
+  QuestionAudioResponse,
 } from "./type";
 
 const PERSONA_TYPES: readonly PersonaType[] = [
@@ -102,6 +103,24 @@ export const getInterviewQuestion = (
       "",
     content,
     personaId: getNumericValue(questionRecord?.personaId) ?? undefined,
+  };
+};
+
+export const getQuestionAudioResponse = (value: unknown): QuestionAudioResponse | null => {
+  const record = getRecord(value);
+  const questionId = getNumericValue(record?.questionId);
+  const rawStatus = record?.status;
+  const status = rawStatus === "QUEUED" || rawStatus === "GENERATING" ? "PENDING" : rawStatus;
+  const url = getTrimmedString(record?.url);
+
+  if (questionId === null || (status !== "READY" && status !== "PENDING" && status !== "FAILED")) return null;
+  if ((status === "READY" && !url) || (url && !url.startsWith("https://"))) return null;
+
+  return {
+    questionId,
+    status,
+    url,
+    errorCode: getTrimmedString(record?.errorCode),
   };
 };
 

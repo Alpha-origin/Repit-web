@@ -21,12 +21,6 @@ const focusRing = css`
   }
 `;
 
-const spin = keyframes`
-  to {
-    transform: rotate(360deg);
-  }
-`;
-
 const loadingDots = keyframes`
   0%, 20% {
     content: '.';
@@ -325,13 +319,6 @@ export const RoleBadge = styled.span`
   font-weight: 800;
 `;
 
-export const CandidateSpecialty = styled.p`
-  margin: 0;
-  color: #596273;
-  font-size: 0.72rem;
-  font-weight: 700;
-`;
-
 export const CandidateDescription = styled.p`
   display: -webkit-box;
   overflow: hidden;
@@ -408,34 +395,6 @@ export const LoadingDots = styled.span`
     content: '.';
     animation: ${loadingDots} 1.2s steps(1, end) infinite;
   }
-`;
-
-export const LoadingOverlay = styled.div`
-  position: fixed;
-  z-index: 1000;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  background: rgba(15, 23, 42, 0.58);
-`;
-
-export const LoadingSpinner = styled.span`
-  width: 3.5rem;
-  height: 3.5rem;
-  border: 0.25rem solid rgba(255, 255, 255, 0.35);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: ${spin} 0.85s linear infinite;
-`;
-
-export const LoadingText = styled.p`
-  margin: 0;
-  color: #ffffff;
-  font-size: 1rem;
-  font-weight: 800;
 `;
 
 export const OptionsLock = styled.fieldset`

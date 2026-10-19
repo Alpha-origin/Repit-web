@@ -6,6 +6,7 @@ const SettingActions = ({
   isBusy,
   isNextDisabled,
   isPortfolioAnalyzing,
+  nextLabel = INTERVIEW_SETTING_ACTION_LABELS.next,
   onBack,
   onNext,
 }: SettingActionsProps) => (
@@ -33,7 +34,7 @@ const SettingActions = ({
               분석 중<S.LoadingDots aria-hidden="true" />
             </>
           )
-          : INTERVIEW_SETTING_ACTION_LABELS.next}
+          : nextLabel}
     </S.NextButton>
   </S.BottomButtonWrapper>
 );
