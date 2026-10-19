@@ -271,7 +271,21 @@ export const VideoControls = styled.div`
   z-index: 2;
 `;
 
-export const StatusIndicator = styled.div<{ $active: boolean }>`
+export const StatusIndicator = styled.button<{ $active: boolean }>`
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  &:disabled { cursor: not-allowed; }
+  &:focus-visible { outline: 2px solid #1684ef; outline-offset: 3px; }
+  &[aria-pressed="false"]::after {
+    content: "";
+    position: absolute;
+    width: 1.6rem;
+    height: 2px;
+    background: #667085;
+    transform: rotate(-45deg);
+    z-index: 2;
+  }
   position: relative;
   width: 2.8rem;
   height: 2.8rem;
