@@ -87,6 +87,28 @@ export const SortSelect = styled.select`
   ${focusRing}
 `;
 
+export const SortControls = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+export const SortDirectionButton = styled.button`
+  min-height: 2rem;
+  border: 0.0625rem solid rgba(26, 115, 232, 0.32);
+  border-radius: 0.35rem;
+  background: transparent;
+  color: #1a73e8;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.3rem 0.6rem;
+
+  ${focusRing}
+`;
+
 export const List = styled.div`
   width: 100%;
   display: grid;

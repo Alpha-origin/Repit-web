@@ -7,13 +7,13 @@ import {
   type FeedbackData,
 } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
 import {
-  getCareerLabel,
   getFormattedDate,
   getInterviewStatusLabel,
   getInterviewStyleLabel,
   getInterviewModeLabel,
   getInterviewId,
   getInterviewerName,
+  getLevelLabel,
   sortInterviewsByCreatedAt,
 } from "@/features/feedback-page/model/interviewDisplay";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
@@ -70,6 +70,7 @@ const getListItems = (
       id: targetInterviewId,
       companyName: readCompanyBadge(interview.company)?.displayName,
       date: getFormattedDate(interview.createdAt),
+      createdAt: interview.createdAt,
       imageUrl:
         interview.persona?.imageUrl ??
         getInterviewerImageUrl(
@@ -81,7 +82,7 @@ const getListItems = (
       styleLabel: getInterviewStyleLabel(
         feedback?.style ?? interview.persona?.type,
       ),
-      levelLabel: getCareerLabel(interview.persona?.career),
+      levelLabel: getLevelLabel(feedback?.level ?? interview.persona?.level),
       interviewerName,
       statusLabel: feedback
         ? getInterviewStatusLabel(feedback.status)
