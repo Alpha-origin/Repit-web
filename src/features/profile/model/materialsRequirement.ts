@@ -9,6 +9,19 @@ export const getRequiredDocuments = (jobRole: string | null | undefined): readon
 
 // 06-web §4: 직무의 필수 종류 문서 1개 이상, GitHub 필수 직무는 GitHub 1개 이상.
 export const checkMaterials = (materials: Materials) => {
+  if (getJobRole(materials.jobRole)?.materialRule === "NON_RESUME_OR_COVER_LETTER") {
+    const hasNonResumeDocument = materials.documents.some((document) =>
+      ["CAREER_DESCRIPTION", "PORTFOLIO", "WORK_SAMPLE"].includes(document.type));
+    const hasCoverLetter = materials.coverLetters.some(({ question, answer }) =>
+      question.trim() && answer.trim());
+    const hasRequiredDocument = hasNonResumeDocument || hasCoverLetter;
+    return {
+      hasAnyMaterial: materials.documents.length > 0 || hasCoverLetter,
+      hasRequiredDocument,
+      isGithubMissing: false,
+      isSatisfied: Boolean(materials.jobTitle?.trim()) && hasRequiredDocument,
+    };
+  }
   const requiredDocuments = getRequiredDocuments(materials.jobRole);
   const hasRequiredDocument = materials.documents.some((document) =>
     requiredDocuments.includes(document.type));

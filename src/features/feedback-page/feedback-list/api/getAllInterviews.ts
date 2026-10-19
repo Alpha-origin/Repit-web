@@ -12,6 +12,7 @@ export interface InterviewPersona {
   personaRole?: string;
   personaName?: string;
   major?: string;
+  jobTitle?: string | null;
   type?: string;
   career?: number;
   gender?: string;

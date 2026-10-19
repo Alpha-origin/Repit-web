@@ -1,4 +1,4 @@
-import { getJobRoleLabel } from "@/shared/constants/job/jobRoles";
+import { getJobRoleLabel, requiresJobTitle } from "@/shared/constants/job/jobRoles";
 import type { InterviewSummary } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
 
 export const getInterviewId = (interview: InterviewSummary) =>
@@ -71,8 +71,11 @@ export const getInterviewMajorLabel = (major?: string) => {
   return LEGACY_MAJOR_LABELS[major] ?? getJobRoleLabel(major);
 };
 
-export const getInterviewTitle = (major?: string) =>
-  `${getInterviewMajorLabel(major)} 모의면접`;
+export const getInterviewTitle = (major?: string, jobTitle?: string | null) => {
+  const majorLabel = getInterviewMajorLabel(major);
+  const title = requiresJobTitle(major) ? jobTitle?.trim() : undefined;
+  return `${majorLabel}${title ? ` · ${title}` : ""} 모의면접`;
+};
 
 export const getInterviewModeLabel = (interview: InterviewSummary) => {
   if (interview.mode !== "MULTI") return "일대일 모의면접";
