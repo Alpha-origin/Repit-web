@@ -28,6 +28,7 @@ const STATUS_LABELS: Record<string, string> = {
   READY: "대기중",
   PENDING: "분석중",
   FAILED: "분석실패",
+  ABANDONED: "중단됨",
 };
 
 const getSafeDate = (value?: string) => {
