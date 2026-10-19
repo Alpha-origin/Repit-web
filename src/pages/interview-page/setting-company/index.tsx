@@ -4,6 +4,7 @@ import { MULTI_INTERVIEWER_TEMPLATES } from "@/shared/constants/interview-page/s
 import { useCompanySetup } from "@/features/interview-page/setting-company/model/useCompanySetup";
 import { useUserStore } from "@/shared/store/userStore";
 import Loading from "@/shared/components/loading";
+import ProfileGuidance from "@/widgets/interview-page/profile-guidance";
 import CompanyPicker from "@/widgets/interview-page/company-picker";
 import SettingStepper from "@/widgets/interview-page/setting-stepper";
 import * as Setting from "@/widgets/interview-page/setting-interview/style";
@@ -60,6 +61,7 @@ const SettingCompanyPage = () => {
             ) : null}
             <S.Disclaimer><S.InfoIcon aria-hidden="true">i</S.InfoIcon>{COMPANY_DISCLAIMER}</S.Disclaimer>
             <S.Description>기준일은 자료를 수집한 시점이며, 모든 사실의 작성일이나 현재 유효성을 뜻하지 않습니다.</S.Description>
+            {setup.showMyPageLink ? <ProfileGuidance message="" showMyPageLink /> : null}
             {setup.errorMessage ? <Setting.ErrorMessage role="alert">{setup.errorMessage}</Setting.ErrorMessage> : null}
             {isPreparing ? <S.Notice role="status">면접을 준비하고 있어요. 준비가 끝나면 면접 화면으로 이동합니다.</S.Notice> : null}
             {isUnknown && !setup.isSubmitting ? <S.Notice role="status">생성 결과를 확인 중인 요청이 있습니다. 설정을 유지한 채 같은 요청으로 복구합니다.</S.Notice> : null}

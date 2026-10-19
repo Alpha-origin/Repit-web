@@ -30,6 +30,7 @@ export const useCompanySetup = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [preparationState, setPreparationState] = useState<"PREPARING" | "PREPARATION_FAILED" | null>(null);
   const [canRetryPreparation, setCanRetryPreparation] = useState(false);
+  const [showMyPageLink, setShowMyPageLink] = useState(false);
   const [preparationAttempt, setPreparationAttempt] = useState(0);
   const busy = useRef(false);
   const mounted = useRef(true);
@@ -108,6 +109,7 @@ export const useCompanySetup = () => {
         if (!saved?.submission || saved.submission.interviewId !== interviewId) return;
         setPreparationState("PREPARING");
         setErrorMessage("");
+        setShowMyPageLink(false);
         const data = await getCreatedInterview(interviewId, saved.submission.requestBody, controller.signal);
         if (controller.signal.aborted) return;
         if (String(data.userId) !== saved.ownerKey) throw new Error("면접 접근 권한이 없습니다.");
@@ -133,7 +135,11 @@ export const useCompanySetup = () => {
           requestedStart = true;
           const started = await prepareInterviewRecord(interviewId, controller.signal);
           if (controller.signal.aborted) return;
-          if (!started.data) throw new Error(started.errorMessage ?? "면접 준비 요청을 확인하지 못했습니다.");
+          if (!started.data) {
+            // 자료가 없어 준비할 수 없으면(404) 마이페이지 안내를 함께 보여 준다.
+            setShowMyPageLink(started.statusCode === 404);
+            throw new Error(started.errorMessage ?? "면접 준비 요청을 확인하지 못했습니다.");
+          }
         }
         if (Date.now() >= deadline) throw new Error("면접 준비가 지연되고 있습니다. 저장된 면접의 준비 상태를 다시 확인해주세요.");
         const interval = preparation.status === "WAITING"
@@ -183,7 +189,7 @@ export const useCompanySetup = () => {
     listState, listError,
     emptyMessage: debouncedQuery.length >= 2 || category !== "ALL" ? "검색 결과가 없어요" : "현재 등록된 기업이 없습니다. 기업 없이 면접을 시작할 수 있어요.",
     onRetryList: () => setListAttempt((value) => value + 1),
-    errorMessage, isSubmitting, locked, preparationState, canRetryPreparation, onRetryPreparation,
+    errorMessage, showMyPageLink, isSubmitting, locked, preparationState, canRetryPreparation, onRetryPreparation,
     onBack: () => {
       if (locked || !draft) return;
       void navigate(`/main/setting/interview${draft.mode === "MULTI" ? "/multi" : ""}?draftId=${draft.draftId}`);
