@@ -69,7 +69,7 @@ export const TopButton = styled.button<TopButtonProps>`
   color: ${({ $active }) => ($active ? "#0061E0" : "#000000")};
 
   font-family: inherit;
-  font-size: 0.8125rem;
+  font-size: ${({ theme }) => theme.fontSize.md};
   font-weight: ${({ $active }) => ($active ? 600 : 500)};
 
   cursor: pointer;
@@ -109,7 +109,7 @@ export const StatusButton = styled.button`
   width: auto;
   min-width: 4.25rem;
   max-width: 7rem;
-  height: 1.875rem;
+  height: 2.125rem;
   padding: 0 0.75rem;
 
   border-radius: 0.375rem;
@@ -117,7 +117,7 @@ export const StatusButton = styled.button`
   background-color: #3388f7;
   color: #ffffff;
 
-  font-size: 0.75rem;
+  font-size: ${({ theme }) => theme.fontSize.sm};
 
   display: block;
   overflow: hidden;
@@ -141,7 +141,7 @@ export const LogoutButton = styled.button`
 
   color: #1a73e8;
 
-  font-size: 0.8125rem;
+  font-size: ${({ theme }) => theme.fontSize.md};
 
   cursor: pointer;
 
