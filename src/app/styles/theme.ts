@@ -24,6 +24,11 @@ export const theme = {
       blue: "rgba(0, 102, 255, 0.25)",
     },
   },
+  layout: {
+    contentMaxWidth: "88rem",
+    contentPadding: "clamp(1rem, 2.5vw, 2rem)",
+    mobileBreakpoint: "42rem",
+  },
   spacing: {
     xs: "0.25rem",
     sm: "0.5rem",

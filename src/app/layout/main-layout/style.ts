@@ -2,7 +2,6 @@ import styled from "styled-components";
 
 interface RouteLayoutProps {
   $isInterviewRoute: boolean;
-  $isFeedbackOverallRoute?: boolean;
   $isFeedbackDetailRoute?: boolean;
 }
 
@@ -27,11 +26,11 @@ export const Content = styled.div<RouteLayoutProps>`
   min-height: 100dvh;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  row-gap: ${({ $isInterviewRoute, $isFeedbackOverallRoute, $isFeedbackDetailRoute }) => ($isInterviewRoute || $isFeedbackOverallRoute || $isFeedbackDetailRoute ? 0 : "1rem")};
+  row-gap: ${({ $isInterviewRoute, $isFeedbackDetailRoute }) => ($isInterviewRoute || $isFeedbackDetailRoute ? 0 : "1rem")};
   box-sizing: border-box;
 
   @media (max-width: 56rem) {
-    row-gap: ${({ $isInterviewRoute, $isFeedbackOverallRoute, $isFeedbackDetailRoute }) => ($isInterviewRoute || $isFeedbackOverallRoute || $isFeedbackDetailRoute ? 0 : "0.75rem")};
+    row-gap: ${({ $isInterviewRoute, $isFeedbackDetailRoute }) => ($isInterviewRoute || $isFeedbackDetailRoute ? 0 : "0.75rem")};
   }
 `;
 

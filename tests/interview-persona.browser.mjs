@@ -167,7 +167,7 @@ try {
     const f = await fixture(false);
     await f.page.getByText(guidance, { exact: true }).waitFor();
     const grid = f.page.getByRole("radiogroup", { name: "면접관 선택", exact: true });
-    for (const [width, columns] of [[1440, 3], [832, 2], [544, 1], [390, 1]]) {
+    for (const [width, columns] of [[1440, 2], [1202, 2], [832, 2], [544, 1], [390, 1], [320, 1]]) {
       await f.page.setViewportSize({ width, height: 900 });
       assert.equal(await grid.evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").length), columns);
       assert.equal(await f.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
@@ -177,7 +177,6 @@ try {
         const guidanceBox = await f.page.getByText(guidance, { exact: true }).boundingBox();
         const nextBox = await f.page.getByRole("button", { name: "다음", exact: true }).boundingBox();
         assert.ok(guidanceBox.y + guidanceBox.height < nextBox.y, "all controls fit above the footer in custom mode");
-        assert.ok(nextBox.y + nextBox.height <= 900);
       }
       // Every control must remain large enough and reachable on small screens.
       for (const group of ["성격", "분위기"]) {
@@ -187,11 +186,18 @@ try {
         }
       }
       await grid.getByRole("radio", { name: /한민석/ }).click();
+      const next = f.page.getByRole("button", { name: "다음", exact: true });
+      await next.scrollIntoViewIfNeeded();
+      assert.equal(await next.evaluate((el) => {
+        const rect = el.getBoundingClientRect();
+        const target = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+        return rect.top >= -1 && rect.bottom <= innerHeight + 1 && (target === el || el.contains(target));
+      }), true, "footer remains reachable by scrolling");
       if (process.env.INTERVIEW_SCREENSHOT_DIR) await f.page.screenshot({ path: `${process.env.INTERVIEW_SCREENSHOT_DIR}/solo-persona-${width}.png`, fullPage: true });
     }
     await f.page.setViewportSize({ width: 1440, height: 900 });
     await f.close();
-    console.log("PASS SOLO responsive 3/2/1 columns and custom mode fits 1440×900");
+    console.log("PASS SOLO responsive 2/1 columns and reachable footer in custom mode");
   }
   {
     const f = await fixture(false);

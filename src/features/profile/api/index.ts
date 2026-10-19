@@ -4,6 +4,7 @@ export type ProfileStatus = "NONE" | "PENDING" | "COMPLETED" | "FAILED";
 export type ProfileFailureReason =
   | "REPO_NOT_PUBLIC"
   | "INVALID_MATERIAL"
+  | "UNREADABLE_DOCUMENT"
   | "INSUFFICIENT_EVIDENCE"
   | "INTERNAL";
 

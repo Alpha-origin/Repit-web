@@ -1,3 +1,5 @@
+import { useFeedbackAudioAnalysis } from "@/features/feedback-page/model/useFeedbackAudioAnalysis";
+import CompanyFeedback from "@/widgets/feedback-page/company-feedback";
 import { buildFeedbackOverallContent } from "@/features/feedback-page/model/feedbackDisplay";
 import { useFeedbackInterview } from "@/features/feedback-page/model/useFeedbackInterview";
 import FeedbackOverallBottomSection from "@/widgets/feedback-page/feedback-overall/bottom-section";
@@ -17,7 +19,10 @@ const FeedbackOverallPage = () => {
     interview,
     previousFeedback,
     isLoading,
+    isRetryingFeedback,
+    isSavingInterview,
     refetch,
+    retryFeedback,
   } = useFeedbackInterview(id, true);
   const isAnalysisPending =
     feedback?.status === "PENDING" || feedback?.status === "IN_PROGRESS";
@@ -26,6 +31,7 @@ const FeedbackOverallPage = () => {
     feedback && !isAnalysisPending && !isAnalysisFailed
       ? buildFeedbackOverallContent(feedback, interview, previousFeedback)
       : null;
+  const audio = useFeedbackAudioAnalysis(interview?.interviewId ?? interview?.id, interview?.answerMode, content !== null);
   const panelRef = useRef<HTMLElement | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
@@ -52,7 +58,9 @@ const FeedbackOverallPage = () => {
       <S.Panel ref={panelRef}>
         {isLoading ? (
           <S.StateCard aria-live="polite">
-            <S.StateText>면접 정보를 불러오는 중입니다.</S.StateText>
+            <S.StateText>
+              {isSavingInterview ? "면접 기록을 저장하고 있어요" : "면접 정보를 불러오는 중입니다."}
+            </S.StateText>
           </S.StateCard>
         ) : errorMessage || !interview ? (
           <S.StateCard aria-live="polite">
@@ -67,19 +75,26 @@ const FeedbackOverallPage = () => {
               {isAnalysisPending
                 ? feedbackErrorMessage ?? "피드백을 분석 중입니다. 완료되면 자동으로 표시됩니다."
                 : isAnalysisFailed
-                  ? feedback?.errorMessage ?? "피드백 분석에 실패했습니다."
+                  ? feedbackErrorMessage ?? feedback?.errorMessage ?? "피드백 분석에 실패했습니다."
                   : feedbackErrorMessage ?? "피드백 분석 결과를 불러오지 못했습니다."}
             </S.StateText>
-            <S.RetryButton type="button" onClick={() => void refetch()}>
-              다시 시도
+            <S.RetryButton
+              type="button"
+              onClick={() => void (isAnalysisFailed ? retryFeedback() : refetch())}
+              disabled={isAnalysisFailed && isRetryingFeedback}
+            >
+              {isAnalysisFailed && isRetryingFeedback ? "요청 중…" : "다시 시도"}
             </S.RetryButton>
           </S.StateCard>
         ) : (
           <>
             <FeedbackOverallTopSection content={content.topSection} />
             <FeedbackOverallMiddleSection content={content.middleSection} />
+            <CompanyFeedback feedback={feedback!} interview={interview} />
             <FeedbackOverallBottomSection
               content={content.bottomSection}
+              speechAnalysis={audio.view}
+              onRetrySpeechAnalysis={audio.retry}
               isDownloadingPdf={isDownloadingPdf}
               onDownloadPdf={handleDownloadPdf}
             />

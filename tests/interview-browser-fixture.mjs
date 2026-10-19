@@ -10,7 +10,7 @@ export const browser = await chromium.launch({ headless: true, args: [
 ] });
 export const question = (id) => ({ questionId: id, parentId: 0, type: "ORIGINAL", intention: "경험", content: `질문 ${id}: 프로젝트 경험을 설명해주세요.`, personaId: 1 });
 
-export async function fixture({ multi = false, answerMode = "voice", timeout = false, denied = false, fail = false, delayUploads = false, complete = false, mimeMode, socketOnAnswer = false, preparationFailed = false, recorderFails = false, slowStop = false, audioResponses = null, holdAudio = false, fastAudioTimers = false, audioDeadline = false, playback = "native", recoveredSessionId = null, quitStatuses = [200] } = {}) {
+export async function fixture({ multi = false, answerMode = "voice", timeout = false, denied = false, fail = false, delayUploads = false, complete = false, mimeMode, socketOnAnswer = false, preparationFailed = false, recorderFails = false, slowStop = false, audioResponses = null, holdAudio = false, fastAudioTimers = false, audioDeadline = false, playback = "native", recoveredSessionId = null, quitStatuses = [200], preparationQuestions = null } = {}) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage();
   page.setDefaultTimeout(10_000);
@@ -172,11 +172,11 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
     if (recoveredSessionId && pathname === "/api/questions/tailor" && ++recovery.reads <= 3) {
       return json({ data: { status: "NOT_REQUESTED", preparationStatus: "NOT_REQUESTED", questions: [], interviewId: 42 } });
     }
-    if (pathname === "/api/questions/tailor") return json({ data: { status: preparationFailed ? "FAILED" : "SUCCEEDED", preparationStatus: preparationFailed ? "FAILED" : "READY", errorMessage: preparationFailed ? "테스트 면접 준비 실패" : null, retryable: false, chatDelivered: !preparationFailed, questions: [current, question(102)], interviewId: 42 } });
+    if (pathname === "/api/questions/tailor") return json({ data: { status: preparationFailed ? "FAILED" : "SUCCEEDED", preparationStatus: preparationFailed ? "FAILED" : "READY", errorMessage: preparationFailed ? "테스트 면접 준비 실패" : null, retryable: false, chatDelivered: !preparationFailed, questions: preparationQuestions ?? [current, question(102)], interviewId: 42 } });
     if (pathname.endsWith("/me")) return json({ data: { id: 7, name: "테스트", nickname: "테스트" } });
     if (pathname.endsWith("/audio")) {
       const id = Number(pathname.split("/").at(-2));
-      audioRequests.push({ id, wait: requestUrl.searchParams.get("wait"), authorization: request.headers().authorization });
+      audioRequests.push({ id, wait: requestUrl.searchParams.get("wait"), authorization: request.headers().authorization, at: Date.now() });
       const count = audioCounts.get(id) ?? 0;
       audioCounts.set(id, count + 1);
       if (holdAudio && id === 101) await new Promise((resolve) => audioReleases.push(resolve));

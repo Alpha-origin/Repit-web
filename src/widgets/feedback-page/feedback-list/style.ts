@@ -1,5 +1,7 @@
 import styled, { css } from "styled-components";
 
+import { pageLayout } from "@/shared/styles/pageLayout";
+
 interface StatusBadgeProps {
   $complete: boolean;
 }
@@ -12,21 +14,15 @@ const focusRing = css`
 `;
 
 export const Page = styled.div`
-  width: 100%;
+  ${pageLayout}
   min-height: 100%;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 2rem clamp(1.5rem, 5vw, 5rem) 4rem;
-  box-sizing: border-box;
-
-  @media (max-width: 56rem) {
-    padding: 1.25rem 1rem 2rem;
-  }
 `;
 
 export const Panel = styled.section`
-  width: min(100%, 80rem);
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -87,6 +83,28 @@ export const SortSelect = styled.select`
   font-weight: 800;
   line-height: 1;
   padding: 0.3rem 1.5rem 0.3rem 0.3rem;
+
+  ${focusRing}
+`;
+
+export const SortControls = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+export const SortDirectionButton = styled.button`
+  min-height: 2rem;
+  border: 0.0625rem solid rgba(26, 115, 232, 0.32);
+  border-radius: 0.35rem;
+  background: transparent;
+  color: #1a73e8;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.3rem 0.6rem;
 
   ${focusRing}
 `;

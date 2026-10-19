@@ -7,8 +7,6 @@ import type {
 } from '@/shared/constants/interview-page/setting-interview';
 
 export interface SettingOptionsProps {
-  answerMode: "voice" | "text";
-  onAnswerModeChange: (mode: "voice" | "text") => void;
   children?: ReactNode;
   onSelect: Pick<InterviewSettingSelectHandlers, 'difficulty' | 'style'>;
   selection: Pick<InterviewSettingSelection, 'difficulty'> & { style: InterviewStyleOption | null };

@@ -1,4 +1,5 @@
-import { forwardRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import FeedbackTabs from "@/widgets/feedback-page/feedback-tabs";
 import FeedbackDetailTopSection from "./top-section";
 import FeedbackDetailMiddleSection from "./middle-section";
@@ -7,12 +8,21 @@ import type { FeedbackDetailProps } from "./type";
 import * as S from "./style";
 
 const FeedbackDetail = forwardRef<HTMLElement, FeedbackDetailProps>(function FeedbackDetail(
-  { content, isDownloadingPdf, onDownloadPdf },
+  { content, isDownloadingPdf, onDownloadPdf, companySection },
   ref,
 ) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const linkedQuestionId = searchParams.get("questionId");
   const [selectedQuestionId, setSelectedQuestionId] = useState(content.topSection.questions[0]?.id);
-  const selectedQuestion = content.topSection.questions.find((item) => item.id === selectedQuestionId)
+  const selectedQuestion = content.topSection.questions.find((item) => linkedQuestionId !== null && item.questionId === linkedQuestionId)
+    ?? content.topSection.questions.find((item) => item.id === selectedQuestionId)
     ?? content.topSection.questions[0];
+
+  // 기업 코멘트의 문항 링크로 들어왔을 때만 한 번 스크롤한다. 탭 클릭으로 바뀐 주소에는 반응하지 않는다.
+  const initialLinkedQuestionId = useRef(linkedQuestionId);
+  useEffect(() => {
+    if (initialLinkedQuestionId.current) document.getElementById("feedback-question-content")?.scrollIntoView({ block: "start" });
+  }, []);
 
   if (!selectedQuestion) return null;
 
@@ -28,7 +38,15 @@ const FeedbackDetail = forwardRef<HTMLElement, FeedbackDetailProps>(function Fee
               $active={item.id === selectedQuestion.id}
               aria-pressed={item.id === selectedQuestion.id}
               aria-controls="feedback-question-content"
-              onClick={() => setSelectedQuestionId(item.id)}
+              onClick={() => {
+                setSelectedQuestionId(item.id);
+                setSearchParams((previous) => {
+                  const next = new URLSearchParams(previous);
+                  if (item.questionId) next.set("questionId", item.questionId);
+                  else next.delete("questionId");
+                  return next;
+                }, { replace: true });
+              }}
             >
               <S.QuestionItemHeading>
                 <S.QuestionNumber>{item.label}</S.QuestionNumber>
@@ -58,6 +76,7 @@ const FeedbackDetail = forwardRef<HTMLElement, FeedbackDetailProps>(function Fee
           </S.HeadingRow>
           <FeedbackDetailTopSection content={content.topSection} question={selectedQuestion} />
           <FeedbackDetailMiddleSection content={content.middleSection} question={selectedQuestion} />
+          {companySection}
           <FeedbackDetailBottomSection
             content={{ ...content.bottomSection, coachComment: selectedQuestion.comment }}
           />

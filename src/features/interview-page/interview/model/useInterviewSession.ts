@@ -18,6 +18,9 @@ import {
 } from "@/features/interview-page/interview/api";
 import {
   INTERVIEW_STATUS_MESSAGES,
+  INTERVIEW_PREPARATION_POLL_INTERVAL_MS,
+  INTERVIEW_QUESTIONS_WAITING_POLL_INTERVAL_MS,
+  INTERVIEW_PREPARATION_TIMEOUT_MS,
 } from "@/shared/constants/interview-page/interview";
 
 import { useQuestionAudio } from "./useQuestionAudio";
@@ -35,9 +38,6 @@ import { useVoiceLevel } from "./useVoiceLevel";
 type InterviewCloseReason = "completed" | "quit";
 const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
 const AWAITING_RESPONSE_TIMEOUT_MS = 30_000;
-const INTERVIEW_PREPARATION_POLL_INTERVAL_MS = 1_000;
-const INTERVIEW_PREPARATION_TIMEOUT_MS = 20 * 60_000;
-const INTERVIEW_QUESTIONS_WAITING_POLL_INTERVAL_MS = 3_000;
 
 const buildQuestionKey = (question: CurrentInterviewQuestion | null) => {
   if (!question) {
@@ -504,7 +504,9 @@ export const useInterviewSession = (
       if (shouldNavigate && closeReasonRef.current === reason && !hasNavigatedRef.current) {
         hasNavigatedRef.current = true;
         navigate(getInterviewExitPath(reason), {
-          state: reason === "completed" ? { answeredQuestionCount: displayQuestionNumberRef.current } : undefined,
+          state: reason === "completed"
+            ? { answeredQuestionCount: displayQuestionNumberRef.current, interviewId: preparedInterview?.interviewId ?? null }
+            : undefined,
         });
       }
       return true;

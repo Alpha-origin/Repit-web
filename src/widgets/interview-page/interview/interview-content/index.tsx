@@ -6,7 +6,6 @@ import QuestionAudioControl, { QuestionAudioError } from "../question-audio-cont
 const TEXT_ANSWER_MAX_LENGTH = 10000;
 const TEXT_ANSWER_PLACEHOLDER =
   "이곳에 답변을 입력해주세요. 자신의 경험과 성과를 구체적인 수치와 함께 작성하면 좋은 평가를 받을 수 있습니다.";
-const FALLBACK_TOTAL_QUESTION_COUNT = 10;
 
 const formatQuestionLabel = ({
   currentQuestionNumber,
@@ -29,10 +28,10 @@ const formatQuestionLabel = ({
       ? questionNumber
       : `${questionNumber}-${followUpQuestionNumber}`;
 
-  return `Question ${questionLabel} / ${String(totalQuestionCount).padStart(
-    2,
-    "0",
-  )}`;
+  const totalLabel =
+    totalQuestionCount > 0 ? String(totalQuestionCount).padStart(2, "0") : "--";
+
+  return `Question ${questionLabel} / ${totalLabel}`;
 };
 
 const InterviewContentView = () => {
@@ -49,14 +48,13 @@ const InterviewContentView = () => {
     onAnswerTextChange,
     onSubmitText,
     preparedInterview,
+    totalQuestionCount,
     voiceLevel,
   } = useInterviewSessionContext();
   const isVoiceMode = mode === "voice";
   const isTextMode = mode === "text";
   const visualizerLevel = isVoiceStarted ? voiceLevel : 0.22;
   const isQuestionLoading = currentQuestion === null;
-  const totalQuestionCount =
-    preparedInterview?.questions.length || FALLBACK_TOTAL_QUESTION_COUNT;
   const currentQuestionNumber = Math.max(displayQuestionNumber, 1);
   const activeInterviewer = preparedInterview?.interviewers?.find(
     (interviewer) => interviewer.personaId === currentQuestion?.personaId,

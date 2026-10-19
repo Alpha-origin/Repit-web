@@ -419,6 +419,19 @@ export const PersonaEmpty = styled(EmptyText)`
   padding: 1.5rem;
 `;
 
+export const SpeechRetryButton = styled.button`
+  align-self: flex-start;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 0.375rem;
+  color: ${({ theme }) => theme.colors.brand.blue};
+  background: ${({ theme }) => theme.colors.white};
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+`;
+
 export const SpeechCard = styled.article`
   ${cardSurface}
   display: flex;

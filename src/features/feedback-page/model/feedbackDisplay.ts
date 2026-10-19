@@ -1,3 +1,4 @@
+import { buildFeedbackMetrics } from "./feedbackMetrics";
 import type { InterviewAnswer } from "@/features/feedback-page/api/getInterviewAnswers";
 import type {
   FeedbackData,
@@ -37,12 +38,13 @@ const getFeedbackQuestion = (
   personaLabel?: string,
 ) => ({
   id: index + 1,
+  questionId: item.questionId === undefined ? undefined : String(item.questionId),
   label: `Q${index + 1}`,
   preview: getText(item.questionContent),
   personaLabel: personaLabel ?? "면접관",
   question: getText(item.questionContent),
   intention: getText(item.intention),
-  myAnswer: getText(answerContent, "작성된 답변이 없습니다."),
+  myAnswer: getText(item.userAnswer?.trim() || answerContent, "작성된 답변이 없습니다."),
   modelAnswer: getText(item.modelAnswer),
   followUpQuestion: "예상 꼬리질문이 아직 제공되지 않았습니다.",
   strengths: item.strengths?.length ? item.strengths : ["이 질문의 장점 분석 결과가 아직 없습니다."],
@@ -112,14 +114,7 @@ export const buildFeedbackOverallContent = (
         score: totalScore,
         description: summarySentences.slice(0, 2).map((sentence) => sentence.trim()),
       },
-      // The current feedback API only supplies the intent score; other criteria
-      // remain unscored until dedicated analysis results are available.
-      metrics: [
-        { label: "의도 충족", score: getOptionalScore(feedback.intentAlignmentScore) },
-        { label: "깊이", score: null },
-        { label: "구체성", score: null },
-        { label: "정확성", score: null },
-      ],
+      metrics: buildFeedbackMetrics(feedback),
       evaluation: summary,
     },
     middleSection: {
@@ -139,6 +134,7 @@ export const buildFeedbackOverallContent = (
         previousScore: getOptionalScore(previousFeedback?.totalScore),
         currentScore: totalScore,
       },
+      showPersonaFeedback: (interview?.mode ?? feedback.mode) === "MULTI",
       personaFeedbacks: (feedback.personas ?? []).map((persona, index) => ({
         title: persona.personaRole?.trim() || `면접관 ${index + 1}`,
         imageUrl:
@@ -146,21 +142,16 @@ export const buildFeedbackOverallContent = (
           (persona.personaId === interview?.persona?.id
             ? interview?.persona?.imageUrl
             : undefined),
-        comment: persona.comment?.trim() || "면접관 코멘트가 아직 등록되지 않았습니다.",
+        comment: persona.comment?.trim() || "면접관 코멘트가 제공되지 않았습니다.",
         score: getOptionalScore(persona.score),
         hasNoAnswer: persona.answeredCount === 0,
       })),
     },
     bottomSection: {
-      speechMetrics: ["발화 속도", "발음 명료도", "침묵 비율", "음량 안정성"].map((label) => ({
-        label,
-        score: null,
-        description: "음성 분석 결과가 아직 없습니다.",
-      })),
       reliability: {
         title: "응답 신뢰성",
         scoreLabel: reliabilityScore === null ? "—" : `${reliabilityScore}%`,
-        levelLabel: reliabilityScore === null ? "분석 대기" : getReliabilityLevel(reliabilityScore),
+        levelLabel: reliabilityScore === null ? "미제공" : getReliabilityLevel(reliabilityScore),
       },
       keywords: {
         items: keywords.map((item, index) => ({
@@ -187,7 +178,7 @@ export const buildFeedbackDetailContent = (
         (Date.parse(left.createdAt) || 0) - (Date.parse(right.createdAt) || 0) ||
         left.answerId - right.answerId,
       )
-      .map((answer) => [answer.question, answer.content]),
+      .map((answer) => [String(answer.question), answer.content]),
   );
   const personaRoleById = new Map(
     (feedback.personas ?? []).flatMap((persona, index) =>
@@ -216,7 +207,7 @@ export const buildFeedbackDetailContent = (
         getFeedbackQuestion(
           item,
           index,
-          answersByQuestionId.get(Number(item.questionId)),
+          answersByQuestionId.get(String(item.questionId)),
           typeof item.personaId === "number"
             ? personaRoleById.get(item.personaId) ?? "면접관"
             : undefined,

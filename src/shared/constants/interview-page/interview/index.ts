@@ -24,3 +24,7 @@ export const INTERVIEW_DEVICE_STATUS_LABELS = {
     blocked: '마이크 연결 안 됨',
   },
 } as const;
+
+export const INTERVIEW_PREPARATION_POLL_INTERVAL_MS = 1_000;
+export const INTERVIEW_QUESTIONS_WAITING_POLL_INTERVAL_MS = 3_000;
+export const INTERVIEW_PREPARATION_TIMEOUT_MS = 20 * 60_000;

@@ -34,110 +34,94 @@ const focusRing = css`
 
 export const Container = styled.div`
   width: 100%;
-  height: 100%;
-  min-height: 0;
+  min-height: 100%;
   display: flex;
   justify-content: center;
-  align-items: stretch;
-  overflow: hidden;
-  padding: clamp(0.7rem, 2.4vh, 1.75rem)
-    clamp(1.25rem, 6.8vw, 6.125rem)
-    clamp(0.55rem, 1.8vh, 1.25rem);
+  padding: ${({ theme }) => theme.spacing.md}
+    clamp(1.5rem, 6.8vw, 6.125rem)
+    ${({ theme }) => theme.spacing.lg};
   box-sizing: border-box;
 
-  @media (max-width: 52rem) {
-    height: auto;
-    min-height: 100%;
-    align-items: flex-start;
-    overflow-y: auto;
-    padding: 1.25rem 1rem 2rem;
+  @media (max-width: 64rem) {
+    padding-inline: ${({ theme }) => theme.spacing.lg};
+  }
+
+  @media (max-width: 34rem) {
+    padding: ${({ theme }) => theme.spacing.md}
+      ${({ theme }) => theme.spacing.md}
+      ${({ theme }) => theme.spacing.lg};
   }
 `;
 
 export const ContentWrapper = styled.div`
-  width: min(100%, 76.5rem);
-  height: 100%;
-  min-height: 0;
+  width: min(100%, 66rem);
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(0.5rem, 1.5vh, 1rem);
+  gap: ${({ theme }) => theme.spacing.lg};
   box-sizing: border-box;
-
-  @media (max-width: 52rem) {
-    height: auto;
-    min-height: 100%;
-  }
 `;
 
 export const Sections = styled.div`
   width: 100%;
-  flex: 1 1 auto;
-  min-height: 0;
   display: grid;
-  grid-template-columns: minmax(20rem, 26.5rem) minmax(0, 1fr);
-  gap: clamp(2rem, 4.6vw, 3.75rem);
-  align-items: stretch;
+  grid-template-columns: minmax(18rem, 0.58fr) minmax(0, 1fr);
+  gap: ${({ theme }) => theme.spacing.lg};
+  align-items: start;
 
-  @media (max-width: 64rem) {
-    grid-template-columns: minmax(18rem, 23rem) minmax(0, 1fr);
-    gap: 1.5rem;
-  }
-
-  @media (max-width: 52rem) {
-    flex: 0 0 auto;
-    min-height: auto;
+  @media (max-width: 60rem) {
     grid-template-columns: 1fr;
+    gap: ${({ theme }) => theme.spacing.lg};
   }
-
 `;
 
 export const ControlColumn = styled.div`
-  min-height: 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: clamp(0.5rem, 1vh, 0.75rem);
+  gap: ${({ theme }) => theme.spacing.xl};
 
-  @media (max-width: 52rem) {
-    min-height: auto;
-    gap: 2rem;
+  @media (max-width: 60rem) {
+    gap: ${({ theme }) => theme.spacing.lg};
   }
 `;
 
 export const Section = styled.section`
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(0.4rem, 0.9vh, 0.65rem);
+  gap: 0.75rem;
 `;
 
 export const Title = styled.h2`
   margin: 0;
   color: #4d5570;
-  font-size: clamp(1rem, 1.8vh, 1.5rem);
-  font-weight: 800;
-  line-height: 1.25;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.4;
 `;
 
 export const StyleOptionGroup = styled.div`
   display: grid;
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-  height: clamp(10rem, 18.7vh, 11rem);
-  gap: 0.6rem;
+  grid-auto-rows: minmax(4.5rem, auto);
+  gap: 0.75rem;
 `;
 
 export const StyleOptionButton = styled.button<SelectedProps>`
   width: 100%;
-  min-height: 0;
+  min-width: 0;
+  min-height: 4.5rem;
   display: grid;
-  grid-template-columns: 2.25rem minmax(0, 1fr) 1.5rem;
+  grid-template-columns: 2rem minmax(0, 1fr) 1.5rem;
   align-items: center;
   gap: 1rem;
-  padding: 0.3rem 1.25rem 0.3rem 1rem;
+  padding: 0.75rem 1rem;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
   border-radius: 0.5rem;
   background: ${({ $selected }) => ($selected ? '#eef4ff' : '#ffffff')};
   color: #171717;
+  font-family: inherit;
   cursor: pointer;
   text-align: left;
   transition:
@@ -155,8 +139,7 @@ export const StyleOptionButton = styled.button<SelectedProps>`
   ${focusRing}
 
   @media (max-width: 30rem) {
-    grid-template-columns: 2.1rem minmax(0, 1fr) 1.35rem;
-    padding-inline: 1rem;
+    gap: 0.75rem;
   }
 `;
 
@@ -209,15 +192,17 @@ export const StyleTextGroup = styled.span`
 export const OptionLabel = styled.span`
   color: #171717;
   font-size: 1rem;
-  font-weight: 800;
-  line-height: 1.2;
+  font-weight: 600;
+  line-height: 1.4;
 `;
 
 export const OptionDescription = styled.span`
   color: #262626;
-  font-size: 0.9rem;
-  font-weight: 500;
-  line-height: 1.35;
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  font-weight: 400;
+  line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 `;
 
 export const SelectionCircle = styled.span<SelectedProps>`
@@ -246,23 +231,19 @@ export const SelectionCircle = styled.span<SelectedProps>`
 export const DifficultyGroup = styled.div`
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  height: clamp(2.75rem, 4.8vh, 3rem);
-  gap: 0.9rem;
-
-  @media (max-width: 30rem) {
-    height: auto;
-    grid-template-columns: 1fr;
-    grid-auto-rows: 2.75rem;
-  }
+  gap: 0.75rem;
 `;
 
 export const DifficultyButton = styled.button<SelectedProps>`
-  min-height: 0;
+  min-width: 0;
+  min-height: 3rem;
+  padding: 0.75rem 0.5rem;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
   border-radius: 0.5rem;
   background: ${({ $selected }) => ($selected ? '#eef4ff' : '#ffffff')};
   color: #171717;
+  font-family: inherit;
   cursor: pointer;
   transition:
     background-color 0.2s ease,
@@ -293,171 +274,15 @@ export const DifficultyIcon = styled.img`
   }
 `;
 
-export const InterviewerGrid = styled.div`
-  height: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: clamp(0.7rem, 2vh, 1.45rem);
-
-  @media (max-width: 52rem) {
-    height: auto;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: none;
-  }
-
-  @media (max-width: 34rem) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-export const InterviewerCard = styled.button<SelectedProps>`
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
-  overflow: hidden;
-  min-width: 0;
-  min-height: 0;
-  height: 100%;
-  padding: 0;
-  appearance: none;
-  border: 0.0625rem solid
-    ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
-  border-radius: 0.5rem;
-  background: #ffffff;
-  cursor: pointer;
-  text-align: left;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
-
-  &:hover {
-    border-color: #3388f7;
-    box-shadow: 0 1rem 2rem rgba(38, 111, 224, 0.1);
-    transform: translateY(-0.0625rem);
-  }
-
-  ${focusRing}
-
-  @media (max-width: 52rem) {
-    height: auto;
-    min-height: 16.75rem;
-  }
-`;
-
-export const InterviewerImage = styled.img`
-  width: 100%;
-  height: clamp(5.25rem, 14vh, 10rem);
-  flex: 0 0 auto;
-  display: block;
-  object-fit: cover;
-  object-position: center;
-
-  @media (max-width: 52rem) {
-    height: 8.6rem;
-  }
-`;
-
-export const InterviewerBody = styled.div<SelectedProps>`
-  min-height: 0;
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  padding: clamp(0.55rem, 1.5vh, 1rem)
-    clamp(0.7rem, 1.8vw, 1.5rem)
-    clamp(0.6rem, 1.7vh, 1.25rem);
-  background: ${({ $selected }) => ($selected ? '#eef6ff' : '#ffffff')};
-
-  @media (max-width: 52rem) {
-    min-height: 8.25rem;
-  }
-`;
-
-export const InterviewerSelectedBadge = styled.span`
-  position: absolute;
-  top: 1.15rem;
-  right: 1.15rem;
-  width: 1.45rem;
-  height: 1.45rem;
-  border-radius: 50%;
-  background: #1f7bf2;
-  box-shadow: 0 0.4rem 1rem rgba(31, 123, 242, 0.24);
-
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0.48rem;
-    top: 0.31rem;
-    width: 0.38rem;
-    height: 0.68rem;
-    border: solid #ffffff;
-    border-width: 0 0.15rem 0.15rem 0;
-    transform: rotate(45deg);
-  }
-`;
-
-export const InterviewerTitle = styled.h3`
-  margin: 0;
-  color: #3c3c3c;
-  font-size: 1.15rem;
-  font-weight: 800;
-  line-height: 1.2;
-`;
-
-export const TagList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-`;
-
-export const Tag = styled.span`
-  display: inline-flex;
-  align-items: center;
-  min-height: 1rem;
-  padding: 0.08rem 0.32rem;
-  border: 0.0625rem solid #94c3ff;
-  border-radius: 0.12rem;
-  background: #eaf4ff;
-  color: #1376ef;
-  font-size: 0.68rem;
-  font-weight: 700;
-  line-height: 1.2;
-`;
-
-export const InterviewerDescription = styled.p`
-  display: -webkit-box;
-  overflow: hidden;
-  margin: 0;
-  color: #4b4b4b;
-  font-size: 0.78rem;
-  font-weight: 500;
-  line-height: 1.35;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-`;
-
 export const BottomButtonWrapper = styled.div`
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  margin-top: auto;
-  padding-top: clamp(0.25rem, 1vh, 0.75rem);
-
-  @media (max-width: 52rem) {
-    margin-top: 0;
-    padding-top: 0.75rem;
-    padding-bottom: 0.25rem;
-  }
+  padding-top: ${({ theme }) => theme.spacing.sm};
 
   @media (max-width: 34rem) {
-    flex-direction: column-reverse;
-    align-items: stretch;
     gap: 0.75rem;
   }
 `;
@@ -472,17 +297,18 @@ export const ErrorMessage = styled.p`
 `;
 
 const baseButton = styled.button<ActionButtonProps>`
-  width: min(100%, 9.5rem);
-  height: clamp(2.85rem, 5.8vh, 3.35rem);
+  width: min(100%, 8.5rem);
+  min-height: 3rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   box-sizing: border-box;
-  font-size: 1.15rem;
-  font-weight: 800;
-  line-height: 1.2;
+  font-family: inherit;
+  font-size: ${({ theme }) => theme.fontSize.md};
+  font-weight: 600;
+  line-height: 1.4;
   cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
   transition:
     background-color 0.2s ease,
@@ -503,11 +329,6 @@ const baseButton = styled.button<ActionButtonProps>`
 
   @media (max-width: 34rem) {
     width: 100%;
-  }
-
-  @media (max-height: 44rem) {
-    height: 2.65rem;
-    font-size: 1rem;
   }
 `;
 
@@ -577,15 +398,11 @@ export const LoadingMessage = styled.p`
 
 export const AnswerModeGroup = styled.div`
   display: grid;
-  gap: ${({ theme }) => theme.spacing.sm};
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: 0.75rem;
 `;
 
 export const AnswerModeButton = styled(StyleOptionButton)`
   grid-template-columns: minmax(0, 1fr) 1.5rem;
-  height: auto;
-  min-height: 4.5rem;
-
-  @media (max-width: 30rem), (max-height: 44rem) {
-    grid-template-columns: minmax(0, 1fr) 1.35rem;
-  }
+  min-height: 5rem;
 `;

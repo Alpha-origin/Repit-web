@@ -9,7 +9,7 @@ export const Header = styled.header`
   z-index: 1;
 
   width: 100%;
-  min-height: clamp(3.5rem, 7.3vw, 4.5rem);
+  min-height: clamp(4.5rem, 8vw, 5.25rem);
 
   box-sizing: border-box;
 
@@ -24,7 +24,7 @@ export const Header = styled.header`
   background-color: transparent;
 
   @media (max-width: 42rem) {
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto minmax(0, 1fr);
     gap: 0.25rem 0.5rem;
     padding: 0.5rem 1rem 0;
   }
@@ -32,7 +32,7 @@ export const Header = styled.header`
 
 export const LogoImage = styled.img`
   width: auto;
-  height: clamp(2.5rem, 5.3vw, 3.25rem);
+  height: clamp(3rem, 6vw, 3.75rem);
 
   display: block;
   flex-shrink: 0;
@@ -57,6 +57,7 @@ export const TopButtons = styled.nav`
     grid-row: 2;
     grid-column: 1 / -1;
     justify-self: center;
+    gap: 1rem;
   }
 `;
 
@@ -75,9 +76,9 @@ export const TopButton = styled.button<TopButtonProps>`
   cursor: pointer;
 
   min-width: 0;
-  min-height: 2.75rem;
+  min-height: 3rem;
   flex: none;
-  padding: 0.75rem;
+  padding: 0.875rem;
 
   transition:
     color 0.25s ease,
@@ -100,6 +101,8 @@ export const StatusButtons = styled.div`
   @media (max-width: 42rem) {
     grid-row: 1;
     grid-column: 2;
+    gap: 0.5rem;
+    min-width: 0;
   }
 `;
 
@@ -107,12 +110,12 @@ export const StatusButton = styled.button`
   border: none;
 
   width: auto;
-  min-width: 4.25rem;
-  max-width: 7rem;
-  height: 2.125rem;
-  padding: 0 0.75rem;
+  min-width: 5rem;
+  max-width: 8rem;
+  height: 2.5rem;
+  padding: 0 0.875rem;
 
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
 
   background-color: #3388f7;
   color: #ffffff;
@@ -125,6 +128,10 @@ export const StatusButton = styled.button`
   text-overflow: ellipsis;
 
   cursor: default;
+
+  @media (max-width: 42rem) {
+    max-width: 7rem;
+  }
 `;
 
 export const LogoutButton = styled.button`
@@ -132,8 +139,8 @@ export const LogoutButton = styled.button`
 
   width: auto;
   height: 1.875rem;
-  min-height: 2.75rem;
-  padding: 0 0.375rem;
+  min-height: 3rem;
+  padding: 0 0.5rem;
 
   border-radius: 1rem;
 
