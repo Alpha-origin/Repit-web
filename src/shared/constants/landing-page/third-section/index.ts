@@ -47,4 +47,22 @@ export const THIRD_SECTION_REVIEW_ITEMS = [
   },
 ] as const;
 
-export const THIRD_SECTION_FOOTER_TEXT = "사이트 정보 여기";
+export const THIRD_SECTION_FOOTER_LINKS = [
+  "개인정보처리방침",
+  "이용약관",
+  "AI 이용 안내",
+  "기업 정보 출처",
+  "문의 【이메일】",
+] as const;
+
+export const THIRD_SECTION_FOOTER_AI_NOTICE =
+  "리핏의 면접 질문·면접관 음성·피드백·점수는 AI가 만든 결과로 참고용이며, 실제 채용 결과와 무관합니다.";
+
+export const THIRD_SECTION_FOOTER_COMPANY_NOTICE =
+  "리핏은 소개된 기업과 제휴하거나 그 기업의 보증을 받지 않았습니다.";
+
+export const THIRD_SECTION_FOOTER_OPERATOR =
+  "운영 【운영 주체】 · 개인정보 보호책임자 【이름】";
+
+export const THIRD_SECTION_FOOTER_COPYRIGHT =
+  "© 2026 Repit. All rights reserved.";
