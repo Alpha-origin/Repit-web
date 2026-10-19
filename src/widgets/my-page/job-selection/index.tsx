@@ -2,6 +2,7 @@ import {
   JOB_CATEGORIES,
   NON_DEVELOPMENT_FAMILIES,
   getJobRolesByCategory,
+  getJobRole,
   type JobCategory,
 } from "@/shared/constants/job/jobRoles";
 
@@ -22,7 +23,6 @@ const JobSelection = ({
 }: JobSelectionProps) => (
   <S.Section aria-labelledby="my-page-job-title">
     <S.Heading>
-      <S.SectionNumber aria-hidden="true">01</S.SectionNumber>
       <S.Title id="my-page-job-title">직무</S.Title>
       <S.RequiredBadge>필수</S.RequiredBadge>
     </S.Heading>
@@ -45,11 +45,11 @@ const JobSelection = ({
         <S.Select
           aria-label="세부 직무"
           aria-describedby="my-page-job-hint"
-          value={job}
-          $isPlaceholder={!job}
+          value={getJobRole(job)?.category === category ? job : ""}
+          $isPlaceholder={getJobRole(job)?.category !== category}
           onChange={(event) => onJobChange(event.target.value)}
         >
-          <option value="" disabled>본인의 직무를 선택해 주세요</option>
+          <option value="" disabled>본인의 직무를 선택해주세요.</option>
           {category === "DEVELOPMENT"
             ? getJobRolesByCategory(category).map((role) => (
               <option key={role.code} value={role.code}>{role.label}</option>
@@ -70,7 +70,7 @@ const JobSelection = ({
       </S.SelectWrapper>
     </S.Controls>
     <S.Hint id="my-page-job-hint">
-      개발·비개발을 선택한 뒤, 준비하고 싶은 세부 직무를 선택해 주세요.
+      직무에 따라 올릴 자료와 면접 질문이 달라집니다. 직무를 바꾸면 자료가 초기화되고, 개발 직무끼리 바꿀 때는 유지됩니다.
     </S.Hint>
   </S.Section>
 );

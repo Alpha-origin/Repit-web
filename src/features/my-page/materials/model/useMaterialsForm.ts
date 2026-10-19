@@ -76,6 +76,7 @@ interface UseMaterialsFormOptions {
   isSaveBlocked?: boolean;
   requiresChangeConfirmation?: boolean;
   onAnalysisStarted?: (jobId: string | null) => void;
+  onAnalysisInvalidated?: () => void;
 }
 
 interface FormSnapshot {
@@ -103,7 +104,7 @@ const isFilledDocument = (row: DocumentRow) => Boolean(row.file || row.fileUrl);
 const isFilledSupplement = (row: SupplementRow) =>
   Boolean(row.title || row.documentId || row.goal || row.role || row.decision || row.outcome);
 
-// 서버 값을 화면 행으로 바꾼다. 직무를 고른 상태면 빈 문서 행 1개를 미리 둔다(시안).
+// 자료가 없어도 첫 입력 행은 보여 준다. 첨부는 직무를 선택한 뒤에 활성화된다.
 const toSnapshot = (materials: Materials): FormSnapshot => {
   const documents = materials.documents.map((document) => ({
     id: nextRowId("doc"),
@@ -113,19 +114,22 @@ const toSnapshot = (materials: Materials): FormSnapshot => {
     pageCount: document.pageCount,
     file: null,
   }));
+  const supplements = materials.supplements.map((supplement) => ({
+    id: nextRowId("supp"),
+    title: supplement.title ?? "",
+    documentId: supplement.documentIndex === null ? "" : documents[supplement.documentIndex]?.id ?? "",
+    goal: supplement.goal ?? "",
+    role: supplement.role ?? "",
+    decision: supplement.decision ?? "",
+    outcome: supplement.outcome ?? "",
+  }));
   return {
     job: materials.jobRole,
-    documents: documents.length || !materials.jobRole ? documents : [blankDocument()],
+    documents: documents.length ? documents : [blankDocument()],
     gitUrls: materials.gitUrls,
-    supplements: materials.supplements.map((supplement) => ({
-      id: nextRowId("supp"),
-      title: supplement.title ?? "",
-      documentId: supplement.documentIndex === null ? "" : documents[supplement.documentIndex]?.id ?? "",
-      goal: supplement.goal ?? "",
-      role: supplement.role ?? "",
-      decision: supplement.decision ?? "",
-      outcome: supplement.outcome ?? "",
-    })),
+    supplements: supplements.length || !getJobRole(materials.jobRole)?.hasSupplement
+      ? supplements
+      : [blankSupplement()],
   };
 };
 
@@ -146,7 +150,7 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   const [savedSnapshot, setSavedSnapshot] = useState<FormSnapshot>(EMPTY_SNAPSHOT);
   const [category, setCategory] = useState<JobCategory>("DEVELOPMENT");
   const [job, setJob] = useState<JobRoleCode | null>(null);
-  const [documents, setDocuments] = useState<DocumentRow[]>([]);
+  const [documents, setDocuments] = useState<DocumentRow[]>(() => [blankDocument()]);
   const [gitUrls, setGitUrls] = useState<string[]>([]);
   const [gitInput, setGitInput] = useState("");
   const [supplements, setSupplements] = useState<SupplementRow[]>([]);
@@ -159,11 +163,12 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   const [isMaterialsLoading, setIsMaterialsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
-  const jobRole = getJobRole(job);
+  const selectedRole = getJobRole(job);
+  const jobRole = selectedRole?.category === category ? selectedRole : undefined;
   // 저장은 문서·GitHub·보완 입력 전체를 바꾸므로 저장된 값을 읽기 전에는 보내지 않는다.
   const isLoadBlocked = isMaterialsLoading || Boolean(loadError);
-  const githubRule = getGithubRule(job);
-  const hasSupplements = Boolean(jobRole?.hasSupplement);
+  const githubRule = category === "NON_DEVELOPMENT" ? "HIDDEN" : getGithubRule(jobRole?.code);
+  const hasSupplements = category === "NON_DEVELOPMENT";
 
   const applySnapshot = (snapshot: FormSnapshot) => {
     setJob(snapshot.job);
@@ -263,11 +268,17 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
     }
     setDocuments([blankDocument()]);
     setGitUrls([]);
-    setSupplements([]);
+    setSupplements(getJobRole(nextJob)?.hasSupplement ? [blankSupplement()] : []);
   };
 
   const handleCategoryChange = (nextCategory: JobCategory) => {
+    if (nextCategory === category) return;
     setCategory(nextCategory);
+    if (nextCategory === "NON_DEVELOPMENT" && supplements.length === 0) {
+      setSupplements([blankSupplement()]);
+    }
+    setErrors(EMPTY_ERRORS);
+    markEdited();
   };
 
   const handleJobChange = (value: string) => {
@@ -351,8 +362,9 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   };
 
   const handleGitAdd = () => {
-    const nextGitUrl = gitInput.trim();
-    if (!nextGitUrl) return;
+    const input = gitInput.trim();
+    if (!input) return;
+    const nextGitUrl = /^[A-Za-z0-9-]+$/.test(input) ? `https://github.com/${input}` : input;
 
     if (!isValidGithubUrl(nextGitUrl)) {
       setErrors((prev) => ({ ...prev, github: MATERIAL_MESSAGES.INVALID_GITHUB_URL }));
@@ -391,7 +403,10 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   };
 
   const handleSupplementRemove = (rowId: string) => {
-    setSupplements((rows) => rows.filter((row) => row.id !== rowId));
+    setSupplements((rows) => {
+      const remaining = rows.filter((row) => row.id !== rowId);
+      return remaining.length ? remaining : [blankSupplement()];
+    });
     markEdited();
   };
 
@@ -525,12 +540,14 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
         options.onAnalysisStarted?.(result.analysis.jobId);
         setSaveStatus({ tone: "success", text: "저장했어요. 자료 분석을 시작해요" });
       } else if (result.analysis.status === "failed") {
+        options.onAnalysisInvalidated?.();
         setSaveStatus({
           tone: "warning",
           text: "자료는 저장했지만 분석을 시작하지 못했어요. 다시 분석해 주세요",
           canReanalyze: true,
         });
       } else {
+        options.onAnalysisInvalidated?.();
         setSaveStatus({ tone: "info", text: "저장했어요. 이 직무의 자료 분석은 준비 중이에요" });
       }
     } catch (error) {
@@ -595,7 +612,7 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
       onCancel: handleCancelJobChange,
       onConfirm: handleConfirmJobChange,
     },
-    job,
+    job: jobRole?.code ?? null,
     githubRule,
     hasSupplements,
     documents,
@@ -619,9 +636,10 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
     onSupplementChange: handleSupplementChange,
     errors,
     saveStatus,
+    clearAnalysisWarning: () => setSaveStatus((current) => current?.canReanalyze ? null : current),
     isSaving,
     isEdited,
-    isSaveDisabled: isSaving || isLoadBlocked || Boolean(options.isSaveBlocked),
+    isSaveDisabled: !jobRole || isSaving || isLoadBlocked || Boolean(options.isSaveBlocked),
     loadError,
     onRetryLoad: () => void loadMaterials(true),
     onSave: handleSave,
