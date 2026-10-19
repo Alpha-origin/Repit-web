@@ -212,8 +212,11 @@ export const AnswerPanel = styled.section<MultiLayoutProps>`
 `;
 
 export const AnswerTabs = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.8rem;
+  line-height: 1.5;
   border-bottom: 0.0625rem solid #dce3ee;
 `;
 
