@@ -220,8 +220,9 @@ export const getCreatedInterview = async (interviewId: number, params: CreateInt
   const response = await apiInstance.get("/api/interviews/get", { params: { interviewId }, signal, timeout: 15_000 });
   const data = normalizeCreatedInterview(response.data, params);
   if (!data || data.interviewId !== interviewId) throw new Error("면접 정보를 확인하지 못했습니다.");
+  // 서버가 N:1 면접관을 기술 면접관 먼저로 재정렬하므로 순서는 비교하지 않는다.
   if ("personaIds" in params && (params.personaIds.length !== data.personaIds.length ||
-    params.personaIds.some((id, index) => data.personaIds[index] !== id))) {
+    params.personaIds.some((id) => !data.personaIds.includes(id)))) {
     throw new Error("생성된 면접관 정보가 선택한 설정과 일치하지 않습니다.");
   }
   return data;

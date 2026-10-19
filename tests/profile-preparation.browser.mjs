@@ -113,7 +113,9 @@ async function fixture(options = {}) {
       mode: request.postDataJSON().personaIds ? "MULTI" : "SOLO", status: "IN_PROGRESS",
     } });
     if (pathname === "/api/interviews/get") return json({ data: {
-      interviewId: 42, sessionId: "test-session", userId: 7, personaId: 1, personaIds: state.createdPersonaIds,
+      // reversePersonas: 서버가 N:1 면접관을 기술 면접관 먼저로 재정렬해 돌려주는 경우
+      interviewId: 42, sessionId: "test-session", userId: 7, personaId: 1,
+      personaIds: state.reversePersonas ? [...state.createdPersonaIds].reverse() : state.createdPersonaIds,
       mode: state.createdPersonaIds.length > 1 ? "MULTI" : "SOLO", status: "IN_PROGRESS", questions: [],
     } });
     if (pathname === "/api/interviews/42") return state.start404 ? json({ message: "포트폴리오 분석을 먼저 진행해주세요" }, 404) : json({ data: { interviewId: 42, sessionId: "test-session" } });
@@ -264,8 +266,8 @@ try {
     }
   }
 
-  for (const path of ["/main/setting/interview", "/main/setting/interview/multi"]) {
-    const f = await fixture({ start404: true, preparation: preparation("NOT_REQUESTED") });
+  for (const [path, reversePersonas] of [["/main/setting/interview", false], ["/main/setting/interview/multi", false], ["/main/setting/interview/multi", true]]) {
+    const f = await fixture({ start404: true, preparation: preparation("NOT_REQUESTED"), reversePersonas });
     await f.navigate(path);
     const next = f.page.getByRole("button", { name: "다음: 기업 선택", exact: true });
     await expectEnabled(next, true);
@@ -282,7 +284,7 @@ try {
     await f.page.getByText("포트폴리오 분석을 먼저 진행해주세요", { exact: true }).waitFor();
     assert.equal(await f.page.getByRole("link", { name: "마이페이지로 이동", exact: true }).count(), 1);
     await f.close();
-    report(`${path}: start 404 links to materials`);
+    report(`${path}: start 404 links to materials${reversePersonas ? " (server reorders personas)" : ""}`);
   }
 
   const waiting = await fixture({ preparation: preparation("PREPARING", { chatDelivered: true, retryAfterMs: 4_500 }) });
