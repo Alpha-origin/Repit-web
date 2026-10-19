@@ -11,6 +11,7 @@ export type CreateInterviewPersonaType = InterviewPersonality;
 export type InterviewPersonaGender = "MALE" | "FEMALE";
 export type InterviewPersonaRole = "TECH" | "HR" | "CEO" | "PM" | "DESIGN";
 export type InterviewTone = "GENTLE" | "DIRECT" | "PRESSURING";
+export type InterviewAnswerMode = "TEXT" | "VOICE";
 export type InterviewMode = "SOLO" | "MULTI";
 export type InterviewLifecycleStatus =
   | "IN_PROGRESS"
@@ -19,6 +20,7 @@ export type InterviewLifecycleStatus =
 
 export interface CreateSoloInterviewParams {
   companyId?: number;
+  answerMode?: InterviewAnswerMode | null;
   personaName: string;
   major?: InterviewPersonaMajor;
   type: CreateInterviewPersonaType;
@@ -28,6 +30,7 @@ export interface CreateSoloInterviewParams {
 
 export interface CreateMultiInterviewParams {
   companyId?: number;
+  answerMode?: InterviewAnswerMode | null;
   personaIds: number[];
 }
 
@@ -40,6 +43,7 @@ export interface CreatedInterviewData {
   interviewId: number;
   userId: number;
   mode: InterviewMode;
+  answerMode?: InterviewAnswerMode | null;
   personaId: number | null;
   personaIds: number[];
   sessionId: string;

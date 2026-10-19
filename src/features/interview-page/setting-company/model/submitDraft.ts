@@ -28,7 +28,7 @@ export const submitSetupDraft = (draftId: string): Promise<SetupDraft> => {
       }
       draft = saveSetupDraft({ ...latest, updatedAt: new Date().toISOString(), submission: {
         idempotencyKey: crypto.randomUUID(),
-        requestBody: { ...body, ...(latest.companyId !== null ? { companyId: latest.companyId } : {}) },
+        requestBody: { ...body, answerMode: latest.settings.answerMode === "text" ? "TEXT" : "VOICE", ...(latest.companyId !== null ? { companyId: latest.companyId } : {}) },
         interviewId: null, state: "SUBMITTING",
       } });
     }

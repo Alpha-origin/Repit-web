@@ -6,6 +6,7 @@ export type {
   CreatedInterviewData,
   InterviewLifecycleStatus,
   InterviewMode,
+  InterviewAnswerMode,
   InterviewPersonaGender,
   InterviewPersonaMajor,
   InterviewPersonaRole,

@@ -142,6 +142,8 @@ const normalizeCreatedInterview = (
     personaId,
     personaIds: normalizedPersonaIds,
     mode,
+    answerMode: sourceRecord?.answerMode === "TEXT" || sourceRecord?.answerMode === "VOICE"
+      ? sourceRecord.answerMode : null,
     sessionId,
     status: isInterviewLifecycleStatus(sourceRecord?.status)
       ? sourceRecord.status

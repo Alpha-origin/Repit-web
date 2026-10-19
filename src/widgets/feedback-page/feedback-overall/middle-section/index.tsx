@@ -70,7 +70,7 @@ const FeedbackOverallMiddleSection = ({ content }: FeedbackOverallMiddleSectionP
         </S.ComparisonCard>
       </S.MiddleGrid>
 
-      <S.PersonaFeedbackList aria-label="면접관별 피드백">
+      {content.showPersonaFeedback ? <S.PersonaFeedbackList aria-label="면접관별 피드백">
         {content.personaFeedbacks.length > 0 ? content.personaFeedbacks.map((persona, index) => (
           <S.PersonaFeedbackCard key={`${persona.title}-${index}`}>
             <S.PersonaImage
@@ -86,13 +86,13 @@ const FeedbackOverallMiddleSection = ({ content }: FeedbackOverallMiddleSectionP
               <S.PersonaFeedbackText>{persona.comment}</S.PersonaFeedbackText>
             </S.PersonaFeedbackBody>
             <S.PersonaScore>
-              {persona.hasNoAnswer ? "담당 답변 없음" : persona.score === null ? "분석 대기" : `${persona.score}점`}
+              {persona.hasNoAnswer ? "담당 답변 없음" : persona.score === null ? "미제공" : `${persona.score}점`}
             </S.PersonaScore>
           </S.PersonaFeedbackCard>
         )) : (
-          <S.PersonaEmpty>면접관별 코멘트가 아직 없습니다.</S.PersonaEmpty>
+          <S.PersonaEmpty>면접관별 코멘트가 제공되지 않았습니다.</S.PersonaEmpty>
         )}
-      </S.PersonaFeedbackList>
+      </S.PersonaFeedbackList> : null}
     </S.SectionBlock>
   );
 };
