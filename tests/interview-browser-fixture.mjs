@@ -10,13 +10,13 @@ export const browser = await chromium.launch({ headless: true, args: [
 ] });
 export const question = (id) => ({ questionId: id, parentId: 0, type: "ORIGINAL", intention: "경험", content: `질문 ${id}: 프로젝트 경험을 설명해주세요.`, personaId: 1 });
 
-export async function fixture({ multi = false, answerMode = "voice", timeout = false, denied = false, fail = false, delayUploads = false, complete = false, mimeMode, socketOnAnswer = false, preparationFailed = false, recorderFails = false, slowStop = false, audioResponses = null, holdAudio = false, fastAudioTimers = false, audioDeadline = false, playback = "native", recoveredSessionId = null, quitStatuses = [200], preparationQuestions = null } = {}) {
+export async function fixture({ multi = false, answerMode = "voice", timeout = false, denied = false, fail = false, delayUploads = false, complete = false, mimeMode, socketOnAnswer = false, preparationFailed = false, recorderFails = false, slowStop = false, audioResponses = null, holdAudio = false, fastAudioTimers = false, audioDeadline = false, playback = "native", recoveredSessionId = null, quitStatuses = [200], preparationQuestions = null, manualSpeech = false } = {}) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage();
   page.setDefaultTimeout(10_000);
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.addInitScript(({ timeout, denied, mimeMode, recorderFails, slowStop, fastAudioTimers, audioDeadline, playback }) => {
+  await page.addInitScript(({ timeout, denied, mimeMode, recorderFails, slowStop, fastAudioTimers, audioDeadline, playback, manualSpeech }) => {
     window.__audioEvents = [];
     window.__audios = [];
     window.__releasePlay = [];
@@ -92,13 +92,16 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
         else super.stop();
       }
     };
+    window.__recognitions = [];
     window.SpeechRecognition = class {
+      constructor() { this.active = false; window.__recognitions.push(this); }
       start() {
+        this.active = true;
         this.onstart?.();
-        setTimeout(() => this.onresult?.({ results: [{ isFinal: true, 0: { transcript: "팀 프로젝트에서 성능을 개선하고 문제를 해결했습니다." } }] }), 20);
+        if (!manualSpeech) setTimeout(() => this.onresult?.({ results: [{ isFinal: true, 0: { transcript: "팀 프로젝트에서 성능을 개선하고 문제를 해결했습니다." } }] }), 20);
       }
-      stop() { this.onend?.(); }
-      abort() { this.onend?.(); }
+      stop() { this.active = false; this.onend?.(); }
+      abort() { this.active = false; this.onend?.(); }
     };
     window.WebSocket = class extends EventTarget {
       static CONNECTING = 0;
@@ -114,7 +117,7 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
       const originalTimeout = window.setTimeout.bind(window);
       window.setTimeout = (callback, delay, ...args) => originalTimeout(callback, delay === 210_000 ? 1_200 : delay, ...args);
     }
-  }, { timeout, denied, mimeMode, recorderFails, slowStop, fastAudioTimers, audioDeadline, playback });
+  }, { timeout, denied, mimeMode, recorderFails, slowStop, fastAudioTimers, audioDeadline, playback, manualSpeech });
   const audioRequests = [];
   const audioReleases = [];
   const failedRequests = [];
