@@ -2,6 +2,8 @@ import type { CompanySummary } from "@/features/interview-page/company/model/typ
 import type { CompanyCategoryFilter } from "@/features/interview-page/setting-company/model/useCompanySetup";
 
 export interface CompanyPickerProps {
+  listState: "loading" | "success" | "error";
+  emptyMessage: string;
   query: string;
   onQueryChange: (value: string) => void;
   category: CompanyCategoryFilter;

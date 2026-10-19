@@ -1,15 +1,12 @@
 import {
-  createInterview,
-  prepareInterviewRecord,
   savePersona,
-  setActiveInterviewSessionId,
+  type CreateInterviewParams,
   type InterviewLevel,
   type InterviewPersonaRole,
   type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
 import type {
   SoloInterviewDraft,
-  SubmitInterviewResult,
 } from "@/features/interview-page/setting-company/model/draft";
 import type { InterviewDifficultyOption } from "@/shared/constants/interview-page/setting-interview";
 import { MULTI_INTERVIEWER_TEMPLATES } from "@/shared/constants/interview-page/setting-multi-interview";
@@ -30,24 +27,18 @@ const LEVEL_BY_DIFFICULTY: Record<InterviewDifficultyOption, InterviewLevel> = {
 const DEFAULT_INTERVIEW_ROLE: InterviewPersonaRole = "TECH";
 
 const buildUniquePersonaName = (personaName: string) =>
-  `${personaName}-${Date.now().toString(36)}`;
+  `${personaName}-${crypto.randomUUID()}`;
 
-const fail = (errorMessage: string, requiresMaterials = false): SubmitInterviewResult => ({
-  ok: false,
-  errorMessage,
-  requiresMaterials,
-});
-
-export const submitSoloInterview = async (
+export const buildSoloInterviewPayload = async (
   draft: SoloInterviewDraft,
-): Promise<SubmitInterviewResult> => {
-  const { answerMode, difficulty: selectedDifficulty, interviewerKey, personality, tone } = draft;
+): Promise<CreateInterviewParams> => {
+  const { difficulty: selectedDifficulty, interviewerKey, personality, tone } = draft;
   const selectedInterviewer = MULTI_INTERVIEWER_TEMPLATES.find(
     (interviewer) => interviewer.key === interviewerKey,
   );
 
   if (!selectedInterviewer) {
-    return fail("선택한 면접관 정보를 찾을 수 없습니다.");
+    throw new Error("선택한 면접관 정보를 찾을 수 없습니다.");
   }
 
   const personaPayload: SavePersonaParams = {
@@ -67,81 +58,13 @@ export const submitSoloInterview = async (
     await savePersona(personaPayload);
 
   if (savePersonaErrorMessage || !savedPersona) {
-    return fail(savePersonaErrorMessage ?? "페르소나 저장에 실패했습니다.");
+    throw new Error(savePersonaErrorMessage ?? "페르소나 저장에 실패했습니다.");
   }
 
-  const { data, errorMessage: createErrorMessage } = await createInterview({
+  return {
     personaName: personaPayload.personaName,
     type: personaPayload.type,
     career: personaPayload.career,
     gender: personaPayload.gender,
-  });
-
-  if (createErrorMessage || !data) {
-    return fail(createErrorMessage ?? "면접 시작에 실패했습니다.");
-  }
-
-  const {
-    data: preparedInterviewRecord,
-    errorMessage: prepareInterviewErrorMessage,
-    statusCode,
-  } = await prepareInterviewRecord(data.interviewId);
-
-  if (prepareInterviewErrorMessage || !preparedInterviewRecord) {
-    return fail(
-      prepareInterviewErrorMessage ?? "면접 준비에 실패했습니다.",
-      statusCode === 404,
-    );
-  }
-
-  const interviewSessionId =
-    preparedInterviewRecord.sessionId ?? data.sessionId;
-  const personaId =
-    data.personaId !== null && data.personaId > 0
-      ? data.personaId
-      : savedPersona.personaId;
-  setActiveInterviewSessionId(interviewSessionId);
-
-  return {
-    ok: true,
-    path: `/main/interview/${data.interviewId}`,
-    state: {
-      preparedInterview: {
-        sessionId: interviewSessionId,
-        interviewId: preparedInterviewRecord.interviewId,
-        userId: data.userId,
-        personaId,
-        personaName: personaPayload.personaName,
-        role: personaPayload.role,
-        major: savedPersona.major,
-        type: personaPayload.type,
-        personaType: personaPayload.type,
-        level: personaPayload.level,
-        career: personaPayload.career,
-        gender: personaPayload.gender,
-        tone: personaPayload.tone,
-        jobId: preparedInterviewRecord.jobId ?? "",
-        analysisJobId: preparedInterviewRecord.analysisJobId,
-        questionPreparationStatus: preparedInterviewRecord.status,
-        status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
-        currentQuestionIndex: data.currentQuestionIndex,
-        questions: [],
-        mode: "SOLO",
-        answerMode,
-        interviewers: [
-          {
-            personaId,
-            name: selectedInterviewer.name,
-            roleLabel: "기술 면접관",
-            image: selectedInterviewer.image,
-            gender: personaPayload.gender,
-            voiceIndex: selectedInterviewer.voiceIndex,
-            personaType: personaPayload.type,
-            tone: personaPayload.tone,
-            level: personaPayload.level,
-          },
-        ],
-      },
-    },
   };
 };

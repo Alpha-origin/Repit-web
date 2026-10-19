@@ -26,7 +26,7 @@ async function fixture(options = {}) {
   page.on("pageerror", (error) => errors.push(error.message));
   const state = {
     profile: profile("COMPLETED"), profileError: false, materials: true, materialsError: false, holdProfile: false, holdSave: false,
-    preparation: preparation("READY"), retryError: false, start404: false, ...options,
+    preparation: preparation("READY"), retryError: false, start404: false, createdPersonaIds: [1], ...options,
     profileReads: 0, uploads: 0, savedPayloads: [], retries: 0, analysisRequests: 0, personaCount: 0, preparationReads: [],
   };
   const releases = [];
@@ -107,9 +107,14 @@ async function fixture(options = {}) {
       return json({ success: true });
     }
     if (pathname === "/api/persona/save") return json({ data: { personaId: ++state.personaCount } });
+    if (pathname === "/api/interviews/create") state.createdPersonaIds = request.postDataJSON().personaIds ?? [1];
     if (pathname === "/api/interviews/create") return json({ data: {
       interviewId: 42, sessionId: "test-session", userId: 7, personaId: 1, personaIds: request.postDataJSON().personaIds ?? [1],
       mode: request.postDataJSON().personaIds ? "MULTI" : "SOLO", status: "IN_PROGRESS",
+    } });
+    if (pathname === "/api/interviews/get") return json({ data: {
+      interviewId: 42, sessionId: "test-session", userId: 7, personaId: 1, personaIds: state.createdPersonaIds,
+      mode: state.createdPersonaIds.length > 1 ? "MULTI" : "SOLO", status: "IN_PROGRESS", questions: [],
     } });
     if (pathname === "/api/interviews/42") return state.start404 ? json({ message: "포트폴리오 분석을 먼저 진행해주세요" }, 404) : json({ data: { interviewId: 42, sessionId: "test-session" } });
     if (pathname.endsWith("/question")) return json(question);
@@ -244,7 +249,7 @@ try {
     for (const [status, materials, allowed] of [["COMPLETED", false, true], ["NONE", true, true], ["NONE", false, false], ["PENDING", true, false], ["FAILED", true, false], ["ERROR", true, false]]) {
       const f = await fixture({ profile: profile(status === "ERROR" ? "COMPLETED" : status, status === "FAILED" ? "INTERNAL" : null), profileError: status === "ERROR", materials });
       await f.navigate(path);
-      const next = f.page.getByRole("button", { name: status === "PENDING" ? /^분석 중/ : "다음", exact: status !== "PENDING" });
+      const next = f.page.getByRole("button", { name: status === "PENDING" ? /^분석 중/ : "다음: 기업 선택", exact: status !== "PENDING" });
       const guidance = status === "ERROR" ? "테스트 상태 조회 실패" : status === "NONE" ? materials ? "첫 면접은 준비에 몇 분 걸릴 수 있어요" : "마이페이지에서 자료를 등록해 주세요" : status === "PENDING" ? "자료 분석이 끝나면 시작할 수 있어요" : status === "FAILED" ? "분석 중 문제가 생겼어요" : null;
       if (guidance) await f.page.getByText(guidance, { exact: true }).waitFor();
       await expectEnabled(next, allowed);
@@ -260,9 +265,9 @@ try {
   }
 
   for (const path of ["/main/setting/interview", "/main/setting/interview/multi"]) {
-    const f = await fixture({ start404: true });
+    const f = await fixture({ start404: true, preparation: preparation("NOT_REQUESTED") });
     await f.navigate(path);
-    const next = f.page.getByRole("button", { name: "다음", exact: true });
+    const next = f.page.getByRole("button", { name: "다음: 기업 선택", exact: true });
     await expectEnabled(next, true);
     if (path.endsWith("multi")) {
       for (const [index, name] of ["김도윤", "이서준", "박지민"].entries()) {
@@ -272,8 +277,8 @@ try {
       }
     }
     await next.click();
-    // 사전설정 다음에 기업 선택 단계가 있고, 면접 생성은 거기서 "면접 시작"으로 한다.
-    await f.page.getByRole("button", { name: "면접 시작", exact: true }).click();
+    // 사전설정 다음에 기업 선택 단계가 있고, 면접 생성은 거기서 "기업 없이 면접 시작"으로 한다.
+    await f.page.getByRole("button", { name: "기업 없이 면접 시작", exact: true }).click();
     await f.page.getByText("포트폴리오 분석을 먼저 진행해주세요", { exact: true }).waitFor();
     assert.equal(await f.page.getByRole("link", { name: "마이페이지로 이동", exact: true }).count(), 1);
     await f.close();

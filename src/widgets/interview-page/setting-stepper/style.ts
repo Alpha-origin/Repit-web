@@ -10,12 +10,14 @@ export const List = styled.ol`
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 0;
+  @media (max-width: 34rem) { flex-wrap: nowrap; }
 `;
 
 export const Item = styled.li`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  @media (max-width: 34rem) { gap: 0.25rem; }
 `;
 
 export const Line = styled.span`
@@ -23,6 +25,7 @@ export const Line = styled.span`
   height: 0.0625rem;
   margin: 0 0.5rem;
   background: #c8cbd0;
+  @media (max-width: 34rem) { width: 0.5rem; margin-inline: 0.25rem; }
 `;
 
 export const StepNumber = styled.span<{ $state: StepState }>`
@@ -44,6 +47,8 @@ export const StepNumber = styled.span<{ $state: StepState }>`
 
 export const Label = styled.span<{ $state: StepState }>`
   font-size: 0.9rem;
+  white-space: nowrap;
+  @media (max-width: 34rem) { font-size: 0.75rem; }
   font-weight: ${({ $state }) => ($state === "current" ? 700 : 500)};
   color: ${({ $state }) => ($state === "current" ? "#257ee8" : "#8a8f99")};
 `;

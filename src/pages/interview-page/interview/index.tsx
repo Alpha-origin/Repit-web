@@ -1,5 +1,10 @@
+import { useInterviewEntry } from "@/features/interview-page/setting-company/model/useInterviewEntry";
+import { useUserStore } from "@/shared/store/userStore";
+import { loadSetupDraft } from "@/features/interview-page/setting-company/model/draftStore";
+import { COMPANY_SETTING_PATH } from "@/features/interview-page/setting-company/model/draft";
+import CompanyBadge from "@/widgets/interview-page/company-badge";
 import { useMemo } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 
 import type { PreparedInterviewData } from "@/features/interview-page/interview/api";
 import {
@@ -39,15 +44,30 @@ const formatElapsedTime = (elapsedSeconds: number) => {
 
 const InterviewPage = () => {
   const location = useLocation();
+  const { id } = useParams();
+  const user = useUserStore();
   const preparedInterview = useMemo(
     () => getPreparedInterviewFromState(location.state),
     [location.state],
   );
 
+  const draftId = new URLSearchParams(location.search).get("draftId");
+  const entry = useInterviewEntry(preparedInterview, draftId, user.id, user.isLoaded);
+
+  if (!user.isLoaded) return <Loading message="로그인 정보를 확인하고 있어요" />;
+  if (!preparedInterview || preparedInterview.interviewId !== Number(id) || preparedInterview.userId !== user.id) {
+    const draft = loadSetupDraft(draftId);
+    if (draft?.submission?.interviewId === Number(id)) return <Navigate to={`${COMPANY_SETTING_PATH}?draftId=${draft.draftId}`} replace />;
+    return <S.PreparationErrorScreen role="alert">면접 정보를 복구할 수 없습니다. 사전 설정에서 다시 시작해주세요.<Link to="/main">메인으로 돌아가기</Link></S.PreparationErrorScreen>;
+  }
+
+  if (entry.error) return <S.PreparationErrorScreen role="alert">{entry.error}<Link to="/main">메인으로 돌아가기</Link></S.PreparationErrorScreen>;
+  if (entry.isChecking || !entry.prepared) return <Loading message="면접 정보를 확인하고 있어요" />;
+
   return (
     <InterviewSessionProvider
       key={preparedInterview?.sessionId ?? location.pathname}
-      preparedInterview={preparedInterview}
+      preparedInterview={entry.prepared}
     >
       <InterviewPageContent />
     </InterviewSessionProvider>
@@ -120,6 +140,7 @@ const InterviewPageContent = () => {
   return (
     <S.Container $textMode={isTextMode} $voiceMode={isVoiceMode}>
       <S.Content $textMode={isTextMode} $voiceMode={isVoiceMode}>
+        <CompanyBadge />
         {isVoiceMode ? (
           <S.TopControlBar>
             <S.TopControls>

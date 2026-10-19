@@ -1,3 +1,4 @@
+import { loadSetupDraft, upsertSettingsDraft } from "@/features/interview-page/setting-company/model/draftStore";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -5,7 +6,6 @@ import { useInterviewEligibility } from "@/features/profile/model/useInterviewEl
 
 import {
   COMPANY_SETTING_PATH,
-  readInterviewDraft,
   type SoloInterviewDraft,
 } from "@/features/interview-page/setting-company/model/draft";
 import {
@@ -24,7 +24,7 @@ export const useInterviewSetup = () => {
   const location = useLocation();
   // 기업 선택에서 돌아오면 히스토리 state에 남겨 둔 설정값으로 다시 채운다.
   const [initialDraft] = useState(() => {
-    const draft = readInterviewDraft(location.state);
+    const draft = loadSetupDraft(new URLSearchParams(location.search).get("draftId"))?.settings;
     return draft?.mode === "SOLO" ? draft : null;
   });
   const [answerMode, setAnswerMode] = useState<"voice" | "text">(
@@ -66,10 +66,13 @@ export const useInterviewSetup = () => {
       interviewerKey,
       answerMode,
     };
-    // 현재 항목에 draft를 먼저 남겨야 돌아왔을 때 선택이 유지된다. 두 이동이 겹치지 않게 순서대로 한다.
-    void Promise.resolve(
-      navigate(location.pathname, { replace: true, state: { draft } }),
-    ).then(() => navigate(COMPANY_SETTING_PATH, { state: { draft } }));
+    try {
+      const saved = upsertSettingsDraft(draft, new URLSearchParams(location.search).get("draftId"));
+      void Promise.resolve(navigate(`${location.pathname}?draftId=${saved.draftId}`, { replace: true }))
+        .then(() => navigate(`${COMPANY_SETTING_PATH}?draftId=${saved.draftId}`));
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "설정을 저장하지 못했습니다.");
+    }
   };
 
   const select: InterviewSettingSelectHandlers = {

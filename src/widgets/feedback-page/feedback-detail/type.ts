@@ -1,5 +1,6 @@
 export interface FeedbackDetailQuestionItem {
   id: number;
+  questionId?: string;
   label: string;
   preview: string;
   personaLabel?: string;
@@ -64,6 +65,7 @@ export interface FeedbackDetailProps {
     middleSection: FeedbackDetailMiddleSectionData;
     bottomSection: FeedbackDetailBottomSectionData;
   };
+  companySection?: import("react").ReactNode;
   isDownloadingPdf: boolean;
   onDownloadPdf: () => Promise<void> | void;
 }

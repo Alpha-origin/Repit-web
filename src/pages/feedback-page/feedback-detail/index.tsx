@@ -1,3 +1,4 @@
+import CompanyFeedback from "@/widgets/feedback-page/company-feedback";
 import { buildFeedbackDetailContent } from "@/features/feedback-page/model/feedbackDisplay";
 import { useFeedbackInterview } from "@/features/feedback-page/model/useFeedbackInterview";
 import { exportElementToPdf } from "@/shared/utils/exportElementToPdf";
@@ -86,6 +87,7 @@ const FeedbackDetailPage = () => {
             key={id}
             ref={panelRef}
             content={content}
+            companySection={<CompanyFeedback feedback={feedback!} interview={interview} />}
             isDownloadingPdf={isDownloadingPdf}
             onDownloadPdf={handleDownloadPdf}
           />

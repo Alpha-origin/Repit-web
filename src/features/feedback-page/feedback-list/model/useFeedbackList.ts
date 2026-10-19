@@ -1,3 +1,4 @@
+import { readCompanyBadge } from "@/features/interview-page/company/model/type";
 import { useCallback, useEffect, useState } from "react";
 
 import {
@@ -67,6 +68,7 @@ const getListItems = (
 
     return {
       id: targetInterviewId,
+      companyName: readCompanyBadge(interview.company)?.displayName,
       date: getFormattedDate(interview.createdAt),
       imageUrl:
         interview.persona?.imageUrl ??

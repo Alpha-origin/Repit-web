@@ -117,6 +117,7 @@ const FeedbackList = ({
                   />
                   <S.CardBody>
                     <S.CardTitle>{item.title}</S.CardTitle>
+                    {item.companyName ? <S.Tag>{item.companyName} 연습 면접</S.Tag> : null}
                     {item.totalScore !== undefined ? (
                       <S.ScoreLine>
                         종합 점수 <S.ScoreValue>{item.totalScore}점</S.ScoreValue>

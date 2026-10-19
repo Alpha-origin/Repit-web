@@ -125,9 +125,12 @@ export const Grid = styled.div`
   }
 `;
 
-export const Card = styled.button<SelectedProps>`
+export const Card = styled.label<SelectedProps>`
   min-width: 0;
   min-height: 9rem;
+  position: relative;
+  &:focus-within { outline: 0.125rem solid ${({ theme }) => theme.colors.brand.blue}; outline-offset: 0.125rem; }
+  &:has(input:disabled) { cursor: not-allowed; }
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -248,6 +251,7 @@ export const Meta = styled.span`
 
 export const TagRow = styled.span`
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
@@ -261,6 +265,10 @@ export const Tags = styled.span`
 `;
 
 export const Tag = styled.span<SelectedProps>`
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
   padding: 0.15rem 0.55rem;
   border-radius: 999rem;
   background: ${({ $selected }) => ($selected ? "#ffffff" : "#f4f6fa")};
@@ -282,4 +290,11 @@ export const Empty = styled.p`
   align-self: center;
   color: #6b7080;
   font-size: 0.95rem;
+`;
+
+export const RadioInput = styled.input`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
 `;

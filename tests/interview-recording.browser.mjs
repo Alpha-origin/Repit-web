@@ -185,9 +185,9 @@ try {
   await f.page.waitForURL("**/main");
   for (const path of ["/main/setting/interview", "/main/setting/interview/multi"]) {
     await f.page.evaluate((path) => window.__router.navigate(path), path);
-    const textChoice = f.page.getByRole("button", { name: "단순 텍스트 면접", exact: false });
+    const textChoice = f.page.getByRole("button", { name: "텍스트 답변", exact: false });
     await textChoice.click();
-    const voiceChoice = f.page.getByRole("button", { name: "음성/영상 면접", exact: false });
+    const voiceChoice = f.page.getByRole("button", { name: "영상/음성 답변", exact: false });
     const labelBox = await voiceChoice.locator("span").first().boundingBox();
     assert.ok(labelBox.width > 200, "answer mode text has enough width");
     assert.equal(await textChoice.getAttribute("aria-pressed"), "true");

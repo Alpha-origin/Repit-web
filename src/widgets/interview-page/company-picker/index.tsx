@@ -36,6 +36,8 @@ const CompanyPicker = ({
   selectedCompanyId,
   onSelect,
   disabled,
+  listState,
+  emptyMessage,
 }: CompanyPickerProps) => (
   <S.Container>
     <S.Toolbar>
@@ -43,6 +45,7 @@ const CompanyPicker = ({
         <S.SearchIcon aria-hidden="true" />
         <S.SearchInput
           type="search"
+          maxLength={30}
           value={query}
           disabled={disabled}
           placeholder="기업 이름으로 검색"
@@ -68,13 +71,10 @@ const CompanyPicker = ({
 
     <S.Grid role="radiogroup" aria-label="기업 선택">
       <S.Card
-        type="button"
-        role="radio"
-        aria-checked={selectedCompanyId === null}
-        disabled={disabled}
         $selected={selectedCompanyId === null}
-        onClick={() => onSelect(null)}
       >
+        <S.RadioInput type="radio" name="company" checked={selectedCompanyId === null}
+          disabled={disabled} onChange={() => onSelect(null)} aria-label="선택 안 함" />
         <S.CardTop>
           <S.Badge $selected={false} $muted>—</S.Badge>
           <S.Names>
@@ -86,18 +86,15 @@ const CompanyPicker = ({
         <S.CardNote>지금까지와 같은 방식의 연습 면접이에요</S.CardNote>
       </S.Card>
 
-      {companies.map((company) => {
+      {(listState === "success" ? companies : []).map((company) => {
         const selected = selectedCompanyId === company.companyId;
         return (
           <S.Card
             key={company.companyId}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            disabled={disabled}
             $selected={selected}
-            onClick={() => onSelect(company.companyId)}
           >
+            <S.RadioInput type="radio" name="company" checked={selected}
+              disabled={disabled} onChange={() => onSelect(company.companyId)} aria-label={company.displayName} />
             <S.CardTop>
               <S.Badge $selected={selected}>{getInitial(company.displayName)}</S.Badge>
               <S.Names>
@@ -123,10 +120,11 @@ const CompanyPicker = ({
         );
       })}
 
-      {companies.length === 0 ? (
-        <S.Empty role="status">검색 결과가 없어요</S.Empty>
+      {listState === "success" && companies.length === 0 ? (
+        <S.Empty role="status">{emptyMessage}</S.Empty>
       ) : null}
     </S.Grid>
+    {listState === "loading" ? <S.Empty role="status">기업 목록을 불러오고 있어요</S.Empty> : null}
   </S.Container>
 );
 

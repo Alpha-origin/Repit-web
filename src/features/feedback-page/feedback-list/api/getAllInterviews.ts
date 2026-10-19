@@ -1,3 +1,4 @@
+import type { CompanyBadge } from "@/features/interview-page/company/model/type";
 import axios from "axios";
 import {
   apiInstance,
@@ -19,6 +20,7 @@ export interface InterviewPersona {
 }
 
 export interface InterviewSummary {
+  company?: CompanyBadge | null;
   id?: number;
   interviewId?: number;
   userId?: number;
@@ -70,6 +72,8 @@ export interface FeedbackPersona {
 }
 
 export interface FeedbackData {
+  company?: CompanyBadge | null;
+  companyFit?: unknown;
   feedbackId?: number;
   interviewId?: number;
   sessionId?: string;

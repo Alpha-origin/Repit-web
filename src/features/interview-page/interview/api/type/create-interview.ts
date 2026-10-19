@@ -1,3 +1,4 @@
+import type { CompanyBadge } from "@/features/interview-page/company/model/type";
 import type { JobRoleCode } from "@/shared/constants/job/jobRoles";
 import type { PrepareInterviewQuestion } from "./prepare-interview";
 
@@ -17,6 +18,7 @@ export type InterviewLifecycleStatus =
   | "ABANDONED";
 
 export interface CreateSoloInterviewParams {
+  companyId?: number;
   personaName: string;
   major?: InterviewPersonaMajor;
   type: CreateInterviewPersonaType;
@@ -25,6 +27,7 @@ export interface CreateSoloInterviewParams {
 }
 
 export interface CreateMultiInterviewParams {
+  companyId?: number;
   personaIds: number[];
 }
 
@@ -33,6 +36,7 @@ export type CreateInterviewParams =
   | CreateMultiInterviewParams;
 
 export interface CreatedInterviewData {
+  company: CompanyBadge | null;
   interviewId: number;
   userId: number;
   mode: InterviewMode;
