@@ -32,6 +32,9 @@ export const useCompanySetup = () => {
   const [canRetryPreparation, setCanRetryPreparation] = useState(false);
   const [showMyPageLink, setShowMyPageLink] = useState(false);
   const [preparationAttempt, setPreparationAttempt] = useState(0);
+  // 처음 받은 필터 없는 목록이 비었으면 선택 화면 없이 바로 준비한다(05-web §3-3 C0-1). null = 아직 판정 전.
+  const [skipMode, setSkipMode] = useState<boolean | null>(null);
+  const autoStarted = useRef(false);
   const busy = useRef(false);
   const mounted = useRef(true);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
@@ -52,11 +55,14 @@ export const useCompanySetup = () => {
         const result = await getCompanies(debouncedQuery, category, controller.signal);
         if (controller.signal.aborted) return;
         setCompanies(result);
+        if (!debouncedQuery && category === "ALL") setSkipMode((previous) => previous ?? result.length === 0);
         setSelectedCompany((previous) => result.find((company) => company.companyId === selectedCompanyId) ?? previous);
         setListState("success");
       } catch (error) {
         if (controller.signal.aborted) return;
         setListState("error");
+        // 목록 실패면 건너뛰지 않는다. 선택 화면이 오류와 "기업 없이 면접 시작"을 보여 준다(C0-4).
+        setSkipMode((previous) => previous ?? false);
         setListError(extractErrorMessage(error, "기업 목록을 불러오지 못했습니다."));
       }
     })();
@@ -77,6 +83,14 @@ export const useCompanySetup = () => {
       if (mounted.current) setIsSubmitting(false);
     }
   };
+
+  // 건너뛰기 모드: 아직 제출하지 않았고 기업을 고른 적 없는 초안이면 "기업 없이 면접 시작"을 한 번만 자동 실행한다(C0-2).
+  const skipStep = skipMode === true && draft?.companyId === null;
+  useEffect(() => {
+    if (!skipStep || autoStarted.current || !draft || draft.submission) return;
+    autoStarted.current = true;
+    void handleStart();
+  });
 
   // 제출 중 새로고침/재진입에서는 새 본문을 만들지 않고 저장된 요청만 복구한다.
   useEffect(() => {
@@ -174,7 +188,7 @@ export const useCompanySetup = () => {
   };
 
   return {
-    hasDraft: !!draft, draft, query, category, companies, selectedCompanyId,
+    hasDraft: !!draft, draft, skipStep, isDecidingSkip: skipMode === null, query, category, companies, selectedCompanyId,
     selectedCompany: selectedCompany?.companyId === selectedCompanyId ? selectedCompany : null,
     onQueryChange: (value: string) => { if (!locked) setQuery(value.slice(0, 30)); },
     onCategoryChange: (value: CompanyCategoryFilter) => { if (!locked) setCategory(value); },
