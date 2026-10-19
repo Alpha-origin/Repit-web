@@ -86,11 +86,14 @@ export const useCompanySetup = () => {
 
   // 건너뛰기 모드: 아직 제출하지 않았고 기업을 고른 적 없는 초안이면 "기업 없이 면접 시작"을 한 번만 자동 실행한다(C0-2).
   const skipStep = skipMode === true && draft?.companyId === null;
+  const hasSubmission = !!draft?.submission;
+  const startRef = useRef(handleStart);
+  startRef.current = handleStart;
   useEffect(() => {
-    if (!skipStep || autoStarted.current || !draft || draft.submission) return;
+    if (!skipStep || autoStarted.current || hasSubmission) return;
     autoStarted.current = true;
-    void handleStart();
-  });
+    void startRef.current();
+  }, [skipStep, hasSubmission]);
 
   // 제출 중 새로고침/재진입에서는 새 본문을 만들지 않고 저장된 요청만 복구한다.
   useEffect(() => {

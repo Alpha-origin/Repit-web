@@ -41,6 +41,9 @@ const SettingCompanyPage = () => {
       <Setting.Container>
         <Setting.ContentWrapper>
           <S.Notice role="status">면접 설정을 확인하고 있어요.</S.Notice>
+          <S.Footer>
+            <S.Button type="button" disabled={setup.locked} onClick={setup.onBack}>설정 수정</S.Button>
+          </S.Footer>
         </Setting.ContentWrapper>
       </Setting.Container>
     );
