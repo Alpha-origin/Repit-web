@@ -1,5 +1,5 @@
 export const THIRD_SECTION_SUBTITLE = "User Review";
-export const THIRD_SECTION_TITLE = "사람들이 말하는 레핏";
+export const THIRD_SECTION_TITLE = "사람들이 말하는 래핏";
 
 const REVIEW_MESSAGE =
   "혼자 집에서도 간편하게 면접을 보고 구체적인 피드백을 받을 수 있어서 좋아요";

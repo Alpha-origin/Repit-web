@@ -1,6 +1,6 @@
 export const SECOND_SECTION_SUBTITLE = "Main Servece";
 
-export const SECOND_SECTION_TITLE = "레핏에서 모의 면접 보고\n원하는 기업의 면접에 합격하세요";
+export const SECOND_SECTION_TITLE = "래핏에서 모의 면접 보고\n원하는 기업의 면접에 합격하세요";
 
 export const SECOND_SECTION_SERVICE_ITEMS = [
   {
