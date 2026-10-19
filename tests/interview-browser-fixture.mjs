@@ -176,7 +176,7 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
     if (pathname.endsWith("/me")) return json({ data: { id: 7, name: "테스트", nickname: "테스트" } });
     if (pathname.endsWith("/audio")) {
       const id = Number(pathname.split("/").at(-2));
-      audioRequests.push({ id, wait: requestUrl.searchParams.get("wait"), authorization: request.headers().authorization });
+      audioRequests.push({ id, wait: requestUrl.searchParams.get("wait"), authorization: request.headers().authorization, at: Date.now() });
       const count = audioCounts.get(id) ?? 0;
       audioCounts.set(id, count + 1);
       if (holdAudio && id === 101) await new Promise((resolve) => audioReleases.push(resolve));
