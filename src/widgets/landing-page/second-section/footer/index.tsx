@@ -1,6 +1,6 @@
 import * as S from "./style";
 import { useNavigate } from "react-router-dom";
-const Footer = () => {
+const Footer = ({ startPath = "/login" }: { startPath?: string }) => {
   const navigate = useNavigate();
   return (
     <S.Container>
@@ -12,7 +12,7 @@ const Footer = () => {
             전문적인 피드백을 받아보자!
           </S.Title>
 
-          <S.StartButton onClick={() => navigate("/login")}>
+          <S.StartButton onClick={() => navigate(startPath)}>
             면접 시작하기
           </S.StartButton>
         </S.LeftSection>
