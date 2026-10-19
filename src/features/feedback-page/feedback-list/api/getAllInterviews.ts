@@ -78,6 +78,7 @@ export interface FeedbackData {
   interviewId?: number;
   sessionId?: string;
   style?: string;
+  level?: string;
   status?: string;
   totalScore?: number;
   intentAlignmentScore?: number;
