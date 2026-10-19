@@ -81,7 +81,7 @@ const FeedbackList = ({
             </S.SortSelectWrapper>
             <S.SortDirectionButton
               type="button"
-              aria-label="정렬 방향"
+              aria-label={`정렬 방향: ${getFeedbackListSortLabel(sort)}`}
               onClick={() =>
                 updateSort({
                   key: sort.key,

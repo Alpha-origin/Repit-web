@@ -51,6 +51,14 @@ async function open(path) {
   return { page, close: async () => { assert.deepEqual(errors, []); await context.close(); } };
 }
 
+// 방향 토글의 접근성 이름은 "정렬 방향: {현재 조합}"이고 보이는 글자는 현재 조합 이름이다.
+const expectDirection = async (page, label) => {
+  const button = page.getByRole("button", { name: `정렬 방향: ${label}`, exact: true });
+  assert.equal(await button.innerText(), label);
+  assert.equal(await page.getByRole("button", { name: "정렬 방향", exact: true }).count(), 0);
+};
+const directionButton = (page) => page.getByRole("button", { name: /^정렬 방향: / });
+
 const cardOrder = async (page) => {
   await page.locator("button img[alt$=' 이미지']").first().waitFor();
   return page.evaluate(() => [...document.querySelectorAll("button img[alt$=' 이미지']")].map((img) => img.alt.replace(/ 이미지$/, "")));
@@ -67,16 +75,16 @@ const cardOrder = async (page) => {
   assert.equal(await f.page.locator("button", { hasText: "TECH-" }).count(), 0);
   await f.page.getByText("중단됨", { exact: true }).waitFor();
   assert.equal(new URL(f.page.url()).search, "");
-  assert.equal(await f.page.getByRole("button", { name: "정렬 방향" }).innerText(), "최신순");
+  await expectDirection(f.page, "최신순");
   report("list: default latest, no query, 친근한/쉬움, 김도윤 without suffix, MULTI count, persona-less 면접관 1명, 중단됨");
 
   const initialHistoryLength = await f.page.evaluate(() => history.length);
   await f.page.getByRole("combobox", { name: "정렬 기준" }).selectOption("score");
-  assert.equal(await f.page.getByRole("button", { name: "정렬 방향" }).innerText(), "높은 점수순");
+  await expectDirection(f.page, "높은 점수순");
   assert.equal(new URL(f.page.url()).search, "?sort=score&order=desc");
   assert.deepEqual(await cardOrder(f.page), ["면접관 3명", "김도윤", "박서연", "면접관 1명"]);
-  await f.page.getByRole("button", { name: "정렬 방향" }).click();
-  assert.equal(await f.page.getByRole("button", { name: "정렬 방향" }).innerText(), "낮은 점수순");
+  await directionButton(f.page).click();
+  await expectDirection(f.page, "낮은 점수순");
   assert.deepEqual(await cardOrder(f.page), ["김도윤", "면접관 3명", "박서연", "면접관 1명"]);
   const historyLength = await f.page.evaluate(() => history.length);
   report("list: score sort, toggle to 낮은 점수순, missing scores last");
@@ -85,12 +93,12 @@ const cardOrder = async (page) => {
   await f.page.waitForURL("**/main/feedback/overall/56");
   await f.page.goBack();
   await f.page.waitForURL("**/main/feedback/list?sort=score&order=asc");
-  assert.equal(await f.page.getByRole("button", { name: "정렬 방향" }).innerText(), "낮은 점수순");
+  await expectDirection(f.page, "낮은 점수순");
   assert.equal(historyLength, initialHistoryLength);
   report("list: sort kept after visiting overall and going back (replace, no extra history)");
 
   await f.page.getByRole("combobox", { name: "정렬 기준" }).selectOption("date");
-  assert.equal(await f.page.getByRole("button", { name: "정렬 방향" }).innerText(), "최신순");
+  await expectDirection(f.page, "최신순");
   assert.equal(new URL(f.page.url()).search, "");
   await f.close();
   report("list: back to date resets to latest and drops query");
@@ -98,7 +106,7 @@ const cardOrder = async (page) => {
 {
   const f = await open("/main/feedback/list?sort=name&order=up");
   assert.deepEqual(await cardOrder(f.page), ["김도윤", "박서연", "면접관 3명", "면접관 1명"]);
-  assert.equal(await f.page.getByRole("button", { name: "정렬 방향" }).innerText(), "최신순");
+  await expectDirection(f.page, "최신순");
   await f.close();
   report("list: invalid query falls back to default");
 }
