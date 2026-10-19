@@ -1,15 +1,16 @@
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+  FEEDBACK_LIST_SORT_KEY_LABELS,
+  getFeedbackListSortLabel,
+  readFeedbackListSort,
+  sortFeedbackList,
+  writeFeedbackListSort,
+  type FeedbackListSort,
+  type FeedbackListSortKey,
+} from "@/features/feedback-page/feedback-list/model/sortFeedbackList";
 import * as S from "./style";
 import type { FeedbackListProps } from "./type";
-
-type SortOrder = "oldest" | "latest";
-
-const getDateTime = (date: string) => {
-  const parsedDate = new Date(date.split("/").join("-"));
-
-  return Number.isNaN(parsedDate.getTime()) ? 0 : parsedDate.getTime();
-};
 
 const getNormalizedStatusLabel = (statusLabel: string) =>
   statusLabel.replace(/\s/g, "");
@@ -40,37 +41,57 @@ const FeedbackList = ({
   onItemClick,
 }: InternalProps) => {
   const navigate = useNavigate();
-  const [sortOrder, setSortOrder] = useState<SortOrder>("oldest");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sort = readFeedbackListSort(searchParams);
   const sortedItems = useMemo(
-    () =>
-      [...items].sort((left, right) => {
-        const leftTime = getDateTime(left.date);
-        const rightTime = getDateTime(right.date);
-
-        return sortOrder === "oldest"
-          ? leftTime - rightTime
-          : rightTime - leftTime;
-      }),
-    [items, sortOrder],
+    () => sortFeedbackList(items, readFeedbackListSort(searchParams)),
+    [items, searchParams],
   );
+  const updateSort = (nextSort: FeedbackListSort) => {
+    setSearchParams(
+      (current) => writeFeedbackListSort(current, nextSort),
+      { replace: true },
+    );
+  };
 
   return (
     <S.Page>
       <S.Panel>
         <S.Toolbar>
           <S.SectionTitle>{title}</S.SectionTitle>
-          <S.SortSelectWrapper>
-            <S.SortSelect
-              aria-label="면접 목록 정렬"
-              value={sortOrder}
-              onChange={(event) =>
-                setSortOrder(event.target.value as SortOrder)
+          <S.SortControls>
+            <S.SortSelectWrapper>
+              <S.SortSelect
+                aria-label="정렬 기준"
+                value={sort.key}
+                onChange={(event) =>
+                  // 기준을 바꾸면 방향은 내림차순으로 되돌린다.
+                  updateSort({
+                    key: event.target.value as FeedbackListSortKey,
+                    order: "desc",
+                  })
+                }
+              >
+                {(Object.keys(FEEDBACK_LIST_SORT_KEY_LABELS) as FeedbackListSortKey[]).map((key) => (
+                  <option key={key} value={key}>
+                    {FEEDBACK_LIST_SORT_KEY_LABELS[key]}
+                  </option>
+                ))}
+              </S.SortSelect>
+            </S.SortSelectWrapper>
+            <S.SortDirectionButton
+              type="button"
+              aria-label="정렬 방향"
+              onClick={() =>
+                updateSort({
+                  key: sort.key,
+                  order: sort.order === "desc" ? "asc" : "desc",
+                })
               }
             >
-              <option value="oldest">오래된 순</option>
-              <option value="latest">최신순</option>
-            </S.SortSelect>
-          </S.SortSelectWrapper>
+              {getFeedbackListSortLabel(sort)}
+            </S.SortDirectionButton>
+          </S.SortControls>
         </S.Toolbar>
 
         {isLoading ? (

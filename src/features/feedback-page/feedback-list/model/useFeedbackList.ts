@@ -70,6 +70,7 @@ const getListItems = (
       id: targetInterviewId,
       companyName: readCompanyBadge(interview.company)?.displayName,
       date: getFormattedDate(interview.createdAt),
+      createdAt: interview.createdAt,
       imageUrl:
         interview.persona?.imageUrl ??
         getInterviewerImageUrl(
