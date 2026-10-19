@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import FeedbackTabs from "@/widgets/feedback-page/feedback-tabs";
 import FeedbackDetailTopSection from "./top-section";
 import FeedbackDetailMiddleSection from "./middle-section";
@@ -18,9 +18,11 @@ const FeedbackDetail = forwardRef<HTMLElement, FeedbackDetailProps>(function Fee
     ?? content.topSection.questions.find((item) => item.id === selectedQuestionId)
     ?? content.topSection.questions[0];
 
+  // 기업 코멘트의 문항 링크로 들어왔을 때만 한 번 스크롤한다. 탭 클릭으로 바뀐 주소에는 반응하지 않는다.
+  const initialLinkedQuestionId = useRef(linkedQuestionId);
   useEffect(() => {
-    if (linkedQuestionId) document.getElementById("feedback-question-content")?.scrollIntoView({ block: "start" });
-  }, [linkedQuestionId]);
+    if (initialLinkedQuestionId.current) document.getElementById("feedback-question-content")?.scrollIntoView({ block: "start" });
+  }, []);
 
   if (!selectedQuestion) return null;
 
@@ -38,7 +40,12 @@ const FeedbackDetail = forwardRef<HTMLElement, FeedbackDetailProps>(function Fee
               aria-controls="feedback-question-content"
               onClick={() => {
                 setSelectedQuestionId(item.id);
-                setSearchParams(item.questionId ? { questionId: item.questionId } : {}, { replace: true });
+                setSearchParams((previous) => {
+                  const next = new URLSearchParams(previous);
+                  if (item.questionId) next.set("questionId", item.questionId);
+                  else next.delete("questionId");
+                  return next;
+                }, { replace: true });
               }}
             >
               <S.QuestionItemHeading>

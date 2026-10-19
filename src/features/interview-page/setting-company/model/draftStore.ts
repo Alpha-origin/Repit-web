@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { useUserStore } from "@/shared/store/userStore";
 import type { CreateInterviewParams } from "@/features/interview-page/interview/api";
+import { getJobRole } from "@/shared/constants/job/jobRoles";
 import { readInterviewDraft, type InterviewDraft } from "./draft";
 
 const PREFIX = "repit:interview-setup:";
@@ -40,7 +41,7 @@ const validBody = (body: unknown, draft: SetupDraft): body is CreateInterviewPar
     ["FRIENDLY", "REALISTIC", "METICULOUS"].includes(String(body.type)) &&
     typeof body.career === "number" && Number.isFinite(body.career) && body.career >= 0 &&
     ["MALE", "FEMALE"].includes(String(body.gender)) &&
-    (body.major === undefined || ["FRONTEND", "BACKEND"].includes(String(body.major)));
+    (body.major === undefined || getJobRole(String(body.major)) !== undefined);
 };
 
 export const parseSetupDraft = (value: unknown, ownerKey: string, now = Date.now()): SetupDraft | null => {
