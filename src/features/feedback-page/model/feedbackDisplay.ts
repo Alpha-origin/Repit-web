@@ -1,3 +1,4 @@
+import { buildFeedbackMetrics } from "./feedbackMetrics";
 import type { InterviewAnswer } from "@/features/feedback-page/api/getInterviewAnswers";
 import type {
   FeedbackData,
@@ -113,14 +114,7 @@ export const buildFeedbackOverallContent = (
         score: totalScore,
         description: summarySentences.slice(0, 2).map((sentence) => sentence.trim()),
       },
-      // The current feedback API only supplies the intent score; other criteria
-      // remain unscored until dedicated analysis results are available.
-      metrics: [
-        { label: "의도 충족", score: getOptionalScore(feedback.intentAlignmentScore) },
-        { label: "깊이", score: null },
-        { label: "구체성", score: null },
-        { label: "정확성", score: null },
-      ],
+      metrics: buildFeedbackMetrics(feedback),
       evaluation: summary,
     },
     middleSection: {
@@ -140,6 +134,7 @@ export const buildFeedbackOverallContent = (
         previousScore: getOptionalScore(previousFeedback?.totalScore),
         currentScore: totalScore,
       },
+      showPersonaFeedback: (interview?.mode ?? feedback.mode) === "MULTI",
       personaFeedbacks: (feedback.personas ?? []).map((persona, index) => ({
         title: persona.personaRole?.trim() || `면접관 ${index + 1}`,
         imageUrl:
@@ -147,21 +142,16 @@ export const buildFeedbackOverallContent = (
           (persona.personaId === interview?.persona?.id
             ? interview?.persona?.imageUrl
             : undefined),
-        comment: persona.comment?.trim() || "면접관 코멘트가 아직 등록되지 않았습니다.",
+        comment: persona.comment?.trim() || "면접관 코멘트가 제공되지 않았습니다.",
         score: getOptionalScore(persona.score),
         hasNoAnswer: persona.answeredCount === 0,
       })),
     },
     bottomSection: {
-      speechMetrics: ["발화 속도", "발음 명료도", "침묵 비율", "음량 안정성"].map((label) => ({
-        label,
-        score: null,
-        description: "음성 분석 결과가 아직 없습니다.",
-      })),
       reliability: {
         title: "응답 신뢰성",
         scoreLabel: reliabilityScore === null ? "—" : `${reliabilityScore}%`,
-        levelLabel: reliabilityScore === null ? "분석 대기" : getReliabilityLevel(reliabilityScore),
+        levelLabel: reliabilityScore === null ? "미제공" : getReliabilityLevel(reliabilityScore),
       },
       keywords: {
         items: keywords.map((item, index) => ({
