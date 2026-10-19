@@ -20,10 +20,6 @@ const getStatusDisplayLabel = (statusLabel: string) => {
     return "분석 완료";
   }
 
-  if (statusLabel === "진행중") {
-    return "분석중";
-  }
-
   return statusLabel;
 };
 
