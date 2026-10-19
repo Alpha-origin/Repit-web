@@ -1,119 +1,96 @@
 import styled from "styled-components";
+import { Select as JobSelect } from "@/widgets/my-page/job-selection/style";
 
-export { Chevron, Select, SelectWrapper } from "@/widgets/my-page/job-selection/style";
+export { Chevron, SelectWrapper } from "@/widgets/my-page/job-selection/style";
+
+export const Select = styled(JobSelect)`
+  padding-left: 0.875rem;
+  background: ${({ theme }) => theme.colors.white};
+`;
 
 export const DocumentList = styled.ul`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
-  margin-top: ${({ theme }) => theme.spacing.md};
+  gap: 0.375rem;
 `;
 
 export const DocumentRow = styled.li<{ $hasError: boolean }>`
   display: grid;
-  grid-template-columns: minmax(10rem, 14rem) auto minmax(0, 1fr) auto;
-  grid-template-areas: "type attach info remove" "error error error error";
+  grid-template-columns: var(--mypage-document-width, 7.125rem) minmax(0, 1fr);
   align-items: center;
-  column-gap: 0.75rem;
-  padding: 0.625rem 0.5rem 0.625rem 0.75rem;
-  border: 1px solid ${({ $hasError }) => ($hasError ? "#e8b4b4" : "#e4eaf2")};
-  border-radius: ${({ theme }) => theme.radius.sm};
-  background: ${({ theme }) => theme.colors.surface.muted};
+  column-gap: 0.375rem;
+
+  ${({ $hasError }) => $hasError && "select, button { border-color: #e8b4b4; }"}
 
   @media (max-width: 36rem) {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    grid-template-areas: "type type remove" "attach info info" "error error error";
-    row-gap: 0.5rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
   }
 `;
 
-export const TypeCell = styled.div`
-  grid-area: type;
+export const FileCell = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
   min-width: 0;
 `;
 
-export const Badge = styled.span`
-  flex-shrink: 0;
-  padding: 0.1875rem 0.4375rem;
-  border-radius: 0.25rem;
-  background: ${({ theme }) => theme.colors.surface.blueLight};
-  color: ${({ theme }) => theme.colors.brand.blue};
-  font-size: 0.6875rem;
-  font-weight: 600;
-  line-height: 1.4;
-`;
-
-export const AttachCell = styled.div`
-  grid-area: attach;
-`;
-
 export const AttachButton = styled.button`
-  min-height: 2.25rem;
-  padding: 0 0.875rem;
-  border: 1px solid #dfe5ed;
-  border-radius: ${({ theme }) => theme.radius.sm};
-  background: ${({ theme }) => theme.colors.white};
-  color: #465b79;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  font-weight: 600;
-  white-space: nowrap;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  min-height: var(--mypage-control-height, 1.875rem);
+  padding: 0 0.75rem 0 0.875rem;
+  border: 1px solid #e1e3e9;
+  border-radius: 0.25rem;
+  background: ${({ theme }) => theme.colors.surface.muted};
+  color: #7c89a4;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
+  text-align: left;
   cursor: pointer;
 
-  &:hover:not(:disabled) {
-    border-color: ${({ theme }) => theme.colors.brand.blueLight};
-    background: ${({ theme }) => theme.colors.surface.blueLight};
-  }
+  &:hover:not(:disabled) { border-color: ${({ theme }) => theme.colors.brand.blueLight}; }
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.brand.blue};
     outline-offset: 2px;
   }
-  &:disabled { cursor: not-allowed; opacity: 0.5; }
+  &:disabled { cursor: not-allowed; }
+
+  @media (max-width: 36rem) { min-height: 2.75rem; }
 `;
 
-export const InfoCell = styled.div`
-  grid-area: info;
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
+export const FileName = styled.span<{ $hasFile: boolean }>`
+  flex: ${({ $hasFile }) => $hasFile ? "0 1 auto" : "1"};
   min-width: 0;
-`;
-
-export const FileName = styled.span`
+  color: ${({ $hasFile }) => $hasFile ? "#51576e" : "inherit"};
   overflow: hidden;
-  color: #42516b;
-  font-size: ${({ theme }) => theme.fontSize.sm};
-  font-weight: 600;
+  line-height: 1.5;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
 
 export const FileMeta = styled.span`
   flex-shrink: 0;
-  color: #7b8799;
-  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-size: var(--mypage-caption-size, 0.625rem);
 `;
 
-export const EmptyText = styled.span`
-  color: #8b96a8;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-`;
-
-export const RemoveCell = styled.div`
-  grid-area: remove;
+export const Plus = styled.span`
+  flex-shrink: 0;
+  font-size: ${({ theme }) => theme.fontSize.md};
 `;
 
 export const RemoveButton = styled.button`
   display: grid;
   place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  flex: 0 0 1.25rem;
+  height: var(--mypage-control-height, 1.875rem);
+  padding: 0;
   border: none;
-  border-radius: ${({ theme }) => theme.radius.sm};
+  border-radius: 0.25rem;
   background: transparent;
-  color: #8290a4;
+  color: #7c89a4;
   cursor: pointer;
 
   &:hover { background: #fceeee; color: #c24141; }
@@ -121,13 +98,18 @@ export const RemoveButton = styled.button`
     outline: 2px solid ${({ theme }) => theme.colors.brand.blue};
     outline-offset: 2px;
   }
+
+  @media (max-width: 36rem) {
+    flex-basis: 2.75rem;
+    height: 2.75rem;
+  }
 `;
 
 export const RowError = styled.p`
-  grid-area: error;
-  margin-top: 0.375rem;
+  grid-column: 1 / -1;
+  margin-top: 0.25rem;
   color: #c24141;
-  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
   line-height: 1.6;
 `;
 
@@ -135,30 +117,32 @@ export const AddRow = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-top: 0.75rem;
+  margin-top: 0.375rem;
 `;
 
 export const AddButton = styled.button`
-  min-height: 2.25rem;
+  flex: 1;
+  min-height: var(--mypage-control-height, 1.875rem);
   padding: 0 0.875rem;
-  border: 1px solid transparent;
-  border-radius: ${({ theme }) => theme.radius.sm};
-  background: ${({ theme }) => theme.colors.surface.blueLight};
-  color: ${({ theme }) => theme.colors.brand.blue};
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  font-weight: 600;
+  border: 1px dashed #b8c2d7;
+  border-radius: 0.125rem;
+  background: ${({ theme }) => theme.colors.white};
+  color: #7c89a4;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
   cursor: pointer;
 
-  &:hover:not(:disabled) { background: #e3efff; }
+  &:hover:not(:disabled) { background: ${({ theme }) => theme.colors.surface.blueLight}; }
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.brand.blue};
     outline-offset: 2px;
   }
-  &:disabled { cursor: not-allowed; opacity: 0.5; }
+  &:disabled { cursor: not-allowed; }
+
+  @media (max-width: 36rem) { min-height: 2.75rem; }
 `;
 
 export const Count = styled.span`
-  color: #8b96a8;
-  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: #7c89a4;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
   font-variant-numeric: tabular-nums;
 `;

@@ -2,82 +2,44 @@ import styled from "styled-components";
 
 export const PersonalInfoWrapper = styled.section`
   min-width: 0;
-  border: 1px solid #e1e7ef;
-  border-radius: ${({ theme }) => theme.radius.lg};
+  border: 1px solid #e1e3e9;
+  border-radius: ${({ theme }) => theme.radius.md};
   background: ${({ theme }) => theme.colors.white};
-  box-shadow: 0 4px 24px rgba(34, 55, 88, 0.025);
-  overflow: hidden;
-`;
-
-export const ProfileHeader = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem 1.5rem 1.75rem;
-  border-bottom: 1px solid #edf0f5;
-  background: linear-gradient(180deg, #f5f9ff 0%, #ffffff 100%);
-  text-align: center;
-`;
-
-export const Avatar = styled.div`
-  display: grid;
-  place-items: center;
-  width: 3.5rem;
-  height: 3.5rem;
-  margin-bottom: ${({ theme }) => theme.spacing.md};
-  border: 1px solid #dce9fc;
-  border-radius: ${({ theme }) => theme.radius.circle};
-  background: ${({ theme }) => theme.colors.surface.blueLight};
-  color: ${({ theme }) => theme.colors.brand.blue};
-  font-size: ${({ theme }) => theme.fontSize.lg};
-  font-weight: 700;
-`;
-
-export const ProfileName = styled.p`
-  max-width: 100%;
-  color: #25324a;
-  font-size: 1.125rem;
-  font-weight: 700;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-`;
-
-export const ProfileCaption = styled.p`
-  margin-top: 0.375rem;
-  color: #778398;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  line-height: 1.5;
 `;
 
 export const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.lg};
-  padding: ${({ theme }) => theme.spacing.lg};
+  padding: var(--mypage-card-padding, 1.75rem);
+
+  @media (max-width: 36rem) {
+    padding: ${({ theme }) => theme.spacing.lg};
+  }
 `;
 
 export const Title = styled.h2`
-  color: #344159;
-  font-size: ${({ theme }) => theme.fontSize.md};
+  margin-bottom: var(--mypage-personal-title-gap, 1.5rem);
+  color: #51576e;
+  font-size: var(--mypage-title-size, 1.25rem);
   font-weight: 700;
-  line-height: 1.5;
+  line-height: 1.4;
 `;
 
 export const InfoList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1.125rem;
+  gap: var(--mypage-personal-row-gap, 0.75rem);
 `;
 
 export const InfoRow = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
+  display: grid;
+  grid-template-columns: var(--mypage-personal-label-width, 4rem) minmax(0, 1fr);
+  align-items: center;
 `;
 
 export const Label = styled.label`
-  color: #566176;
-  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: var(--mypage-label-size, ${({ theme }) => theme.fontSize.md});
   font-weight: 600;
   line-height: 1.4;
 `;
@@ -85,14 +47,14 @@ export const Label = styled.label`
 export const EditInput = styled.input`
   width: 100%;
   min-width: 0;
-  height: 2.75rem;
-  padding: 0 0.875rem;
-  border: 1px solid #dfe5ed;
-  border-radius: ${({ theme }) => theme.radius.sm};
+  height: var(--mypage-control-height, 1.875rem);
+  padding: 0 0.625rem;
+  border: 1px solid #e1e3e9;
+  border-radius: 0.25rem;
   outline: none;
   background: ${({ theme }) => theme.colors.white};
-  color: #344159;
-  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: #51576e;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
   &:focus-visible {
@@ -100,64 +62,45 @@ export const EditInput = styled.input`
     box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.surface.blueLight};
   }
 
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.65;
-  }
-
-  &:read-only {
-    background: ${({ theme }) => theme.colors.surface.muted};
-    color: #788397;
-  }
+  &:disabled { cursor: not-allowed; opacity: 0.65; }
 
   @media (max-width: 36rem) {
-    font-size: ${({ theme }) => theme.fontSize.md};
+    min-height: 2.75rem;
+    font-size: var(--mypage-label-size, ${({ theme }) => theme.fontSize.md});
   }
-`;
-
-export const FieldHint = styled.p`
-  color: #7b8799;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  line-height: 1.5;
 `;
 
 export const StatusText = styled.p`
-  color: #68758a;
+  color: #748095;
   font-size: ${({ theme }) => theme.fontSize.sm};
   line-height: 1.6;
 `;
 
 export const ResultMessage = styled.p<{ $isError: boolean }>`
-  color: ${({ $isError, theme }) =>
-    $isError ? "#c24141" : theme.colors.brand.blue};
-  font-size: ${({ theme }) => theme.fontSize.xs};
+  margin-top: 0.75rem;
+  color: ${({ $isError, theme }) => $isError ? "#c24141" : theme.colors.brand.blue};
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
   line-height: 1.6;
   overflow-wrap: anywhere;
 `;
 
 export const SaveButton = styled.button`
-  width: 100%;
-  min-height: 2.75rem;
-  border: 1px solid #dce7f8;
-  border-radius: ${({ theme }) => theme.radius.sm};
-  background: ${({ theme }) => theme.colors.surface.blueLight};
+  align-self: flex-end;
+  min-height: var(--mypage-personal-save-height, 1.25rem);
+  margin-top: var(--mypage-personal-save-gap, 1.125rem);
+  padding: 0;
+  border: none;
+  background: transparent;
   color: ${({ theme }) => theme.colors.brand.blue};
-  font-size: ${({ theme }) => theme.fontSize.sm};
-  font-weight: 600;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
   cursor: pointer;
-  transition: background-color 0.2s ease;
 
-  &:hover:not(:disabled) {
-    background: #e3efff;
-  }
-
+  &:hover:not(:disabled) { text-decoration: underline; }
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.brand.blue};
     outline-offset: 3px;
   }
+  &:disabled { cursor: not-allowed; opacity: 0.5; }
 
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
+  @media (max-width: 36rem) { min-height: 2.75rem; }
 `;

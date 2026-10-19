@@ -13,7 +13,7 @@ import { getUploadGuides } from "@/shared/constants/job/uploadGuides";
 
 import DocumentList from "./document-list";
 import SupplementForm from "./supplement-form";
-import { GithubIcon, TrashIcon } from "./icons";
+import { CloseIcon } from "./icons";
 import * as S from "./style";
 
 interface PortfolioProps {
@@ -44,17 +44,14 @@ interface PortfolioProps {
   errors: MaterialFormErrors;
   saveStatus: SaveStatus | null;
   isAnalyzing: boolean;
-  isEdited: boolean;
   isSaving: boolean;
   isSaveDisabled: boolean;
   loadError: string;
   onRetryLoad: () => void;
   onSave: () => void;
-  onCancelEdit: () => void;
+  onBack: () => void;
   onReanalyze: () => void;
 }
-
-const formatSectionNumber = (value: number) => String(value).padStart(2, "0");
 
 const Portfolio = ({
   children,
@@ -84,29 +81,23 @@ const Portfolio = ({
   errors,
   saveStatus,
   isAnalyzing,
-  isEdited,
   isSaving,
   isSaveDisabled,
   loadError,
   onRetryLoad,
   onSave,
-  onCancelEdit,
+  onBack,
   onReanalyze,
 }: PortfolioProps) => {
   const jobRole = getJobRole(job);
   const isGitAddDisabled = !gitInput.trim();
-  // 직무 칸이 01. 이후 영역은 보이는 것만 차례로 번호를 붙인다.
-  let sectionNumber = 1;
+  const requiredDocuments = jobRole?.requiredDocuments ?? ["PORTFOLIO"];
+  const requiredLabel = requiredDocuments.length === 1
+    ? `${getDocumentTypeLabel(requiredDocuments[0])} 필수`
+    : `${requiredDocuments.map(getDocumentTypeLabel).join(" / ")} 중 1개 이상 필수`;
 
   return (
-    <S.PortfolioWrapper aria-labelledby="portfolio-title">
-      <S.Header>
-        <S.Title id="portfolio-title">나의 면접 자료</S.Title>
-        <S.Description>
-          직무에 맞는 자료를 바탕으로 나에게 맞는 면접 질문을 준비해요.
-        </S.Description>
-      </S.Header>
-
+    <S.PortfolioWrapper aria-label="나의 면접 자료" $hasSupplements={hasSupplements}>
       {loadError && (
         <S.SaveStatus role="alert" $tone="error">
           <span>{loadError}</span>
@@ -117,142 +108,117 @@ const Portfolio = ({
       {jobSelection}
       {errors.job && <S.FieldError role="alert">{errors.job}</S.FieldError>}
 
-      {!jobRole ? (
-        <S.Notice>
-          직무를 먼저 선택해 주세요
-          {(documents.some((row) => row.fileUrl) || gitUrls.length > 0) && (
-            <S.NoticeDetail>저장된 자료는 직무를 고르면 이어서 보여요</S.NoticeDetail>
-          )}
-        </S.Notice>
-      ) : (
-        <>
-          <S.Section ref={documentSectionRef} aria-labelledby="portfolio-document-title">
-            <S.SectionHeading>
-              <S.SectionNumber aria-hidden="true">{formatSectionNumber(++sectionNumber)}</S.SectionNumber>
-              <S.SectionTitle id="portfolio-document-title">문서</S.SectionTitle>
-              <S.RequiredBadge>필수</S.RequiredBadge>
-            </S.SectionHeading>
+      <S.Section ref={documentSectionRef} aria-labelledby="portfolio-document-title">
+        <S.SectionHeading>
+          <S.SectionTitle id="portfolio-document-title">자료</S.SectionTitle>
+          <S.RequiredBadge>{requiredLabel}</S.RequiredBadge>
+          <S.GuideDetails>
+            <S.GuideSummary>내용이 정밀할수록 가이드 정밀도 <strong>UP</strong></S.GuideSummary>
             <S.Guide>
-              {getUploadGuides(jobRole.code).map((guide) => <p key={guide}>{guide}</p>)}
-              <S.RequiredLine>
-                필수 종류
-                {jobRole.requiredDocuments.map((type) => (
-                  <S.RequiredBadge key={type}>{getDocumentTypeLabel(type)}</S.RequiredBadge>
-                ))}
-              </S.RequiredLine>
-              <p>필수 종류 중 1개 이상, 최대 5개, 합계 50쪽, PDF만</p>
+              {getUploadGuides(job).map((guide) => <p key={guide}>{guide}</p>)}
+              <p>필수 자료: {requiredDocuments.map(getDocumentTypeLabel).join(" · ")} 중 1개 이상</p>
+              {!jobRole && <p>직무를 선택하면 해당 직무의 자료를 첨부할 수 있어요.</p>}
             </S.Guide>
-            <DocumentList
-              jobRole={jobRole}
-              documents={documents}
-              rowErrors={errors.documentRows}
-              onAdd={onDocumentAdd}
-              onRemove={onDocumentRemove}
-              onTypeChange={onDocumentTypeChange}
-              onAttachClick={onDocumentAttachClick}
+          </S.GuideDetails>
+        </S.SectionHeading>
+        <DocumentList
+          jobRole={jobRole}
+          documents={documents}
+          rowErrors={errors.documentRows}
+          onAdd={onDocumentAdd}
+          onRemove={onDocumentRemove}
+          onTypeChange={onDocumentTypeChange}
+          onAttachClick={onDocumentAttachClick}
+        />
+        <S.FieldHint>가능한 파일 형식 - PDF, 최대 5개, 합계 50쪽</S.FieldHint>
+        <S.HiddenFileInput
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,application/pdf"
+          aria-label="문서 PDF 파일"
+          onChange={onDocumentFileChange}
+        />
+        {errors.documents && <S.FieldError role="alert">{errors.documents}</S.FieldError>}
+      </S.Section>
+
+      {githubRule !== "HIDDEN" && (
+        <S.Section aria-labelledby="github-section-title">
+          <S.SectionHeading>
+            <S.SectionTitle id="github-section-title">
+              <S.Label htmlFor="my-page-git">GitHub</S.Label>
+            </S.SectionTitle>
+            <S.RequiredBadge>{githubRule === "REQUIRED" ? "필수" : "선택"}</S.RequiredBadge>
+          </S.SectionHeading>
+          <S.GitInputWrapper>
+            <S.Input
+              ref={gitInputRef}
+              id="my-page-git"
+              type="text"
+              value={gitInput}
+              placeholder="깃허브 주소를 링크 또는 아이디로 입력해주세요."
+              autoCapitalize="none"
+              spellCheck={false}
+              onChange={onGitInputChange}
+              onKeyDown={onGitInputKeyDown}
             />
-            <S.HiddenFileInput
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,application/pdf"
-              aria-label="문서 PDF 파일"
-              onChange={onDocumentFileChange}
-            />
-            {errors.documents && <S.FieldError role="alert">{errors.documents}</S.FieldError>}
-          </S.Section>
+            <S.GitAddButton
+              type="button"
+              aria-label="Git 주소 추가"
+              disabled={isGitAddDisabled}
+              onClick={onGitAdd}
+            >
+              저장
+            </S.GitAddButton>
+          </S.GitInputWrapper>
 
-          {githubRule !== "HIDDEN" && (
-            <S.Section aria-labelledby="github-section-title">
-              <S.SectionHeading>
-                <S.SectionNumber aria-hidden="true">{formatSectionNumber(++sectionNumber)}</S.SectionNumber>
-                <S.SectionTitle id="github-section-title">
-                  <S.Label htmlFor="my-page-git">GitHub</S.Label>
-                </S.SectionTitle>
-                <S.RequiredBadge>{githubRule === "REQUIRED" ? "필수" : "선택"}</S.RequiredBadge>
-              </S.SectionHeading>
-              <S.Description id="my-page-git-hint">
-                {githubRule === "REQUIRED"
-                  ? "나의 개발 경험을 보여줄 GitHub 주소를 추가해 주세요."
-                  : "(선택) 데이터·코드 저장소가 있으면 추가해 주세요."}
-              </S.Description>
-
-              <S.GitInputWrapper>
-                <S.InputIcon><GithubIcon /></S.InputIcon>
-                <S.Input
-                  ref={gitInputRef}
-                  id="my-page-git"
-                  type="text"
-                  value={gitInput}
-                  placeholder="GitHub 주소 입력 (예: github.com/아이디/저장소)"
-                  aria-describedby="my-page-git-hint"
-                  autoCapitalize="none"
-                  spellCheck={false}
-                  onChange={onGitInputChange}
-                  onKeyDown={onGitInputKeyDown}
-                />
-                <S.GitAddButton
-                  type="button"
-                  aria-label="Git 주소 추가"
-                  disabled={isGitAddDisabled}
-                  onClick={onGitAdd}
-                >
-                  추가
-                </S.GitAddButton>
-              </S.GitInputWrapper>
-
-              {gitUrls.length > 0 && (
-                <S.GitUrlList aria-label="등록할 GitHub 주소">
-                  {gitUrls.map((gitUrl) => (
-                    <S.GitUrlItem key={gitUrl}>
-                      <S.GitUrlRow>
-                        <S.LinkIndicator aria-hidden="true">↗</S.LinkIndicator>
-                        <S.GitUrlText title={gitUrl}>{gitUrl}</S.GitUrlText>
-                        <S.GitRemoveButton
-                          type="button"
-                          aria-label={`${gitUrl} 삭제`}
-                          onClick={() => onGitRemove(gitUrl)}
-                        >
-                          <TrashIcon />
-                        </S.GitRemoveButton>
-                      </S.GitUrlRow>
-                      {errors.githubRows[gitUrl] && (
-                        <S.FieldError role="alert">{errors.githubRows[gitUrl]}</S.FieldError>
-                      )}
-                    </S.GitUrlItem>
-                  ))}
-                </S.GitUrlList>
-              )}
-              {errors.github && <S.FieldError role="alert">{errors.github}</S.FieldError>}
-            </S.Section>
+          {gitUrls.length > 0 && (
+            <S.GitUrlList aria-label="등록할 GitHub 주소">
+              {gitUrls.map((gitUrl) => (
+                <S.GitUrlItem key={gitUrl}>
+                  <S.GitUrlRow>
+                    <S.GitUrlText title={gitUrl}>{gitUrl}</S.GitUrlText>
+                    <S.GitRemoveButton
+                      type="button"
+                      aria-label={`${gitUrl} 삭제`}
+                      onClick={() => onGitRemove(gitUrl)}
+                    >
+                      <CloseIcon />
+                    </S.GitRemoveButton>
+                  </S.GitUrlRow>
+                  {errors.githubRows[gitUrl] && (
+                    <S.FieldError role="alert">{errors.githubRows[gitUrl]}</S.FieldError>
+                  )}
+                </S.GitUrlItem>
+              ))}
+            </S.GitUrlList>
           )}
+          {errors.github && <S.FieldError role="alert">{errors.github}</S.FieldError>}
+        </S.Section>
+      )}
 
-          {hasSupplements && (
-            <S.Section aria-labelledby="supplement-section-title">
-              <S.SectionHeading>
-                <S.SectionNumber aria-hidden="true">{formatSectionNumber(++sectionNumber)}</S.SectionNumber>
-                <S.SectionTitle id="supplement-section-title">보완 입력</S.SectionTitle>
-                <S.RequiredBadge>선택</S.RequiredBadge>
-              </S.SectionHeading>
-              <S.Description>
-                문서에 담긴 프로젝트에서 본인이 한 일을 설명해 주세요. 필수 문서를 대신하지는 않아요.
-              </S.Description>
-              <SupplementForm
-                supplements={supplements}
-                documents={documents}
-                rowErrors={errors.supplementRows}
-                onAdd={onSupplementAdd}
-                onRemove={onSupplementRemove}
-                onChange={onSupplementChange}
-              />
-              {errors.supplements && <S.FieldError role="alert">{errors.supplements}</S.FieldError>}
-            </S.Section>
-          )}
-        </>
+      {hasSupplements && (
+        <S.SupplementSection aria-labelledby="supplement-section-title">
+          <S.SectionHeading>
+            <S.SectionTitle id="supplement-section-title">보완 입력</S.SectionTitle>
+            <S.RequiredBadge>선택</S.RequiredBadge>
+          </S.SectionHeading>
+          <SupplementForm
+            disabled={!jobRole}
+            supplements={supplements}
+            documents={documents}
+            rowErrors={errors.supplementRows}
+            onAdd={onSupplementAdd}
+            onRemove={onSupplementRemove}
+            onChange={onSupplementChange}
+          />
+          <S.FieldHint>문서에 담기 어려운 내용을 적어 주시면 면접 질문에 반영됩니다.</S.FieldHint>
+          {errors.supplements && <S.FieldError role="alert">{errors.supplements}</S.FieldError>}
+        </S.SupplementSection>
       )}
 
       {children && <S.AnalysisStatus>{children}</S.AnalysisStatus>}
 
-      {saveStatus && (
+      {saveStatus && saveStatus.tone !== "success" && (
         <S.SaveStatus role={saveStatus.tone === "error" ? "alert" : "status"} $tone={saveStatus.tone}>
           <span>{saveStatus.text}</span>
           {saveStatus.canReanalyze && (
@@ -262,13 +228,22 @@ const Portfolio = ({
       )}
 
       <S.Footer>
-        <S.FooterHint>자료를 저장하면 AI가 분석을 시작해요.</S.FooterHint>
         <S.ButtonWrapper>
-          <S.BackButton type="button" disabled={!isEdited || isSaving} onClick={onCancelEdit}>취소</S.BackButton>
-          <S.SaveButton type="button" disabled={isSaveDisabled} onClick={onSave}>
-            {isSaving ? "저장 중..." : isAnalyzing ? "분석 중…" : "저장하고 분석하기"}
+          <S.BackButton type="button" disabled={isSaving} onClick={onBack}>돌아가기</S.BackButton>
+          <S.SaveButton
+            type="button"
+            disabled={isSaveDisabled}
+            aria-describedby={isAnalyzing ? "materials-analysis-hint" : undefined}
+            onClick={onSave}
+          >
+            {isSaving ? "저장 중..." : "저장"}
           </S.SaveButton>
         </S.ButtonWrapper>
+        {isAnalyzing && (
+          <S.AnalysisHint id="materials-analysis-hint" role="status">
+            분석이 끝난 뒤에 자료 변경이 가능합니다.
+          </S.AnalysisHint>
+        )}
       </S.Footer>
     </S.PortfolioWrapper>
   );

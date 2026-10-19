@@ -32,13 +32,6 @@ const PersonalInfo = ({
 
   return (
     <S.PersonalInfoWrapper aria-labelledby="personal-info-title">
-      <S.ProfileHeader>
-        <S.Avatar aria-hidden="true">
-          {(draft.nickname || draft.name || "R").slice(0, 1)}
-        </S.Avatar>
-        <S.ProfileName>{draft.nickname || draft.name || "회원"}님</S.ProfileName>
-        <S.ProfileCaption>나만의 면접을 준비하는 공간</S.ProfileCaption>
-      </S.ProfileHeader>
       <S.Form onSubmit={handleSubmit}>
         <S.Title id="personal-info-title">개인정보</S.Title>
 
@@ -80,11 +73,8 @@ const PersonalInfo = ({
                 autoComplete="email"
                 value={email}
                 readOnly
-                aria-describedby="my-page-email-hint"
+                title="이메일은 변경할 수 없어요."
               />
-              <S.FieldHint id="my-page-email-hint">
-                이메일은 변경할 수 없어요.
-              </S.FieldHint>
             </S.InfoRow>
           </S.InfoList>
         )}
@@ -98,8 +88,8 @@ const PersonalInfo = ({
           </S.ResultMessage>
         )}
 
-        <S.SaveButton type="submit" disabled={isLoading || isSaving}>
-          {isSaving ? "저장 중…" : "개인정보 저장"}
+        <S.SaveButton type="submit" aria-label="개인정보 저장" disabled={isLoading || isSaving}>
+          {isSaving ? "저장 중…" : "저장"}
         </S.SaveButton>
       </S.Form>
     </S.PersonalInfoWrapper>
