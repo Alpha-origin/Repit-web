@@ -25,40 +25,49 @@ const MyPage = () => {
     isChangeConfirmationOpen,
     onCancelChange,
     onConfirmChange,
+    onCancelEdit,
     focusDocuments,
     ...materialsForm
   } = useMaterialsForm({
     isSaveBlocked: profileStatus.isLoading || isAnalyzing || profileStatus.isRestarting,
     requiresChangeConfirmation: profileStatus.profile?.status === "COMPLETED",
     onAnalysisStarted: profileStatus.markPending,
+    onAnalysisInvalidated: profileStatus.invalidate,
   });
 
+  const handleReanalyze = async () => {
+    materialsForm.clearAnalysisWarning();
+    await profileStatus.reanalyze();
+  };
+
   return (
-    <S.Page>
-      <S.PageHeader>
-        <S.PageTitle>마이페이지</S.PageTitle>
-        <S.PageDescription>
-          나의 정보와 경험을 채우고, 나에게 맞는 면접을 준비하세요.
-        </S.PageDescription>
-      </S.PageHeader>
+    <S.Page aria-label="마이페이지">
       <S.Content>
         <PersonalInfo {...personalInfo} />
         <Portfolio
           {...materialsForm}
           isAnalyzing={isAnalyzing}
-          onReanalyze={() => void profileStatus.reanalyze()}
+          onReanalyze={() => void handleReanalyze()}
+          onBack={() => {
+            onCancelEdit();
+            navigate("/main");
+          }}
           jobSelection={<JobSelection {...jobSelection} />}
         >
-          <ProfileStatusCard
-            {...profileStatus}
-            onRefresh={() => void profileStatus.refetch()}
-            onReanalyze={() => void profileStatus.reanalyze()}
-            onEdit={focusDocuments}
-            onReplaceFile={focusDocuments}
-            onGoToInterview={() => navigate("/main")}
-            isSaving={materialsForm.isSaving}
-            jobRole={materials?.jobRole}
-          />
+          {(materialsForm.isSaving || profileStatus.isRestarting || isAnalyzing ||
+            profileStatus.isLoading || profileStatus.errorMessage ||
+            profileStatus.profile?.status === "FAILED" || profileStatus.profile?.status === "COMPLETED") && (
+            <ProfileStatusCard
+              {...profileStatus}
+              onRefresh={() => void profileStatus.refetch()}
+              onReanalyze={() => void handleReanalyze()}
+              onEdit={focusDocuments}
+              onReplaceFile={focusDocuments}
+              onGoToInterview={() => navigate("/main")}
+              isSaving={materialsForm.isSaving}
+              jobRole={materials?.jobRole}
+            />
+          )}
         </Portfolio>
       </S.Content>
       {isChangeConfirmationOpen ? (

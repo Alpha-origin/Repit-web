@@ -1,103 +1,66 @@
 import styled, { css } from "styled-components";
 
+export { RequiredBadge } from "../job-selection/style";
+
 const buttonStyle = css`
-  min-height: 2.75rem;
-  padding: 0 1.125rem;
+  min-height: var(--mypage-button-height, 2.125rem);
+  padding: 0 1rem;
   border: 1px solid #dfe5ed;
-  border-radius: ${({ theme }) => theme.radius.sm};
-  font-size: ${({ theme }) => theme.fontSize.sm};
-  font-weight: 600;
+  border-radius: 0.25rem;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
+  font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
 
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.brand.blue};
     outline-offset: 3px;
   }
+  &:disabled { cursor: not-allowed; opacity: 0.5; }
 
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
+  @media (max-width: 36rem) { min-height: 2.75rem; }
 `;
 
-export const PortfolioWrapper = styled.section`
+export const PortfolioWrapper = styled.section<{ $hasSupplements: boolean }>`
   min-width: 0;
-  padding: ${({ theme }) => theme.spacing.xl};
-  border: 1px solid #e1e7ef;
-  border-radius: ${({ theme }) => theme.radius.lg};
+  min-height: ${({ $hasSupplements }) => $hasSupplements ? "var(--mypage-supplement-min-height, 36rem)" : "29.25rem"};
+  padding: var(--mypage-card-padding, 1.75rem) var(--mypage-card-padding, 1.75rem) 2.5rem;
+  border: 1px solid #e1e3e9;
+  border-radius: ${({ theme }) => theme.radius.md};
   background: ${({ theme }) => theme.colors.white};
-  box-shadow: 0 4px 24px rgba(34, 55, 88, 0.025);
 
   @media (max-width: 36rem) {
-    padding: 1.5rem 1.25rem;
+    padding: 1.5rem;
   }
-`;
-
-export const Header = styled.div`
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
-`;
-
-export const Title = styled.h2`
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
-  color: #25324a;
-  font-size: 1.25rem;
-  font-weight: 700;
-  line-height: 1.4;
-  letter-spacing: -0.025em;
-`;
-
-export const Description = styled.p`
-  color: #748095;
-  font-size: ${({ theme }) => theme.fontSize.sm};
-  line-height: 1.6;
-  word-break: keep-all;
 `;
 
 export const Section = styled.section`
-  margin-top: 1.75rem;
+  margin-top: var(--mypage-section-gap, 1.5rem);
 
-  & + & {
-    padding-top: 1.75rem;
-    border-top: 1px solid #edf0f5;
-  }
+  & + & { margin-top: 1.25rem; }
+`;
+
+export const SupplementSection = styled(Section)`
+  && { margin-top: var(--mypage-supplement-gap, 2rem); }
 `;
 
 export const SectionHeading = styled.div`
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm};
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
-`;
-
-export const SectionNumber = styled.span`
-  margin-right: 0.125rem;
-  color: #95a4ba;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  gap: 0.375rem;
+  margin-bottom: var(--mypage-heading-gap, 0.375rem);
 `;
 
 export const SectionTitle = styled.h3`
-  color: #344159;
-  font-size: ${({ theme }) => theme.fontSize.md};
-  font-weight: 650;
-  line-height: 1.5;
+  color: #51576e;
+  font-size: var(--mypage-title-size, 1.25rem);
+  font-weight: 700;
+  line-height: 1.2;
 `;
 
 export const Label = styled.label`
   cursor: pointer;
-`;
-
-export const RequiredBadge = styled.span`
-  padding: 0.1875rem 0.4375rem;
-  border-radius: 0.25rem;
-  background: ${({ theme }) => theme.colors.surface.blueLight};
-  color: ${({ theme }) => theme.colors.brand.blue};
-  font-size: 0.6875rem;
-  font-weight: 600;
-  line-height: 1.4;
 `;
 
 export const HiddenFileInput = styled.input`
@@ -105,27 +68,77 @@ export const HiddenFileInput = styled.input`
 `;
 
 export const FieldHint = styled.p`
-  margin-top: 0.625rem;
-  color: #7b8799;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  line-height: 1.6;
+  margin-top: 0.25rem;
+  color: #7c89a4;
+  font-size: var(--mypage-caption-size, 0.625rem);
+  line-height: 1.5;
   word-break: keep-all;
 `;
 
 export const FieldError = styled(FieldHint)`
   color: #c24141;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
+`;
+
+export const GuideDetails = styled.details`
+  position: relative;
+  margin-left: auto;
+
+  @media (max-width: 64rem) {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+`;
+
+export const GuideSummary = styled.summary`
+  width: fit-content;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #e1e3e9;
+  border-radius: ${({ theme }) => theme.radius.pill};
+  background: #f0f5ff;
+  color: #51576e;
+  font-size: var(--mypage-caption-size, 0.625rem);
+  line-height: 1.4;
+  list-style: none;
+  cursor: pointer;
+
+  &::-webkit-details-marker { display: none; }
+  strong { color: ${({ theme }) => theme.colors.brand.blue}; font-weight: 600; }
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.brand.blue};
+    outline-offset: 2px;
+  }
+`;
+
+export const Guide = styled.div`
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 2;
+  width: min(20rem, 100vw - 6rem);
+  padding: 0.875rem;
+  border: 1px solid #dfe5ed;
+  border-radius: ${({ theme }) => theme.radius.sm};
+  background: ${({ theme }) => theme.colors.white};
+  box-shadow: 0 4px 16px rgba(34, 55, 88, 0.08);
+  color: #748095;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
+  line-height: 1.6;
+  word-break: keep-all;
+
+  p + p { margin-top: 0.5rem; }
+
+  @media (max-width: 64rem) { right: auto; left: 0; }
 `;
 
 export const GitInputWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  min-height: 3rem;
-  margin-top: ${({ theme }) => theme.spacing.md};
-  padding: 0.25rem 0.375rem 0.25rem 0.875rem;
-  border: 1px solid #dfe5ed;
-  border-radius: ${({ theme }) => theme.radius.sm};
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-height: var(--mypage-control-height, 1.875rem);
+  padding: 0 0.75rem 0 0.875rem;
+  border: 1px solid #e1e3e9;
+  border-radius: 0.25rem;
+  background: ${({ theme }) => theme.colors.surface.muted};
 
   &:focus-within {
     border-color: ${({ theme }) => theme.colors.brand.blue};
@@ -133,72 +146,66 @@ export const GitInputWrapper = styled.div`
   }
 `;
 
-export const InputIcon = styled.span`
-  display: flex;
-  flex-shrink: 0;
-  color: #8a96a8;
-`;
-
 export const Input = styled.input`
   flex: 1;
   min-width: 0;
   width: 100%;
-  height: 2.375rem;
+  height: calc(var(--mypage-control-height, 1.875rem) - 0.125rem);
   padding: 0;
   border: none;
   outline: none;
   background: transparent;
-  color: #344159;
-  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: #51576e;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
 
-  &::placeholder { color: #8b96a8; }
+  &::placeholder { color: #7c89a4; }
 
   @media (max-width: 36rem) {
+    min-height: 2.75rem;
     font-size: ${({ theme }) => theme.fontSize.md};
   }
 `;
 
 export const GitAddButton = styled.button`
   ${buttonStyle}
-  min-height: 2.25rem;
-  padding: 0 0.875rem;
-  border-color: transparent;
-  background: ${({ theme }) => theme.colors.surface.blueLight};
-  color: ${({ theme }) => theme.colors.brand.blue};
-  font-size: ${({ theme }) => theme.fontSize.xs};
+  min-height: calc(var(--mypage-control-height, 1.875rem) - 0.125rem);
+  padding: 0 0.25rem 0 0.75rem;
+  border: none;
+  background: transparent;
+  color: #51576e;
 
-  &:hover:not(:disabled) { background: #e3efff; }
+  &:hover:not(:disabled) { color: ${({ theme }) => theme.colors.brand.blue}; }
 `;
 
 export const GitUrlList = styled.ul`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
-  margin-top: 0.75rem;
+  gap: 0.375rem;
+  margin-top: 0.375rem;
+`;
+
+export const GitUrlItem = styled.li`
+  list-style: none;
 `;
 
 export const GitUrlRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  min-height: 2.75rem;
-  padding: 0.25rem 0.375rem 0.25rem 0.875rem;
-  border-radius: ${({ theme }) => theme.radius.sm};
-  background: ${({ theme }) => theme.colors.surface.muted};
-`;
-
-export const LinkIndicator = styled.span`
-  color: #8a96a8;
-  font-size: ${({ theme }) => theme.fontSize.md};
+  gap: 0.375rem;
+  min-width: 0;
 `;
 
 export const GitUrlText = styled.span`
   flex: 1;
   min-width: 0;
+  min-height: var(--mypage-control-height, 1.875rem);
+  padding: 0.375rem 0.875rem;
   overflow: hidden;
-  color: #596a82;
-  font-size: ${({ theme }) => theme.fontSize.sm};
-  line-height: 1.5;
+  border: 1px solid #e1e3e9;
+  border-radius: 0.25rem;
+  color: #7c89a4;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
+  line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
@@ -206,18 +213,24 @@ export const GitUrlText = styled.span`
 export const GitRemoveButton = styled.button`
   display: grid;
   place-items: center;
-  flex: 0 0 2.25rem;
-  height: 2.25rem;
+  flex: 0 0 1.25rem;
+  height: var(--mypage-control-height, 1.875rem);
+  padding: 0;
   border: none;
-  border-radius: ${({ theme }) => theme.radius.sm};
+  border-radius: 0.25rem;
   background: transparent;
-  color: #8290a4;
+  color: #7c89a4;
   cursor: pointer;
 
   &:hover { background: #fceeee; color: #c24141; }
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.brand.blue};
     outline-offset: 2px;
+  }
+
+  @media (max-width: 36rem) {
+    flex-basis: 2.75rem;
+    height: 2.75rem;
   }
 `;
 
@@ -242,53 +255,10 @@ export const SaveStatus = styled.p<{ $tone: keyof typeof SAVE_STATUS_COLORS }>`
 
 export const InlineButton = styled.button`
   ${buttonStyle}
-  min-height: 2.25rem;
-  padding: 0 0.875rem;
   background: ${({ theme }) => theme.colors.white};
   color: #465b79;
-  font-size: ${({ theme }) => theme.fontSize.xs};
 
   &:hover { background: ${({ theme }) => theme.colors.surface.muted}; }
-`;
-
-export const Notice = styled.p`
-  margin-top: 1.75rem;
-  padding: 1rem;
-  border-radius: ${({ theme }) => theme.radius.sm};
-  background: ${({ theme }) => theme.colors.surface.muted};
-  color: #748095;
-  font-size: ${({ theme }) => theme.fontSize.sm};
-  text-align: center;
-`;
-
-export const NoticeDetail = styled.span`
-  display: block;
-  margin-top: 0.25rem;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-`;
-
-export const Guide = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  color: #748095;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  line-height: 1.6;
-  word-break: keep-all;
-`;
-
-export const RequiredLine = styled.p`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.375rem;
-  margin: 0.25rem 0;
-  color: #596a82;
-  font-weight: 600;
-`;
-
-export const GitUrlItem = styled.li`
-  list-style: none;
 `;
 
 export const AnalysisStatus = styled.div`
@@ -297,49 +267,48 @@ export const AnalysisStatus = styled.div`
 
 export const Footer = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${({ theme }) => theme.spacing.md};
-  margin-top: ${({ theme }) => theme.spacing.xl};
-  padding-top: ${({ theme }) => theme.spacing.lg};
-  border-top: 1px solid #edf0f5;
-
-  @media (max-width: 64rem) {
-    flex-direction: column;
-    align-items: stretch;
-  }
+  flex-direction: column;
+  align-items: flex-end;
+  margin-top: var(--mypage-footer-gap, 1.5rem);
 `;
 
-export const FooterHint = styled.p`
-  color: #7b8799;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  line-height: 1.6;
+export const AnalysisHint = styled(FieldHint)`
+  margin-top: 0.375rem;
+  text-align: right;
 `;
 
 export const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-  gap: ${({ theme }) => theme.spacing.sm};
+  gap: 0.75rem;
+
+  @media (max-width: 36rem) { width: 100%; }
 `;
 
 export const BackButton = styled.button`
   ${buttonStyle}
+  min-width: var(--mypage-button-width, 4.5rem);
+  border-color: ${({ theme }) => theme.colors.brand.blue};
   background: ${({ theme }) => theme.colors.white};
-  color: #68758a;
+  color: ${({ theme }) => theme.colors.brand.blue};
 
-  &:hover { background: ${({ theme }) => theme.colors.surface.muted}; }
-
+  &:hover { background: ${({ theme }) => theme.colors.surface.blueLight}; }
   @media (max-width: 36rem) { flex: 1; }
 `;
 
 export const SaveButton = styled.button`
   ${buttonStyle}
-  min-width: 6rem;
+  min-width: var(--mypage-button-width, 4.5rem);
   border-color: ${({ theme }) => theme.colors.brand.blue};
   background: ${({ theme }) => theme.colors.brand.blue};
   color: ${({ theme }) => theme.colors.white};
 
-  &:hover:not(:disabled) { background: #1268d8; border-color: #1268d8; }
-
+  &:hover:not(:disabled) { background: #1268d8; }
+  &:disabled {
+    border-color: #bdbdbd;
+    background: #f5f5f5;
+    color: #51576e;
+    opacity: 1;
+  }
   @media (max-width: 36rem) { flex: 1; }
 `;
