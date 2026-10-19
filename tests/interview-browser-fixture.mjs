@@ -129,6 +129,7 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
   const uploads = [];
   const answers = [];
   const quits = [];
+  const feedbackRequests = [];
   const chatRequests = [];
   const recovery = { starts: 0, reads: 0 };
   const releases = [];
@@ -138,6 +139,7 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
     const request = route.request();
     const requestUrl = new URL(request.url());
     const pathname = requestUrl.pathname;
+    if (pathname === "/api/feedbacks" && request.method() === "POST") feedbackRequests.push(pathname);
     if (pathname.startsWith("/chat/")) chatRequests.push({ path: pathname, method: request.method() });
     if (requestUrl.hostname === "tts.example.test") return route.fulfill({ contentType: "audio/wav", body: wav });
     if (pathname.includes("/elevenlabs/") || pathname.includes("/supertone/")) directTtsRequests.push(pathname);
@@ -215,7 +217,7 @@ export async function fixture({ multi = false, answerMode = "voice", timeout = f
       throw error;
     }
   }
-  return { page, context, start, finish, uploads, answers, quits, releases, errors, audioRequests, failedRequests, directTtsRequests, chatRequests, recovery,
+  return { page, context, start, finish, uploads, answers, quits, feedbackRequests, releases, errors, audioRequests, failedRequests, directTtsRequests, chatRequests, recovery,
     releaseAudio: () => { for (const resolve of audioReleases.splice(0)) resolve(); },
     recover: () => { shouldFail = false; },
     release: () => { for (const resolve of releases.splice(0)) resolve(); },
