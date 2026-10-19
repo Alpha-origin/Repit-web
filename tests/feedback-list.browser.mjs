@@ -23,7 +23,13 @@ const listInterviews = [
     persona: { id: 1, personaName: "TECH-0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0", type: "REALISTIC", level: "NORMAL" } },
   { id: 53, mode: "SOLO", status: "ABANDONED", personaId: 53, createdAt: "2026-10-17T05:00:00Z" },
 ];
+listInterviews.push(
+  { id: 57, mode: "SOLO", status: "IN_PROGRESS", sessionId: "s57", createdAt: "2026-10-19T04:00:00Z" },
+  { id: 58, mode: "MULTI", status: "FAILED", sessionId: "s58", createdAt: "2026-10-19T05:00:00Z" },
+);
 const listFeedbacks = [
+  { interviewId: 57, sessionId: "s57", status: "PENDING" },
+  { interviewId: 58, sessionId: "s58", status: "SUCCEEDED" },
   { interviewId: 56, sessionId: "s56", status: "SUCCEEDED", style: "FRIENDLY", level: "EASY", totalScore: 89 },
   { interviewId: 54, sessionId: "s54", status: "SUCCEEDED", style: "REALISTIC", level: "NORMAL", totalScore: 95 },
 ];
@@ -67,25 +73,26 @@ const cardOrder = async (page) => {
 // 2-5 + 2-6 목록
 {
   const f = await open("/main/feedback/list");
-  assert.deepEqual(await cardOrder(f.page), ["김도윤", "박서연", "면접관 3명", "면접관 1명"]);
+  assert.deepEqual(await cardOrder(f.page), ["김도윤", "박서연", "면접관 3명"]);
   const card56 = f.page.locator("button", { hasText: "김도윤" }).first();
   for (const label of ["친근한", "쉬움", "89점"]) await card56.getByText(label, { exact: true }).first().waitFor();
   const card55 = f.page.locator("button", { hasText: "박서연" }).first();
   for (const label of ["꼼꼼한", "어려움"]) await card55.getByText(label, { exact: true }).first().waitFor();
   assert.equal(await f.page.locator("button", { hasText: "TECH-" }).count(), 0);
-  await f.page.getByText("중단됨", { exact: true }).waitFor();
+  assert.equal(await f.page.getByText("중단됨", { exact: true }).count(), 0);
+  assert.equal(await f.page.getByText("분석중", { exact: true }).count(), 0);
   assert.equal(new URL(f.page.url()).search, "");
   await expectDirection(f.page, "최신순");
-  report("list: default latest, no query, 친근한/쉬움, 김도윤 without suffix, MULTI count, persona-less 면접관 1명, 중단됨");
+  report("list: default latest, no query, 친근한/쉬움, 김도윤 without suffix, MULTI count, excludes unfinished interviews even with pending feedback");
 
   const initialHistoryLength = await f.page.evaluate(() => history.length);
   await f.page.getByRole("combobox", { name: "정렬 기준" }).selectOption("score");
   await expectDirection(f.page, "높은 점수순");
   assert.equal(new URL(f.page.url()).search, "?sort=score&order=desc");
-  assert.deepEqual(await cardOrder(f.page), ["면접관 3명", "김도윤", "박서연", "면접관 1명"]);
+  assert.deepEqual(await cardOrder(f.page), ["면접관 3명", "김도윤", "박서연"]);
   await directionButton(f.page).click();
   await expectDirection(f.page, "낮은 점수순");
-  assert.deepEqual(await cardOrder(f.page), ["김도윤", "면접관 3명", "박서연", "면접관 1명"]);
+  assert.deepEqual(await cardOrder(f.page), ["김도윤", "면접관 3명", "박서연"]);
   const historyLength = await f.page.evaluate(() => history.length);
   report("list: score sort, toggle to 낮은 점수순, missing scores last");
 
@@ -105,7 +112,7 @@ const cardOrder = async (page) => {
 }
 {
   const f = await open("/main/feedback/list?sort=name&order=up");
-  assert.deepEqual(await cardOrder(f.page), ["김도윤", "박서연", "면접관 3명", "면접관 1명"]);
+  assert.deepEqual(await cardOrder(f.page), ["김도윤", "박서연", "면접관 3명"]);
   await expectDirection(f.page, "최신순");
   await f.close();
   report("list: invalid query falls back to default");
