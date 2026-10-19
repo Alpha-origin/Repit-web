@@ -25,9 +25,9 @@ async function fixture(options = {}) {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   const state = {
-    profile: profile("COMPLETED"), profileError: false, materials: true, holdProfile: false,
+    profile: profile("COMPLETED"), profileError: false, materials: true, materialsError: false, holdProfile: false, holdSave: false,
     preparation: preparation("READY"), retryError: false, start404: false, ...options,
-    profileReads: 0, uploads: 0, retries: 0, analysisRequests: 0, personaCount: 0, preparationReads: [],
+    profileReads: 0, uploads: 0, savedPayloads: [], retries: 0, analysisRequests: 0, personaCount: 0, preparationReads: [],
   };
   const releases = [];
   await page.addInitScript(({ shortTimeout }) => {
@@ -56,7 +56,28 @@ async function fixture(options = {}) {
       if (state.holdProfile) await new Promise((resolve) => releases.push(resolve));
       return state.profileError ? json({ message: "테스트 상태 조회 실패" }, 503) : json({ success: true, data: state.profile });
     }
-    if (pathname.endsWith("/metaData/materials")) return json({
+    if (pathname.endsWith("/metaData/materials") && request.method() === "PUT") {
+      assert.match(request.headers()["content-type"], /multipart\/form-data; boundary=/);
+      assert.match(request.headers().authorization, /^Bearer /);
+      const payload = JSON.parse(/(\{"jobRole".*)\r\n/.exec(request.postDataBuffer().toString("utf8"))[1]);
+      state.uploads++;
+      state.savedPayloads.push(payload);
+      if (state.holdSave) await new Promise((resolve) => releases.push(resolve));
+      state.profileError = false;
+      state.profile = profile("PENDING");
+      return json({
+        materials: {
+          jobRole: payload.jobRole,
+          documents: payload.documents.map((document, index) => ({
+            index, type: document.type, fileUrl: document.fileUrl ?? `/uploaded-${index}.pdf`, fileName: `document-${index}.pdf`, pageCount: 1,
+          })),
+          gitUrls: payload.gitUrls,
+          supplements: payload.supplements,
+        },
+        analysis: { jobId: "profile-job", status: "accepted" },
+      });
+    }
+    if (pathname.endsWith("/metaData/materials")) return state.materialsError ? json({ message: "테스트 자료 조회 실패" }, 503) : json({
       jobRole: "FRONTEND",
       documents: state.materials ? [{ index: 0, type: "PORTFOLIO", fileUrl: "/portfolio.pdf", fileName: "portfolio.pdf", pageCount: 1 }] : [],
       gitUrls: state.materials ? ["https://github.com/example/project"] : [],
@@ -115,14 +136,14 @@ async function fixture(options = {}) {
     assert.deepEqual(errors, []);
     await context.close();
   };
-  return { page, state, navigate, interview, close, release: () => { state.holdProfile = false; releases.splice(0).forEach((resolve) => resolve()); } };
+  return { page, state, navigate, interview, close, release: () => { state.holdProfile = false; state.holdSave = false; releases.splice(0).forEach((resolve) => resolve()); } };
 }
-const saveButton = (page) => page.getByRole("button", { name: "저장", exact: true }).last();
-async function fillPortfolio(page) {
-  await page.locator('input[type="file"]').setInputFiles({ name: "portfolio.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\n%%EOF") });
-  await page.getByRole("textbox", { name: "GitHub", exact: true }).fill("https://github.com/example/new-project");
+const saveButton = (page) => page.getByRole("button", { name: "저장하고 분석하기", exact: true });
+async function addGitUrl(page, url = "https://github.com/example/new-project") {
+  await page.getByRole("textbox", { name: "GitHub", exact: true }).fill(url);
   await page.getByRole("button", { name: "Git 주소 추가", exact: true }).click();
 }
+const fillPortfolio = (page) => addGitUrl(page);
 async function expectEnabled(locator, enabled) {
   await locator.waitFor();
   await locator.page().waitForFunction(({ selector, enabled }) => {
@@ -159,7 +180,7 @@ try {
   await saveButton(completed.page).click();
   await completed.page.getByRole("dialog").waitFor();
   assert.equal(completed.state.uploads, 0);
-  await completed.page.getByRole("button", { name: "취소", exact: true }).click();
+  await completed.page.getByRole("dialog").getByRole("button", { name: "취소", exact: true }).click();
   assert.equal(completed.state.uploads, 0);
   await saveButton(completed.page).click();
   await completed.page.getByRole("button", { name: "변경하고 분석하기", exact: true }).click();
@@ -173,7 +194,39 @@ try {
   await completed.close();
   report("completed material changes require confirmation; known PENDING stays blocked on polling errors");
 
-  for (const [reason, action] of [["REPO_NOT_PUBLIC", "다시 저장"], ["INVALID_MATERIAL", "파일 교체"], ["INSUFFICIENT_EVIDENCE", "자료 보강"], ["INTERNAL", "다시 분석"]]) {
+  const loadFailed = await fixture({ materialsError: true });
+  await loadFailed.navigate("/main/mypage");
+  await loadFailed.page.getByText("저장된 자료를 불러오지 못했어요. 다시 불러와야 저장할 수 있어요", { exact: true }).waitFor();
+  await loadFailed.page.getByText("자료 분석이 완료됐어요. 면접을 시작할 수 있어요", { exact: true }).waitFor();
+  await loadFailed.page.getByRole("combobox", { name: "세부 직무", exact: true }).selectOption("FRONTEND");
+  await addGitUrl(loadFailed.page);
+  assert.equal(await saveButton(loadFailed.page).isDisabled(), true);
+  loadFailed.state.materialsError = false;
+  await loadFailed.page.getByRole("button", { name: "다시 불러오기", exact: true }).click();
+  await loadFailed.page.getByText("https://github.com/example/project", { exact: true }).waitFor();
+  assert.equal(await loadFailed.page.getByText("https://github.com/example/new-project", { exact: true }).count(), 0);
+  assert.equal(await loadFailed.page.getByText("portfolio.pdf", { exact: true }).count(), 1);
+  await expectEnabled(saveButton(loadFailed.page), true);
+  assert.equal(loadFailed.state.uploads, 0);
+  await loadFailed.close();
+  report("materials load failure blocks whole-set save until saved materials reload");
+
+  const slowSave = await fixture({ profile: profile("NONE"), holdSave: true });
+  await slowSave.navigate("/main/mypage");
+  await slowSave.page.getByText("https://github.com/example/project", { exact: true }).waitFor();
+  await addGitUrl(slowSave.page);
+  await saveButton(slowSave.page).click();
+  await slowSave.page.getByRole("button", { name: "저장 중...", exact: true }).waitFor();
+  await addGitUrl(slowSave.page, "https://github.com/example/during-save");
+  slowSave.release();
+  await slowSave.page.getByText("저장했어요. 자료 분석을 시작해요", { exact: true }).waitFor();
+  assert.deepEqual(slowSave.state.savedPayloads[0].gitUrls, ["https://github.com/example/project", "https://github.com/example/new-project"]);
+  assert.equal(await slowSave.page.getByText("https://github.com/example/during-save", { exact: true }).count(), 1);
+  assert.equal(await slowSave.page.getByLabel("나의 면접 자료").getByRole("button", { name: "취소", exact: true }).isEnabled(), true);
+  await slowSave.close();
+  report("edits made while saving stay on screen after the save response");
+
+  for (const [reason, action] of [["REPO_NOT_PUBLIC", "다시 분석"], ["INVALID_MATERIAL", "파일 교체"], ["INSUFFICIENT_EVIDENCE", "자료 보강"], ["INTERNAL", "다시 분석"]]) {
     const f = await fixture({ profile: profile("FAILED", reason) });
     await f.navigate("/main/mypage");
     await f.page.getByRole("button", { name: action, exact: true }).waitFor();
