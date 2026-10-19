@@ -52,6 +52,6 @@ node tests/feedback-abandoned-policy.browser.mjs
 ## 검증 결과 (2026-10-20)
 
 - lint 통과(기존 router의 미사용 eslint-disable 경고 1건), build 통과, 단위 테스트 82개 통과.
-- 브라우저: 정상 완료 13, 녹화 22, 종료 복구 10, 종료 상태 19, 피드백 정책 13, 피드백 폴링 23개 시나리오(총 100개).
+- 브라우저: 정상 완료 13, 녹화 22, 종료 복구 10, 종료 상태 35, 피드백 정책 13, 피드백 폴링 23개 시나리오(총 116개).
 - `codex review --uncommitted`의 P2 1건을 반영했다. 폴링 종료 시 취소된 controller를 재채점·음성 정책 상태 확인에서 재사용하지 않도록 요청 수명을 분리했다. PENDING→FAILED→재채점 및 PENDING→SUCCEEDED→음성 409 회귀를 추가했다.
 - 기존 브라우저 테스트는 취소된 POST의 response 대신 requestfailed를 검증하고, 최신 마이페이지의 aria-label과 답변 방식 선택 상태 반영을 기다리도록 보완했다.

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { browser, fixture, waitUntil, assertReleased } from "./interview-browser-fixture.mjs";
+import { browser, fixture, waitUntil, assertReleased, origin } from "./interview-browser-fixture.mjs";
 
 let passed = 0;
 const report = (name) => { passed++; console.log(`PASS ${name}`); };
@@ -105,6 +105,30 @@ try {
     assert.notEqual(await f.page.evaluate(async () => (await import("/src/shared/api/accessToken.ts")).getAccessToken()), null);
     await close(f);
     report(`${button}: late QUIT COMPLETED keeps completion destination`);
+  }
+  for (const multi of [false, true]) for (const answerMode of ["text", "voice"]) {
+    for (const action of ["quit", "header", "back", "logout"]) {
+      const f = await fixture({ multi, answerMode });
+      await ready(f);
+      if (answerMode === "voice") {
+        await f.start.click();
+        await f.finish.waitFor();
+        await f.page.waitForFunction(() => window.__recognitions.some((item) => item.active));
+        await f.page.waitForTimeout(250);
+      }
+      if (action === "back") await f.page.goBack();
+      else await f.page.getByRole("button", { name: action === "quit" ? "그만두기" : action === "header" ? "피드백" : "로그아웃", exact: true }).click();
+      await waitUntil(() => f.quits.length === 1);
+      await f.page.waitForURL(action === "quit" ? "**/main" : action === "header" ? "**/main/feedback/list" : action === "logout" ? "**/login" : `${origin}/`);
+      assert.equal(f.quits.length, 1);
+      if (answerMode === "voice") {
+        await waitUntil(() => f.uploads.length === 2);
+        assert.equal(f.uploads.find((upload) => upload.kind === "ANSWER").endReason, "interrupted");
+      } else assert.equal(f.uploads.length, 0);
+      await assertReleased(f);
+      await close(f);
+      report(`${multi ? "MULTI" : "SOLO"}/${answerMode}/${action}: one QUIT, preserved files, no generation`);
+    }
   }
   console.log(`${passed} terminal status scenarios passed`);
 } finally { await browser.close(); }
