@@ -13,7 +13,7 @@ export const buildPreparedView = (settings: InterviewDraft, data: CreatedIntervi
   const first = interviewers[0];
   return {
     interviewId: data.interviewId, userId: data.userId, sessionId: data.sessionId,
-    company: data.company, mode: data.mode, answerMode: settings.answerMode,
+    company: data.company, mode: data.mode, answerMode: data.answerMode === "TEXT" ? "text" : data.answerMode === "VOICE" ? "voice" : settings.answerMode,
     personaId: data.personaIds[0], personaName: first.name, role: first.role,
     major: null, type: first.personality, personaType: first.personality,
     level: LEVEL_BY_DIFFICULTY[settings.difficulty], career: settings.mode === "SOLO" ? ({ 쉬움: 0, 보통: 3, 어려움: 5 }[settings.difficulty]) : first.career,

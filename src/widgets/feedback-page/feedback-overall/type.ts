@@ -2,6 +2,7 @@ export interface FeedbackOverallMetric {
   label: string;
   score: number | null;
   description?: string;
+  emptyLabel?: "해당 없음" | "미제공";
 }
 
 export interface FeedbackOverallPersonaFeedback {
@@ -44,11 +45,11 @@ export interface FeedbackOverallMiddleSectionData {
     previousScore: number | null;
     currentScore: number | null;
   };
+  showPersonaFeedback: boolean;
   personaFeedbacks: readonly FeedbackOverallPersonaFeedback[];
 }
 
 export interface FeedbackOverallBottomSectionData {
-  speechMetrics: readonly FeedbackOverallMetric[];
   reliability: {
     title: string;
     scoreLabel: string;
@@ -68,7 +69,15 @@ export interface FeedbackOverallMiddleSectionProps {
   content: FeedbackOverallMiddleSectionData;
 }
 
+export interface FeedbackSpeechAnalysis {
+  visible: boolean;
+  message: string;
+  canRetry: boolean;
+}
+
 export interface FeedbackOverallBottomSectionProps {
+  speechAnalysis: FeedbackSpeechAnalysis;
+  onRetrySpeechAnalysis: () => void;
   content: FeedbackOverallBottomSectionData;
   isDownloadingPdf?: boolean;
   onDownloadPdf?: () => void;

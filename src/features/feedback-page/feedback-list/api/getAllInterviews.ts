@@ -24,7 +24,8 @@ export interface InterviewSummary {
   id?: number;
   interviewId?: number;
   userId?: number;
-  mode?: "SOLO" | "MULTI";
+  mode?: "SOLO" | "MULTI" | null;
+  answerMode?: "TEXT" | "VOICE" | null;
   personaId?: number | null;
   personaIds?: number[];
   persona?: InterviewPersona | null;
@@ -71,7 +72,15 @@ export interface FeedbackPersona {
   questionCount?: number;
 }
 
+export interface ScoreBreakdown {
+  scoringVersion?: string;
+  axes?: { axis: string; score: number | null; weight: number | null }[];
+  consistencyScore?: number | null;
+}
+
 export interface FeedbackData {
+  mode?: "SOLO" | "MULTI" | null;
+  scoreBreakdown?: ScoreBreakdown | null;
   company?: CompanyBadge | null;
   companyFit?: unknown;
   feedbackId?: number;

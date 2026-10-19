@@ -32,7 +32,7 @@ export const useInterviewEntry = (
           return;
         }
         if (data.status === "ABANDONED") throw new Error("종료된 면접입니다. 새 면접을 만들어주세요.");
-        setEntry({ key, data: { ...prepared, sessionId: data.sessionId, company: data.company, status: data.status }, error: null });
+        setEntry({ key, data: { ...prepared, answerMode: data.answerMode === "TEXT" ? "text" : data.answerMode === "VOICE" ? "voice" : prepared.answerMode, sessionId: data.sessionId, company: data.company, status: data.status }, error: null });
       } catch (error) {
         if (!controller.signal.aborted) setEntry({ key, data: null, error: extractErrorMessage(error, "면접 정보를 확인하지 못했습니다.") });
       }
