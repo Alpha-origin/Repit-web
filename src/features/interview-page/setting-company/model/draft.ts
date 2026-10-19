@@ -1,5 +1,5 @@
 import { MULTI_INTERVIEWER_TEMPLATES, type InterviewerCount } from "@/shared/constants/interview-page/setting-multi-interview";
-import { validateSelection } from "@/features/interview-page/setting-multi-interview/model/selection";
+import { findMultiStylePreset, validateSelection } from "@/features/interview-page/setting-multi-interview/model/selection";
 import type {
   InterviewDifficultyOption,
   InterviewStyleOption,
@@ -25,7 +25,7 @@ export interface SoloInterviewDraft {
 
 export interface MultiInterviewDraft {
   mode: "MULTI";
-  style: InterviewStyleOption;
+  style: InterviewStyleOption | null;
   difficulty: InterviewDifficultyOption;
   slots: InterviewerSlot[];
   answerMode: AnswerMode;
@@ -51,7 +51,7 @@ export const readInterviewDraft = (state: unknown): InterviewDraft | null => {
       personality: draft.personality as InterviewerPersonality, tone: draft.tone as InterviewerTone,
       interviewerKey: String(draft.interviewerKey) };
   }
-  if (draft.mode !== "MULTI" || !["편함", "일반", "압박"].includes(String(draft.style)) ||
+  if (draft.mode !== "MULTI" || (draft.style !== null && !["편함", "일반", "압박"].includes(String(draft.style))) ||
     !Array.isArray(draft.slots) || draft.slots.length < 2 || draft.slots.length > 4) return null;
   const slots: InterviewerSlot[] = [];
   for (const slot of draft.slots) {
@@ -62,5 +62,5 @@ export const readInterviewDraft = (state: unknown): InterviewDraft | null => {
       personality: slot.personality as InterviewerPersonality, tone: slot.tone as InterviewerTone });
   }
   if (validateSelection(slots, slots.length as InterviewerCount)) return null;
-  return { mode: "MULTI", difficulty, style: draft.style as InterviewStyleOption, slots, answerMode: draft.answerMode };
+  return { mode: "MULTI", difficulty, style: findMultiStylePreset(slots, difficulty), slots, answerMode: draft.answerMode };
 };
