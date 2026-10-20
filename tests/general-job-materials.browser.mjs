@@ -119,7 +119,8 @@ try {
     const eligible = await fixture({ ...empty, jobRole: "GEN_MARKETING", jobTitle: "마케터", coverLetters: hasCoverLetter ? [{ question: "지원 동기", answer: "지원 경험" }] : [] });
     for (const path of ["/main/setting/interview", "/main/setting/interview/multi"]) {
       await eligible.page.evaluate((path) => window.__router.navigate(path), path);
-      const next = eligible.page.getByRole("button", { name: "다음: 기업 선택", exact: true });
+      // fixture는 공개 기업을 0개 돌려준다. #187 이후 기업 단계를 건너뛰므로 버튼은 "면접 시작"이다.
+      const next = eligible.page.getByRole("button", { name: "면접 시작", exact: true });
       await next.waitFor();
       if (hasCoverLetter) await eligible.page.getByText("첫 면접은 준비에 몇 분 걸릴 수 있어요", { exact: true }).waitFor();
       else await eligible.page.getByText("이력서 외 자료나 자소서를 1개 이상 등록해야 면접을 시작할 수 있어요", { exact: true }).waitFor();
