@@ -39,7 +39,7 @@ const SettingMultiInterviewPage = () => {
               }}
             />
           </S.SettingsPanel>
-          <S.InterviewerColumn>
+          <S.InterviewerColumn $slotCount={setup.selection.interviewerCount}>
             <S.Section>
               <S.SectionTitle>면접관 수</S.SectionTitle>
               <S.ChoiceRow $columns={3} role="group" aria-label="면접관 수">

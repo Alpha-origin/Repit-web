@@ -1,6 +1,7 @@
 import { SOLO_MAJOR_GUIDANCE } from "@/shared/constants/interview-page/setting-interview";
 import {
-  MULTI_INTERVIEWER_TEMPLATES, PERSONALITY_OPTIONS, TONE_OPTIONS, ROLE_OPTIONS,
+  INTERVIEWER_CARD_DESCRIPTIONS, MULTI_INTERVIEWER_TEMPLATES,
+  PERSONALITY_OPTIONS, TONE_OPTIONS, ROLE_OPTIONS,
   type InterviewerSlot,
 } from "@/shared/constants/interview-page/setting-multi-interview";
 import * as S from "@/widgets/interview-page/setting-multi-interview/style";
@@ -37,22 +38,29 @@ const MultiInterviewerSettings = ({ slot, otherSlots, technical, disabled, onCha
     </S.Section>
     <S.Section>
       <S.SectionTitle>면접관</S.SectionTitle>
-      <S.IdentityRow role="group" aria-label="면접관 선택">
+      <S.InterviewerList role="group" aria-label="면접관 선택">
         {MULTI_INTERVIEWER_TEMPLATES.map((interviewer) => {
           const alreadySelected = otherSlots.some((other) => other.interviewer?.key === interviewer.key);
 
           return (
-            <S.IdentityButton key={interviewer.key} type="button" $selected={slot.interviewer?.key === interviewer.key}
+            <S.InterviewerCard key={interviewer.key} type="button" $selected={slot.interviewer?.key === interviewer.key}
               $unavailable={alreadySelected} disabled={disabled || alreadySelected}
               title={alreadySelected ? "다른 슬롯에서 선택한 면접관입니다." : undefined}
               aria-pressed={slot.interviewer?.key === interviewer.key} onClick={() => onChange({ interviewer })}>
-              <S.IdentityImage src={interviewer.image} alt="" />
-              {interviewer.name}
-              {alreadySelected ? <S.SelectedLabel>선택됨</S.SelectedLabel> : null}
-            </S.IdentityButton>
+              <S.InterviewerImage src={interviewer.image} alt="" />
+              <S.InterviewerInfo>
+                <S.InterviewerName>
+                  {interviewer.name}
+                  {alreadySelected ? <S.SelectedLabel>선택됨</S.SelectedLabel> : null}
+                </S.InterviewerName>
+                <S.InterviewerDescription>
+                  {INTERVIEWER_CARD_DESCRIPTIONS[interviewer.key]}
+                </S.InterviewerDescription>
+              </S.InterviewerInfo>
+            </S.InterviewerCard>
           );
         })}
-      </S.IdentityRow>
+      </S.InterviewerList>
     </S.Section>
         <S.Section>
       <S.SectionTitle>성격/분위기</S.SectionTitle>

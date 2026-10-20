@@ -1,10 +1,16 @@
 import styled from "styled-components";
 
-export const Page = styled.main`
+export const Page = styled.div`
   width: 100%;
-  min-height: calc(100vh - 5.5rem);
+  height: 100%;
+  min-height: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  padding: 2rem 1.5rem 7rem;
+  overflow-y: auto;
+
+  @media (max-width: ${({ theme }) => theme.layout.mobileBreakpoint}) {
+    padding: 2rem 1rem 4rem;
+  }
 `;

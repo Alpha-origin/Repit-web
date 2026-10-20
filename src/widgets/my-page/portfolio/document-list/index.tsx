@@ -59,12 +59,12 @@ const DocumentList = ({
                   onChange={(event) => onTypeChange(row.id, event.target.value)}
                 >
                   <option value="" disabled>선택</option>
-                  <optgroup label="필수 (1개 이상)">
+                  {requiredTypes.length > 0 && <optgroup label="필수 (1개 이상)">
                     {requiredTypes.map((type) => <option key={type} value={type}>{getDocumentTypeLabel(type)}</option>)}
-                  </optgroup>
-                  <optgroup label="선택">
+                  </optgroup>}
+                  {jobRole?.category === "GENERAL" ? optionalTypes.map((type) => <option key={type} value={type}>{getDocumentTypeLabel(type)}</option>) : <optgroup label="선택">
                     {optionalTypes.map((type) => <option key={type} value={type}>{getDocumentTypeLabel(type)}</option>)}
-                  </optgroup>
+                  </optgroup>}
                 </S.Select>
                 <S.Chevron aria-hidden="true" viewBox="0 0 24 24" fill="none">
                   <path d="m6 9 6 6 6-6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />

@@ -67,7 +67,7 @@ export const Sections = styled.div`
   display: grid;
   grid-template-columns: minmax(18rem, 0.58fr) minmax(0, 1fr);
   gap: ${({ theme }) => theme.spacing.lg};
-  align-items: start;
+  align-items: stretch;
 
   @media (max-width: 60rem) {
     grid-template-columns: 1fr;

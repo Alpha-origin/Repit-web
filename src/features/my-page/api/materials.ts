@@ -21,35 +21,48 @@ export interface MaterialSupplement {
   outcome: string;
 }
 
+export interface CoverLetter {
+  question: string;
+  answer: string;
+}
+
 export interface Materials {
   jobRole: JobRoleCode | null;
+  jobTitle: string | null;
   documents: MaterialDocument[];
   gitUrls: string[];
   supplements: MaterialSupplement[];
+  coverLetters: CoverLetter[];
 }
 
 interface MaterialsResponse {
   jobRole?: string | null;
+  jobTitle?: string | null;
   documents?: MaterialDocument[] | null;
   gitUrls?: string[] | null;
   supplements?: MaterialSupplement[] | null;
+  coverLetters?: CoverLetter[] | null;
 }
 
 const MATERIALS_URL = "/api/v1/metaData/materials";
 
 export const EMPTY_MATERIALS: Materials = {
   jobRole: null,
+  jobTitle: null,
   documents: [],
   gitUrls: [],
   supplements: [],
+  coverLetters: [],
 };
 
 const toMaterials = (payload: MaterialsResponse | null | undefined): Materials => ({
   // 모르는 직무 코드는 직무를 고르지 않은 것으로 본다.
   jobRole: (getJobRole(payload?.jobRole)?.code as JobRoleCode | undefined) ?? null,
+  jobTitle: payload?.jobTitle ?? null,
   documents: payload?.documents ?? [],
   gitUrls: payload?.gitUrls ?? [],
   supplements: payload?.supplements ?? [],
+  coverLetters: payload?.coverLetters ?? [],
 });
 
 export const getMaterials = async (signal?: AbortSignal): Promise<Materials> => {
@@ -69,9 +82,11 @@ export type MaterialDocumentInput =
 
 export interface MaterialsPayload {
   jobRole: JobRoleCode;
+  jobTitle: string | null;
   documents: MaterialDocumentInput[];
   gitUrls: string[];
   supplements: MaterialSupplement[];
+  coverLetters: CoverLetter[];
 }
 
 export interface MaterialsDraft {

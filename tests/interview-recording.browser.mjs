@@ -33,7 +33,7 @@ try {
   await stopping.context.close();
   report("unload covers file finalization and uploads, clears after success");
   for (const multi of [false, true]) {
-    const f = await fixture({ multi });
+    const f = await fixture({ multi, delayUploads: true });
     await f.start.click();
     await f.finish.waitFor();
     assert.equal(await f.page.evaluate(() => !window.dispatchEvent(new Event("beforeunload", { cancelable: true }))), true);
@@ -44,6 +44,16 @@ try {
     assert.equal(f.answers[0].questionId, 101);
     assert.match(f.uploads[0].type, /^audio\//);
     assert.match(f.uploads[0].filename, /\.(webm|m4a|ogg)$/);
+    assert.equal(await f.page.getByRole("complementary", { name: "면접 녹화 업로드 상태" }).count(), 0,
+      "answer uploads stay silent while the request is pending");
+    f.release();
+    await f.page.waitForFunction(async () => {
+      const { useRecordingUploadStore } = await import("/src/features/interview-page/interview/model/interviewRecordingStore.ts");
+      return useRecordingUploadStore.getState().jobs.some((job) => job.kind === "ANSWER" && job.status === "SUCCEEDED");
+    });
+    assert.equal(await f.page.getByRole("complementary", { name: "면접 녹화 업로드 상태" }).count(), 0,
+      "answer uploads stay silent after success");
+    await f.page.screenshot({ path: `/tmp/repit-${multi ? "multi" : "solo"}-answer-upload-hidden.png`, fullPage: true });
     const captures = await f.page.evaluate(() => window.__captures);
     assert.deepEqual(captures[0].kinds.sort(), ["audio", "video"]);
     assert.deepEqual(captures[1].kinds, ["audio"]);
@@ -56,9 +66,10 @@ try {
     assert.equal(f.uploads[1].endReason, undefined);
     assert.match(f.uploads[1].type, /^video\//);
     assert.ok(f.uploads[1].filename.endsWith(f.uploads[1].type.startsWith("video/mp4") ? ".mp4" : ".webm"));
+    f.release();
     await assertReleased(f);
     await f.context.close();
-    report(`${multi ? "MULTI" : "SOLO"}: answer + full capture, multipart contract, track cleanup`);
+    report(`${multi ? "MULTI" : "SOLO"}: silent pending/successful answer upload, full capture, multipart contract, track cleanup`);
   }
   for (const action of ["quit", "header", "back", "logout"]) {
     const f = await fixture({ multi: action === "header", delayUploads: action === "logout" || action === "header" });
@@ -79,7 +90,7 @@ try {
     } else {
       await f.page.waitForURL(action === "header" ? "**/main/feedback/list" : action === "back" ? `${origin}/` : "**/main");
       if (action === "header") {
-        assert.equal(await f.page.getByText("업로드 중입니다.", { exact: false }).count(), 2);
+        assert.equal(await f.page.getByText("업로드 중입니다.", { exact: false }).count(), 1);
         assert.equal(await f.page.evaluate(() => !window.dispatchEvent(new Event("beforeunload", { cancelable: true }))), true);
         f.release();
       }
@@ -185,11 +196,13 @@ try {
   await f.page.waitForURL("**/main");
   for (const path of ["/main/setting/interview", "/main/setting/interview/multi"]) {
     await f.page.evaluate((path) => window.__router.navigate(path), path);
+    if (path.endsWith("/multi")) await f.page.getByRole("group", { name: "면접관 수", exact: true }).waitFor();
     const textChoice = f.page.getByRole("button", { name: "텍스트 답변", exact: false });
     await textChoice.click();
     const voiceChoice = f.page.getByRole("button", { name: "영상/음성 답변", exact: false });
     const labelBox = await voiceChoice.locator("span").first().boundingBox();
     assert.ok(labelBox.width > 200, "answer mode text has enough width");
+    await waitUntil(async () => await textChoice.getAttribute("aria-pressed") === "true");
     assert.equal(await textChoice.getAttribute("aria-pressed"), "true");
     await f.page.screenshot({ path: `/tmp/repit-${path.endsWith("multi") ? "multi" : "solo"}-setup.png`, fullPage: true });
   }

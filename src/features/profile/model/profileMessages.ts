@@ -23,7 +23,10 @@ const withObjectParticle = (word: string) => {
   return `${word}${hasFinalConsonant ? "을" : "를"}`;
 };
 
+export const GENERAL_MATERIAL_GUIDANCE = "이력서 외 자료나 자소서를 1개 이상 등록해야 면접을 시작할 수 있어요";
+
 export const getRequiredDocumentGuidance = (jobRole: string | null | undefined) => {
+  if (getJobRole(jobRole)?.category === "GENERAL") return GENERAL_MATERIAL_GUIDANCE;
   const labels = getRequiredDocuments(jobRole).map(getDocumentTypeLabel);
   return labels.length === 1
     ? `${withObjectParticle(labels[0])} 등록해야 면접을 시작할 수 있어요`
@@ -32,6 +35,14 @@ export const getRequiredDocumentGuidance = (jobRole: string | null | undefined) 
 
 export const getProfileFailureMessage = (profile: LatestProfile, jobRole?: string | null) => {
   const job = getJobRole(jobRole);
+  if (job?.category === "GENERAL") {
+    if (profile.failureReason === "INSUFFICIENT_EVIDENCE") {
+      return "자료에서 질문 근거를 충분히 찾지 못했어요. 경력기술서·포트폴리오·업무 산출물을 올리거나 자소서 문항을 더 작성해 주세요";
+    }
+    if (profile.failureReason === "UNREADABLE_DOCUMENT") {
+      return "올린 문서의 내용을 읽지 못했어요. 원본 파일에서 PDF로 다시 내보내 올리거나 자소서를 작성해 주세요";
+    }
+  }
   if (profile.failureReason === "INSUFFICIENT_EVIDENCE" && job?.category === "NON_DEVELOPMENT") {
     return getNonDevInsufficientMessage(job);
   }

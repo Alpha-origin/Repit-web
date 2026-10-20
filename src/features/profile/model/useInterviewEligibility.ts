@@ -6,9 +6,10 @@ import {
   getMaterials,
   type Materials,
 } from "@/features/my-page/api/materials";
+import { requiresJobTitle } from "@/shared/constants/job/jobRoles";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
 import { checkMaterials } from "./materialsRequirement";
-import { getProfileFailureMessage, getRequiredDocumentGuidance } from "./profileMessages";
+import { GENERAL_MATERIAL_GUIDANCE, getProfileFailureMessage, getRequiredDocumentGuidance } from "./profileMessages";
 import { useProfileStatus } from "./useProfileStatus";
 
 const JOB_SELECTION_GUIDANCE = "마이페이지에서 직무를 선택해 주세요";
@@ -68,6 +69,7 @@ export const useInterviewEligibility = () => {
   else if (status === "FAILED" && profileStatus.profile) guidance = getProfileFailureMessage(profileStatus.profile, jobRole);
   else if (status === "NONE") guidance = hasMaterials
     ? "첫 면접은 준비에 몇 분 걸릴 수 있어요"
+    : requiresJobTitle(jobRole) ? GENERAL_MATERIAL_GUIDANCE
     : !requirement.hasAnyMaterial
       ? jobRole ? "마이페이지에서 자료를 등록해 주세요" : "마이페이지에서 직무와 자료를 등록해 주세요"
     : !requirement.hasRequiredDocument ? getRequiredDocumentGuidance(jobRole)

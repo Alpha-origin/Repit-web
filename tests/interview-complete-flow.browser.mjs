@@ -170,7 +170,7 @@ try {
     ["ABANDONED interview", { listStatus: "ABANDONED" }],
   ]) {
     const f = await openOverall(options);
-    await f.page.getByText(notCompletedMessage, { exact: true }).waitFor();
+    await f.page.getByText(options.listStatus === "ABANDONED" ? "중단된 면접은 피드백을 생성하지 않습니다." : notCompletedMessage, { exact: true }).waitFor();
     await f.page.clock.runFor(10_000);
     assert.equal(f.state.gets, 0);
     await f.close();

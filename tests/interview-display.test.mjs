@@ -3,11 +3,14 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import ts from "typescript";
 
-// interviewDisplay가 쓰는 직무 라벨 상수는 이 테스트와 무관해 같은 값을 돌려주는 함수로 바꾼다.
+const toModuleUrl = (source) => {
+  const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ESNext } });
+  return `data:text/javascript;base64,${Buffer.from(outputText).toString("base64")}`;
+};
+const rolesUrl = toModuleUrl(readFileSync(new URL("../src/shared/constants/job/jobRoles.ts", import.meta.url), "utf8"));
 const source = readFileSync(new URL("../src/features/feedback-page/model/interviewDisplay.ts", import.meta.url), "utf8")
-  .replace(/^import \{ getJobRoleLabel \} from .*$/m, "const getJobRoleLabel = (value) => value;");
-const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ESNext } });
-const display = await import(`data:text/javascript;base64,${Buffer.from(outputText).toString("base64")}`);
+  .replace('"@/shared/constants/job/jobRoles"', JSON.stringify(rolesUrl));
+const display = await import(toModuleUrl(source));
 
 test("level label reads EASY/NORMAL/HARD", () => {
   assert.equal(display.getLevelLabel("EASY"), "쉬움");
@@ -32,4 +35,11 @@ test("interviewer name falls back without persona and MULTI keeps the count", ()
 
 test("ABANDONED status is labeled", () => {
   assert.equal(display.getInterviewStatusLabel("ABANDONED"), "중단됨");
+});
+
+test("일반 직군 제목은 면접에 저장된 직무명을 쓰며 IT 제목은 유지한다", () => {
+  assert.equal(display.getInterviewTitle("GEN_MARKETING", " 퍼포먼스 마케터 "), "마케팅·홍보 · 퍼포먼스 마케터 모의면접");
+  assert.equal(display.getInterviewTitle("GEN_MARKETING", null), "마케팅·홍보 모의면접");
+  assert.equal(display.getInterviewTitle("BACKEND", "무시할 직무명"), "백엔드 모의면접");
+  assert.equal(display.getInterviewTitle("FULLSTACK"), "풀스택 모의면접");
 });

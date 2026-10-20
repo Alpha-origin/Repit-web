@@ -16,12 +16,17 @@ import { extractErrorMessage } from "@/shared/api/errorMessage";
 import {
   getGithubRule,
   getJobRole,
+  keepsMaterials,
   type JobCategory,
   type JobRoleCode,
 } from "@/shared/constants/job/jobRoles";
 import {
   MATERIAL_MESSAGES,
   MAX_DOCUMENTS,
+  MAX_JOB_TITLE,
+  MAX_COVER_LETTERS,
+  MAX_COVER_LETTER_QUESTION,
+  MAX_COVER_LETTER_ANSWER,
   MAX_FILE_BYTES,
   MAX_GITHUB_URLS,
   MAX_SUPPLEMENTS,
@@ -43,6 +48,12 @@ export interface DocumentRow {
   file: File | null;
 }
 
+export interface CoverLetterRow {
+  id: string;
+  question: string;
+  answer: string;
+}
+
 export interface SupplementRow {
   id: string;
   title: string;
@@ -57,6 +68,9 @@ export type SupplementField = "title" | "goal" | "role" | "decision" | "outcome"
 
 export interface MaterialFormErrors {
   job?: string;
+  jobTitle?: string;
+  coverLetters?: string;
+  coverLetterRows: Record<string, string>;
   documents?: string;
   github?: string;
   supplements?: string;
@@ -81,12 +95,14 @@ interface UseMaterialsFormOptions {
 
 interface FormSnapshot {
   job: JobRoleCode | null;
+  jobTitle: string;
+  coverLetters: CoverLetterRow[];
   documents: DocumentRow[];
   gitUrls: string[];
   supplements: SupplementRow[];
 }
 
-const EMPTY_ERRORS: MaterialFormErrors = { documentRows: {}, githubRows: {}, supplementRows: {} };
+const EMPTY_ERRORS: MaterialFormErrors = { documentRows: {}, githubRows: {}, supplementRows: {}, coverLetterRows: {} };
 
 let rowSequence = 0;
 const nextRowId = (prefix: string) => `${prefix}-${++rowSequence}`;
@@ -99,7 +115,8 @@ const blankSupplement = (): SupplementRow => ({
   id: nextRowId("supp"), title: "", documentId: "", goal: "", role: "", decision: "", outcome: "",
 });
 
-const isDevelopmentJob = (job: string | null) => !job || getJobRole(job)?.category === "DEVELOPMENT";
+const blankCoverLetter = (): CoverLetterRow => ({ id: nextRowId("cl"), question: "", answer: "" });
+const isFilledCoverLetter = (row: CoverLetterRow) => Boolean(row.question.trim() || row.answer.trim());
 const isFilledDocument = (row: DocumentRow) => Boolean(row.file || row.fileUrl);
 const isFilledSupplement = (row: SupplementRow) =>
   Boolean(row.title || row.documentId || row.goal || row.role || row.decision || row.outcome);
@@ -125,6 +142,10 @@ const toSnapshot = (materials: Materials): FormSnapshot => {
   }));
   return {
     job: materials.jobRole,
+    jobTitle: materials.jobTitle ?? "",
+    coverLetters: materials.coverLetters?.length
+      ? materials.coverLetters.map((row) => ({ ...row, id: nextRowId("cl") }))
+      : getJobRole(materials.jobRole)?.hasCoverLetter ? [blankCoverLetter()] : [],
     documents: documents.length ? documents : [blankDocument()],
     gitUrls: materials.gitUrls,
     supplements: supplements.length || !getJobRole(materials.jobRole)?.hasSupplement
@@ -133,7 +154,7 @@ const toSnapshot = (materials: Materials): FormSnapshot => {
   };
 };
 
-const EMPTY_SNAPSHOT: FormSnapshot = { job: null, documents: [], gitUrls: [], supplements: [] };
+const EMPTY_SNAPSHOT: FormSnapshot = { job: null, jobTitle: "", coverLetters: [], documents: [], gitUrls: [], supplements: [] };
 
 export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -150,6 +171,8 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   const [savedSnapshot, setSavedSnapshot] = useState<FormSnapshot>(EMPTY_SNAPSHOT);
   const [category, setCategory] = useState<JobCategory>("DEVELOPMENT");
   const [job, setJob] = useState<JobRoleCode | null>(null);
+  const [jobTitle, setJobTitle] = useState("");
+  const [coverLetters, setCoverLetters] = useState<CoverLetterRow[]>([]);
   const [documents, setDocuments] = useState<DocumentRow[]>(() => [blankDocument()]);
   const [gitUrls, setGitUrls] = useState<string[]>([]);
   const [gitInput, setGitInput] = useState("");
@@ -167,11 +190,14 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   const jobRole = selectedRole?.category === category ? selectedRole : undefined;
   // 저장은 문서·GitHub·보완 입력 전체를 바꾸므로 저장된 값을 읽기 전에는 보내지 않는다.
   const isLoadBlocked = isMaterialsLoading || Boolean(loadError);
-  const githubRule = category === "NON_DEVELOPMENT" ? "HIDDEN" : getGithubRule(jobRole?.code);
-  const hasSupplements = category === "NON_DEVELOPMENT";
+  const githubRule = jobRole ? getGithubRule(jobRole.code) : category === "DEVELOPMENT" ? "REQUIRED" : "HIDDEN";
+  const hasSupplements = jobRole?.hasSupplement ?? false;
+  const hasCoverLetters = jobRole?.hasCoverLetter ?? false;
 
   const applySnapshot = (snapshot: FormSnapshot) => {
     setJob(snapshot.job);
+    setJobTitle(snapshot.jobTitle);
+    setCoverLetters(snapshot.coverLetters);
     setCategory(getJobRole(snapshot.job)?.category ?? "DEVELOPMENT");
     setDocuments(snapshot.documents);
     setGitUrls(snapshot.gitUrls);
@@ -245,16 +271,16 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   };
 
   const hasMaterials = documents.some((row) => row.type || isFilledDocument(row)) ||
-    gitUrls.length > 0 || supplements.some(isFilledSupplement);
+    gitUrls.length > 0 || supplements.some(isFilledSupplement) || coverLetters.some(isFilledCoverLetter);
 
-  // 직무를 바꾼다. 개발 3직무(직무 없음 포함) 사이만 자료를 유지하고, 그 밖은 초기화한다(06 §3.2).
-  const applyJob = (nextJob: JobRoleCode, keepsMaterials: boolean) => {
+  // 직무를 바꿀 때 자료를 유지할 수 있는지는 공통 규칙으로 판단한다(06 §3.2).
+  const applyJob = (nextJob: JobRoleCode, retainMaterials: boolean, confirmedReset = false) => {
     setJob(nextJob);
     setCategory(getJobRole(nextJob)?.category ?? "DEVELOPMENT");
     setPendingJob(null);
     setErrors(EMPTY_ERRORS);
     markEdited();
-    if (keepsMaterials) {
+    if (retainMaterials) {
       if (documents.length === 0) setDocuments([blankDocument()]);
       if (!getJobRole(nextJob)?.hasSupplement) setSupplements([]);
       return;
@@ -264,8 +290,12 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
       setDocuments(savedSnapshot.documents.length ? savedSnapshot.documents : [blankDocument()]);
       setGitUrls(savedSnapshot.gitUrls);
       setSupplements(savedSnapshot.supplements);
+      setJobTitle(savedSnapshot.jobTitle);
+      setCoverLetters(savedSnapshot.coverLetters);
       return;
     }
+    setJobTitle((current) => confirmedReset || getJobRole(nextJob)?.category !== "GENERAL" ? "" : current);
+    setCoverLetters(getJobRole(nextJob)?.hasCoverLetter ? [blankCoverLetter()] : []);
     setDocuments([blankDocument()]);
     setGitUrls([]);
     setSupplements(getJobRole(nextJob)?.hasSupplement ? [blankSupplement()] : []);
@@ -274,9 +304,6 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   const handleCategoryChange = (nextCategory: JobCategory) => {
     if (nextCategory === category) return;
     setCategory(nextCategory);
-    if (nextCategory === "NON_DEVELOPMENT" && supplements.length === 0) {
-      setSupplements([blankSupplement()]);
-    }
     setErrors(EMPTY_ERRORS);
     markEdited();
   };
@@ -285,9 +312,9 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
     const nextRole = getJobRole(value);
     if (!nextRole || nextRole.code === job) return;
     const nextJob = nextRole.code as JobRoleCode;
-    const keepsMaterials = isDevelopmentJob(job) && nextRole.category === "DEVELOPMENT";
-    if (keepsMaterials || !hasMaterials) {
-      applyJob(nextJob, keepsMaterials);
+    const retainMaterials = keepsMaterials(job, nextJob);
+    if (retainMaterials || !hasMaterials) {
+      applyJob(nextJob, retainMaterials);
       return;
     }
     setPendingJob(nextJob);
@@ -299,7 +326,7 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   };
 
   const handleConfirmJobChange = () => {
-    if (pendingJob) applyJob(pendingJob, false);
+    if (pendingJob) applyJob(pendingJob, false, true);
   };
 
   // ----- 문서 -----
@@ -415,10 +442,37 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
     markEdited();
   };
 
+  const handleJobTitleChange = (value: string) => {
+    setJobTitle(value);
+    setErrors((prev) => ({ ...prev, jobTitle: undefined }));
+    markEdited();
+  };
+  const handleCoverLetterChange = (rowId: string, field: "question" | "answer", value: string) => {
+    setCoverLetters((rows) => rows.map((row) => row.id === rowId ? { ...row, [field]: value } : row));
+    setErrors((prev) => ({
+      ...prev,
+      coverLetters: undefined,
+      coverLetterRows: Object.fromEntries(Object.entries(prev.coverLetterRows).filter(([id]) => id !== rowId)),
+    }));
+    markEdited();
+  };
+  const handleCoverLetterAdd = () => {
+    if (coverLetters.length >= MAX_COVER_LETTERS) return;
+    setCoverLetters((rows) => [...rows, blankCoverLetter()]);
+    markEdited();
+  };
+  const handleCoverLetterRemove = (rowId: string) => {
+    setCoverLetters((rows) => {
+      const remaining = rows.filter((row) => row.id !== rowId);
+      return remaining.length ? remaining : [blankCoverLetter()];
+    });
+    markEdited();
+  };
+
   // ----- 저장 -----
 
   const validate = () => {
-    const nextErrors: MaterialFormErrors = { documentRows: {}, githubRows: {}, supplementRows: {} };
+    const nextErrors: MaterialFormErrors = { documentRows: {}, githubRows: {}, supplementRows: {}, coverLetterRows: {} };
     if (!jobRole) {
       nextErrors.job = MATERIAL_MESSAGES.JOB_ROLE_REQUIRED;
       return nextErrors;
@@ -427,8 +481,21 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
     const filledDocuments = documents.filter(isFilledDocument);
     if (filledDocuments.length > MAX_DOCUMENTS) {
       nextErrors.documents = MATERIAL_MESSAGES.TOO_MANY_DOCUMENTS;
-    } else if (!filledDocuments.some((row) => (jobRole.requiredDocuments as readonly string[]).includes(row.type))) {
+    } else if (jobRole.materialRule === "REQUIRED_TYPE" && !filledDocuments.some((row) => (jobRole.requiredDocuments as readonly string[]).includes(row.type))) {
       nextErrors.documents = getRequiredDocumentMessage(jobRole.requiredDocuments);
+    }
+
+    if (hasCoverLetters) {
+      const title = jobTitle.trim();
+      if (!title) nextErrors.jobTitle = MATERIAL_MESSAGES.JOB_TITLE_REQUIRED;
+      else if (title.length > MAX_JOB_TITLE || Array.from(title).some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) nextErrors.jobTitle = MATERIAL_MESSAGES.JOB_TITLE_INVALID;
+      coverLetters.forEach((row) => {
+        if (!isFilledCoverLetter(row)) return;
+        if (!row.question.trim() || !row.answer.trim()) nextErrors.coverLetterRows[row.id] = MATERIAL_MESSAGES.COVER_LETTER_INCOMPLETE;
+        else if (row.question.trim().length > MAX_COVER_LETTER_QUESTION || row.answer.trim().length > MAX_COVER_LETTER_ANSWER) nextErrors.coverLetterRows[row.id] = MATERIAL_MESSAGES.COVER_LETTER_INVALID;
+      });
+      if (coverLetters.filter(isFilledCoverLetter).length > MAX_COVER_LETTERS) nextErrors.coverLetters = MATERIAL_MESSAGES.COVER_LETTER_INVALID;
+      if (!filledDocuments.some((row) => row.type && row.type !== "RESUME") && !coverLetters.some((row) => row.question.trim() && row.answer.trim())) nextErrors.coverLetters = MATERIAL_MESSAGES.MATERIAL_REQUIRED;
     }
 
     let totalNewBytes = 0;
@@ -454,31 +521,34 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   };
 
   const hasErrors = (target: MaterialFormErrors) =>
-    Boolean(target.job || target.documents || target.github || target.supplements) ||
+    Boolean(target.job || target.jobTitle || target.coverLetters || target.documents || target.github || target.supplements) ||
     Object.keys(target.documentRows).length > 0 ||
     Object.keys(target.githubRows).length > 0 ||
-    Object.keys(target.supplementRows).length > 0;
+    Object.keys(target.supplementRows).length > 0 || Object.keys(target.coverLetterRows).length > 0;
 
   const applyServerErrors = (
     serverErrors: MaterialError[],
-    sent: { documents: string[]; gitUrls: string[]; supplements: string[] },
+    sent: { documents: string[]; gitUrls: string[]; supplements: string[]; coverLetters: string[] },
   ) => {
     const requiredDocuments = jobRole?.requiredDocuments ?? [];
-    const nextErrors: MaterialFormErrors = { documentRows: {}, githubRows: {}, supplementRows: {} };
+    const nextErrors: MaterialFormErrors = { documentRows: {}, githubRows: {}, supplementRows: {}, coverLetterRows: {} };
     const append = (current: string | undefined, message: string) =>
       current && current !== message ? `${current} ${message}` : message;
 
     serverErrors.forEach((error) => {
       const message = getMaterialErrorMessage(error, requiredDocuments);
-      const indexed = /^(documents|gitUrls|supplements)\[(\d+)]$/.exec(error.field);
+      const indexed = /^(documents|gitUrls|supplements|coverLetters)\[(\d+)]$/.exec(error.field);
       if (indexed) {
         const index = Number(indexed[2]);
         if (indexed[1] === "documents" && sent.documents[index]) nextErrors.documentRows[sent.documents[index]] = message;
         else if (indexed[1] === "gitUrls" && sent.gitUrls[index]) nextErrors.githubRows[sent.gitUrls[index]] = message;
         else if (indexed[1] === "supplements" && sent.supplements[index]) nextErrors.supplementRows[sent.supplements[index]] = message;
+        else if (indexed[1] === "coverLetters" && sent.coverLetters[index]) nextErrors.coverLetterRows[sent.coverLetters[index]] = message;
         return;
       }
-      if (error.field === "jobRole") nextErrors.job = message;
+      if (error.field === "jobTitle") nextErrors.jobTitle = message;
+      else if (error.field === "coverLetters" || error.field === "materials") nextErrors.coverLetters = append(nextErrors.coverLetters, message);
+      else if (error.field === "jobRole") nextErrors.job = message;
       else if (error.field === "gitUrls") nextErrors.github = append(nextErrors.github, message);
       else if (error.field === "supplements") nextErrors.supplements = append(nextErrors.supplements, message);
       else nextErrors.documents = append(nextErrors.documents, message);
@@ -501,6 +571,7 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
       return { type: row.type, source: "EXISTING", fileUrl: row.fileUrl ?? "" };
     });
     const sentGitUrls = githubRule === "HIDDEN" ? [] : gitUrls;
+    const sentCoverLetters = hasCoverLetters ? coverLetters.filter((row) => row.question.trim() && row.answer.trim()) : [];
     const sentSupplements = hasSupplements ? supplements.filter(isFilledSupplement) : [];
     const supplementInputs: MaterialSupplement[] = sentSupplements.map((row) => {
       const documentIndex = filledDocuments.findIndex((document) => document.id === row.documentId);
@@ -523,6 +594,8 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
       const result = await putMaterials({
         payload: {
           jobRole: jobRole.code as JobRoleCode,
+          jobTitle: hasCoverLetters ? jobTitle.trim() : null,
+          coverLetters: sentCoverLetters.map((row) => ({ question: row.question.trim(), answer: row.answer.trim() })),
           documents: documentInputs,
           gitUrls: sentGitUrls,
           supplements: supplementInputs,
@@ -557,6 +630,7 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
           documents: filledDocuments.map((row) => row.id),
           gitUrls: sentGitUrls,
           supplements: sentSupplements.map((row) => row.id),
+          coverLetters: sentCoverLetters.map((row) => row.id),
         });
         setSaveStatus({ tone: "error", text: MATERIAL_MESSAGES.SAVE_FAILED });
       } else {
@@ -606,6 +680,10 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
       job: job ?? "",
       onCategoryChange: handleCategoryChange,
       onJobChange: handleJobChange,
+      jobTitle,
+      onJobTitleChange: handleJobTitleChange,
+      jobTitleError: errors.jobTitle,
+      showJobTitleRetention: hasCoverLetters && job === savedSnapshot.job && hasMaterials && jobTitle !== savedSnapshot.jobTitle,
     },
     jobChange: {
       isOpen: pendingJob !== null,
@@ -615,6 +693,12 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
     job: jobRole?.code ?? null,
     githubRule,
     hasSupplements,
+    hasCoverLetters,
+    coverLetters,
+    onCoverLetterAdd: handleCoverLetterAdd,
+    onCoverLetterRemove: handleCoverLetterRemove,
+    onCoverLetterChange: handleCoverLetterChange,
+    onCoverLetterExample: (rowId: string, text: string) => handleCoverLetterChange(rowId, "question", text),
     documents,
     documentSectionRef,
     fileInputRef,

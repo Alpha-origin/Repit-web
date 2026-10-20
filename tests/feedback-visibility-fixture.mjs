@@ -26,6 +26,7 @@ const server = await createServer({server:{host:"127.0.0.1",port,strictPort:true
   if(url.pathname.endsWith("/refresh")) return json({accessToken:"fixture-only-token"});
   if(url.pathname.endsWith("/me")) return json({data:{id:7,name:"회귀 테스트",nickname:"회귀 테스트",email:"test@example.com"}});
   if(url.pathname==="/api/interviews/getAll") return json({success:true,data:interviews});
+  if(url.pathname==="/api/interviews/get") return json({success:true,data:interviews.find(x=>x.interviewId===Number(url.searchParams.get("interviewId")))});
   if(url.pathname==="/api/feedbacks/getAll") return json({success:true,data:[]});
   if(url.pathname==="/api/answer/getAll") return json({success:true,data:[]});
   if(url.pathname==="/api/feedbacks") return json({success:true,data:feedback(Number(url.searchParams.get("interviewId")))});
