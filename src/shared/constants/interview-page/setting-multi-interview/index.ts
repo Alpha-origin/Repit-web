@@ -85,6 +85,22 @@ export const MULTI_INTERVIEWER_TEMPLATES = [
   },
 ] as const satisfies readonly InterviewerTemplate[];
 
+export const INTERVIEWER_CARD_DESCRIPTIONS: Record<
+  (typeof MULTI_INTERVIEWER_TEMPLATES)[number]["key"],
+  string
+> = {
+  "interviewer-kim": "기술적 역량과 아키텍처 설계 능력을 중점적으로 파악합니다.",
+  "interviewer-lee": "문제 해결 프로세스와 데이터 기반의 의사결정 능력을 평가합니다.",
+  "interviewer-park": "사용자 중심의 사고방식과 시각적 커뮤니케이션 능력을 심층 질문합니다.",
+  "interviewer-choi": "사용자 행동과 니즈를 바탕으로 디자인의 타당성과 사용성 개선 역량을 평가합니다.",
+  "interviewer-han": "시각적 완성도와 디자인 의도, 일관성 있는 인터페이스 설계 능력을 평가합니다.",
+};
+
+export const INTERVIEWER_SELECTION_CARD_SIZE = {
+  width: "12rem",
+  height: "15rem",
+} as const;
+
 export const INTERVIEWER_COUNT_OPTIONS = [2, 3, 4] as const;
 
 export const PERSONALITY_OPTIONS = [

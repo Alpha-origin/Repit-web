@@ -2,7 +2,10 @@ import {
   INTERVIEW_SETTING_OPTION_SECTIONS,
   INTERVIEW_SETTING_STYLE_META,
 } from '@/shared/constants/interview-page/setting-interview';
-import { MULTI_INTERVIEWER_TEMPLATES } from '@/shared/constants/interview-page/setting-multi-interview';
+import {
+  INTERVIEWER_CARD_DESCRIPTIONS,
+  MULTI_INTERVIEWER_TEMPLATES,
+} from '@/shared/constants/interview-page/setting-multi-interview';
 import DifficultyEasyImage from '@/shared/img/interview-page/easy.svg?url';
 import DifficultyNormalImage from '@/shared/img/interview-page/normal.svg?url';
 import DifficultyHardImage from '@/shared/img/interview-page/hard.svg?url';
@@ -35,7 +38,12 @@ export const SETTING_DIFFICULTY_SECTION = {
 };
 
 export const SETTING_INTERVIEWER_CARDS = MULTI_INTERVIEWER_TEMPLATES.map(
-  ({ key, name, image }) => ({ key, name, image }),
+  ({ key, name, image }) => ({
+    key,
+    name,
+    image,
+    description: INTERVIEWER_CARD_DESCRIPTIONS[key],
+  }),
 );
 
 export type SettingInterviewerCard = (typeof SETTING_INTERVIEWER_CARDS)[number];

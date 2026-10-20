@@ -25,7 +25,12 @@ const SettingOptions = ({ onSelect, selection, children }: SettingOptionsProps) 
 
 const StyleOptions = ({ onSelect, selectedValue }: StyleOptionsProps) => (
   <S.Section>
-    <S.Title>{SETTING_STYLE_SECTION.title}</S.Title>
+    <S.Title>
+      {SETTING_STYLE_SECTION.title}
+      {selectedValue === null ? (
+        <S.OptionDescription> (직접 설정 중이에요)</S.OptionDescription>
+      ) : null}
+    </S.Title>
 
     <S.StyleOptionGroup
       role="radiogroup"
@@ -55,7 +60,6 @@ const StyleOptions = ({ onSelect, selectedValue }: StyleOptionsProps) => (
         );
       })}
     </S.StyleOptionGroup>
-    {selectedValue === null ? <S.OptionDescription>직접 설정 중이에요</S.OptionDescription> : null}
   </S.Section>
 );
 
