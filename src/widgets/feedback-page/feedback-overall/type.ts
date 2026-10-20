@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 export interface FeedbackOverallMetric {
   label: string;
   score: number | null;
@@ -76,6 +78,7 @@ export interface FeedbackSpeechAnalysis {
 }
 
 export interface FeedbackOverallBottomSectionProps {
+  videoAnalysis?: ReactNode;
   speechAnalysis: FeedbackSpeechAnalysis;
   onRetrySpeechAnalysis: () => void;
   content: FeedbackOverallBottomSectionData;

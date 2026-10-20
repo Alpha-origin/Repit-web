@@ -1,4 +1,6 @@
 import { useFeedbackAudioAnalysis } from "@/features/feedback-page/model/useFeedbackAudioAnalysis";
+import { useFeedbackVideoAnalysis } from "@/features/feedback-page/model/useFeedbackVideoAnalysis";
+import BehaviorAnalysis from "@/widgets/feedback-page/behavior-analysis";
 import CompanyFeedback from "@/widgets/feedback-page/company-feedback";
 import { buildFeedbackOverallContent } from "@/features/feedback-page/model/feedbackDisplay";
 import { useFeedbackInterview } from "@/features/feedback-page/model/useFeedbackInterview";
@@ -28,16 +30,20 @@ const FeedbackOverallPage = () => {
   const isAnalysisPending =
     feedback?.status === "PENDING" || feedback?.status === "IN_PROGRESS";
   const isAnalysisFailed = feedback?.status === "FAILED";
+  const currentInterviewId = interview?.interviewId ?? interview?.id;
+  const isCompleted = currentInterviewId === Number(id) && interview?.status === "COMPLETED";
   const content =
-    interview?.status === "COMPLETED" && feedback && !isAnalysisPending && !isAnalysisFailed
+    isCompleted && feedback && !isAnalysisPending && !isAnalysisFailed
       ? buildFeedbackOverallContent(feedback, interview, previousFeedback)
       : null;
-  const audio = useFeedbackAudioAnalysis(interview?.interviewId ?? interview?.id, interview?.answerMode, interview?.status === "COMPLETED" && content !== null, onAnalysisError);
+  const audio = useFeedbackAudioAnalysis(currentInterviewId, interview?.answerMode, isCompleted && content !== null, onAnalysisError);
+  const video = useFeedbackVideoAnalysis(currentInterviewId === Number(id) ? currentInterviewId : undefined, interview?.answerMode, isCompleted, onAnalysisError);
+  const videoSection = <BehaviorAnalysis view={video.view} onRefresh={video.refresh} onRetry={video.retry} />;
   const panelRef = useRef<HTMLElement | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const handleDownloadPdf = async () => {
-    if (interview?.status !== "COMPLETED" || !panelRef.current || isDownloadingPdf) {
+    if (!isCompleted || !panelRef.current || isDownloadingPdf) {
       return;
     }
 
@@ -96,11 +102,13 @@ const FeedbackOverallPage = () => {
               content={content.bottomSection}
               speechAnalysis={audio.view}
               onRetrySpeechAnalysis={audio.retry}
+              videoAnalysis={videoSection}
               isDownloadingPdf={isDownloadingPdf}
               onDownloadPdf={handleDownloadPdf}
             />
           </>
         )}
+        {!content ? videoSection : null}
       </S.Panel>
     </S.Page>
   );
