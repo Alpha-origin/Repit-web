@@ -4,7 +4,7 @@ import { browser, fixture, waitUntil } from "./interview-browser-fixture.mjs";
 let passed = 0;
 const report = (label) => { passed++; console.log(`PASS ${label}`); };
 const retry = (page) => page.getByRole("button", { name: "다시 시도", exact: true });
-const waitForQuitError = (page) => page.getByText("면접 종료를 저장하지 못했어요. 다시 시도해 주세요.", { exact: true }).waitFor();
+const waitForQuitError = (page) => page.getByText("면접 종료 저장을 확인하지 못했어요. 다시 시도해 주세요.", { exact: true }).waitFor();
 try {
   for (const multi of [false, true]) {
     const label = multi ? "MULTI" : "SOLO";

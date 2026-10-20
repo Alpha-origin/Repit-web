@@ -13,6 +13,7 @@ import * as S from "./style";
 const FeedbackOverallPage = () => {
   const { id } = useParams();
   const {
+    onAnalysisError,
     errorMessage,
     feedback,
     feedbackErrorMessage,
@@ -28,15 +29,15 @@ const FeedbackOverallPage = () => {
     feedback?.status === "PENDING" || feedback?.status === "IN_PROGRESS";
   const isAnalysisFailed = feedback?.status === "FAILED";
   const content =
-    feedback && !isAnalysisPending && !isAnalysisFailed
+    interview?.status === "COMPLETED" && feedback && !isAnalysisPending && !isAnalysisFailed
       ? buildFeedbackOverallContent(feedback, interview, previousFeedback)
       : null;
-  const audio = useFeedbackAudioAnalysis(interview?.interviewId ?? interview?.id, interview?.answerMode, content !== null);
+  const audio = useFeedbackAudioAnalysis(interview?.interviewId ?? interview?.id, interview?.answerMode, interview?.status === "COMPLETED" && content !== null, onAnalysisError);
   const panelRef = useRef<HTMLElement | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const handleDownloadPdf = async () => {
-    if (!panelRef.current || isDownloadingPdf) {
+    if (interview?.status !== "COMPLETED" || !panelRef.current || isDownloadingPdf) {
       return;
     }
 

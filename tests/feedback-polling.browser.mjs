@@ -196,6 +196,8 @@ try {
     postSteps: [{ waitFor: stalePost }],
     steps: [{ feedback: { interviewId: 43, status: "FAILED", errorMessage: "다른 면접의 분석 실패" } }],
   });
+  const staleRequestCanceled = stale.page.waitForEvent("requestfailed", { predicate: (request) =>
+    new URL(request.url()).pathname === "/api/feedbacks" && request.method() === "POST" });
   await stale.page.getByRole("button", { name: "다시 시도", exact: true }).click();
   await stale.page.getByRole("button", { name: "요청 중…", exact: true }).waitFor();
   await stale.page.clock.resume();
@@ -205,10 +207,8 @@ try {
   });
   await stale.page.getByText("다른 면접의 분석 실패", { exact: true }).waitFor();
   await stale.page.clock.pauseAt(await stale.page.evaluate(() => Date.now() + 100));
-  const staleResponse = stale.page.waitForResponse((response) =>
-    new URL(response.url()).pathname === "/api/feedbacks" && response.request().method() === "POST");
+  await staleRequestCanceled;
   releaseStalePost();
-  await (await staleResponse).finished();
   await expectNoMoreRequests(stale, 1);
   await stale.page.getByText("다른 면접의 분석 실패", { exact: true }).waitFor();
   assert.equal(await stale.page.getByRole("button", { name: "다시 시도", exact: true }).isEnabled(), true);
@@ -260,6 +260,17 @@ try {
   await failed.close();
   report("terminal FAILED result stops polling after a recovered request");
 
+  const failedRetry = await fixture({ steps: [{ feedback: { ...completedFeedback, status: "FAILED" } }] });
+  await failedRetry.page.clock.runFor(5_000);
+  await failedRetry.page.getByText("피드백 분석에 실패했습니다.", { exact: true }).waitFor();
+  await failedRetry.page.getByRole("button", { name: "다시 시도", exact: true }).click();
+  await failedRetry.page.getByText(pendingMessage("overall"), { exact: true }).waitFor();
+  assert.equal(failedRetry.state.posts, 1);
+  await failedRetry.page.clock.runFor(5_000);
+  await failedRetry.page.getByText("회복 확인 코멘트", { exact: true }).first().waitFor();
+  await failedRetry.close();
+  report("PENDING to FAILED polling cleanup does not cancel a later regrade request");
+
   const deadline = await fixture({ steps: [{ code: 503 }, { code: 503, message: "두 번째 일시 오류" }] });
   await deadline.page.clock.runFor(5_000);
   await deadline.page.getByText("테스트 오류 503", { exact: true }).waitFor();
@@ -276,9 +287,10 @@ try {
   const leaving = await fixture({ steps: [{ code: 503 }] });
   await leaving.page.clock.runFor(5_000);
   await leaving.page.getByText("테스트 오류 503", { exact: true }).waitFor();
+  await leaving.page.clock.resume();
   await leaving.page.getByRole("button", { name: "마이페이지", exact: true }).click();
   await leaving.page.waitForURL("**/main/mypage");
-  await leaving.page.getByRole("heading", { name: "마이페이지", exact: true }).waitFor();
+  await leaving.page.getByLabel("마이페이지", { exact: true }).waitFor();
   await expectNoMoreRequests(leaving);
   await leaving.close();
   report("leaving the page clears a scheduled retry");

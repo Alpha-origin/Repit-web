@@ -9,6 +9,7 @@ import {
 import { getInterviewStatus } from "@/features/feedback-page/api/getInterviewStatus";
 
 import {
+  FeedbackInterviewPolicyError,
   getAllFeedbacks,
   getAllInterviews,
   getFeedback,
@@ -102,9 +103,41 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
   const isRetryingFeedbackRef = useRef(false);
   const saveCheckControllerRef = useRef<AbortController | null>(null);
 
+  const feedbackControllerRef = useRef<AbortController | null>(null);
+
+  const checkPolicyRejection = useCallback(async (error: unknown, requestId: number) => {
+    if (!(error instanceof FeedbackInterviewPolicyError) &&
+      !(axios.isAxiosError(error) && error.response?.status === 409)) return false;
+    // 409는 중복 접수일 수도 있으므로 오류 문구 대신 저장 상태를 확인한다.
+    let status: string | null;
+    try {
+      status = error instanceof FeedbackInterviewPolicyError
+        ? error.interviewStatus
+        : await getInterviewStatus(Number(id), { signal: feedbackControllerRef.current?.signal, timeout: 15_000 });
+    } catch {
+      status = null;
+    }
+    if (requestId !== requestIdRef.current) return true;
+    if (status === "COMPLETED") return false;
+    feedbackControllerRef.current?.abort();
+    setInterview((current) => current ? { ...current, status: status ?? undefined } : current);
+    setFeedback(null);
+    setPreviousFeedback(null);
+    setFeedbackErrorMessage(status === "ABANDONED"
+      ? "중단된 면접은 피드백을 생성하지 않습니다."
+      : "완료된 면접만 피드백을 요청할 수 있습니다.");
+    return true;
+  }, [id]);
+
+  const onAnalysisError = useCallback((error: unknown) =>
+    checkPolicyRejection(error, requestIdRef.current), [checkPolicyRejection]);
+
   const loadInterview = useCallback(async () => {
     const requestId = ++requestIdRef.current;
     const interviewId = Number(id);
+    feedbackControllerRef.current?.abort();
+    feedbackControllerRef.current = new AbortController();
+    setInterview(null);
     saveCheckControllerRef.current?.abort();
     saveCheckControllerRef.current = null;
     isRetryingFeedbackRef.current = false;
@@ -171,7 +204,7 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
         setInterview(nextInterview);
       }
 
-      if (nextInterview?.createdAt && historyResult.status === "fulfilled") {
+      if (nextInterview?.status === "COMPLETED" && nextInterview.createdAt && historyResult.status === "fulfilled") {
         const currentTime = new Date(nextInterview.createdAt).getTime();
         const completedFeedbacks = new Map(
           historyResult.value
@@ -182,7 +215,7 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
             .map((entry) => [entry.interviewId, entry]),
         );
         const priorInterview = sortedInterviews.find((item) =>
-          item.createdAt && new Date(item.createdAt).getTime() < currentTime &&
+          item.status === "COMPLETED" && item.createdAt && new Date(item.createdAt).getTime() < currentTime &&
           completedFeedbacks.has(getInterviewId(item)),
         );
 
@@ -203,7 +236,7 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
           : "아직 완료되지 않은 면접입니다. 면접을 마친 뒤 피드백을 확인해주세요.");
       } else {
         try {
-          const nextFeedback = await getOrRequestFeedback(interviewId);
+          const nextFeedback = await getOrRequestFeedback(interviewId, feedbackControllerRef.current?.signal);
 
           if (requestId !== requestIdRef.current) {
             return;
@@ -215,9 +248,9 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
             return;
           }
 
-          setFeedbackErrorMessage(
-            extractErrorMessage(error, "피드백을 불러오지 못했습니다."),
-          );
+          if (!await checkPolicyRejection(error, requestId)) {
+            setFeedbackErrorMessage(extractErrorMessage(error, "피드백을 불러오지 못했습니다."));
+          }
         }
       }
     } else {
@@ -231,7 +264,7 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
     }
 
     setIsLoading(false);
-  }, [fromCompletion, id, includePreviousFeedback]);
+  }, [checkPolicyRejection, fromCompletion, id, includePreviousFeedback]);
 
   const retryFeedback = useCallback(async () => {
     if (feedback?.status !== "FAILED") {
@@ -249,14 +282,16 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
     setFeedbackErrorMessage(null);
 
     try {
-      const nextFeedback = await requestFeedback(interviewId).catch((error: unknown) => {
+      const nextFeedback = await requestFeedback(interviewId, feedbackControllerRef.current?.signal).catch(async (error: unknown) => {
         if (requestId !== requestIdRef.current) {
           return null;
         }
 
+        if (await checkPolicyRejection(error, requestId)) return null;
+
         if (axios.isAxiosError(error) && error.response?.status === 409) {
           // 다른 재채점의 새 결과가 아직 조회되지 않으면 FAILED를 유지한다.
-          return getFeedback(interviewId).then((currentFeedback) => {
+          return getFeedback(interviewId, feedbackControllerRef.current?.signal).then((currentFeedback) => {
             if (!currentFeedback) {
               throw new Error("피드백 상태를 확인하지 못했습니다. 잠시 후 다시 시도해주세요.");
             }
@@ -273,9 +308,9 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
       }
     } catch (error) {
       if (requestId === requestIdRef.current) {
-        setFeedbackErrorMessage(
-          extractErrorMessage(error, "피드백 생성을 다시 요청하지 못했습니다."),
-        );
+        if (!await checkPolicyRejection(error, requestId)) {
+          setFeedbackErrorMessage(extractErrorMessage(error, "피드백 생성을 다시 요청하지 못했습니다."));
+        }
       }
     } finally {
       if (requestId === requestIdRef.current) {
@@ -283,7 +318,7 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
         setIsRetryingFeedback(false);
       }
     }
-  }, [feedback?.status, id, loadInterview]);
+  }, [checkPolicyRejection, feedback?.status, id, loadInterview]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -293,6 +328,7 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
     return () => {
       window.clearTimeout(timeoutId);
       requestIdRef.current += 1;
+      feedbackControllerRef.current?.abort();
       saveCheckControllerRef.current?.abort();
       saveCheckControllerRef.current = null;
     };
@@ -304,11 +340,12 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
     const interviewId = Number(id);
     const isPending = feedbackStatus === "PENDING" || feedbackStatus === "IN_PROGRESS";
 
-    if (isLoading || !isPending || !Number.isSafeInteger(interviewId) || interviewId <= 0) {
+    if (interview?.status !== "COMPLETED" || isLoading || !isPending || !Number.isSafeInteger(interviewId) || interviewId <= 0) {
       return;
     }
 
     const controller = new AbortController();
+    const requestId = requestIdRef.current;
     const deadline = Date.now() + 5 * 60_000;
     const timeoutMessage = "피드백 분석이 지연되고 있습니다. 잠시 후 다시 확인해주세요.";
     let timeoutId: number;
@@ -337,6 +374,7 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
         }
       } catch (error) {
         if (controller.signal.aborted) return;
+        if (await checkPolicyRejection(error, requestId)) return;
         setFeedbackErrorMessage(
           extractErrorMessage(error, "피드백 분석 상태를 확인하지 못했습니다."),
         );
@@ -364,16 +402,17 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
       controller.abort();
       window.clearTimeout(timeoutId);
     };
-  }, [id, isLoading, feedbackStatus]);
+  }, [checkPolicyRejection, id, interview?.status, isLoading, feedbackStatus]);
 
   return {
+    onAnalysisError,
     answers,
     answersErrorMessage,
     errorMessage,
-    feedback,
+    feedback: interview?.status === "COMPLETED" ? feedback : null,
     feedbackErrorMessage,
     interview,
-    previousFeedback,
+    previousFeedback: interview?.status === "COMPLETED" ? previousFeedback : null,
     isLoading,
     isRetryingFeedback,
     isSavingInterview,

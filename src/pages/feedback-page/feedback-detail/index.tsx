@@ -26,14 +26,14 @@ const FeedbackDetailPage = () => {
   const isAnalysisFailed = feedback?.status === "FAILED";
   const hasQuestionFeedback = (feedback?.feedbacks?.length ?? 0) > 0;
   const content =
-    feedback && !isAnalysisPending && !isAnalysisFailed && hasQuestionFeedback
+    interview?.status === "COMPLETED" && feedback && !isAnalysisPending && !isAnalysisFailed && hasQuestionFeedback
       ? buildFeedbackDetailContent(feedback, answers)
       : null;
   const panelRef = useRef<HTMLElement | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const handleDownloadPdf = async () => {
-    if (!panelRef.current || isDownloadingPdf) {
+    if (interview?.status !== "COMPLETED" || !panelRef.current || isDownloadingPdf) {
       return;
     }
 
