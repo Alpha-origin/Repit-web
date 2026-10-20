@@ -167,8 +167,8 @@ export const useMaterialsForm = (options: UseMaterialsFormOptions = {}) => {
   const jobRole = selectedRole?.category === category ? selectedRole : undefined;
   // 저장은 문서·GitHub·보완 입력 전체를 바꾸므로 저장된 값을 읽기 전에는 보내지 않는다.
   const isLoadBlocked = isMaterialsLoading || Boolean(loadError);
-  const githubRule = category === "NON_DEVELOPMENT" ? "HIDDEN" : getGithubRule(jobRole?.code);
-  const hasSupplements = category === "NON_DEVELOPMENT";
+  const githubRule = getGithubRule(jobRole?.code);
+  const hasSupplements = jobRole?.hasSupplement ?? false;
 
   const applySnapshot = (snapshot: FormSnapshot) => {
     setJob(snapshot.job);
