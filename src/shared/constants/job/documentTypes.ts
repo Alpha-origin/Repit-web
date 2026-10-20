@@ -19,6 +19,7 @@ export const DOCUMENT_TYPES = [
   { code: "SCREEN_SPEC", label: "화면설계서·플로우" },
   { code: "PROPOSAL", label: "제안서" },
   { code: "PROJECT_REPORT", label: "수행·결과 보고서" },
+  { code: "WORK_SAMPLE", label: "업무 산출물" },
 ] as const;
 
 export type DocumentTypeCode = (typeof DOCUMENT_TYPES)[number]["code"];

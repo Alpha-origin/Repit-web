@@ -40,7 +40,7 @@ export const Controls = styled.div`
 
 export const CategoryGroup = styled.fieldset`
   display: flex;
-  flex: 0 0 var(--mypage-category-width, 7.875rem);
+  flex: 1.35;
   min-width: 0;
   height: var(--mypage-control-height, 1.875rem);
   border: 1px solid #c8cedd;
@@ -83,6 +83,8 @@ export const CategoryText = styled.span`
   color: #7c89a4;
   font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
   line-height: 1.5;
+  white-space: nowrap;
+  padding: 0 0.375rem;
   transition: background-color 0.2s ease, color 0.2s ease;
 
   ${CategoryInput}:checked + & {
@@ -149,4 +151,50 @@ export const Hint = styled.p`
   font-size: var(--mypage-caption-size, 0.625rem);
   line-height: 1.5;
   word-break: keep-all;
+`;
+
+export const JobTitleField = styled.div`
+  margin-top: 1rem;
+`;
+
+export const FieldTop = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+  color: #51576e;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
+  font-weight: 600;
+`;
+
+export const Count = styled.span`
+  color: #7c89a4;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+`;
+
+export const JobTitleInput = styled.input`
+  width: 100%;
+  height: var(--mypage-control-height, 1.875rem);
+  padding: 0 0.875rem;
+  border: 1px solid #e1e3e9;
+  border-radius: 0.25rem;
+  background: ${({ theme }) => theme.colors.surface.muted};
+  color: #51576e;
+  font-family: inherit;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
+
+  &::placeholder { color: #7c89a4; }
+  &[aria-invalid="true"] { border-color: #c24141; }
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.brand.blue};
+    outline-offset: 2px;
+  }
+  @media (max-width: 36rem) {
+    height: 2.75rem;
+    font-size: ${({ theme }) => theme.fontSize.md};
+  }
+`;
+
+export const FieldError = styled(Hint)`
+  color: #c24141;
 `;

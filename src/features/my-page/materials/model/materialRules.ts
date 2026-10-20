@@ -2,6 +2,10 @@ import type { MaterialError } from "@/features/my-page/api/materials";
 import { getDocumentTypeLabel } from "@/shared/constants/job/documentTypes";
 
 // 서버 검사(MaterialsValidator)와 같은 한도. 06 §3.3, Web 수정 사항 4.7.
+export const MAX_JOB_TITLE = 30;
+export const MAX_COVER_LETTERS = 5;
+export const MAX_COVER_LETTER_QUESTION = 200;
+export const MAX_COVER_LETTER_ANSWER = 2000;
 export const MAX_DOCUMENTS = 5;
 export const MAX_FILE_BYTES = 50 * 1024 * 1024;
 export const MAX_TOTAL_NEW_FILE_BYTES = 200 * 1024 * 1024;
@@ -33,6 +37,11 @@ export const isPdfFile = (file: File) =>
   file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 
 export const MATERIAL_MESSAGES = {
+  JOB_TITLE_REQUIRED: "직무명을 입력해 주세요",
+  JOB_TITLE_INVALID: "직무명은 30자까지 한 줄로 입력해 주세요",
+  MATERIAL_REQUIRED: "이력서 외에 경력기술서·포트폴리오·업무 산출물 중 1개를 올리거나 자소서를 1문항 이상 작성해 주세요",
+  COVER_LETTER_INCOMPLETE: "문항과 답을 모두 입력해 주세요",
+  COVER_LETTER_INVALID: "자소서는 5문항까지, 문항 200자·답 2,000자까지 쓸 수 있어요",
   JOB_ROLE_REQUIRED: "직무를 선택해 주세요",
   TOO_MANY_DOCUMENTS: "문서는 5개까지 올릴 수 있어요",
   DOC_TYPE_NOT_ALLOWED: "이 직무에서 받지 않는 문서 종류예요",
@@ -61,6 +70,12 @@ export const getTooManyPagesMessage = (totalPages: string | null) =>
 // 422 errors[] 한 건을 화면 문구로 바꾼다(06 §3.4, Web 수정 사항 4.4).
 export const getMaterialErrorMessage = (error: MaterialError, requiredDocuments: readonly string[]) => {
   switch (error.reason) {
+    case "JOB_TITLE_REQUIRED": return MATERIAL_MESSAGES.JOB_TITLE_REQUIRED;
+    case "JOB_TITLE_INVALID": return MATERIAL_MESSAGES.JOB_TITLE_INVALID;
+    case "MATERIAL_REQUIRED": return MATERIAL_MESSAGES.MATERIAL_REQUIRED;
+    case "COVER_LETTER_INVALID": return /^coverLetters\[\d+]$/.test(error.field) ? MATERIAL_MESSAGES.COVER_LETTER_INCOMPLETE : MATERIAL_MESSAGES.COVER_LETTER_INVALID;
+    case "JOB_TITLE_NOT_ALLOWED":
+    case "COVER_LETTER_NOT_ALLOWED": return MATERIAL_MESSAGES.MATERIALS_CHANGED;
     case "JOB_ROLE_REQUIRED":
       return MATERIAL_MESSAGES.JOB_ROLE_REQUIRED;
     case "NO_DOCUMENT":
