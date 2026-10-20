@@ -14,7 +14,7 @@ interface MultiInterviewerSlotsProps {
 const MultiInterviewerSlots = ({ activeSlot, slots, disabled, onSelectSlot }: MultiInterviewerSlotsProps) => (
   <S.Section aria-labelledby="multi-interviewer-slots-title">
     <S.SectionTitle id="multi-interviewer-slots-title">면접관 선택</S.SectionTitle>
-    <S.SlotGrid $count={slots.length}>
+    <S.SlotGrid>
       {slots.map((slot, index) => (
         <S.SlotButton key={index} $active={activeSlot === index}
           $filled={Boolean(slot.interviewer && slot.role)} disabled={disabled}

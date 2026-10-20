@@ -1,4 +1,5 @@
 import styled, { css, keyframes } from "styled-components";
+import { INTERVIEWER_SELECTION_CARD_SIZE } from "@/shared/constants/interview-page/setting-multi-interview";
 
 interface SlotButtonProps {
   $active: boolean;
@@ -19,6 +20,13 @@ const focusRing = css`
     outline: 0.15rem solid rgba(37, 126, 232, 0.48);
     outline-offset: 0.15rem;
   }
+`;
+
+const interviewerCardSize = css`
+  width: 100%;
+  min-width: 0;
+  min-height: 14rem;
+  aspect-ratio: 4 / 5;
 `;
 
 const loadingDots = keyframes`
@@ -116,11 +124,21 @@ export const MainGrid = styled.div`
   }
 `;
 
-export const InterviewerColumn = styled.div`
+export const InterviewerColumn = styled.div<{ $slotCount: number }>`
+  --interviewer-slot-columns: ${({ $slotCount }) => $slotCount};
+  --interviewer-slot-gap: 0.65rem;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+
+  @media (max-width: 64rem) {
+    --interviewer-slot-columns: 2;
+  }
+
+  @media (max-width: 32rem) {
+    --interviewer-slot-columns: 1;
+  }
 `;
 
 export const Section = styled.section`
@@ -135,22 +153,14 @@ export const SectionTitle = styled.h2`
   line-height: 1.25;
 `;
 
-export const SlotGrid = styled.div<{ $count: number }>`
+export const SlotGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(${({ $count }) => $count}, minmax(0, 1fr));
-  gap: 0.65rem;
-
-  @media (max-width: 64rem) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @media (max-width: 32rem) {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: repeat(var(--interviewer-slot-columns), minmax(0, 1fr));
+  gap: var(--interviewer-slot-gap);
 `;
 
 export const SlotButton = styled.button<SlotButtonProps>`
-  min-height: clamp(9.5rem, 24vh, 12.75rem);
+  ${interviewerCardSize}
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -174,8 +184,11 @@ export const SlotButton = styled.button<SlotButtonProps>`
 `;
 
 export const SlotImage = styled.img`
+  display: block;
   width: 100%;
-  height: clamp(4.5rem, 11vh, 6rem);
+  height: 45%;
+  min-height: 0;
+  flex-shrink: 0;
   object-fit: cover;
 `;
 
@@ -186,8 +199,8 @@ export const SlotBody = styled.span`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.75rem;
+  gap: 0.2rem;
+  padding: 0.5rem;
   text-align: center;
 `;
 
@@ -444,15 +457,7 @@ export const SelectedLabel = styled.span`
   font-weight: 500;
 `;
 
-export const IdentityRow = styled.div`
-  display: grid;
-  grid-template-columns: repeat(5, minmax(5rem, 1fr));
-  gap: 0.55rem;
-  overflow-x: auto;
-  padding-bottom: 0.3rem;
-`;
-
-export const IdentityButton = styled(ChoiceButton)`
+const IdentityButton = styled(ChoiceButton)`
   padding: 0.35rem;
   display: flex;
   flex-direction: column;
@@ -460,9 +465,93 @@ export const IdentityButton = styled(ChoiceButton)`
   gap: 0.4rem;
 `;
 
-export const IdentityImage = styled.img`
+const IdentityImage = styled.img`
   width: 100%;
   height: 4rem;
   object-fit: cover;
   border-radius: 0.3rem;
+`;
+
+export const InterviewerList = styled.div`
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min(100%, ${INTERVIEWER_SELECTION_CARD_SIZE.width});
+  grid-auto-rows: ${INTERVIEWER_SELECTION_CARD_SIZE.height};
+  gap: 0.65rem;
+  overflow-x: scroll;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  padding-bottom: 0.75rem;
+
+  &::-webkit-scrollbar {
+    height: 0.6rem;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #e4e7ec;
+    border-radius: 999rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #aeb3bd;
+    border-radius: 999rem;
+  }
+`;
+
+export const InterviewerCard = styled(IdentityButton)`
+  ${interviewerCardSize}
+  height: 100%;
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  scroll-snap-align: start;
+  border-width: 0.1rem;
+
+  &:focus-visible {
+    outline-offset: -0.2rem;
+  }
+`;
+
+export const InterviewerImage = styled(IdentityImage)`
+  display: block;
+  height: 52%;
+  min-height: 0;
+  flex-shrink: 1;
+  border-radius: 0;
+`;
+
+export const InterviewerInfo = styled.span`
+  width: 100%;
+  min-height: 48%;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  padding: 0.75rem;
+  text-align: left;
+`;
+
+export const InterviewerName = styled.span`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  font-size: ${({ theme }) => theme.fontSize.md};
+  font-weight: 600;
+  line-height: 1.4;
+
+  ${SelectedLabel} {
+    margin-top: 0;
+  }
+`;
+
+export const InterviewerDescription = styled.span`
+  color: #667085;
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-weight: 400;
+  line-height: 1.45;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 `;
