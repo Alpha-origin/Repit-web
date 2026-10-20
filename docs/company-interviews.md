@@ -6,9 +6,9 @@
 
 ## 화면과 API
 
-`/main/setting/interview` 또는 `/main/setting/interview/multi` → `/main/setting/interview/company?draftId=<uuid>` → `/main/interview/:id?draftId=<uuid>`.
+`/main/setting/interview` 또는 `/main/setting/interview/multi` → `/main/setting/interview/company?draftId=<uuid>` → `/main/setting/interview/preparing?draftId=<uuid>` → `/main/interview/:id?draftId=<uuid>`.
 
-사전 설정은 검증·초안 저장·다음 단계 이동만 한다. 최종 시작에서 기존 페르소나 저장 로직으로 생성 DTO를 만들고, 선택한 경우에만 `companyId`를 추가한다. 면접 생성은 `submitSetupDraft` 한 곳에서만 호출한다.
+사전 설정은 검증·초안 저장·다음 단계 이동만 한다. 기업 선택의 시작 버튼은 준비 페이지로 즉시 이동한다. 준비 페이지에서 기존 페르소나 저장 로직으로 생성 DTO를 만들고, 선택한 경우에만 `companyId`를 추가한다. 면접 생성은 `submitSetupDraft` 한 곳에서만 호출한다.
 
 - 목록: `GET /api/companies`. 검색 300ms 디바운스·최대 30자, 1자는 q 생략, 전체 분류는 category 생략. 요청 취소와 취소 여부 검사로 이전 결과가 현재 결과를 덮지 않는다.
 - 단건 복구: `GET /api/interviews/get?interviewId=…`. 사용자·면접 ID 확인 후 종료 상태를 처리한다.
@@ -62,3 +62,18 @@ Playwright는 기존 브라우저 검사처럼 외부 설치 경로를 지정할
 - 기존 면접 복구: 10개, 피드백 폴링: 11개, 녹화·종료·업로드: 22개 시나리오 통과.
 - 녹화 검사의 기존 설정 버튼명 2곳을 현재 화면의 ‘텍스트 답변’·‘영상/음성 답변’에 맞췄다.
 - 자체 리뷰: 생성 호출 단일화, POST 이전 저장, 소유자 변경 시 정리, 서버 준비 상태 확인, 문자열 문항 연결을 점검했다.
+
+## 준비 페이지 분리 (2026-10-20)
+
+- SOLO·MULTI 사전설정은 `SettingStepper`의 1단계, 기업 선택은 2단계, 준비 대기는 3단계를 표시한다.
+- 기업이 없으면 선택 화면을 건너뛰고 같은 준비 페이지로 이동한다.
+- 준비 페이지는 Re:pit 로고와 회전 인디케이터를 표시하고, 생성·준비·오류 및 재시도를 담당한다.
+- 제출된 사전설정 재접근과 면접 진입 데이터 복구도 준비 페이지로 연결한다. 새로고침은 저장된 생성 본문·멱등 키·면접 ID를 재사용한다.
+- 확정된 기업 오류는 기업 선택으로 돌아가 수정할 수 있다. 결과 불명 요청은 설정을 바꾸지 않고 같은 요청으로 확인한다.
+- `tests/company-setup.browser.mjs`에서 SOLO·MULTI 단계 표시, 준비 경로에서만 생성, READY + chatDelivered 진입 조건, 새로고침 복구, 확정 오류 후 선택 복귀를 확인한다. 실제 서버 전체 연동은 별도 확인이 필요하다.
+
+### 화면 시안
+
+![사전설정 단계 표시](images/interview-preparation/setup.png)
+![면접 준비 대기](images/interview-preparation/desktop.png)
+![모바일 준비 대기](images/interview-preparation/mobile.png)

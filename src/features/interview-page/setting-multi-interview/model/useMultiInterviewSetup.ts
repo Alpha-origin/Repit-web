@@ -61,7 +61,7 @@ export const useMultiInterviewSetup = () => {
     setErrorMessage("");
   };
 
-  // 면접 생성은 다음 단계(기업 선택)의 "면접 시작"에서 한다.
+  // 기업 선택을 마친 뒤 준비 페이지에서 면접을 생성한다.
   const handleNext = () => {
     if (!eligibility.canStart) return;
     const validationError = validateSelection(slots, interviewerCount);

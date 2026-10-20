@@ -1,7 +1,7 @@
 import { useInterviewEntry } from "@/features/interview-page/setting-company/model/useInterviewEntry";
 import { useUserStore } from "@/shared/store/userStore";
 import { loadSetupDraft } from "@/features/interview-page/setting-company/model/draftStore";
-import { COMPANY_SETTING_PATH } from "@/features/interview-page/setting-company/model/draft";
+import { INTERVIEW_PREPARING_PATH } from "@/features/interview-page/setting-company/model/draft";
 import CompanyBadge from "@/widgets/interview-page/company-badge";
 import { useMemo } from "react";
 import { Link, Navigate, useLocation, useParams } from "react-router-dom";
@@ -57,7 +57,7 @@ const InterviewPage = () => {
   if (!user.isLoaded) return <Loading message="로그인 정보를 확인하고 있어요" />;
   if (!preparedInterview || preparedInterview.interviewId !== Number(id) || preparedInterview.userId !== user.id) {
     const draft = loadSetupDraft(draftId);
-    if (draft?.submission?.interviewId === Number(id)) return <Navigate to={`${COMPANY_SETTING_PATH}?draftId=${draft.draftId}`} replace />;
+    if (draft?.submission?.interviewId === Number(id)) return <Navigate to={`${INTERVIEW_PREPARING_PATH}?draftId=${draft.draftId}`} replace />;
     return <S.PreparationErrorScreen role="alert">면접 정보를 복구할 수 없습니다. 사전 설정에서 다시 시작해주세요.<Link to="/main">메인으로 돌아가기</Link></S.PreparationErrorScreen>;
   }
 
