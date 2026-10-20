@@ -35,9 +35,11 @@ export const PortfolioWrapper = styled.section<{ $hasSupplements: boolean }>`
 `;
 
 export const Section = styled.section`
-  margin-top: var(--mypage-section-gap, 1.5rem);
+  margin-top: var(--mypage-section-gap, 2rem);
 
-  & + & { margin-top: 1.25rem; }
+  & + & {
+    margin-top: 3rem;
+  }
 `;
 
 export const SupplementSection = styled(Section)`

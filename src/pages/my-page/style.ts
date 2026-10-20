@@ -20,7 +20,7 @@ export const Page = styled.div`
     --mypage-card-padding: clamp(1.75rem, 2.61vw, 2.25rem);
     --mypage-section-gap: clamp(1.5rem, 2.61vw, 2.25rem);
     --mypage-heading-gap: clamp(0.375rem, 0.725vw, 0.625rem);
-    --mypage-supplement-gap: clamp(2rem, 2.9vw, 2.5rem);
+    --mypage-supplement-gap: clamp(3rem, 4vw, 3.5rem);
     --mypage-footer-gap: clamp(1.5rem, 2.61vw, 2.25rem);
     --mypage-button-height: clamp(2.125rem, 3.116vw, 2.6875rem);
     --mypage-button-width: clamp(4.5rem, 6.81vw, 5.875rem);
@@ -34,7 +34,7 @@ export const Page = styled.div`
     --mypage-supplement-min-height: clamp(36rem, 50.8vw, 43.8125rem);
     --mypage-column-gap: clamp(0.6875rem, 1.087vw, 0.9375rem);
     width: 84.4%;
-    padding-top: clamp(1.375rem, calc(12vw - 7rem), 3.1875rem);
+    padding-top: clamp(0.75rem, calc(12vw - 8rem), 2.1875rem);
   }
 
   @media (max-width: 48rem) {
