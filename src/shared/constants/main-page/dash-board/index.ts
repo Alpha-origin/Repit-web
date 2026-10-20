@@ -15,7 +15,7 @@ export const MAIN_PAGE_INTERVIEW_MODE_CARDS = [
         title: "꼬리질문",
       },
       {
-        description: "분석 Ai를 통한",
+        description: "분석 AI를 통한",
         title: "피드백",
       },
     ],
