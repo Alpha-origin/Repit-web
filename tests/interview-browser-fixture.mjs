@@ -4,7 +4,9 @@ import { pathToFileURL } from "node:url";
 const modulePath = process.env.PLAYWRIGHT_MODULE_PATH;
 const { chromium } = await import(modulePath ? pathToFileURL(modulePath).href : "playwright");
 export const origin = process.env.INTERVIEW_TEST_ORIGIN ?? "http://127.0.0.1:5173";
-export const browser = await chromium.launch({ headless: true, args: [
+export const browser = await chromium.launch({ headless: true,
+  ...(process.env.BROWSER_EXECUTABLE_PATH ? { executablePath: process.env.BROWSER_EXECUTABLE_PATH } : {}),
+  args: [
   "--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream",
   "--autoplay-policy=no-user-gesture-required",
 ] });
