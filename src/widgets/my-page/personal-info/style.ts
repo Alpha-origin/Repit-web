@@ -49,7 +49,7 @@ export const EditInput = styled.input`
   min-width: 0;
   height: var(--mypage-control-height, 1.875rem);
   padding: 0 0.625rem;
-  border: 1px solid #e1e3e9;
+  border: 1px solid transparent;
   border-radius: 0.25rem;
   outline: none;
   background: ${({ theme }) => theme.colors.white};
@@ -57,7 +57,11 @@ export const EditInput = styled.input`
   font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
-  &:focus-visible {
+  &:not([readonly]) {
+    border-color: #e1e3e9;
+  }
+
+  &:focus-visible:not([readonly]) {
     border-color: ${({ theme }) => theme.colors.brand.blue};
     box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.surface.blueLight};
   }
