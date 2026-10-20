@@ -7,6 +7,7 @@ import { useFeedbackInterview } from "@/features/feedback-page/model/useFeedback
 import FeedbackOverallBottomSection from "@/widgets/feedback-page/feedback-overall/bottom-section";
 import FeedbackOverallMiddleSection from "@/widgets/feedback-page/feedback-overall/middle-section";
 import FeedbackOverallTopSection from "@/widgets/feedback-page/feedback-overall/top-section";
+import Loading from "@/shared/components/loading";
 import { exportElementToPdf } from "@/shared/utils/exportElementToPdf";
 import { useRef, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -60,16 +61,14 @@ const FeedbackOverallPage = () => {
     }
   };
 
+  if (isLoading) {
+    return <Loading message={isSavingInterview ? "면접 기록을 저장하고 있어요" : "면접 정보를 불러오는 중입니다."} />;
+  }
+
   return (
     <S.Page>
       <S.Panel ref={panelRef}>
-        {isLoading ? (
-          <S.StateCard aria-live="polite">
-            <S.StateText>
-              {isSavingInterview ? "면접 기록을 저장하고 있어요" : "면접 정보를 불러오는 중입니다."}
-            </S.StateText>
-          </S.StateCard>
-        ) : errorMessage || !interview ? (
+        {errorMessage || !interview ? (
           <S.StateCard aria-live="polite">
             <S.StateText>{errorMessage ?? "면접 정보를 찾을 수 없습니다."}</S.StateText>
             <S.RetryButton type="button" onClick={() => void refetch()}>
