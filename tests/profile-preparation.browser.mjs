@@ -110,6 +110,8 @@ async function fixture(options = {}) {
       state.preparation = preparation("READY");
       return json({ success: true });
     }
+    // 면접 화면을 떠나려면 서버가 종료 상태를 확정해야 한다. 준비 중 이탈은 ABANDONED로 저장된다.
+    if (pathname.endsWith("/quit")) return json({ status: "ABANDONED" });
     if (pathname === "/api/persona/save") return json({ data: { personaId: ++state.personaCount } });
     if (pathname === "/api/interviews/create") state.createdPersonaIds = request.postDataJSON().personaIds ?? [1];
     if (pathname === "/api/interviews/create") return json({ data: {
