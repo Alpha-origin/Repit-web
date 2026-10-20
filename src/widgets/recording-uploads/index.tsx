@@ -9,6 +9,7 @@ import * as S from "./style";
 
 const RecordingUploads = () => {
   const jobs = useRecordingUploadStore((state) => state.jobs);
+  const visibleJobs = jobs.filter((job) => job.kind !== "ANSWER" || job.status !== "SUCCEEDED");
   useEffect(() => {
     const warnBeforeUnload = (event: BeforeUnloadEvent) => {
       if (!hasUnsavedRecordings()) return;
@@ -18,10 +19,10 @@ const RecordingUploads = () => {
     window.addEventListener("beforeunload", warnBeforeUnload);
     return () => window.removeEventListener("beforeunload", warnBeforeUnload);
   }, []);
-  if (!jobs.length) return null;
+  if (!visibleJobs.length) return null;
   return (
     <S.Panel aria-label="면접 녹화 업로드 상태">
-      {jobs.map((job) => (
+      {visibleJobs.map((job) => (
         <S.Job key={job.id}>
           <div role={job.status === "FAILED" ? "alert" : "status"}>
             면접 {job.interviewId} · {job.kind === "ANSWER" ? `질문 ${job.questionId} 음성` : "전체 영상"}
