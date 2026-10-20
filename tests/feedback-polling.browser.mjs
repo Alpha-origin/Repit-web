@@ -198,8 +198,11 @@ try {
   });
   const staleRequestCanceled = stale.page.waitForEvent("requestfailed", { predicate: (request) =>
     new URL(request.url()).pathname === "/api/feedbacks" && request.method() === "POST" });
+  const staleRequestSent = stale.page.waitForRequest((request) =>
+    new URL(request.url()).pathname === "/api/feedbacks" && request.method() === "POST");
   await stale.page.getByRole("button", { name: "다시 시도", exact: true }).click();
   await stale.page.getByRole("button", { name: "요청 중…", exact: true }).waitFor();
+  await staleRequestSent;
   await stale.page.clock.resume();
   await stale.page.evaluate(() => {
     window.history.pushState(window.history.state, "", "/main/feedback/overall/43");

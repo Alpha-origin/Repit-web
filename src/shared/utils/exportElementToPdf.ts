@@ -19,6 +19,9 @@ export const exportElementToPdf = async (
     windowWidth: Math.max(document.documentElement.clientWidth, element.scrollWidth),
     windowHeight: Math.max(document.documentElement.clientHeight, element.scrollHeight),
     onclone: (_document, clonedElement) => {
+      clonedElement.querySelectorAll<HTMLDetailsElement>("details[data-pdf-expand]").forEach((details) => {
+        details.open = true;
+      });
       // 스크롤 영역 안의 피드백도 화면 너비를 유지한 채 끝까지 내보낸다.
       let parent = clonedElement.parentElement;
       while (parent) {

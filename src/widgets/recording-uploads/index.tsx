@@ -9,7 +9,7 @@ import * as S from "./style";
 
 const RecordingUploads = () => {
   const jobs = useRecordingUploadStore((state) => state.jobs);
-  const visibleJobs = jobs.filter((job) => job.kind !== "ANSWER" || job.status !== "SUCCEEDED");
+  const visibleJobs = jobs.filter((job) => job.kind !== "ANSWER" || job.status === "FAILED");
   useEffect(() => {
     const warnBeforeUnload = (event: BeforeUnloadEvent) => {
       if (!hasUnsavedRecordings()) return;

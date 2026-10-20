@@ -19,8 +19,9 @@ async function openFeedback({ route = "overall", listStatus = "COMPLETED", feedb
       { id: 40, status: "COMPLETED", createdAt: "2026-10-18T12:00:00Z" },
     ] });
     if (pathname === "/api/interviews/get") {
-      const status = storedStatuses[Math.min(state.status++, storedStatuses.length - 1)];
-      return json({ data: { status } });
+      const read = state.status++;
+      const status = read === 0 ? listStatus : storedStatuses[Math.min(read - 1, storedStatuses.length - 1)];
+      return json({ data: { status, answerMode: "VOICE" } });
     }
     if (pathname === "/api/feedbacks/getAll") return json({ data: [
       { interviewId: 41, status: "SUCCEEDED", totalScore: 99 },
@@ -67,7 +68,7 @@ try {
     assert.equal(f.state.gets, gets);
     assert.equal(f.state.audio, audio);
     assert.equal(f.state.posts, 0);
-    assert.equal(f.state.status, 1);
+    assert.equal(f.state.status, 2);
     assert.equal(await f.page.getByText(succeeded.summary, { exact: true }).count(), 0);
     assert.equal(await f.page.getByRole("button", { name: /PDF/ }).count(), 0);
     await closed(f);
@@ -89,7 +90,7 @@ try {
   await duplicate.page.getByRole("button", { name: "다시 시도", exact: true }).click();
   await waitUntil(() => duplicate.state.gets === 2);
   assert.equal(duplicate.state.posts, 1);
-  assert.equal(duplicate.state.status, 2);
+  assert.equal(duplicate.state.status, 3);
   await closed(duplicate);
   report("completed duplicate 409 retains existing feedback lookup");
 

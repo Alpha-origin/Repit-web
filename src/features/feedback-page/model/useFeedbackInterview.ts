@@ -6,7 +6,7 @@ import {
   getInterviewAnswers,
   type InterviewAnswer,
 } from "@/features/feedback-page/api/getInterviewAnswers";
-import { getInterviewStatus } from "@/features/feedback-page/api/getInterviewStatus";
+import { getInterviewState, getInterviewStatus } from "@/features/feedback-page/api/getInterviewStatus";
 
 import {
   FeedbackInterviewPolicyError,
@@ -52,9 +52,14 @@ const waitFor = (ms: number, signal: AbortSignal) => new Promise<void>((resolve)
 });
 
 // 완료 직후에는 Chat → API 저장이 끝나기 전이라 IN_PROGRESS일 수 있어 정해진 시간만 다시 조회한다.
-const waitForInterviewCompletion = async (interviewId: number, signal: AbortSignal) => {
+const waitForInterviewCompletion = async (
+  interviewId: number,
+  signal: AbortSignal,
+  initialAnswerMode: InterviewSummary["answerMode"],
+) => {
   const deadline = Date.now() + INTERVIEW_SAVE_CHECK_TIMEOUT_MS;
   let status = "IN_PROGRESS";
+  let answerMode = initialAnswerMode;
   let error: unknown = null;
 
   while (!signal.aborted) {
@@ -70,7 +75,9 @@ const waitForInterviewCompletion = async (interviewId: number, signal: AbortSign
         INTERVIEW_SAVE_REQUEST_TIMEOUT_MS,
         Math.max(deadline - Date.now(), 1_000),
       );
-      status = (await getInterviewStatus(interviewId, { signal, timeout: requestTimeout })) ?? status;
+      const stored = await getInterviewState(interviewId, { signal, timeout: requestTimeout });
+      status = stored?.status ?? status;
+      answerMode = stored?.answerMode ?? null;
       if (status !== "IN_PROGRESS") break;
     } catch (requestError) {
       if (signal.aborted) break;
@@ -81,7 +88,7 @@ const waitForInterviewCompletion = async (interviewId: number, signal: AbortSign
     }
   }
 
-  return { status, error };
+  return { status, answerMode, error };
 };
 
 export const useFeedbackInterview = (id?: string, includePreviousFeedback = false) => {
@@ -160,13 +167,22 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
     setErrorMessage(null);
     setFeedbackErrorMessage(null);
 
-    const [interviewsResult, historyResult, answersResult] = await Promise.allSettled([
+    const [interviewsResult, historyResult, answersResult, stateResult] = await Promise.allSettled([
       getAllInterviews(),
       includePreviousFeedback ? getAllFeedbacks() : Promise.resolve([]),
       getInterviewAnswers(interviewId),
+      getInterviewState(interviewId, { signal: feedbackControllerRef.current.signal, timeout: 15_000 }),
     ]);
 
     if (requestId !== requestIdRef.current) {
+      return;
+    }
+
+    if (stateResult.status === "rejected" || !stateResult.value) {
+      setErrorMessage(stateResult.status === "rejected"
+        ? extractErrorMessage(stateResult.reason, "면접 정보를 불러오지 못했습니다.")
+        : "면접 정보를 확인할 수 없습니다.");
+      setIsLoading(false);
       return;
     }
 
@@ -180,9 +196,12 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
 
     if (interviewsResult.status === "fulfilled") {
       const sortedInterviews = sortInterviewsByCreatedAt(interviewsResult.value);
-      let nextInterview =
-        sortedInterviews.find((item) => getInterviewId(item) === interviewId) ??
-        null;
+      // 목록보다 단건 조회의 최신 상태와 답변 방식을 우선한다.
+      let nextInterview: InterviewSummary = {
+        ...sortedInterviews.find((item) => getInterviewId(item) === interviewId),
+        interviewId,
+        ...stateResult.value,
+      };
 
       setInterview(nextInterview);
       let saveCheckError: unknown = null;
@@ -191,7 +210,7 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
         const controller = new AbortController();
         saveCheckControllerRef.current = controller;
         setIsSavingInterview(true);
-        const result = await waitForInterviewCompletion(interviewId, controller.signal);
+        const result = await waitForInterviewCompletion(interviewId, controller.signal, nextInterview.answerMode);
 
         if (requestId !== requestIdRef.current) {
           return;
@@ -199,7 +218,7 @@ export const useFeedbackInterview = (id?: string, includePreviousFeedback = fals
 
         saveCheckControllerRef.current = null;
         setIsSavingInterview(false);
-        nextInterview = { ...nextInterview, status: result.status };
+        nextInterview = { ...nextInterview, status: result.status, answerMode: result.answerMode };
         saveCheckError = result.error;
         setInterview(nextInterview);
       }
