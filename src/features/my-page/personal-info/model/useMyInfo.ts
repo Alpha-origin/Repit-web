@@ -21,6 +21,7 @@ export const useMyInfo = () => {
     Partial<PersonalInfoDraft>
   >({});
   const [isFetching, setIsFetching] = useState(!isLoaded);
+  const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
@@ -62,7 +63,21 @@ export const useMyInfo = () => {
     };
   }, [isLoaded, setUser]);
 
+  const handleEdit = () => {
+    if (isLoading || isSaving) {
+      return;
+    }
+
+    setIsEditing(true);
+    setErrorMessage("");
+    setSaveMessage("");
+  };
+
   const handleFieldChange = (field: keyof PersonalInfoDraft, value: string) => {
+    if (!isEditing || isSaving) {
+      return;
+    }
+
     setDraftOverrides((previousDraft) => ({
       ...previousDraft,
       [field]: value,
@@ -72,7 +87,7 @@ export const useMyInfo = () => {
   };
 
   const handleSave = useCallback(async () => {
-    if (isSaving) {
+    if (!isEditing || isLoading || isSaving) {
       return;
     }
 
@@ -106,15 +121,18 @@ export const useMyInfo = () => {
     setIsSaving(false);
     setUser(savedUser ?? nextDraft);
     setDraftOverrides({});
+    setIsEditing(false);
     setSaveMessage("개인정보가 저장되었습니다.");
-  }, [draft, isSaving, setUser]);
+  }, [draft, isEditing, isLoading, isSaving, setUser]);
 
   return {
     draft,
     email,
     errorMessage,
+    isEditing,
     isLoading,
     isSaving,
+    onEdit: handleEdit,
     onFieldChange: handleFieldChange,
     onSave: handleSave,
     saveMessage,
