@@ -15,7 +15,7 @@ interface Props {
 
 const MultiInterviewerSettings = ({ slot, otherSlots, technical, disabled, onChange }: Props) => (
   <S.SettingsPanel disabled={disabled}>
-    <S.Section>
+    {/* <S.Section>
       <S.SectionTitle>성격/분위기</S.SectionTitle>
       <S.ChoiceRow $columns={3} role="group" aria-label="성격">
         {PERSONALITY_OPTIONS.map((option) => (
@@ -33,7 +33,7 @@ const MultiInterviewerSettings = ({ slot, otherSlots, technical, disabled, onCha
           </S.ChoiceButton>
         ))}
       </S.ChoiceRow>
-    </S.Section>
+    </S.Section> */}
     <S.Section>
       <S.SectionTitle>{technical ? "전문 분야" : "역할"}</S.SectionTitle>
       {technical ? <S.CatalogHint>{SOLO_MAJOR_GUIDANCE}</S.CatalogHint> : (
@@ -72,6 +72,25 @@ const MultiInterviewerSettings = ({ slot, otherSlots, technical, disabled, onCha
           );
         })}
       </S.IdentityRow>
+    </S.Section>
+        <S.Section>
+      <S.SectionTitle>성격/분위기</S.SectionTitle>
+      <S.ChoiceRow $columns={3} role="group" aria-label="성격">
+        {PERSONALITY_OPTIONS.map((option) => (
+          <S.ChoiceButton key={option.value} type="button" $selected={slot.personality === option.value}
+            aria-pressed={slot.personality === option.value} onClick={() => onChange({ personality: option.value })}>
+            {option.label}
+          </S.ChoiceButton>
+        ))}
+      </S.ChoiceRow>
+      <S.ChoiceRow $columns={3} role="group" aria-label="말투">
+        {TONE_OPTIONS.map((option) => (
+          <S.ChoiceButton key={option.value} type="button" $selected={slot.tone === option.value}
+            aria-pressed={slot.tone === option.value} onClick={() => onChange({ tone: option.value })}>
+            {option.label}
+          </S.ChoiceButton>
+        ))}
+      </S.ChoiceRow>
     </S.Section>
   </S.SettingsPanel>
 );

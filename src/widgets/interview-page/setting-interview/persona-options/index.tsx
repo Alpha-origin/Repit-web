@@ -1,5 +1,5 @@
 import { PERSONALITY_OPTIONS, TONE_OPTIONS } from '@/shared/constants/interview-page/setting-multi-interview';
-import { SOLO_MAJOR_GUIDANCE } from '@/shared/constants/interview-page/setting-interview';
+// import { SOLO_MAJOR_GUIDANCE } from '@/shared/constants/interview-page/setting-interview';
 import * as S from '../style';
 import type { PersonaOptionsProps } from './type';
 
@@ -26,10 +26,10 @@ const PersonaOptions = ({ personality, tone, onPersonalityChange, onToneChange }
         ))}
       </S.DifficultyGroup>
     </S.Section>
-    <S.Section>
+    {/* <S.Section>
       <S.Title>전문 분야</S.Title>
       <S.OptionDescription>{SOLO_MAJOR_GUIDANCE}</S.OptionDescription>
-    </S.Section>
+    </S.Section> */}
   </>
 );
 
