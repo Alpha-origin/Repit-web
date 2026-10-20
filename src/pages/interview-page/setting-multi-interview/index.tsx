@@ -1,4 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
+import { useCompanyNextLabel } from "@/features/interview-page/company/model/useCompanyNextLabel";
 import { COMPANY_SETTING_PATH } from "@/features/interview-page/setting-company/model/draft";
 import { loadSetupDraft } from "@/features/interview-page/setting-company/model/draftStore";
 import { useUserStore } from "@/shared/store/userStore";
@@ -16,6 +17,7 @@ import * as S from "@/widgets/interview-page/setting-multi-interview/style";
 
 const SettingMultiInterviewPage = () => {
   const setup = useMultiInterviewSetup();
+  const nextLabel = useCompanyNextLabel();
 
   return (
     <S.Container>
@@ -89,7 +91,7 @@ const SettingMultiInterviewPage = () => {
                   분석 중<S.LoadingDots aria-hidden="true" />
                 </>
               )
-              : "다음: 기업 선택"}
+              : nextLabel}
           </S.NextButton>
         </S.ActionRow>
       </S.Content>

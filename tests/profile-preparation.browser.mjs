@@ -110,6 +110,8 @@ async function fixture(options = {}) {
       state.preparation = preparation("READY");
       return json({ success: true });
     }
+    // 기업이 0개면 선택 단계를 건너뛰므로(05-web §3-3), 이 검사는 기업이 있는 기본 흐름을 쓴다.
+    if (pathname === "/api/companies") return json({ data: [{ companyId: 12, displayName: "테스트커머스", legalName: "테스트커머스", category: "CONSUMER", legalSize: null, talentKeywords: [], dataAsOf: "2026-10-19" }] });
     // 면접 화면을 떠나려면 서버가 종료 상태를 확정해야 한다. 준비 중 이탈은 ABANDONED로 저장된다.
     if (pathname.endsWith("/quit")) return json({ status: "ABANDONED" });
     if (pathname === "/api/persona/save") return json({ data: { personaId: ++state.personaCount } });

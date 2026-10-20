@@ -8,8 +8,10 @@ interface PersonalInfoProps {
   draft: PersonalInfoDraft;
   email: string;
   errorMessage: string;
+  isEditing: boolean;
   isLoading: boolean;
   isSaving: boolean;
+  onEdit: () => void;
   onFieldChange: (field: keyof PersonalInfoDraft, value: string) => void;
   onSave: () => void;
   saveMessage: string;
@@ -19,15 +21,21 @@ const PersonalInfo = ({
   draft,
   email,
   errorMessage,
+  isEditing,
   isLoading,
   isSaving,
+  onEdit,
   onFieldChange,
   onSave,
   saveMessage,
 }: PersonalInfoProps) => {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onSave();
+    if (isEditing) {
+      onSave();
+    } else {
+      onEdit();
+    }
   };
 
   return (
@@ -46,6 +54,7 @@ const PersonalInfo = ({
                 type="text"
                 autoComplete="name"
                 value={draft.name}
+                readOnly={!isEditing}
                 disabled={isSaving}
                 onChange={(event) => onFieldChange("name", event.target.value)}
               />
@@ -58,6 +67,7 @@ const PersonalInfo = ({
                 type="text"
                 autoComplete="nickname"
                 value={draft.nickname}
+                readOnly={!isEditing}
                 disabled={isSaving}
                 onChange={(event) =>
                   onFieldChange("nickname", event.target.value)
@@ -88,8 +98,12 @@ const PersonalInfo = ({
           </S.ResultMessage>
         )}
 
-        <S.SaveButton type="submit" aria-label="개인정보 저장" disabled={isLoading || isSaving}>
-          {isSaving ? "저장 중…" : "저장"}
+        <S.SaveButton
+          type="submit"
+          aria-label={isEditing ? "개인정보 저장" : "개인정보 수정"}
+          disabled={isLoading || isSaving}
+        >
+          {isSaving ? "저장 중…" : isEditing ? "저장" : "수정"}
         </S.SaveButton>
       </S.Form>
     </S.PersonalInfoWrapper>
