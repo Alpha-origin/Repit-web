@@ -35,23 +35,23 @@ export const JOB_ROLES = [
   dev("WEB_PUBLISHER", "웹 퍼블리셔"),
   {
     code: "DATA_ANALYST", label: "데이터 분석가", category: "NON_DEVELOPMENT", family: "데이터·인프라",
-    github: "HIDDEN", requiredDocuments: ["PORTFOLIO", "ANALYSIS_REPORT"],
-    optionalDocuments: ["COMPETITION_SUMMARY"], hasSupplement: true,
+    github: "OPTIONAL", requiredDocuments: ["PORTFOLIO", "ANALYSIS_REPORT"],
+    optionalDocuments: ["COMPETITION_SUMMARY"], hasSupplement: false,
   },
   {
     code: "DBA_INFRA", label: "DBA·인프라 엔지니어", category: "NON_DEVELOPMENT", family: "데이터·인프라",
-    github: "HIDDEN", requiredDocuments: ["PORTFOLIO", "CAREER_DESCRIPTION"],
-    optionalDocuments: ["INCIDENT_REPORT", "TABLE_SPEC", "SYSTEM_ARCHITECTURE"], hasSupplement: true,
+    github: "OPTIONAL", requiredDocuments: ["PORTFOLIO", "CAREER_DESCRIPTION"],
+    optionalDocuments: ["INCIDENT_REPORT", "TABLE_SPEC", "SYSTEM_ARCHITECTURE"], hasSupplement: false,
   },
   {
     code: "QA_ENGINEER", label: "QA 엔지니어", category: "NON_DEVELOPMENT", family: "품질·보안",
-    github: "HIDDEN", requiredDocuments: ["TEST_PLAN", "TEST_CASE"],
-    optionalDocuments: ["PORTFOLIO", "BUG_REPORT"], hasSupplement: true,
+    github: "OPTIONAL", requiredDocuments: ["TEST_PLAN", "TEST_CASE"],
+    optionalDocuments: ["PORTFOLIO", "BUG_REPORT"], hasSupplement: false,
   },
   {
     code: "SECURITY", label: "정보보안", category: "NON_DEVELOPMENT", family: "품질·보안",
-    github: "HIDDEN", requiredDocuments: ["VULNERABILITY_REPORT", "CTF_WRITEUP"],
-    optionalDocuments: ["PORTFOLIO"], hasSupplement: true,
+    github: "OPTIONAL", requiredDocuments: ["VULNERABILITY_REPORT", "CTF_WRITEUP"],
+    optionalDocuments: ["PORTFOLIO"], hasSupplement: false,
   },
   {
     code: "PRODUCT_MANAGER", label: "서비스 기획자 (PM·PO)", category: "NON_DEVELOPMENT", family: "기획·비즈니스",
