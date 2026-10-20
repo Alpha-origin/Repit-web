@@ -77,6 +77,6 @@ export type {
 } from './type';
 
 export const INTERVIEW_ANSWER_MODE_OPTIONS = [
-  { value: "voice", label: "영상/음성 답변", description: "카메라와 마이크로 답변합니다. 전체 영상과 답변 음성이 저장됩니다. 답변은 210초에 자동 완료됩니다." },
-  { value: "text", label: "텍스트 답변", description: "장치 권한 없이 글로 답변합니다. 영상과 음성은 녹화하지 않습니다." },
+  { value: "voice", label: "영상/음성"},
+  { value: "text", label: "텍스트"},
 ] as const;

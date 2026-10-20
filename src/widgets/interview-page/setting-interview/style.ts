@@ -404,5 +404,7 @@ export const AnswerModeGroup = styled.div`
 
 export const AnswerModeButton = styled(StyleOptionButton)`
   grid-template-columns: minmax(0, 1fr) 1.5rem;
-  min-height: 5rem;
+  min-height: 0;
+  height: 3.5rem;
+  padding: 0.5rem 1rem;
 `;

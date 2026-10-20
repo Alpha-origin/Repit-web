@@ -52,6 +52,7 @@ export const SectionTitle = styled.h2`
   line-height: 1.25;
 `;
 
+
 export const SortSelectWrapper = styled.div`
   position: relative;
   display: inline-flex;
@@ -60,54 +61,74 @@ export const SortSelectWrapper = styled.div`
   &::after {
     content: "";
     position: absolute;
-    right: 0.3rem;
-    width: 0.5rem;
-    height: 0.5rem;
-    border-right: 0.125rem solid #1a73e8;
-    border-bottom: 0.125rem solid #1a73e8;
+    right: 0.8rem;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-right: 0.1rem solid #1a73e8;
+    border-bottom: 0.1rem solid #1a73e8;
     pointer-events: none;
     transform: translateY(-0.12rem) rotate(45deg);
+  }
+`;
+export const SortControls = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  @media (max-width: 30rem) {
+    width: 100%;
+    flex-wrap: wrap;
   }
 `;
 
 export const SortSelect = styled.select`
   appearance: none;
-  min-height: 2rem;
-  border: none;
-  border-radius: 0.35rem;
-  background: transparent;
+  min-height: 2.8rem;
+  padding: 0.65rem 2.5rem 0.65rem 1rem;
+
+  border: 1px solid #d8e2f0;
+  border-radius: 0.5rem;
+  background: #f3f7ff;
   color: #1a73e8;
+
   cursor: pointer;
   font-family: inherit;
   font-size: 1rem;
-  font-weight: 800;
-  line-height: 1;
-  padding: 0.3rem 1.5rem 0.3rem 0.3rem;
+  font-weight: 600;
+  line-height: 1.4;
 
-  ${focusRing}
-`;
-
-export const SortControls = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline: none !important;
+    box-shadow: none !important;
+  }
 `;
 
 export const SortDirectionButton = styled.button`
-  min-height: 2rem;
-  border: 0.0625rem solid rgba(26, 115, 232, 0.32);
-  border-radius: 0.35rem;
-  background: transparent;
-  color: #1a73e8;
+  min-height: 2.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  padding: 0.65rem 1rem;
+
+  border: 1px solid #d8e2f0;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #344054;
+
   cursor: pointer;
   font-family: inherit;
   font-size: 1rem;
-  font-weight: 800;
-  line-height: 1;
-  padding: 0.3rem 0.6rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
 
   ${focusRing}
 `;
+
 
 export const List = styled.div`
   width: 100%;
