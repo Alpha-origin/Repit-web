@@ -20,7 +20,7 @@ const ServicePreview = () => (
               <strong>{card.title}</strong>
             </S.PreviewBanner>
             <S.PreviewDetails>
-              <S.PreviewBadge>Ai</S.PreviewBadge>
+              <S.PreviewBadge>AI</S.PreviewBadge>
               <S.PreviewFeatures>
                 {card.features.map((feature) => (
                   <span key={feature.title}>{feature.title}</span>

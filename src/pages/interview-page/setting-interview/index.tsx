@@ -9,11 +9,13 @@ import { useInterviewSetup } from "@/features/interview-page/setting-interview/m
 import AnswerModeOptions from "@/widgets/interview-page/setting-interview/answer-mode-options";
 import InterviewerOptions from "@/widgets/interview-page/setting-interview/interviewer-options";
 import SettingActions from "@/widgets/interview-page/setting-interview/setting-actions";
+import { useCompanyNextLabel } from "@/features/interview-page/company/model/useCompanyNextLabel";
 import SettingOptions from "@/widgets/interview-page/setting-interview/setting-options";
 import * as S from "@/widgets/interview-page/setting-interview/style";
 
 const SettingInterviewPage = () => {
   const setup = useInterviewSetup();
+  const nextLabel = useCompanyNextLabel();
 
   return (
     <S.Container>
@@ -52,7 +54,7 @@ const SettingInterviewPage = () => {
           isBusy={false}
           isNextDisabled={setup.isNextDisabled}
           isPortfolioAnalyzing={setup.isPortfolioAnalyzing}
-          nextLabel="다음: 기업 선택"
+          nextLabel={nextLabel}
           onBack={setup.onBack}
           onNext={setup.onNext}
         />

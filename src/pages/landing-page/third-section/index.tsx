@@ -18,7 +18,7 @@ const ThirdSection = () => {
       <S.Footer>
         <S.FooterInner>
           <S.FooterTop>
-            <S.FooterBrand>리핏 (Repit)</S.FooterBrand>
+            <S.FooterBrand>Repit</S.FooterBrand>
             <S.FooterLinks aria-label="사이트 정보">
               {THIRD_SECTION_FOOTER_LINKS.map((link, index) => (
                 <S.FooterLinkItem key={link}>
