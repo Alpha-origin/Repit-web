@@ -55,6 +55,9 @@ export const SOLO_MAJOR_GUIDANCE = '전문 분야는 마이페이지에서 선�
 export const INTERVIEW_SETTING_ACTION_LABELS = {
   back: '돌아가기',
   next: '다음',
+  nextToCompany: '다음: 기업 선택',
+  // 공개 기업이 없으면 기업 선택 단계를 건너뛴다(05-web §3-3 C0-6).
+  startWithoutCompanyStep: '면접 시작',
 } as const;
 
 export const INTERVIEW_SETTING_DEFAULT_SELECTION: InterviewSettingSelection = {
@@ -74,6 +77,6 @@ export type {
 } from './type';
 
 export const INTERVIEW_ANSWER_MODE_OPTIONS = [
-  { value: "voice", label: "영상/음성 답변", description: "카메라와 마이크로 답변합니다. 전체 영상과 답변 음성이 저장됩니다. 답변은 210초에 자동 완료됩니다." },
-  { value: "text", label: "텍스트 답변", description: "장치 권한 없이 글로 답변합니다. 영상과 음성은 녹화하지 않습니다." },
+  { value: "voice", label: "영상/음성"},
+  { value: "text", label: "텍스트"},
 ] as const;

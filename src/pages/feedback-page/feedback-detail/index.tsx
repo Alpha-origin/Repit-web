@@ -1,6 +1,7 @@
 import CompanyFeedback from "@/widgets/feedback-page/company-feedback";
 import { buildFeedbackDetailContent } from "@/features/feedback-page/model/feedbackDisplay";
 import { useFeedbackInterview } from "@/features/feedback-page/model/useFeedbackInterview";
+import Loading from "@/shared/components/loading";
 import { exportElementToPdf } from "@/shared/utils/exportElementToPdf";
 import FeedbackDetail from "@/widgets/feedback-page/feedback-detail";
 import { useRef, useState } from "react";
@@ -26,14 +27,14 @@ const FeedbackDetailPage = () => {
   const isAnalysisFailed = feedback?.status === "FAILED";
   const hasQuestionFeedback = (feedback?.feedbacks?.length ?? 0) > 0;
   const content =
-    feedback && !isAnalysisPending && !isAnalysisFailed && hasQuestionFeedback
+    interview?.status === "COMPLETED" && feedback && !isAnalysisPending && !isAnalysisFailed && hasQuestionFeedback
       ? buildFeedbackDetailContent(feedback, answers)
       : null;
   const panelRef = useRef<HTMLElement | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const handleDownloadPdf = async () => {
-    if (!panelRef.current || isDownloadingPdf) {
+    if (interview?.status !== "COMPLETED" || !panelRef.current || isDownloadingPdf) {
       return;
     }
 
@@ -50,13 +51,13 @@ const FeedbackDetailPage = () => {
     }
   };
 
+  if (isLoading) {
+    return <Loading message="면접 정보를 불러오는 중입니다." />;
+  }
+
   return (
     <S.Page>
-        {isLoading ? (
-          <S.StateCard aria-live="polite">
-            <S.StateText>면접 정보를 불러오는 중입니다.</S.StateText>
-          </S.StateCard>
-        ) : errorMessage || answersErrorMessage || !interview ? (
+        {errorMessage || answersErrorMessage || !interview ? (
           <S.StateCard aria-live="polite">
             <S.StateText>{errorMessage ?? answersErrorMessage ?? "면접 정보를 찾을 수 없습니다."}</S.StateText>
             <S.RetryButton type="button" onClick={() => void refetch()}>

@@ -1,5 +1,7 @@
+import SettingStepper from "@/widgets/interview-page/setting-stepper";
 import { Navigate, useLocation } from "react-router-dom";
-import { COMPANY_SETTING_PATH } from "@/features/interview-page/setting-company/model/draft";
+import { useCompanyNextLabel } from "@/features/interview-page/company/model/useCompanyNextLabel";
+import { INTERVIEW_PREPARING_PATH } from "@/features/interview-page/setting-company/model/draft";
 import { loadSetupDraft } from "@/features/interview-page/setting-company/model/draftStore";
 import { useUserStore } from "@/shared/store/userStore";
 import Loading from "@/shared/components/loading";
@@ -16,10 +18,12 @@ import * as S from "@/widgets/interview-page/setting-multi-interview/style";
 
 const SettingMultiInterviewPage = () => {
   const setup = useMultiInterviewSetup();
+  const nextLabel = useCompanyNextLabel();
 
   return (
     <S.Container>
       <S.Content>
+        <SettingStepper current={0} />
         <S.MainGrid>
           <S.SettingsPanel>
             <AnswerModeOptions
@@ -37,7 +41,7 @@ const SettingMultiInterviewPage = () => {
               }}
             />
           </S.SettingsPanel>
-          <S.InterviewerColumn>
+          <S.InterviewerColumn $slotCount={setup.selection.interviewerCount}>
             <S.Section>
               <S.SectionTitle>면접관 수</S.SectionTitle>
               <S.ChoiceRow $columns={3} role="group" aria-label="면접관 수">
@@ -89,7 +93,7 @@ const SettingMultiInterviewPage = () => {
                   분석 중<S.LoadingDots aria-hidden="true" />
                 </>
               )
-              : "다음: 기업 선택"}
+              : nextLabel}
           </S.NextButton>
         </S.ActionRow>
       </S.Content>
@@ -101,7 +105,7 @@ const AuthenticatedSettings = () => {
   const { isLoaded, id } = useUserStore();
   const location = useLocation();
   const saved = isLoaded ? loadSetupDraft(new URLSearchParams(location.search).get("draftId")) : null;
-  if (saved?.submission) return <Navigate to={`${COMPANY_SETTING_PATH}?draftId=${saved.draftId}`} replace />;
+  if (saved?.submission) return <Navigate to={`${INTERVIEW_PREPARING_PATH}?draftId=${saved.draftId}`} replace />;
   return isLoaded ? <SettingMultiInterviewPage key={id} /> : <Loading message="로그인 정보를 확인하고 있어요" />;
 };
 

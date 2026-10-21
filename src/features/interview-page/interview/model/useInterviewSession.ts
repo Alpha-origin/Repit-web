@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useBlocker, useNavigate } from "react-router-dom";
+import { getInterviewStatus } from "@/features/feedback-page/api/getInterviewStatus";
 
 import {
   clearActiveInterviewSessionId,
@@ -308,6 +309,7 @@ export const useInterviewSession = (
   const closePromiseRef = useRef<Promise<void> | null>(null);
   const quitPromiseRef = useRef<Promise<boolean> | null>(null);
   const hasQuitSucceededRef = useRef(false);
+  const terminalStatusRef = useRef<"COMPLETED" | "ABANDONED" | null>(null);
   const closeReasonRef = useRef<InterviewCloseReason | null>(null);
   const hasNavigatedRef = useRef(false);
   const fullRecordingStartedRef = useRef(false);
@@ -438,28 +440,42 @@ export const useInterviewSession = (
     return pending;
   }, [clearAnswerTimeout, preparedInterview?.interviewId, stopAnswerRecording]);
 
-  const saveQuit = useCallback((activeSessionId: string | null) => {
-    if (!activeSessionId || hasQuitSucceededRef.current) {
-      hasQuitSucceededRef.current = true;
-      return Promise.resolve(true);
+  const acceptTerminalStatus = useCallback((status: unknown) => {
+    if (status !== "COMPLETED" && status !== "ABANDONED") return false;
+    terminalStatusRef.current ??= status;
+    closeReasonRef.current = terminalStatusRef.current === "COMPLETED" ? "completed" : "quit";
+    hasQuitSucceededRef.current = true;
+    dispatch({ type: "SET_INTERVIEW_STATUS", status: terminalStatusRef.current });
+    setQuitError(null);
+    return true;
+  }, []);
+
+  const confirmStoredStatus = useCallback(async () => {
+    if (terminalStatusRef.current) return true;
+    try {
+      return acceptTerminalStatus(await getInterviewStatus(preparedInterview?.interviewId ?? 0, { timeout: 15_000 }));
+    } catch {
+      return terminalStatusRef.current !== null;
     }
+  }, [acceptTerminalStatus, preparedInterview?.interviewId]);
+
+  const saveQuit = useCallback((activeSessionId: string | null) => {
+    if (terminalStatusRef.current) return Promise.resolve(true);
     if (!quitPromiseRef.current) {
       setIsClosing(true);
-      quitPromiseRef.current = quitInterview(activeSessionId).then(({ errorMessage, statusCode }) => {
-        if (errorMessage && statusCode !== 404) {
-          setQuitError("면접 종료를 저장하지 못했어요. 다시 시도해 주세요.");
-          return false;
-        }
-        hasQuitSucceededRef.current = true;
-        setQuitError(null);
-        return true;
-      }).finally(() => {
+      quitPromiseRef.current = (async () => {
+        const response = activeSessionId ? await quitInterview(activeSessionId) : null;
+        const confirmed = (response && acceptTerminalStatus(response.data?.status)) ||
+          await confirmStoredStatus();
+        if (!confirmed) setQuitError("면접 종료 저장을 확인하지 못했어요. 다시 시도해 주세요.");
+        return confirmed;
+      })().finally(() => {
         quitPromiseRef.current = null;
         setIsClosing(false);
       });
     }
     return quitPromiseRef.current;
-  }, []);
+  }, [acceptTerminalStatus, confirmStoredStatus]);
 
   const endInterviewSession = useCallback(
     async (shouldNavigate: boolean, reason: InterviewCloseReason = "quit") => {
@@ -502,10 +518,11 @@ export const useInterviewSession = (
         await saveQuit(sessionIdRef.current ?? getActiveInterviewSessionId());
       if (!canLeave) return false;
       clearActiveInterviewSessionId();
-      if (shouldNavigate && closeReasonRef.current === reason && !hasNavigatedRef.current) {
+      const finalReason = closeReasonRef.current ?? reason;
+      if ((shouldNavigate || finalReason === "completed") && !hasNavigatedRef.current) {
         hasNavigatedRef.current = true;
-        navigate(getInterviewExitPath(reason), {
-          state: reason === "completed"
+        navigate(getInterviewExitPath(finalReason), {
+          state: finalReason === "completed"
             ? { answeredQuestionCount: displayQuestionNumberRef.current, interviewId: preparedInterview?.interviewId ?? null }
             : undefined,
         });
@@ -534,7 +551,10 @@ export const useInterviewSession = (
   const closeLatestRef = useRef(endInterviewSession);
   useEffect(() => { closeLatestRef.current = endInterviewSession; }, [endInterviewSession]);
   useEffect(() => {
-    const unregister = registerInterviewLifecycle(() => closeLatestRef.current(false, "quit"));
+    const unregister = registerInterviewLifecycle(async () => {
+      const canLeave = await closeLatestRef.current(false, "quit");
+      return canLeave && terminalStatusRef.current !== "COMPLETED";
+    });
     const warnBeforeUnload = (event: BeforeUnloadEvent) => {
       if (!hasPendingFullRecording() && !hasPendingAnswerRecording()) return;
       event.preventDefault();
@@ -555,6 +575,7 @@ export const useInterviewSession = (
   useEffect(() => {
     if (blocker.state !== "blocked") return;
     void endInterviewSession(false, "quit").then((canLeave) => {
+      if (canLeave && terminalStatusRef.current === "COMPLETED") return;
       if (canLeave) blocker.proceed();
       else blocker.reset();
     });
@@ -564,28 +585,29 @@ export const useInterviewSession = (
     ({
       question,
       status,
+      type,
     }: {
+      type?: string | null;
       message: string | null;
       question: CurrentInterviewQuestion | null;
       status: InterviewProgressStatus | null;
     }) => {
-      if (isSessionClosedRef.current) return;
-
-      if (question) {
-        syncCurrentQuestion(question);
-      }
-
-      if (!status) {
+      if (acceptTerminalStatus(status)) {
+        void endInterviewSession(true, terminalStatusRef.current === "COMPLETED" ? "completed" : "quit");
         return;
       }
-
-      dispatch({ type: "SET_INTERVIEW_STATUS", status });
-
-      if (status === "COMPLETED") {
-        void endInterviewSession(true, "completed");
+      if (isSessionClosedRef.current) return;
+      if (type === "END") {
+        void confirmStoredStatus().then((confirmed) => {
+          if (confirmed) void endInterviewSession(true, terminalStatusRef.current === "COMPLETED" ? "completed" : "quit");
+          else setQuitError("면접 종료 저장을 확인하지 못했어요. 다시 시도해 주세요.");
+        });
+        return;
       }
+      if (question) syncCurrentQuestion(question);
+      if (status) dispatch({ type: "SET_INTERVIEW_STATUS", status });
     },
-    [endInterviewSession, syncCurrentQuestion],
+    [acceptTerminalStatus, confirmStoredStatus, endInterviewSession, syncCurrentQuestion],
   );
 
   useInterviewSocket({
@@ -803,6 +825,13 @@ export const useInterviewSession = (
         content: trimmedContent,
       });
 
+      if (acceptTerminalStatus(data?.status)) {
+        clearAwaitingResponseTimeout();
+        setIsAwaitingNextQuestion(false);
+        await endInterviewSession(true, terminalStatusRef.current === "COMPLETED" ? "completed" : "quit");
+        return;
+      }
+
       if (isSessionClosedRef.current) return;
 
       if (errorMessage) {
@@ -817,13 +846,6 @@ export const useInterviewSession = (
 
       if (data?.status) {
         dispatch({ type: "SET_INTERVIEW_STATUS", status: data.status });
-
-        if (data.status === "COMPLETED") {
-          clearAwaitingResponseTimeout();
-          setIsAwaitingNextQuestion(false);
-          await endInterviewSession(true, "completed");
-          return;
-        }
       }
 
       const responseQuestion = data?.question ?? null;
@@ -843,7 +865,7 @@ export const useInterviewSession = (
         const { data: nextQuestion } = await getCurrentInterviewQuestion(activeSessionId);
 
         if (
-          nextQuestion &&
+          !isSessionClosedRef.current && nextQuestion &&
           !isSameQuestionPrompt(nextQuestion, submittedQuestion)
         ) {
           advanceCurrentQuestion(nextQuestion);
@@ -887,6 +909,10 @@ export const useInterviewSession = (
   };
   const handleQuitInterview = async () => {
     if (!(await endInterviewSession(false, "quit"))) return;
+    if (terminalStatusRef.current === "COMPLETED") {
+      clearPendingInterviewLeave();
+      return;
+    }
     if (!(await resumePendingInterviewLeave())) await endInterviewSession(true, "quit");
   };
 

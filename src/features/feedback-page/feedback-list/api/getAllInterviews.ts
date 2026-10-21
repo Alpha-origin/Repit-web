@@ -12,6 +12,7 @@ export interface InterviewPersona {
   personaRole?: string;
   personaName?: string;
   major?: string;
+  jobTitle?: string | null;
   type?: string;
   career?: number;
   gender?: string;
@@ -117,6 +118,17 @@ interface FeedbackAcceptedResponse {
   message?: string;
 }
 
+export class FeedbackInterviewPolicyError extends Error {
+  readonly interviewStatus: string | null;
+
+  constructor(interviewStatus: string | null) {
+    super(interviewStatus === "ABANDONED"
+      ? "중단된 면접은 피드백을 생성하지 않습니다."
+      : "면접이 완료된 것을 확인한 뒤 피드백을 생성할 수 있습니다.");
+    this.interviewStatus = interviewStatus;
+  }
+}
+
 const feedbackRequests = new Map<number, Promise<FeedbackData>>();
 const feedbackLookups = new Map<number, Promise<FeedbackData>>();
 
@@ -207,7 +219,7 @@ export const getFeedback = async (interviewId: number, signal?: AbortSignal) => 
   }
 };
 
-export const requestFeedback = (interviewId: number): Promise<FeedbackData> => {
+export const requestFeedback = (interviewId: number, signal?: AbortSignal): Promise<FeedbackData> => {
   const existingRequest = feedbackRequests.get(interviewId);
 
   if (existingRequest) {
@@ -216,17 +228,15 @@ export const requestFeedback = (interviewId: number): Promise<FeedbackData> => {
 
   const request = (async (): Promise<FeedbackData> => {
     // 목록에 남아 있는 이전 상태로 중단된 면접의 생성·재생성을 요청하지 않는다.
-    const status = await getInterviewStatus(interviewId, { timeout: 15_000 });
+    const status = await getInterviewStatus(interviewId, { signal, timeout: 15_000 });
     if (status !== "COMPLETED") {
-      throw new Error(status === "ABANDONED"
-        ? "중단된 면접은 피드백을 생성하지 않습니다."
-        : "면접이 완료된 것을 확인한 뒤 피드백을 생성할 수 있습니다.");
+      throw new FeedbackInterviewPolicyError(status);
     }
 
     const response = await apiInstance.post<ApiResponse<FeedbackAcceptedResponse>>(
       GET_FEEDBACK_URL,
       undefined,
-      { params: { interviewId } },
+      { params: { interviewId }, signal },
     );
 
     if (!response.data.success || !response.data.data) {
@@ -251,7 +261,7 @@ export const requestFeedback = (interviewId: number): Promise<FeedbackData> => {
   return request;
 };
 
-export const getOrRequestFeedback = (interviewId: number) => {
+export const getOrRequestFeedback = (interviewId: number, signal?: AbortSignal) => {
   const existingRequest = feedbackRequests.get(interviewId) ?? feedbackLookups.get(interviewId);
 
   if (existingRequest) {
@@ -259,8 +269,8 @@ export const getOrRequestFeedback = (interviewId: number) => {
   }
 
   const request = (async () => {
-    const feedback = await getFeedback(interviewId);
-    return feedback ?? requestFeedback(interviewId);
+    const feedback = await getFeedback(interviewId, signal);
+    return feedback ?? requestFeedback(interviewId, signal);
   })().finally(() => {
     feedbackLookups.delete(interviewId);
   });

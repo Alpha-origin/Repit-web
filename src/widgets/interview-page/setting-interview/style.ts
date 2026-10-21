@@ -67,7 +67,7 @@ export const Sections = styled.div`
   display: grid;
   grid-template-columns: minmax(18rem, 0.58fr) minmax(0, 1fr);
   gap: ${({ theme }) => theme.spacing.lg};
-  align-items: start;
+  align-items: stretch;
 
   @media (max-width: 60rem) {
     grid-template-columns: 1fr;
@@ -404,5 +404,7 @@ export const AnswerModeGroup = styled.div`
 
 export const AnswerModeButton = styled(StyleOptionButton)`
   grid-template-columns: minmax(0, 1fr) 1.5rem;
-  min-height: 5rem;
+  min-height: 0;
+  height: 3.5rem;
+  padding: 0.5rem 1rem;
 `;

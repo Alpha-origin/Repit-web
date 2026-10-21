@@ -1,5 +1,6 @@
+import SettingStepper from "@/widgets/interview-page/setting-stepper";
 import { Navigate, useLocation } from "react-router-dom";
-import { COMPANY_SETTING_PATH } from "@/features/interview-page/setting-company/model/draft";
+import { INTERVIEW_PREPARING_PATH } from "@/features/interview-page/setting-company/model/draft";
 import { loadSetupDraft } from "@/features/interview-page/setting-company/model/draftStore";
 import { useUserStore } from "@/shared/store/userStore";
 import Loading from "@/shared/components/loading";
@@ -9,15 +10,18 @@ import { useInterviewSetup } from "@/features/interview-page/setting-interview/m
 import AnswerModeOptions from "@/widgets/interview-page/setting-interview/answer-mode-options";
 import InterviewerOptions from "@/widgets/interview-page/setting-interview/interviewer-options";
 import SettingActions from "@/widgets/interview-page/setting-interview/setting-actions";
+import { useCompanyNextLabel } from "@/features/interview-page/company/model/useCompanyNextLabel";
 import SettingOptions from "@/widgets/interview-page/setting-interview/setting-options";
 import * as S from "@/widgets/interview-page/setting-interview/style";
 
 const SettingInterviewPage = () => {
   const setup = useInterviewSetup();
+  const nextLabel = useCompanyNextLabel();
 
   return (
     <S.Container>
       <S.ContentWrapper>
+        <SettingStepper current={0} />
         <S.Sections>
           <SettingOptions
             onSelect={setup.select}
@@ -52,7 +56,7 @@ const SettingInterviewPage = () => {
           isBusy={false}
           isNextDisabled={setup.isNextDisabled}
           isPortfolioAnalyzing={setup.isPortfolioAnalyzing}
-          nextLabel="다음: 기업 선택"
+          nextLabel={nextLabel}
           onBack={setup.onBack}
           onNext={setup.onNext}
         />
@@ -65,7 +69,7 @@ const AuthenticatedSettings = () => {
   const { isLoaded, id } = useUserStore();
   const location = useLocation();
   const saved = isLoaded ? loadSetupDraft(new URLSearchParams(location.search).get("draftId")) : null;
-  if (saved?.submission) return <Navigate to={`${COMPANY_SETTING_PATH}?draftId=${saved.draftId}`} replace />;
+  if (saved?.submission) return <Navigate to={`${INTERVIEW_PREPARING_PATH}?draftId=${saved.draftId}`} replace />;
   return isLoaded ? <SettingInterviewPage key={id} /> : <Loading message="로그인 정보를 확인하고 있어요" />;
 };
 

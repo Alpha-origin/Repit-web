@@ -4,6 +4,7 @@ import type { FeedbackOverallBottomSectionProps } from "../type";
 const FeedbackOverallBottomSection = ({
   content,
   speechAnalysis,
+  videoAnalysis,
   onRetrySpeechAnalysis,
   isDownloadingPdf = false,
   onDownloadPdf,
@@ -19,6 +20,8 @@ const FeedbackOverallBottomSection = ({
           {speechAnalysis.canRetry ? <S.SpeechRetryButton type="button" onClick={onRetrySpeechAnalysis} data-html2canvas-ignore="true">음성 정보 다시 확인</S.SpeechRetryButton> : null}
         </S.SpeechCard>
       ) : null}
+
+      {videoAnalysis}
 
       <S.BottomGrid>
         <S.KeywordCard aria-label="자주 사용한 단어">

@@ -4,7 +4,6 @@ import { MULTI_INTERVIEWER_TEMPLATES } from "@/shared/constants/interview-page/s
 import { useCompanySetup } from "@/features/interview-page/setting-company/model/useCompanySetup";
 import { useUserStore } from "@/shared/store/userStore";
 import Loading from "@/shared/components/loading";
-import ProfileGuidance from "@/widgets/interview-page/profile-guidance";
 import CompanyPicker from "@/widgets/interview-page/company-picker";
 import SettingStepper from "@/widgets/interview-page/setting-stepper";
 import * as Setting from "@/widgets/interview-page/setting-interview/style";
@@ -14,12 +13,26 @@ const SettingCompanyPage = () => {
   const setup = useCompanySetup();
   const settings = setup.draft?.settings;
   const companyName = setup.selectedCompany?.displayName ?? "선택한 기업";
-  const isPreparing = setup.preparationState === "PREPARING";
-  const isCreated = !!setup.draft?.submission?.interviewId;
-  const isUnknown = !!setup.draft?.submission && !isCreated;
   const interviewerNames = settings?.mode === "SOLO"
     ? MULTI_INTERVIEWER_TEMPLATES.find((item) => item.key === settings.interviewerKey)?.name
     : settings?.slots.map((slot) => slot.interviewer?.name).join(", ");
+
+  if (setup.hasDraft && setup.isDecidingSkip && !setup.locked) {
+    return (
+      <Setting.Container>
+        <Setting.ContentWrapper>
+          <S.Notice role="status">면접 설정을 확인하고 있어요.</S.Notice>
+          <S.Footer>
+            <S.Button type="button" onClick={setup.onBack}>설정 수정</S.Button>
+          </S.Footer>
+        </Setting.ContentWrapper>
+      </Setting.Container>
+    );
+  }
+
+  if (setup.hasDraft && (setup.skipStep || setup.locked)) {
+    return <Loading message="면접 설정을 확인하고 있어요" />;
+  }
 
   return (
     <Setting.Container>
@@ -61,23 +74,12 @@ const SettingCompanyPage = () => {
             ) : null}
             <S.Disclaimer><S.InfoIcon aria-hidden="true">i</S.InfoIcon>{COMPANY_DISCLAIMER}</S.Disclaimer>
             <S.Description>기준일은 자료를 수집한 시점이며, 모든 사실의 작성일이나 현재 유효성을 뜻하지 않습니다.</S.Description>
-            {setup.showMyPageLink ? <ProfileGuidance message="" showMyPageLink /> : null}
             {setup.errorMessage ? <Setting.ErrorMessage role="alert">{setup.errorMessage}</Setting.ErrorMessage> : null}
-            {isPreparing ? <S.Notice role="status">면접을 준비하고 있어요. 준비가 끝나면 면접 화면으로 이동합니다.</S.Notice> : null}
-            {isUnknown && !setup.isSubmitting ? <S.Notice role="status">생성 결과를 확인 중인 요청이 있습니다. 설정을 유지한 채 같은 요청으로 복구합니다.</S.Notice> : null}
             <S.Footer>
               <S.Button type="button" disabled={setup.locked} onClick={setup.onBack}>돌아가기</S.Button>
-              {isCreated ? (
-                <S.Button type="button" disabled={setup.isSubmitting || isPreparing} onClick={() => void setup.onRetryPreparation()}>
-                  {setup.canRetryPreparation ? "면접 준비 다시 시도" : "준비 상태 다시 확인"}
-                </S.Button>
-              ) : (
-                <S.StartButton type="button"
-                  disabled={setup.isSubmitting} onClick={() => void setup.onStart()}>
-                  {setup.isSubmitting ? "생성 결과 확인 중…" : isUnknown ? "같은 요청으로 결과 확인" : setup.selectedCompanyId === null ? "기업 없이 면접 시작" : `${companyName} 관점으로 면접 시작`}
-                </S.StartButton>
-              )}
-              {isCreated ? <Link to={`/main/setting/interview${settings?.mode === "MULTI" ? "/multi" : ""}`}>새 면접 만들기</Link> : null}
+              <S.StartButton type="button" onClick={setup.onStart}>
+                {setup.selectedCompanyId === null ? "기업 없이 면접 시작" : `${companyName} 관점으로 면접 시작`}
+              </S.StartButton>
             </S.Footer>
           </>
         )}

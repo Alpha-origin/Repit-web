@@ -23,7 +23,7 @@ const AnswerModeOptions = ({
         >
           <S.StyleTextGroup>
             <S.OptionLabel>{option.label}</S.OptionLabel>
-            <S.OptionDescription>{option.description}</S.OptionDescription>
+            {/* <S.OptionDescription>{option.description}</S.OptionDescription> */}
           </S.StyleTextGroup>
           <S.SelectionCircle
             $selected={answerMode === option.value}

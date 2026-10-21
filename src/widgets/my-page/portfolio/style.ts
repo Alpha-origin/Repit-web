@@ -35,9 +35,11 @@ export const PortfolioWrapper = styled.section<{ $hasSupplements: boolean }>`
 `;
 
 export const Section = styled.section`
-  margin-top: var(--mypage-section-gap, 1.5rem);
+  margin-top: var(--mypage-section-gap, 2rem);
 
-  & + & { margin-top: 1.25rem; }
+  & + & {
+    margin-top: 3rem;
+  }
 `;
 
 export const SupplementSection = styled(Section)`
@@ -311,4 +313,38 @@ export const SaveButton = styled.button`
     opacity: 1;
   }
   @media (max-width: 36rem) { flex: 1; }
+`;
+
+export const DocumentGuide = styled.div`
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid #dfe5ed;
+  border-radius: 0.375rem;
+  background: ${({ theme }) => theme.colors.surface.blueLight};
+  color: #748095;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
+  line-height: 1.6;
+  word-break: keep-all;
+
+  p + p { margin-top: 0.375rem; }
+`;
+
+export const DocumentKinds = styled.p`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+`;
+
+export const DocumentTypeBadge = styled.span`
+  padding: 0.125rem 0.375rem;
+  border: 1px solid #dfe5ed;
+  border-radius: 0.25rem;
+  background: ${({ theme }) => theme.colors.white};
+  color: #51576e;
+  font-size: var(--mypage-caption-size, 0.625rem);
+`;
+
+export const CoverLetterDescription = styled(FieldHint)`
+  margin-bottom: 0.75rem;
 `;

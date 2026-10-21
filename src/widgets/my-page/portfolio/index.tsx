@@ -1,6 +1,7 @@
 import type { ChangeEvent, KeyboardEvent, ReactNode, RefObject } from "react";
 
 import type {
+  CoverLetterRow,
   DocumentRow,
   MaterialFormErrors,
   SaveStatus,
@@ -13,6 +14,7 @@ import { getUploadGuides } from "@/shared/constants/job/uploadGuides";
 
 import DocumentList from "./document-list";
 import SupplementForm from "./supplement-form";
+import CoverLetterForm from "./cover-letter-form";
 import { CloseIcon } from "./icons";
 import * as S from "./style";
 
@@ -22,6 +24,12 @@ interface PortfolioProps {
   job: string | null;
   githubRule: GithubRule;
   hasSupplements: boolean;
+  hasCoverLetters: boolean;
+  coverLetters: CoverLetterRow[];
+  onCoverLetterAdd: () => void;
+  onCoverLetterRemove: (rowId: string) => void;
+  onCoverLetterChange: (rowId: string, field: "question" | "answer", value: string) => void;
+  onCoverLetterExample: (rowId: string, text: string) => void;
   documents: DocumentRow[];
   documentSectionRef: RefObject<HTMLElement | null>;
   fileInputRef: RefObject<HTMLInputElement | null>;
@@ -59,6 +67,12 @@ const Portfolio = ({
   job,
   githubRule,
   hasSupplements,
+  hasCoverLetters,
+  coverLetters,
+  onCoverLetterAdd,
+  onCoverLetterRemove,
+  onCoverLetterChange,
+  onCoverLetterExample,
   documents,
   documentSectionRef,
   fileInputRef,
@@ -90,6 +104,7 @@ const Portfolio = ({
   onReanalyze,
 }: PortfolioProps) => {
   const jobRole = getJobRole(job);
+  const isGeneralJob = jobRole?.category === "GENERAL";
   const isGitAddDisabled = !gitInput.trim();
   const requiredDocuments = jobRole?.requiredDocuments ?? ["PORTFOLIO"];
   const requiredLabel = requiredDocuments.length === 1
@@ -110,17 +125,24 @@ const Portfolio = ({
 
       <S.Section ref={documentSectionRef} aria-labelledby="portfolio-document-title">
         <S.SectionHeading>
-          <S.SectionTitle id="portfolio-document-title">자료</S.SectionTitle>
-          <S.RequiredBadge>{requiredLabel}</S.RequiredBadge>
-          <S.GuideDetails>
+          <S.SectionTitle id="portfolio-document-title">{isGeneralJob ? "문서" : "자료"}</S.SectionTitle>
+          <S.RequiredBadge>{isGeneralJob ? "둘 중 1개 이상" : requiredLabel}</S.RequiredBadge>
+          {!isGeneralJob && <S.GuideDetails>
             <S.GuideSummary>내용이 정밀할수록 가이드 정밀도 <strong>UP</strong></S.GuideSummary>
             <S.Guide>
               {getUploadGuides(job).map((guide) => <p key={guide}>{guide}</p>)}
               <p>필수 자료: {requiredDocuments.map(getDocumentTypeLabel).join(" · ")} 중 1개 이상</p>
               {!jobRole && <p>직무를 선택하면 해당 직무의 자료를 첨부할 수 있어요.</p>}
             </S.Guide>
-          </S.GuideDetails>
+          </S.GuideDetails>}
         </S.SectionHeading>
+        {isGeneralJob && (
+          <S.DocumentGuide>
+            {getUploadGuides(job).map((guide) => <p key={guide}>{guide}</p>)}
+            <S.DocumentKinds>받는 종류 {jobRole.optionalDocuments.map((type) => <S.DocumentTypeBadge key={type}>{getDocumentTypeLabel(type)}</S.DocumentTypeBadge>)}</S.DocumentKinds>
+            <p>이력서 외 자료 1개 이상(문서 또는 자소서), 최대 5개, 합계 50쪽, PDF만</p>
+          </S.DocumentGuide>
+        )}
         <DocumentList
           jobRole={jobRole}
           documents={documents}
@@ -130,7 +152,7 @@ const Portfolio = ({
           onTypeChange={onDocumentTypeChange}
           onAttachClick={onDocumentAttachClick}
         />
-        <S.FieldHint>가능한 파일 형식 - PDF, 최대 5개, 합계 50쪽</S.FieldHint>
+        {!isGeneralJob && <S.FieldHint>가능한 파일 형식 - PDF, 최대 5개, 합계 50쪽</S.FieldHint>}
         <S.HiddenFileInput
           ref={fileInputRef}
           type="file"
@@ -140,6 +162,25 @@ const Portfolio = ({
         />
         {errors.documents && <S.FieldError role="alert">{errors.documents}</S.FieldError>}
       </S.Section>
+
+      {hasCoverLetters && (
+        <S.Section aria-labelledby="cover-letter-section-title">
+          <S.SectionHeading>
+            <S.SectionTitle id="cover-letter-section-title">자소서</S.SectionTitle>
+            <S.RequiredBadge>둘 중 1개 이상</S.RequiredBadge>
+          </S.SectionHeading>
+          <S.CoverLetterDescription>지원하는 회사의 자소서 문항을 그대로 옮겨 적어 주세요. 문항이 없으면 예시 문항으로 시작할 수 있어요.</S.CoverLetterDescription>
+          <CoverLetterForm
+            coverLetters={coverLetters}
+            rowErrors={errors.coverLetterRows}
+            onAdd={onCoverLetterAdd}
+            onRemove={onCoverLetterRemove}
+            onChange={onCoverLetterChange}
+            onExample={onCoverLetterExample}
+          />
+          {errors.coverLetters && <S.FieldError role="alert">{errors.coverLetters}</S.FieldError>}
+        </S.Section>
+      )}
 
       {githubRule !== "HIDDEN" && (
         <S.Section aria-labelledby="github-section-title">

@@ -10,6 +10,7 @@ import type {
   InterviewerTone,
 } from "@/shared/constants/interview-page/setting-multi-interview";
 
+export const INTERVIEW_PREPARING_PATH = "/main/setting/interview/preparing";
 export const COMPANY_SETTING_PATH = "/main/setting/interview/company";
 
 type AnswerMode = "voice" | "text";

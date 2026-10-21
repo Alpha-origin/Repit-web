@@ -1,84 +1,85 @@
 import styled from "styled-components";
 
-export const Card = styled.section`
-  width: min(100%, 38rem);
+export const Content = styled.section`
+  width: min(100%, 40rem);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.35rem;
-  padding: 3rem 2rem 2.2rem;
-  border: 1px solid rgba(112, 140, 190, 0.18);
-  border-radius: 2rem;
-  background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.98), rgba(240, 246, 255, 0.94)),
-    #ffffff;
-  box-shadow: 0 1rem 2.5rem rgba(61, 102, 171, 0.12);
+  flex-shrink: 0;
+  margin-block: auto;
   text-align: center;
 `;
 
-export const Badge = styled.span`
-  padding: 0.45rem 0.8rem;
-  border-radius: 999px;
-  background: rgba(59, 130, 246, 0.1);
-  color: #2867c7;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+export const CompletionIcon = styled.img`
+  display: block;
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: ${({ theme }) => theme.spacing.md};
 `;
 
 export const Title = styled.h1`
   margin: 0;
-  color: #111827;
-  font-size: clamp(1.9rem, 2.4vw, 2.4rem);
-  font-weight: 800;
-  letter-spacing: -0.05rem;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: clamp(1.5rem, 2.4vw, ${({ theme }) => theme.fontSize.xl});
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.04em;
 `;
 
 export const Description = styled.p`
-  margin: 0;
-  color: #4b5563;
-  font-size: 1rem;
-  line-height: 1.7;
+  margin: ${({ theme }) => theme.spacing.xs} 0 0;
+  color: #888888;
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  line-height: 1.5;
+  word-break: keep-all;
 `;
 
 export const ActionRow = styled.div`
-  width: 100%;
-  display: flex;
-  gap: 0.9rem;
-  margin-top: 0.5rem;
+  width: min(100%, 23.5rem);
+  display: grid;
+  grid-template-columns: 1.08fr 1fr;
+  gap: ${({ theme }) => theme.spacing.sm};
+  margin-top: 1.75rem;
 
-  @media (max-width: 40rem) {
-    flex-direction: column;
+  @media (max-width: 25rem) {
+    grid-template-columns: 1fr;
   }
 `;
 
 const BaseButton = styled.button`
-  flex: 1;
-  min-height: 3.2rem;
-  border-radius: 1rem;
-  font-size: 1rem;
-  font-weight: 700;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
+  border-radius: ${({ theme }) => theme.radius.sm};
+  font-family: inherit;
+  font-size: ${({ theme }) => theme.fontSize.md};
+  font-weight: 500;
+  line-height: 1.5;
   cursor: pointer;
-  transition:
-    transform 0.16s ease,
-    box-shadow 0.16s ease,
-    background-color 0.16s ease;
+  transition: background-color 0.16s ease;
 
-  &:hover {
-    transform: translateY(-1px);
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.brand.blueAction};
+    outline-offset: 3px;
   }
 `;
 
 export const PrimaryButton = styled(BaseButton)`
-  border: none;
-  background: linear-gradient(135deg, #2f6ee5, #4f8ffc);
-  color: #ffffff;
-  box-shadow: 0 0.8rem 1.8rem rgba(47, 110, 229, 0.22);
+  border: 1px solid ${({ theme }) => theme.colors.brand.blue};
+  background: ${({ theme }) => theme.colors.brand.blue};
+  color: ${({ theme }) => theme.colors.white};
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.brand.blueAction};
+  }
 `;
 
 export const SecondaryButton = styled(BaseButton)`
-  border: 1px solid rgba(112, 140, 190, 0.28);
-  background: #ffffff;
-  color: #334155;
+  border: 1px solid ${({ theme }) => theme.colors.brand.blueLight};
+  background: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.brand.blue};
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.surface.blueLight};
+  }
 `;

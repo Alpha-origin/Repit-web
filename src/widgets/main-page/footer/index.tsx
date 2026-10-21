@@ -17,10 +17,6 @@ const MainPageFooter = () => {
             <span>면접 준비 파트너 Repit과 함께</span>
             <span>당신의 커리어를 시작하세요.</span>
           </S.PromotionDescription>
-          <S.GuideCallout>
-            <span>AI 모의 면접이 궁금하다면?</span>
-            <S.GuideLink to={MAIN_PAGE_GUIDE_ROUTE}>AI모의 면접 알아보기</S.GuideLink>
-          </S.GuideCallout>
         </S.PromotionContent>
         <ServicePreview />
       </S.PromotionCard>
