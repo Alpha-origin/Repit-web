@@ -36,6 +36,7 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_CHAT_URL: ${{ secrets.VITE_CHAT_URL }}
           VITE_TTS_API_KEY: ${{ secrets.VITE_TTS_API_KEY }}
+          VITE_VIDEO_ANALYSIS_UI_ENABLED: ${{ vars.VITE_VIDEO_ANALYSIS_UI_ENABLED }}
 
           VITE_ELEVENLABS_VOICE_ID1: ${{ secrets.VITE_ELEVENLABS_VOICE_ID1 }}
           VITE_ELEVENLABS_VOICE_ID2: ${{ secrets.VITE_ELEVENLABS_VOICE_ID2 }}
