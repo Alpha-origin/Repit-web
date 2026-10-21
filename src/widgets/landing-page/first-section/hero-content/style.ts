@@ -11,6 +11,15 @@ export const ContentContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  @media (max-width: 56.25rem) {
+    height: auto;
+    min-height: 100dvh;
+    padding: 6rem 1.5rem 2rem;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.5rem;
+  }
 `;
 
 export const LeftSection = styled.div`
@@ -20,6 +29,14 @@ export const LeftSection = styled.div`
   align-items: flex-start;
   text-align: left;
   padding-top: 4rem;
+
+  @media (max-width: 56.25rem) {
+    flex: none;
+    width: 100%;
+    align-items: center;
+    text-align: center;
+    padding-top: 0;
+  }
 `;
 
 export const RightSection = styled.div`
@@ -27,6 +44,11 @@ export const RightSection = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+
+  @media (max-width: 56.25rem) {
+    flex: none;
+    width: 100%;
+  }
 `;
 
 export const BrowserImage = styled.img`
@@ -35,6 +57,12 @@ export const BrowserImage = styled.img`
   height: auto;
   object-fit: contain;
   margin-top: 6rem;
+
+  @media (max-width: 56.25rem) {
+    width: 100%;
+    max-width: 28rem;
+    margin-top: 0;
+  }
 `;
 
 export const Badge = styled.div`
@@ -73,6 +101,8 @@ export const Subtitle = styled.p`
   color: #FFFFFF;
   font-weight: 300;
   opacity: 0.9;
+  line-height: 1.5;
+  word-break: keep-all;
 `;
 
 export const StartButton = styled.button`

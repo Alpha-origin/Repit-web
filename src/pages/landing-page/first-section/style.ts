@@ -8,6 +8,11 @@ export const Section = styled.section`
   overflow: hidden;
   background-color: #0E0814;
   color: ${({ theme }) => theme.colors.white};
+
+  @media (max-width: 56.25rem) {
+    height: auto;
+    min-height: 100dvh;
+  }
 `;
 
 export const BackgroundGlow = styled.div`
