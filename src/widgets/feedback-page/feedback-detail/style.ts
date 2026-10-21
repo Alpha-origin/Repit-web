@@ -259,6 +259,72 @@ export const IntentBadge = styled.span`
   line-height: 1.3;
 `;
 
+export const CompetencySection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+`;
+
+export const CompetencySectionTitle = styled.h3`
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 0.8125rem;
+  font-weight: 600;
+`;
+
+export const CompetencyChipList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+`;
+
+export const CompetencyChip = styled.div`
+  flex: 1 1 16rem;
+  min-width: min(100%, 16rem);
+  max-width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #d8e4f5;
+  border-radius: 0.5rem;
+  background: #f7faff;
+`;
+
+export const CompetencyChipHeading = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.5rem;
+  margin-bottom: 0.375rem;
+`;
+
+export const CompetencyChipLabel = styled.strong`
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 0.75rem;
+  font-weight: 600;
+`;
+
+export const CompetencyChipMeta = styled.span`
+  color: #687383;
+  font-size: 0.6875rem;
+`;
+
+export const CompetencyQuote = styled.p`
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.375rem;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+
+  span { color: ${({ theme }) => theme.colors.brand.blue}; }
+`;
+
+export const ResponseNote = styled.p`
+  color: #80501d;
+  font-size: 0.75rem;
+  line-height: 1.4;
+`;
+
 export const AnswerGrid = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.025fr);

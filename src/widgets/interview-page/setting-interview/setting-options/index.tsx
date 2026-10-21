@@ -11,15 +11,15 @@ import type {
 
 const SettingOptions = ({ onSelect, selection, children }: SettingOptionsProps) => (
   <S.ControlColumn>
-    <StyleOptions
-      onSelect={onSelect.style}
-      selectedValue={selection.style}
-    />
+    {children}
     <DifficultyOptions
       onSelect={onSelect.difficulty}
       selectedValue={selection.difficulty}
     />
-    {children}
+    <StyleOptions
+      onSelect={onSelect.style}
+      selectedValue={selection.style}
+    />
   </S.ControlColumn>
 );
 

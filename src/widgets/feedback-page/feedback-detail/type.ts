@@ -12,6 +12,13 @@ export interface FeedbackDetailQuestionItem {
   strengths: readonly string[];
   improvements: readonly string[];
   comment: string;
+  competencyChips?: readonly {
+    label: string;
+    roleLabel: "주 평가" | "추가 근거";
+    verdictLabel: string;
+    quotes: readonly string[];
+  }[];
+  responseNote?: string;
 }
 
 export interface FeedbackDetailTopSectionData {
