@@ -46,9 +46,13 @@ export const InfoIcon = styled.span`
 export const Footer = styled.div`
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-end;
-  gap: 0.75rem 1.5rem;
+  gap: 0.75rem;
+
+  > button {
+    min-height: 2.75rem;
+  }
 `;
 
 export const Summary = styled.p`
@@ -86,11 +90,10 @@ export const Button = styled.button`
 `;
 
 export const StartButton = styled(Button)`
-  min-height: 3rem;
   width: auto;
-  min-width: min(100%, 16rem);
+  min-width: 0;
   max-width: 100%;
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
+  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
   color: ${({ theme }) => theme.colors.white};
   background: ${({ theme }) => theme.colors.brand.blue};
   border-color: ${({ theme }) => theme.colors.brand.blue};
