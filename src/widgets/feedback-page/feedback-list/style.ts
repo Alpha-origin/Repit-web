@@ -35,7 +35,6 @@ export const Toolbar = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0 0.4rem;
 
   @media (max-width: 34rem) {
     align-items: flex-start;
@@ -262,6 +261,7 @@ export const CardImage = styled.img`
 
 export const CardBody = styled.div`
   min-width: 0;
+  align-self: start;
   display: flex;
   flex-direction: column;
   gap: 0.55rem;

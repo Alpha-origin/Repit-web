@@ -157,7 +157,7 @@ export const DetailScrollArea = styled.div`
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
-  padding: 0.75rem 2.375rem 1.5rem 1.375rem;
+  padding: 0.75rem 1.375rem 1.5rem;
 
   @media (max-width: 60rem) { padding: 0.75rem 1.25rem 1.5rem; }
   @media (max-width: 44rem) { flex-shrink: 0; overflow: visible; padding: 0.75rem 1rem 1.5rem; }
@@ -271,8 +271,7 @@ export const AnswerGrid = styled.div`
 export const ModelAnswerCard = styled(DetailCard)`
   grid-column: 2;
   grid-row: 1 / 3;
-  padding: 1.625rem;
-  @media (max-width: 44rem) { grid-column: auto; grid-row: auto; padding: 1.125rem 1.375rem; }
+  @media (max-width: 44rem) { grid-column: auto; grid-row: auto; }
 `;
 
 export const SummaryGrid = styled.section`
