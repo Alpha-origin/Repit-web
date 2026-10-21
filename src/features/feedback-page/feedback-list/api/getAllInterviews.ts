@@ -60,6 +60,33 @@ export interface QuestionFeedback {
   strengths?: string[];
   improvements?: string[];
   comment?: string;
+  followUpQuestion?: string | null;
+  responseLevel?: number | null;
+  axisScores?: Record<string, number | null> | null;
+  competencies?: QuestionCompetency[] | null;
+}
+
+export type CompetencyCode =
+  | "PROBLEM_SOLVING"
+  | "KNOWLEDGE"
+  | "OWNERSHIP"
+  | "COLLABORATION"
+  | "GROWTH";
+
+export type Verdict = "STRONG" | "SOLID" | "BORDERLINE" | "WEAK";
+
+export interface QuestionCompetency {
+  competency: CompetencyCode | "MOTIVATION";
+  role: "PRIMARY" | "SECONDARY";
+  level: number;
+  score: number;
+  evidence: { slot: string; quote: string }[];
+}
+
+export interface CredibilityIssue {
+  kind: "ROLE" | "TECH_CHOICE" | "CAUSE" | "DETAIL" | "OTHER";
+  questionIds: string[];
+  quotes: string[];
 }
 
 export interface FeedbackPersona {
@@ -72,12 +99,22 @@ export interface FeedbackPersona {
   improvements?: string[];
   answeredCount?: number;
   questionCount?: number;
+  scoreBreakdown?: ScoreBreakdown | null;
 }
 
 export interface ScoreBreakdown {
   scoringVersion?: string;
-  axes?: { axis: string; score: number | null; weight: number | null }[];
+  axes?: {
+    axis: string;
+    score: number | null;
+    weight: number | null;
+    verdict?: Verdict | null;
+    evidenceCount?: number;
+  }[];
   consistencyScore?: number | null;
+  response?: { score: number; hitCount: number; gradedCount: number } | null;
+  motivation?: { score: number | null; verdict?: Verdict | null; evidenceCount: number } | null;
+  credibility?: { score: number | null; issues: CredibilityIssue[] } | null;
 }
 
 export interface FeedbackData {
