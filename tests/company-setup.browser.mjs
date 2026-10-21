@@ -151,7 +151,7 @@ try {
       const f = await fixture({ mode });
       await f.navigate(`/main/setting/interview${mode === "MULTI" ? "/multi" : ""}?draftId=${f.draftId}`);
       await f.page.locator('[aria-current="step"]').filter({ hasText: "면접 사전설정" }).waitFor();
-      await f.page.getByRole("button", { name: "다음: 기업 선택", exact: true }).click();
+      await f.page.getByRole("button", { name: "다음", exact: true }).click();
       await f.page.getByRole("radio", { name: "테스트커머스", exact: true }).waitFor();
       assert.equal(f.state.creates.length, 0);
       if (selected) await f.page.getByRole("radio", { name: "테스트커머스", exact: true }).check();
@@ -205,10 +205,10 @@ try {
     assert.equal((await f.draft()).companyId, 12);
     await f.page.getByRole("button", { name: "테스트커머스 관점으로 면접 시작", exact: true }).waitFor();
     await f.page.getByRole("button", { name: "설정 수정", exact: true }).click();
-    await f.page.getByRole("button", { name: "다음: 기업 선택", exact: true }).waitFor();
+    await f.page.getByRole("button", { name: "다음", exact: true }).waitFor();
     assert.equal(f.state.creates.length, 0);
     await f.page.reload();
-    await f.page.getByRole("button", { name: "다음: 기업 선택", exact: true }).click();
+    await f.page.getByRole("button", { name: "다음", exact: true }).click();
     await f.page.getByRole("radio", { name: "테스트커머스", exact: true }).waitFor();
     assert.equal(await f.page.getByRole("radio", { name: "테스트커머스", exact: true }).isChecked(), true);
     f.state.listFail = true;

@@ -11,7 +11,7 @@ interface LoadingProps {
     message?: string;
 }
 
-const Loading = ({ message = "로딩 중..." }: LoadingProps) => {
+export const LoadingSpinner = () => {
     const [frameIndex, setFrameIndex] = useState(0);
 
     useEffect(() => {
@@ -23,12 +23,18 @@ const Loading = ({ message = "로딩 중..." }: LoadingProps) => {
     }, []);
 
     return (
+        <S.Spinner aria-hidden="true">
+        <S.LoadingImage src={loadingFrames[frameIndex]} alt="" aria-hidden="true" />
+        </S.Spinner>
+    );
+};
+
+const Loading = ({ message = "로딩 중..." }: LoadingProps) => {
+    return (
         <S.Container>
         <S.BackgroundImage src={MainBackground} alt="" aria-hidden="true" />
         <S.LoadingBox>
-            <S.Spinner>
-            <S.LoadingImage src={loadingFrames[frameIndex]} alt="" aria-hidden="true" />
-            </S.Spinner>
+            <LoadingSpinner />
             <S.Text>{message}</S.Text>
         </S.LoadingBox>
         </S.Container>

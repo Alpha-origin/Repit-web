@@ -55,7 +55,7 @@ export const SOLO_MAJOR_GUIDANCE = '전문 분야는 마이페이지에서 선�
 export const INTERVIEW_SETTING_ACTION_LABELS = {
   back: '돌아가기',
   next: '다음',
-  nextToCompany: '다음: 기업 선택',
+  nextToCompany: '다음',
   // 공개 기업이 없으면 기업 선택 단계를 건너뛴다(05-web §3-3 C0-6).
   startWithoutCompanyStep: '면접 시작',
 } as const;

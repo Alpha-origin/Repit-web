@@ -7,10 +7,10 @@ export const Page = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem 1.5rem 7rem;
+  padding: 2rem 1.5rem;
   overflow-y: auto;
 
   @media (max-width: ${({ theme }) => theme.layout.mobileBreakpoint}) {
-    padding: 2rem 1rem 4rem;
+    padding: 2rem 1rem;
   }
 `;

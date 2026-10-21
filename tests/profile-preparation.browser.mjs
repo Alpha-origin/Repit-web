@@ -297,7 +297,7 @@ try {
     for (const [status, materials, allowed] of [["COMPLETED", false, true], ["NONE", true, true], ["NONE", false, false], ["PENDING", true, false], ["FAILED", true, false], ["ERROR", true, false]]) {
       const f = await fixture({ profile: profile(status === "ERROR" ? "COMPLETED" : status, status === "FAILED" ? "INTERNAL" : null), profileError: status === "ERROR", materials });
       await f.navigate(path);
-      const next = f.page.getByRole("button", { name: status === "PENDING" ? /^분석 중/ : "다음: 기업 선택", exact: status !== "PENDING" });
+      const next = f.page.getByRole("button", { name: status === "PENDING" ? /^분석 중/ : "다음", exact: status !== "PENDING" });
       const guidance = status === "ERROR" ? "테스트 상태 조회 실패" : status === "NONE" ? materials ? "첫 면접은 준비에 몇 분 걸릴 수 있어요" : "마이페이지에서 자료를 등록해 주세요" : status === "PENDING" ? "자료 분석이 끝나면 시작할 수 있어요" : status === "FAILED" ? "분석 중 문제가 생겼어요" : null;
       if (guidance) await f.page.getByText(guidance, { exact: true }).waitFor();
       await expectEnabled(next, allowed);
@@ -315,7 +315,7 @@ try {
   for (const [path, reversePersonas] of [["/main/setting/interview", false], ["/main/setting/interview/multi", false], ["/main/setting/interview/multi", true]]) {
     const f = await fixture({ start404: true, preparation: preparation("NOT_REQUESTED"), reversePersonas });
     await f.navigate(path);
-    const next = f.page.getByRole("button", { name: "다음: 기업 선택", exact: true });
+    const next = f.page.getByRole("button", { name: "다음", exact: true });
     await expectEnabled(next, true);
     if (path.endsWith("multi")) {
       for (const [index, name] of ["김도윤", "이서준", "박지민"].entries()) {

@@ -58,7 +58,7 @@ export const SectionTitle = styled.h3`
   color: #51576e;
   font-size: var(--mypage-title-size, 1.25rem);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.4;
 `;
 
 export const Label = styled.label`

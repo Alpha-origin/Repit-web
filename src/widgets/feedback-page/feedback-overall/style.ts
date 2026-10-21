@@ -26,7 +26,6 @@ export const HeadingRow = styled.div`
   gap: 1rem;
   min-height: 1.875rem;
   margin-bottom: -0.5rem;
-  padding-left: 0.5rem;
 `;
 
 export const PageHeading = styled.h1`
