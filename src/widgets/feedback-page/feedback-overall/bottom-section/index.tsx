@@ -46,6 +46,18 @@ const FeedbackOverallBottomSection = ({
               <S.ReliabilityBadge>{reliability.scoreLabel}</S.ReliabilityBadge>
               <S.ReliabilityBadge>{reliability.levelLabel}</S.ReliabilityBadge>
             </S.ReliabilityBadges>
+            {reliability.issues?.length ? <S.CredibilityIssueList aria-label="답변 간 모순">
+              {reliability.issues.map((issue, index) => (
+                <S.CredibilityIssue key={`${issue.title}-${index}`}>
+                  <S.CredibilityIssueTitle>{issue.title}</S.CredibilityIssueTitle>
+                  {issue.quotes.map((quote, quoteIndex) => (
+                    <S.CredibilityQuote key={`${issue.questionLabels[quoteIndex]}-${quoteIndex}`}>
+                      {issue.questionLabels[quoteIndex]} “{quote}”
+                    </S.CredibilityQuote>
+                  ))}
+                </S.CredibilityIssue>
+              ))}
+            </S.CredibilityIssueList> : null}
           </S.ReliabilityCard>
           {onDownloadPdf ? (
             <S.PdfButton

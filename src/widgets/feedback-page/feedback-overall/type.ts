@@ -4,7 +4,9 @@ export interface FeedbackOverallMetric {
   label: string;
   score: number | null;
   description?: string;
-  emptyLabel?: "해당 없음" | "미제공";
+  emptyLabel?: "해당 없음" | "미제공" | "이번 면접에서 확인되지 않음";
+  verdictLabel?: string;
+  note?: string;
 }
 
 export interface FeedbackOverallPersonaFeedback {
@@ -32,6 +34,7 @@ export interface FeedbackOverallTopSectionData {
     title: string;
     score: number | null;
     description: readonly string[];
+    responseLabel?: string;
   };
   metrics: readonly FeedbackOverallMetric[];
   evaluation: string;
@@ -46,6 +49,12 @@ export interface FeedbackOverallMiddleSectionData {
   comparison: {
     previousScore: number | null;
     currentScore: number | null;
+    note?: string;
+  };
+  motivation?: {
+    score: number;
+    verdictLabel?: string;
+    note: string;
   };
   showPersonaFeedback: boolean;
   personaFeedbacks: readonly FeedbackOverallPersonaFeedback[];
@@ -56,6 +65,7 @@ export interface FeedbackOverallBottomSectionData {
     title: string;
     scoreLabel: string;
     levelLabel: string;
+    issues?: readonly { title: string; questionLabels: readonly [string, string]; quotes: readonly [string, string] }[];
   };
   keywords: {
     items: readonly FeedbackOverallKeywordItem[];
