@@ -109,6 +109,14 @@ export const DescriptionLine = styled.p`
   overflow-wrap: anywhere;
 `;
 
+export const ResponseLabel = styled.p`
+  margin-top: 0.5rem;
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.4;
+`;
+
 export const MetricsCard = styled.article`
   ${cardSurface}
   display: flex;
@@ -133,9 +141,9 @@ export const SectionCaption = styled.p`
   line-height: 1.4;
 `;
 
-export const MetricGrid = styled.div`
+export const MetricGrid = styled.div<{ $columns?: number }>`
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(${({ $columns = 4 }) => $columns}, minmax(0, 1fr));
   gap: 0.625rem;
 
   @media (max-width: 48rem) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -164,6 +172,23 @@ export const MetricValue = styled.strong`
   font-weight: 600;
   white-space: nowrap;
   line-height: 1.2;
+`;
+
+export const MetricVerdict = styled.span`
+  width: fit-content;
+  padding: 0.1875rem 0.4375rem;
+  border-radius: 999px;
+  background: #eaf2ff;
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.2;
+`;
+
+export const MetricNote = styled.span`
+  color: #687383;
+  font-size: 0.625rem;
+  line-height: 1.3;
 `;
 
 export const ProgressTrack = styled.div`
@@ -285,6 +310,16 @@ export const ComparisonDescription = styled.div`
   white-space: nowrap;
 `;
 
+export const ComparisonNote = styled.p`
+  max-width: 15rem;
+  margin-top: 0.625rem;
+  color: #687383;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: normal;
+`;
+
 export const ComparisonHighlight = styled.strong`
   margin-right: 0.125rem;
   color: ${({ theme }) => theme.colors.brand.blue};
@@ -344,6 +379,40 @@ export const PersonaFeedbackList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.625rem;
+`;
+
+export const MotivationCard = styled.article`
+  ${cardSurface}
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+
+  @media (max-width: 30rem) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+`;
+
+export const MotivationTitle = styled.h3`
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 0.875rem;
+  font-weight: 600;
+`;
+
+export const MotivationNote = styled.p`
+  margin-top: 0.25rem;
+  color: #687383;
+  font-size: 0.75rem;
+  line-height: 1.4;
+`;
+
+export const MotivationScore = styled.strong`
+  flex-shrink: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 0.9375rem;
+  font-weight: 600;
 `;
 
 export const PersonaFeedbackCard = styled.article`
@@ -536,6 +605,36 @@ export const ReliabilityBadge = styled.span`
   line-height: 1.2;
   text-align: center;
   white-space: nowrap;
+`;
+
+export const CredibilityIssueList = styled.ul`
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-top: 0.75rem;
+`;
+
+export const CredibilityIssue = styled.li`
+  min-width: 0;
+  padding: 0.625rem;
+  border-radius: 0.375rem;
+  background: #fff5ec;
+`;
+
+export const CredibilityIssueTitle = styled.strong`
+  display: block;
+  margin-bottom: 0.375rem;
+  color: #80501d;
+  font-size: 0.75rem;
+  line-height: 1.4;
+`;
+
+export const CredibilityQuote = styled.p`
+  margin-top: 0.25rem;
+  color: ${({ theme }) => theme.colors.text.default};
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 `;
 
 export const PdfButton = styled.button`

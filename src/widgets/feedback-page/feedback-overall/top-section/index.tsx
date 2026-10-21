@@ -35,6 +35,7 @@ const FeedbackOverallTopSection = ({ content }: FeedbackOverallTopSectionProps) 
             {summary.description.map((line) => (
               <S.DescriptionLine key={line}>{line}</S.DescriptionLine>
             ))}
+            {summary.responseLabel ? <S.ResponseLabel>{summary.responseLabel}</S.ResponseLabel> : null}
           </S.DescriptionBlock>
         </S.ScoreCard>
 
@@ -43,14 +44,16 @@ const FeedbackOverallTopSection = ({ content }: FeedbackOverallTopSectionProps) 
             <S.TextCardTitle>종합 점수</S.TextCardTitle>
             <S.SectionCaption>평가 가능한 항목의 점수와 가중치를 반영한 결과입니다.</S.SectionCaption>
           </div>
-          <S.MetricGrid>
+          <S.MetricGrid $columns={metrics.length}>
             {metrics.map((metric) => (
               <S.MetricCard key={metric.label}>
                 <S.MetricLabel>{metric.label}</S.MetricLabel>
                 <S.MetricValue>{metric.score === null ? metric.emptyLabel ?? "미제공" : `${metric.score}점`}</S.MetricValue>
+                {metric.verdictLabel ? <S.MetricVerdict>{metric.verdictLabel}</S.MetricVerdict> : null}
                 {metric.score !== null ? <S.ProgressTrack aria-hidden="true">
                   <S.ProgressFill $score={metric.score ?? 0} />
                 </S.ProgressTrack> : null}
+                {metric.note ? <S.MetricNote>{metric.note}</S.MetricNote> : null}
               </S.MetricCard>
             ))}
           </S.MetricGrid>

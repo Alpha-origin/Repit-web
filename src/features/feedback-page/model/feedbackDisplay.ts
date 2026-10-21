@@ -5,6 +5,7 @@ import type {
   InterviewSummary,
   QuestionFeedback,
 } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
+import { COMPETENCY_VERSION, VERDICT_LABEL } from "./feedbackMetrics";
 import type {
   FeedbackOverallBottomSectionData,
   FeedbackOverallMiddleSectionData,
@@ -46,10 +47,45 @@ const getFeedbackQuestion = (
   intention: getText(item.intention),
   myAnswer: getText(item.userAnswer?.trim() || answerContent, "작성된 답변이 없습니다."),
   modelAnswer: getText(item.modelAnswer),
-  followUpQuestion: "예상 꼬리질문이 아직 제공되지 않았습니다.",
+  followUpQuestion: getText(item.followUpQuestion ?? undefined, "예상 꼬리질문이 아직 제공되지 않았습니다."),
   strengths: item.strengths?.length ? item.strengths : ["이 질문의 장점 분석 결과가 아직 없습니다."],
   improvements: item.improvements?.length ? item.improvements : ["이 질문의 보완할 점이 아직 없습니다."],
   comment: getText(item.comment, "이 질문에 대한 코멘트가 아직 없습니다."),
+  competencyChips: Array.isArray(item.competencies)
+    ? item.competencies.flatMap((competency) => {
+      const labels: Record<string, string> = {
+        PROBLEM_SOLVING: "문제 해결·판단",
+        KNOWLEDGE: "직무 지식",
+        OWNERSHIP: "실행·기여",
+        COLLABORATION: "협업·소통",
+        GROWTH: "성장·성찰",
+        MOTIVATION: "지원 동기·회사 이해",
+      };
+      const verdictLabels: Record<number, string> = {
+        4: "강함", 3: "충분", 2: "보완 필요", 1: "부족", 0: "부족",
+      };
+      const label = labels[competency?.competency];
+      if (
+        !competency || !label ||
+        (competency.role !== "PRIMARY" && competency.role !== "SECONDARY") ||
+        !Number.isInteger(competency.level) || competency.level < 0 || competency.level > 4
+      ) {
+        return [];
+      }
+      const quotes = Array.isArray(competency.evidence)
+        ? competency.evidence.flatMap((evidence) =>
+          typeof evidence?.quote === "string" && evidence.quote.trim() ? [evidence.quote.trim()] : [],
+        )
+        : [];
+      return [{
+        label,
+        roleLabel: competency.role === "PRIMARY" ? "주 평가" as const : "추가 근거" as const,
+        verdictLabel: verdictLabels[competency.level],
+        quotes,
+      }];
+    })
+    : undefined,
+  responseNote: item.responseLevel === 0 ? "질문에 답하지 않은 것으로 평가되었습니다" : undefined,
 });
 
 export const getFeedbackStatusLabel = (status?: string) => {
@@ -73,6 +109,16 @@ const getOptionalScore = (score?: number) =>
     ? Math.round(Math.min(100, Math.max(0, score)))
     : null;
 
+const CREDIBILITY_TITLES = {
+  ROLE: "역할이 서로 다릅니다",
+  TECH_CHOICE: "선택한 기술·방법이 서로 다릅니다",
+  CAUSE: "원인 설명이 서로 다릅니다",
+  DETAIL: "세부 내용이 서로 다릅니다",
+  OTHER: "답변이 서로 어긋납니다",
+} as const;
+
+const hasSameScoringVersion = (current?: string, previous?: string) => current === previous;
+
 export const buildFeedbackOverallContent = (
   feedback: FeedbackData,
   interview?: InterviewSummary | null,
@@ -84,6 +130,30 @@ export const buildFeedbackOverallContent = (
 } => {
   const totalScore = getOptionalScore(feedback.totalScore);
   const reliabilityScore = getOptionalScore(feedback.reliabilityScore);
+  const competencyVersion = feedback.scoreBreakdown?.scoringVersion === COMPETENCY_VERSION;
+  const questionIndexes = new Map(
+    (feedback.feedbacks ?? []).flatMap((question, index) =>
+      question.questionId === undefined ? [] : [[String(question.questionId), index + 1] as const],
+    ),
+  );
+  const credibilityIssues = (feedback.scoreBreakdown?.credibility?.issues ?? []).flatMap((issue) => {
+    const kind = issue?.kind as keyof typeof CREDIBILITY_TITLES;
+    const firstId = issue?.questionIds?.[0];
+    const secondId = issue?.questionIds?.[1];
+    const firstLabel = typeof firstId === "string" ? questionIndexes.get(firstId) : undefined;
+    const secondLabel = typeof secondId === "string" ? questionIndexes.get(secondId) : undefined;
+    const firstQuote = issue?.quotes?.[0];
+    const secondQuote = issue?.quotes?.[1];
+    if (
+      !CREDIBILITY_TITLES[kind] || firstLabel === undefined || secondLabel === undefined ||
+      typeof firstQuote !== "string" || typeof secondQuote !== "string"
+    ) return [];
+    return [{
+      title: `${CREDIBILITY_TITLES[kind]} · Q${firstLabel} ↔ Q${secondLabel}`,
+      questionLabels: [`Q${firstLabel}`, `Q${secondLabel}`] as const,
+      quotes: [firstQuote, secondQuote] as const,
+    }];
+  });
   const summary = getText(feedback.summary, "아직 종합 분석이 완료되지 않았습니다.");
   const summarySentences = summary.split(/(?<=[.!?。])\s+/);
   const keywords = [...(feedback.frequentWords ?? [])]
@@ -113,6 +183,12 @@ export const buildFeedbackOverallContent = (
         title: "종합 점수",
         score: totalScore,
         description: summarySentences.slice(0, 2).map((sentence) => sentence.trim()),
+        responseLabel: competencyVersion && feedback.scoreBreakdown?.response &&
+          Number.isInteger(feedback.scoreBreakdown.response.hitCount) && feedback.scoreBreakdown.response.hitCount >= 0 &&
+          Number.isInteger(feedback.scoreBreakdown.response.gradedCount) && feedback.scoreBreakdown.response.gradedCount > 0 &&
+          feedback.scoreBreakdown.response.hitCount <= feedback.scoreBreakdown.response.gradedCount
+          ? `응답 적중 ${feedback.scoreBreakdown.response.hitCount}/${feedback.scoreBreakdown.response.gradedCount}문항`
+          : undefined,
       },
       metrics: buildFeedbackMetrics(feedback),
       evaluation: summary,
@@ -131,9 +207,28 @@ export const buildFeedbackOverallContent = (
         },
       ],
       comparison: {
-        previousScore: getOptionalScore(previousFeedback?.totalScore),
+        previousScore: previousFeedback && hasSameScoringVersion(
+          feedback.scoreBreakdown?.scoringVersion,
+          previousFeedback.scoreBreakdown?.scoringVersion,
+        ) ? getOptionalScore(previousFeedback.totalScore) : null,
         currentScore: totalScore,
+        note: previousFeedback && !hasSameScoringVersion(
+          feedback.scoreBreakdown?.scoringVersion,
+          previousFeedback.scoreBreakdown?.scoringVersion,
+        ) ? "채점 방식이 바뀌어 이전 면접과 비교하지 않습니다." : undefined,
       },
+      motivation: competencyVersion &&
+        typeof feedback.scoreBreakdown?.motivation?.score === "number" &&
+        Number.isFinite(feedback.scoreBreakdown.motivation.score) &&
+        feedback.scoreBreakdown.motivation.score >= 0 && feedback.scoreBreakdown.motivation.score <= 100
+        ? {
+          score: feedback.scoreBreakdown.motivation.score,
+          verdictLabel: feedback.scoreBreakdown.motivation.verdict
+            ? VERDICT_LABEL[feedback.scoreBreakdown.motivation.verdict]
+            : undefined,
+          note: "종합 점수에는 포함되지 않습니다.",
+        }
+        : undefined,
       showPersonaFeedback: (interview?.mode ?? feedback.mode) === "MULTI",
       personaFeedbacks: (feedback.personas ?? []).map((persona, index) => ({
         title: persona.personaRole?.trim() || `면접관 ${index + 1}`,
@@ -151,7 +246,10 @@ export const buildFeedbackOverallContent = (
       reliability: {
         title: "응답 신뢰성",
         scoreLabel: reliabilityScore === null ? "—" : `${reliabilityScore}%`,
-        levelLabel: reliabilityScore === null ? "미제공" : getReliabilityLevel(reliabilityScore),
+        levelLabel: reliabilityScore === null
+          ? competencyVersion ? "판단 불가 (답변 1개)" : "미제공"
+          : getReliabilityLevel(reliabilityScore),
+        issues: competencyVersion ? credibilityIssues : undefined,
       },
       keywords: {
         items: keywords.map((item, index) => ({

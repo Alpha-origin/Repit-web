@@ -42,7 +42,9 @@ const FeedbackOverallMiddleSection = ({ content }: FeedbackOverallMiddleSectionP
         <S.ComparisonCard aria-label="지난 면접 점수 비교">
           <S.ComparisonTitle>
             지난 면접 대비
-            <S.ComparisonDescription>
+            {content.comparison.note ? (
+              <S.ComparisonNote>{content.comparison.note}</S.ComparisonNote>
+            ) : <S.ComparisonDescription>
               {difference === null ? (
                 <span>비교할 점수가 아직 없어요.</span>
               ) : difference === 0 ? (
@@ -50,9 +52,9 @@ const FeedbackOverallMiddleSection = ({ content }: FeedbackOverallMiddleSectionP
               ) : (
                 <><S.ComparisonHighlight>{difference > 0 ? "+ " : "− "}{Math.abs(difference)}점</S.ComparisonHighlight>이 {difference > 0 ? "상승했어요!" : "하락했어요."}</>
               )}
-            </S.ComparisonDescription>
+            </S.ComparisonDescription>}
           </S.ComparisonTitle>
-          <S.BarChart>
+          {!content.comparison.note ? <S.BarChart>
             {[
               { label: "이전 면접 점수", score: previousScore, tone: "muted" as const },
               { label: "이번 면접 점수", score: currentScore, tone: "primary" as const },
@@ -66,9 +68,19 @@ const FeedbackOverallMiddleSection = ({ content }: FeedbackOverallMiddleSectionP
                 <S.BarLabel>{bar.label}</S.BarLabel>
               </S.BarColumn>
             ))}
-          </S.BarChart>
+          </S.BarChart> : null}
         </S.ComparisonCard>
       </S.MiddleGrid>
+
+      {content.motivation ? <S.MotivationCard aria-label="지원 동기·회사 이해">
+        <div>
+          <S.MotivationTitle>지원 동기·회사 이해</S.MotivationTitle>
+          <S.MotivationNote>{content.motivation.note}</S.MotivationNote>
+        </div>
+        <S.MotivationScore>
+          {content.motivation.score}점{content.motivation.verdictLabel ? ` · ${content.motivation.verdictLabel}` : ""}
+        </S.MotivationScore>
+      </S.MotivationCard> : null}
 
       {content.showPersonaFeedback ? <S.PersonaFeedbackList aria-label="면접관별 피드백">
         {content.personaFeedbacks.length > 0 ? content.personaFeedbacks.map((persona, index) => (

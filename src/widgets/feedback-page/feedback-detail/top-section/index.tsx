@@ -10,6 +10,29 @@ const FeedbackDetailTopSection = ({ content, question }: FeedbackDetailTopSectio
         <S.IntentBadge>{content.intentionTitle}</S.IntentBadge>
         <S.QuestionText>{question.intention}</S.QuestionText>
       </S.IntentSection>
+      {question.competencyChips?.length || question.responseNote ? (
+        <S.CompetencySection>
+          {question.competencyChips?.length ? <>
+            <S.CompetencySectionTitle>평가 역량</S.CompetencySectionTitle>
+            <S.CompetencyChipList>
+              {question.competencyChips.map((chip, index) => (
+                <S.CompetencyChip key={`${chip.label}-${index}`}>
+                  <S.CompetencyChipHeading>
+                    <S.CompetencyChipLabel>{chip.label}</S.CompetencyChipLabel>
+                    <S.CompetencyChipMeta>{chip.roleLabel} · {chip.verdictLabel}</S.CompetencyChipMeta>
+                  </S.CompetencyChipHeading>
+                  {chip.quotes.map((quote, quoteIndex) => (
+                    <S.CompetencyQuote key={`${quote}-${quoteIndex}`}>
+                      <span aria-hidden="true">✓</span> “{quote}”
+                    </S.CompetencyQuote>
+                  ))}
+                </S.CompetencyChip>
+              ))}
+            </S.CompetencyChipList>
+          </> : null}
+          {question.responseNote ? <S.ResponseNote>{question.responseNote}</S.ResponseNote> : null}
+        </S.CompetencySection>
+      ) : null}
     </S.QuestionCard>
     <S.AnswerGrid>
       <S.DetailCard>

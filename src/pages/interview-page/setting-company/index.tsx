@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { COMPANY_DISCLAIMER } from "@/features/interview-page/company/model/companyLabels";
 import { MULTI_INTERVIEWER_TEMPLATES } from "@/shared/constants/interview-page/setting-multi-interview";
+import { findStylePreset } from "@/shared/constants/interview-page/setting-interview";
 import { useCompanySetup } from "@/features/interview-page/setting-company/model/useCompanySetup";
 import { useUserStore } from "@/shared/store/userStore";
 import Loading from "@/shared/components/loading";
@@ -16,6 +17,9 @@ const SettingCompanyPage = () => {
   const interviewerNames = settings?.mode === "SOLO"
     ? MULTI_INTERVIEWER_TEMPLATES.find((item) => item.key === settings.interviewerKey)?.name
     : settings?.slots.map((slot) => slot.interviewer?.name).join(", ");
+  const interviewStyle = settings?.mode === "SOLO"
+    ? findStylePreset(settings)
+    : settings?.style;
 
   if (setup.hasDraft && setup.isDecidingSkip && !setup.locked) {
     return (
@@ -52,7 +56,9 @@ const SettingCompanyPage = () => {
             </S.Heading>
             <S.Notice aria-label="면접 설정 요약">
               <strong>{settings?.mode === "SOLO" ? "1:1 면접" : "N:1 면접"}</strong>
-              <p>{interviewerNames} · 난이도 {settings?.difficulty} · {settings?.answerMode === "voice" ? "음성 답변" : "텍스트 답변"}</p>
+              <p>
+                {settings?.answerMode === "voice" ? "음성 답변" : "텍스트 답변"} · 난이도 {settings?.difficulty} · 면접 스타일 {interviewStyle ?? "직접 설정"} · {interviewerNames}
+              </p>
               <S.Button type="button" disabled={setup.locked} onClick={setup.onBack}>설정 수정</S.Button>
             </S.Notice>
             <S.Summary aria-live="polite">
