@@ -3,14 +3,13 @@ import styled from "styled-components";
 import type { StepDotInnerProps } from "./type";
 
 export const Section = styled.section`
-  position: relative;
-  z-index: 1;
   width: 50%;
-  min-height: 100%;
+  min-height: 42rem;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6.65rem clamp(2rem, 8vw, 6.7rem) 3.85rem 2rem;
+  padding: 6rem clamp(1.5rem, 4vw, 4rem) 3rem;
   box-sizing: border-box;
 
   @media (max-width: 60rem) {
@@ -21,7 +20,7 @@ export const Section = styled.section`
 `;
 
 export const AuthNav = styled.nav`
-  position: fixed;
+  position: absolute;
   top: 1.45rem;
   right: 1.75rem;
   z-index: 5;

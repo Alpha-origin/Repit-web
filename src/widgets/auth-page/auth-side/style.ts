@@ -4,14 +4,13 @@ import styled from "styled-components";
 import type { NavButtonStyleProps } from "./type";
 
 export const Section = styled.section`
-  position: relative;
-  z-index: 1;
   width: 50%;
-  min-height: 100%;
+  min-height: 42rem;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  padding: 8.5rem 2.5rem 4rem clamp(7rem, 11.6vw, 9.6rem);
+  justify-content: center;
+  padding: 6rem clamp(1.5rem, 4vw, 4rem) 3rem;
   box-sizing: border-box;
 
   @media (max-width: 60rem) {
@@ -22,7 +21,7 @@ export const Section = styled.section`
 `;
 
 export const Header = styled.header`
-  position: fixed;
+  position: absolute;
   top: 1.45rem;
   left: 1.5rem;
   right: 1.75rem;
@@ -98,6 +97,7 @@ export const Content = styled.div`
   @media (max-width: 60rem) {
     width: 100%;
     max-width: 28rem;
+    text-align: center;
   }
 `;
 
@@ -107,6 +107,11 @@ export const ContentStack = styled.div`
   align-items: flex-start;
   gap: 1.55rem;
   padding-bottom: 1.25rem;
+
+  @media (max-width: 60rem) {
+    align-items: center;
+    padding-bottom: 0;
+  }
 `;
 
 export const Title = styled.h2`
@@ -124,7 +129,7 @@ export const Description = styled.p`
   font-size: clamp(0.95rem, 1.25vw, 1.05rem);
   font-weight: 400;
   line-height: 1.45;
-  white-space: nowrap;
+  word-break: keep-all;
   font-family: ${({ theme }) => theme.fontFamily.A2Z};
 `;
 

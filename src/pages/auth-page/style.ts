@@ -5,12 +5,14 @@ import type { AuthPageStyleProps } from "@/pages/auth-page/type";
 export const Container = styled.main.attrs<AuthPageStyleProps>(({ $isLogin }) => ({
   "data-is-login": String($isLogin),
 }))<AuthPageStyleProps>`
-  width: 100vw;
+  width: 100%;
   height: 100vh;
-  min-height: 42rem;
+  height: 100dvh;
+  min-height: 0;
   display: flex;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 
   background:
     radial-gradient(ellipse 65% 80% at 0% -5%, #61C2FF 0%, rgba(97, 194, 255, 0.85) 35%, rgba(255, 255, 255, 0) 70%),
@@ -19,10 +21,7 @@ export const Container = styled.main.attrs<AuthPageStyleProps>(({ $isLogin }) =>
     linear-gradient(180deg, #edf7ff 0%, #ffffff 78%);
 
   @media (max-width: 60rem) {
-    height: auto;
-    min-height: 100vh;
     flex-direction: column;
-    overflow-y: auto;
   }
 `;
 
