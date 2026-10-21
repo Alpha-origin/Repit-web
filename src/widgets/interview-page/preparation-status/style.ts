@@ -1,17 +1,24 @@
 import styled, { keyframes } from "styled-components";
 
-const spin = keyframes`to { transform: rotate(360deg); }`;
 const pulse = keyframes`50% { opacity: 0.35; }`;
 
 export const Container = styled.div`
   width: 100%;
-  min-height: 100%;
-  padding: 1rem clamp(1rem, 6.8vw, 6.125rem) 2rem;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem clamp(1rem, 6.8vw, 6.125rem);
+  overflow-y: auto;
   box-sizing: border-box;
 `;
 
 export const Content = styled.div`
+  width: 100%;
   max-width: 66rem;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
   margin: 0 auto;
 `;
 
@@ -19,8 +26,10 @@ export const Stage = styled.section`
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex-shrink: 0;
+  margin-block: auto;
   text-align: center;
-  padding: clamp(2rem, 7vh, 5rem) 1rem 2rem;
+  padding: 2rem 1rem;
   word-break: keep-all;
 `;
 
@@ -32,28 +41,17 @@ export const Eyebrow = styled.p`
   letter-spacing: 0.04em;
 `;
 
-export const Orb = styled.div<{ $paused: boolean }>`
-  position: relative;
-  width: 10rem;
-  height: 10rem;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: ${({ theme }) => theme.colors.surface.blueLight};
-  box-shadow: 0 0 0 1rem ${({ theme }) => theme.colors.surface.blueLight}66;
+export const PreparationIcon = styled.img`
+  display: block;
+  width: 7rem;
+  height: 7rem;
+  object-fit: contain;
   margin: 0 0 2.5rem;
-  &::before {
-    content: "";
-    position: absolute;
-    inset: -0.25rem;
-    border: 2px solid ${({ theme }) => theme.colors.brand.blueLight};
-    border-top-color: ${({ theme }) => theme.colors.brand.blue};
-    border-radius: 50%;
-    animation: ${spin} 2s linear infinite;
-    animation-play-state: ${({ $paused }) => $paused ? "paused" : "running"};
-  }
-  img { width: 7rem; max-height: 7rem; object-fit: contain; }
-  @media (prefers-reduced-motion: reduce) { &::before { animation: none; } }
+`;
+
+export const SpinnerSlot = styled.div`
+  flex-shrink: 0;
+  margin: 0 0 2.5rem;
 `;
 
 export const Title = styled.h1`
