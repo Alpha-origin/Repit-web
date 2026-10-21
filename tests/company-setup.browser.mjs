@@ -10,6 +10,8 @@ const companies = [
   { companyId: 13, displayName: "테스트페이", legalName: "테스트페이", category: "FINTECH", legalSize: "MID", talentKeywords: ["신뢰"], dataAsOf: "2026-10-19" },
 ];
 const setupPath = "/main/setting/interview/company";
+const preparationPath = "/main/setting/interview/preparing";
+const preparationMessage = "면접 질문과 대화 연결을 준비하고 있어요";
 let passed = 0;
 const screenshotDirectory = process.env.COMPANY_SCREENSHOT_DIR;
 async function screenshot(page, name) {
@@ -66,6 +68,7 @@ async function fixture({ mode = "SOLO", width = 1440, initialList = companies, l
       return json({ data: { ...request.postDataJSON(), personaId: state.personas.length } });
     }
     if (path === "/api/interviews/create") {
+      assert.equal(new URL(page.url()).pathname, preparationPath, "creation must run on the preparation page");
       state.creates.push({ body: request.postDataJSON(), key: request.headers()["idempotency-key"] });
       state.company = request.postDataJSON().companyId ? { companyId: 12, displayName: "면접 당시 기업명" } : null;
       if (state.createDelay) await new Promise((resolve) => setTimeout(resolve, state.createDelay));
@@ -147,6 +150,7 @@ try {
     await scenario(`${mode} ${selected ? "company" : "general"}: double submit, readiness gate, API snapshot badge`, async () => {
       const f = await fixture({ mode });
       await f.navigate(`/main/setting/interview${mode === "MULTI" ? "/multi" : ""}?draftId=${f.draftId}`);
+      await f.page.locator('[aria-current="step"]').filter({ hasText: "면접 사전설정" }).waitFor();
       await f.page.getByRole("button", { name: "다음: 기업 선택", exact: true }).click();
       await f.page.getByRole("radio", { name: "테스트커머스", exact: true }).waitFor();
       assert.equal(f.state.creates.length, 0);
@@ -155,18 +159,18 @@ try {
       f.state.createDelay = 200;
       const button = f.page.getByRole("button", { name: selected ? "테스트커머스 관점으로 면접 시작" : "기업 없이 면접 시작", exact: true });
       await button.evaluate((button) => { button.click(); button.click(); });
-      await f.page.getByText("면접을 준비하고 있어요. 준비가 끝나면 면접 화면으로 이동합니다.").waitFor();
+      await f.page.getByText(preparationMessage).waitFor();
       assert.equal(f.state.creates.length, 1); assert.equal(f.state.personas.length, mode === "SOLO" ? 1 : 3);
       assert.match(f.state.creates[0].key, /^[\da-f-]{36}$/);
       assert.equal(f.state.creates[0].body.companyId, selected ? 12 : undefined);
       assert.equal(await f.page.evaluate(() => window.__socketCount), 0);
       assert.equal((await f.draft()).submission.interviewId, 42);
       await f.page.reload();
-      await f.page.getByText("면접을 준비하고 있어요. 준비가 끝나면 면접 화면으로 이동합니다.").waitFor();
+      await f.page.getByText(preparationMessage).waitFor();
       assert.equal(f.state.creates.length, 1);
       f.state.preparation = "READY"; f.state.chatDelivered = false;
       await f.page.waitForTimeout(1100);
-      assert.ok(f.page.url().includes(setupPath));
+      assert.ok(f.page.url().includes(preparationPath));
       f.state.chatDelivered = true;
       await f.page.waitForURL(/\/main\/interview\/42/);
       if (selected) await f.page.getByText("면접 당시 기업명 면접을 가정한 연습 면접", { exact: true }).waitFor();
@@ -184,7 +188,7 @@ try {
     assert.equal((await f.draft()).submission.state, "UNKNOWN");
     f.state.createAbort = false;
     await f.page.reload();
-    await f.page.getByText("면접을 준비하고 있어요. 준비가 끝나면 면접 화면으로 이동합니다.").waitFor();
+    await f.page.getByText(preparationMessage).waitFor();
     assert.equal(f.state.creates.length, 2); assert.deepEqual(f.state.creates[0], f.state.creates[1]);
     assert.equal(f.state.personas.length, 1); await f.context.close();
   });
@@ -226,7 +230,7 @@ try {
     await f.page.getByRole("searchbox").fill("");
     await f.page.getByRole("button", { name: "기업 목록 다시 불러오기", exact: true }).waitFor();
     await f.page.getByRole("button", { name: "기업 없이 면접 시작", exact: true }).click();
-    await f.page.getByText("면접을 준비하고 있어요. 준비가 끝나면 면접 화면으로 이동합니다.").waitFor();
+    await f.page.getByText(preparationMessage).waitFor();
     assert.equal(f.state.creates[0].body.companyId, undefined); await f.context.close();
   });
 
@@ -234,7 +238,7 @@ try {
     await scenario(`${mode} zero companies: start label, no picker, single automatic general start`, async () => {
       const f = await fixture({ mode, initialList: [], landing: "settings" });
       await f.page.getByRole("button", { name: "면접 시작", exact: true }).click();
-      await f.page.getByText("면접을 준비하고 있어요. 준비가 끝나면 면접 화면으로 이동합니다.").waitFor();
+      await f.page.getByText(preparationMessage).waitFor();
       assert.equal(await f.page.getByRole("heading", { name: "기업 선택 (선택)" }).count(), 0);
       assert.equal(await f.page.getByRole("searchbox").count(), 0);
       assert.equal(await f.page.getByRole("radio").count(), 0);
@@ -253,7 +257,7 @@ try {
     assert.equal(f.state.creates.length, 1);
     f.state.createAbort = false;
     await f.page.reload();
-    await f.page.getByText("면접을 준비하고 있어요. 준비가 끝나면 면접 화면으로 이동합니다.").waitFor();
+    await f.page.getByText(preparationMessage).waitFor();
     await f.page.waitForTimeout(300);
     assert.equal(f.state.creates.length, 2); assert.deepEqual(f.state.creates[0], f.state.creates[1]);
     assert.equal(await f.page.getByRole("searchbox").count(), 0);
@@ -302,7 +306,15 @@ try {
       assert.equal((await f.draft()).companyId, 12);
       const pending = (await f.draft()).submission;
       assert.equal(pending !== null, code === "IDEMPOTENCY_KEY_REUSED");
-      assert.equal(await f.page.getByRole("radio", { name: "테스트커머스", exact: true }).isDisabled(), code === "IDEMPOTENCY_KEY_REUSED");
+      assert.equal(new URL(f.page.url()).pathname, preparationPath);
+      if (code === "IDEMPOTENCY_KEY_REUSED") {
+        await f.page.getByRole("button", { name: "같은 요청으로 결과 확인", exact: true }).waitFor();
+        assert.equal(await f.page.getByRole("button", { name: "기업 선택으로 돌아가기", exact: true }).count(), 0);
+      } else {
+        await f.page.getByRole("button", { name: "기업 선택으로 돌아가기", exact: true }).click();
+        await f.page.getByRole("radio", { name: "테스트커머스", exact: true }).waitFor();
+        assert.equal(await f.page.getByRole("radio", { name: "테스트커머스", exact: true }).isChecked(), true);
+      }
       assert.equal(f.state.creates.length, 1); await f.context.close();
     });
   }
@@ -345,7 +357,7 @@ try {
     assert.equal((await f.draft()).submission.state, "SUBMITTING");
     f.state.createDelay = 0;
     await f.page.reload();
-    await f.page.getByText("면접을 준비하고 있어요. 준비가 끝나면 면접 화면으로 이동합니다.").waitFor();
+    await f.page.getByText(preparationMessage).waitFor();
     assert.equal(f.state.creates.length, 2); assert.deepEqual(f.state.creates[0], f.state.creates[1]);
     assert.equal(f.state.personas.length, 1); await f.context.close();
   });
@@ -374,10 +386,11 @@ try {
     await f.page.getByRole("button", { name: "선택한 기업 관점으로 면접 시작", exact: true }).click();
     await f.page.getByRole("alert").waitFor();
     assert.equal((await f.draft()).companyId, 12);
+    await f.page.getByRole("button", { name: "기업 선택으로 돌아가기", exact: true }).click();
     await f.page.getByRole("button", { name: "선택 안 함", exact: true }).click();
     f.state.createFailure = null;
     await f.page.getByRole("button", { name: "기업 없이 면접 시작", exact: true }).click();
-    await f.page.getByText("면접을 준비하고 있어요. 준비가 끝나면 면접 화면으로 이동합니다.").waitFor();
+    await f.page.getByText(preparationMessage).waitFor();
     assert.equal(f.state.creates[1].body.companyId, undefined);
     assert.notEqual(f.state.creates[0].key, f.state.creates[1].key); await f.context.close();
   });
