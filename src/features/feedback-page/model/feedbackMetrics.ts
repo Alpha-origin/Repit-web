@@ -55,7 +55,7 @@ const buildCompetencyMetrics = (breakdown: ScoreBreakdown): FeedbackOverallMetri
 
     const entry = entries[0];
     if (entry.score === null) {
-      return entry.weight === null && entry.verdict === null &&
+      return entry.weight === null && (entry.verdict === null || entry.verdict === undefined) &&
         Number.isInteger(entry.evidenceCount) && entry.evidenceCount === 0
         ? { label, score: null, emptyLabel: "이번 면접에서 확인되지 않음" }
         : { label, score: null, emptyLabel: "미제공" };
