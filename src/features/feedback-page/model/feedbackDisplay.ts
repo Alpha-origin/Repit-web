@@ -247,7 +247,11 @@ export const buildFeedbackOverallContent = (
         title: "응답 신뢰성",
         scoreLabel: reliabilityScore === null ? "—" : `${reliabilityScore}%`,
         levelLabel: reliabilityScore === null
-          ? competencyVersion ? "판단 불가 (답변 1개)" : "미제공"
+          ? competencyVersion
+            ? feedback.scoreBreakdown?.response?.gradedCount === 1
+              ? "판단 불가 (답변 1개)"
+              : "판단 불가"
+            : "미제공"
           : getReliabilityLevel(reliabilityScore),
         issues: competencyVersion ? credibilityIssues : undefined,
       },
