@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+
 import type { DocumentRow } from "@/features/my-page/materials/model/useMaterialsForm";
 import { MAX_DOCUMENTS } from "@/features/my-page/materials/model/materialRules";
 import { getDocumentTypeLabel } from "@/shared/constants/job/documentTypes";
@@ -6,7 +8,7 @@ import type { JobRole } from "@/shared/constants/job/jobRoles";
 import { CloseIcon } from "../icons";
 import * as S from "./style";
 
-const COMMON_DOCUMENT_TYPES = ["RESUME", "CAREER_DESCRIPTION"];
+const COMMON_DOCUMENT_TYPES = ["RESUME", "SELF_INTRODUCTION", "CAREER_DESCRIPTION"];
 
 interface DocumentListProps {
   jobRole?: JobRole;
@@ -24,6 +26,115 @@ const getFileName = (row: DocumentRow) =>
 const getFileMeta = (row: DocumentRow) => {
   if (row.file) return `${(row.file.size / (1024 * 1024)).toFixed(1)}MB`;
   return row.pageCount !== null ? `${row.pageCount}쪽` : "";
+};
+
+interface DocumentTypeSelectProps {
+  index: number;
+  value: string;
+  requiredTypes: readonly string[];
+  optionalTypes: readonly string[];
+  disabled: boolean;
+  onChange: (type: string) => void;
+}
+
+const DocumentTypeSelect = ({ index, value, requiredTypes, optionalTypes, disabled, onChange }: DocumentTypeSelectProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    const selected = menuRef.current?.querySelector<HTMLButtonElement>('[aria-selected="true"]');
+    (selected ?? menuRef.current?.querySelector<HTMLButtonElement>("button"))?.focus();
+
+    const closeOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !wrapperRef.current?.contains(event.target)) setIsOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    return () => document.removeEventListener("pointerdown", closeOutside);
+  }, [isOpen]);
+
+  const selectType = (type: string) => {
+    onChange(type);
+    setIsOpen(false);
+    triggerRef.current?.focus();
+  };
+
+  const handleOptionKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const options = Array.from(menuRef.current?.querySelectorAll<HTMLButtonElement>("button[role='option']") ?? []);
+    const activeIndex = options.findIndex((option) => option === document.activeElement);
+    let nextIndex: number | undefined;
+    if (event.key === "ArrowDown") nextIndex = (activeIndex + 1) % options.length;
+    else if (event.key === "ArrowUp") nextIndex = (activeIndex - 1 + options.length) % options.length;
+    else if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = options.length - 1;
+    else if (event.key === "Escape") {
+      event.preventDefault();
+      setIsOpen(false);
+      triggerRef.current?.focus();
+      return;
+    } else if (event.key === "Tab") {
+      setIsOpen(false);
+      return;
+    } else return;
+
+    event.preventDefault();
+    if (nextIndex !== undefined) options[nextIndex]?.focus();
+  };
+
+  const renderOptions = (types: readonly string[]) => types.map((type) => (
+    <S.TypeOption
+      key={type}
+      type="button"
+      role="option"
+      aria-selected={value === type}
+      onClick={() => selectType(type)}
+    >
+      <span>{getDocumentTypeLabel(type)}</span>
+      {value === type && <S.SelectedMark aria-hidden="true">✓</S.SelectedMark>}
+    </S.TypeOption>
+  ));
+
+  return (
+    <S.SelectWrapper ref={wrapperRef}>
+      <S.TypeTrigger
+        ref={triggerRef}
+        type="button"
+        className="document-type-trigger"
+        aria-label={`${index}번 문서 종류`}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? `document-types-${index}` : undefined}
+        title={disabled ? "직무를 먼저 선택해주세요." : undefined}
+        disabled={disabled}
+        $isPlaceholder={!value}
+        onClick={() => setIsOpen((open) => !open)}
+        onKeyDown={(event) => {
+          if ((event.key === "ArrowDown" || event.key === "ArrowUp") && !isOpen) {
+            event.preventDefault();
+            setIsOpen(true);
+          }
+        }}
+      >
+        <span>{value ? getDocumentTypeLabel(value) : "종류 선택"}</span>
+        <S.Chevron aria-hidden="true" viewBox="0 0 24 24" fill="none">
+          <path d="m6 9 6 6 6-6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+        </S.Chevron>
+      </S.TypeTrigger>
+      {isOpen && (
+        <S.TypeMenu ref={menuRef} id={`document-types-${index}`} role="listbox" aria-label={`${index}번 문서 종류 선택`} onKeyDown={handleOptionKeyDown}>
+          {requiredTypes.length > 0 && <>
+            <S.TypeGroupLabel>필수 자료</S.TypeGroupLabel>
+            {renderOptions(requiredTypes)}
+          </>}
+          {optionalTypes.length > 0 && <>
+            {requiredTypes.length > 0 && <S.TypeGroupLabel>선택 자료</S.TypeGroupLabel>}
+            {renderOptions(optionalTypes)}
+          </>}
+        </S.TypeMenu>
+      )}
+    </S.SelectWrapper>
+  );
 };
 
 const DocumentList = ({
@@ -49,27 +160,14 @@ const DocumentList = ({
 
           return (
             <S.DocumentRow key={row.id} $hasError={!!error}>
-              <S.SelectWrapper>
-                <S.Select
-                  aria-label={`${index + 1}번 문서 종류`}
-                  title={!jobRole ? "직무를 먼저 선택해주세요." : undefined}
-                  value={row.type}
-                  disabled={!jobRole}
-                  $isPlaceholder={!row.type}
-                  onChange={(event) => onTypeChange(row.id, event.target.value)}
-                >
-                  <option value="" disabled>선택</option>
-                  {requiredTypes.length > 0 && <optgroup label="필수 (1개 이상)">
-                    {requiredTypes.map((type) => <option key={type} value={type}>{getDocumentTypeLabel(type)}</option>)}
-                  </optgroup>}
-                  {jobRole?.category === "GENERAL" ? optionalTypes.map((type) => <option key={type} value={type}>{getDocumentTypeLabel(type)}</option>) : <optgroup label="선택">
-                    {optionalTypes.map((type) => <option key={type} value={type}>{getDocumentTypeLabel(type)}</option>)}
-                  </optgroup>}
-                </S.Select>
-                <S.Chevron aria-hidden="true" viewBox="0 0 24 24" fill="none">
-                  <path d="m6 9 6 6 6-6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-                </S.Chevron>
-              </S.SelectWrapper>
+              <DocumentTypeSelect
+                index={index + 1}
+                value={row.type}
+                requiredTypes={requiredTypes}
+                optionalTypes={optionalTypes}
+                disabled={!jobRole}
+                onChange={(type) => onTypeChange(row.id, type)}
+              />
               <S.FileCell>
                 <S.AttachButton
                   type="button"
