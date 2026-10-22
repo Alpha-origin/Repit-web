@@ -1,11 +1,101 @@
 import styled from "styled-components";
-import { Select as JobSelect } from "@/widgets/my-page/job-selection/style";
 
 export { Chevron, SelectWrapper } from "@/widgets/my-page/job-selection/style";
 
-export const Select = styled(JobSelect)`
-  padding-left: 0.875rem;
+export const TypeTrigger = styled.button<{ $isPlaceholder: boolean }>`
+  position: relative;
+  width: 100%;
+  height: var(--mypage-control-height, 1.875rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 2rem 0 0.875rem;
+  border: 1px solid #e1e3e9;
+  border-radius: 0.25rem;
   background: ${({ theme }) => theme.colors.white};
+  color: ${({ $isPlaceholder }) => $isPlaceholder ? "#7c89a4" : "#51576e"};
+  font-family: inherit;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
+  text-align: left;
+  cursor: pointer;
+
+  > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &:hover:not(:disabled) { border-color: #b9cbe4; }
+  &:focus-visible {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.brand.blue};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.surface.blueLight};
+  }
+
+  &:disabled { cursor: not-allowed; }
+
+  @media (max-width: 36rem) {
+    height: 2.75rem;
+    font-size: ${({ theme }) => theme.fontSize.md};
+  }
+`;
+
+export const TypeMenu = styled.div`
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  width: 100%;
+  max-height: 15rem;
+  padding: 0.375rem;
+  overflow-y: auto;
+  border: 1px solid #e1e3e9;
+  border-radius: 0.5rem;
+  background: ${({ theme }) => theme.colors.white};
+  box-shadow: 0 0.5rem 1.5rem rgb(35 50 80 / 14%);
+`;
+
+export const TypeGroupLabel = styled.p`
+  margin: 0.375rem 0.5rem 0.25rem;
+  color: #9098aa;
+  font-size: 0.6875rem;
+  font-weight: 600;
+`;
+
+export const TypeOption = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 2.125rem;
+  padding: 0.375rem 0.5rem;
+  border: 0;
+  border-radius: 0.3125rem;
+  background: transparent;
+  color: #51576e;
+  font: inherit;
+  font-size: var(--mypage-body-size, ${({ theme }) => theme.fontSize.xs});
+  text-align: left;
+  cursor: pointer;
+
+  &[aria-selected="true"] {
+    background: ${({ theme }) => theme.colors.surface.blueLight};
+    color: ${({ theme }) => theme.colors.brand.blue};
+    font-weight: 600;
+  }
+  &:hover, &:focus-visible {
+    outline: none;
+    background: ${({ theme }) => theme.colors.surface.muted};
+  }
+
+  @media (max-width: 36rem) { min-height: 2.75rem; }
+`;
+
+export const SelectedMark = styled.span`
+  font-size: 0.875rem;
+  font-weight: 700;
 `;
 
 export const DocumentList = styled.ul`

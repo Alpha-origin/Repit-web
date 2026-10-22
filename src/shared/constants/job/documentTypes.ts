@@ -1,6 +1,7 @@
 // 01-overview §3 / job-family-decisions 「문서 종류 코드」 기준. 서버 코드와 같아야 한다.
 export const DOCUMENT_TYPES = [
   { code: "RESUME", label: "이력서" },
+  { code: "SELF_INTRODUCTION", label: "자기소개서" },
   { code: "CAREER_DESCRIPTION", label: "경력기술서" },
   { code: "PORTFOLIO", label: "포트폴리오" },
   { code: "ANALYSIS_REPORT", label: "분석 리포트" },

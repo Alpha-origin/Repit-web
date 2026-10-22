@@ -54,7 +54,11 @@ try {
   await selectGeneral(p);
   assert.equal(await p.getByRole("textbox", { name: "GitHub", exact: true }).count(), 0);
   assert.equal(await p.getByText("보완 입력", { exact: true }).count(), 0);
-  assert.deepEqual(await p.getByRole("combobox", { name: "1번 문서 종류" }).locator("option").allTextContents(), ["선택", "이력서", "경력기술서", "포트폴리오", "업무 산출물"]);
+  const documentType = p.getByRole("button", { name: "1번 문서 종류" });
+  await documentType.click();
+  assert.deepEqual(await p.getByRole("listbox", { name: "1번 문서 종류 선택" }).getByRole("option").allTextContents(), ["이력서", "자기소개서", "경력기술서", "포트폴리오", "업무 산출물"]);
+  await p.getByRole("option", { name: "자기소개서" }).click();
+  assert.equal(await documentType.innerText(), "자기소개서");
   await save(p).click(); await p.getByText(/이력서 외에 경력기술서/).waitFor(); assert.equal(f.state.saved.length, 0);
   report("general family displays four documents and cover letters, no GitHub or supplements; empty save rejected");
   await card(p).getByRole("button", { name: "예시 문항", exact: true }).click();
